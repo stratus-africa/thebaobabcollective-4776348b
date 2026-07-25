@@ -85,14 +85,14 @@ export function Navbar() {
 
           <Link
             to="/"
-            className="relative shrink-0 flex items-center h-16 sm:h-20 lg:h-24 w-16 sm:w-24 lg:w-32 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+            className="group relative shrink-0 flex items-center h-16 sm:h-20 lg:h-24 w-16 sm:w-24 lg:w-32 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
             aria-label="The Baobab Collective home"
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt="The Baobab Collective"
-                className="absolute left-0 top-1/2 -translate-y-1/2 h-28 sm:h-40 lg:h-52 w-auto max-w-none object-contain z-[60] pointer-events-none"
+                className="absolute left-0 top-1/2 -translate-y-1/2 h-full w-auto max-w-none object-contain z-[60] origin-left transition-transform duration-300 ease-out group-hover:scale-[1.75] sm:group-hover:scale-[2] lg:group-hover:scale-[2.15] group-focus-visible:scale-[1.75] sm:group-focus-visible:scale-[2] lg:group-focus-visible:scale-[2.15]"
               />
             ) : (
               <span className={`font-serif text-lg sm:text-xl lg:text-2xl leading-tight ${overlay ? "text-cream" : "text-foreground"}`}>
