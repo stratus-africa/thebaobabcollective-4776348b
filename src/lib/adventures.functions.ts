@@ -17,6 +17,7 @@ export type AdventuresCta = {
   headline: string;
   body: string;
   buttonLabel: string;
+  included: string[];
   notIncluded: string[];
 };
 export type AdventuresSignature = {
@@ -56,6 +57,7 @@ export const adventuresDefaults: AdventuresPage = {
     headline: "Your adventure, our craft.",
     body: "Share your dates, your dreams and the shape of your travelling party. We'll respond within 24 hours with a first sketch.",
     buttonLabel: "Request Your Adventure",
+    included: [],
     notIncluded: [],
   },
   signatures: [],
@@ -97,6 +99,7 @@ const SavePayload = z.object({
     headline: z.string(),
     body: z.string(),
     buttonLabel: z.string(),
+    included: z.array(z.string()).default([]),
     notIncluded: z.array(z.string()).default([]),
   }),
   signatures: z.array(
