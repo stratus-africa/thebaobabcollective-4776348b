@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Compass, Calendar, Users, Search, Plus, Minus } from "lucide-react";
+import { ArrowRight, Compass, Calendar, Users, Search, Plus, Minus } from "lucide-react";
 import heroImg from "@/assets/hero-baobab.jpg";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
@@ -52,7 +52,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
   const overlayNavSpacer = overlay ? "pt-24 sm:pt-28 md:pt-32 lg:pt-36" : "";
 
   return (
-    <section className={`relative w-full pb-12 md:pb-16 ${overlay ? "-mt-px" : ""}`}>
+    <section className={`relative w-full ${overlay ? "-mt-px" : ""}`}>
       {/* Full-bleed hero panel — no outer padding, no rounding, edge-to-edge on all breakpoints */}
       <div
         className={`relative overflow-hidden w-full ${
@@ -105,38 +105,48 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
           {/* LEFT — copy */}
           <div
             className={`max-w-2xl animate-fade-up ${
-              asBackground ? "min-h-[520px] md:min-h-[620px] flex flex-col justify-center py-8" : ""
+              asBackground ? "min-h-[640px] md:min-h-[760px] flex flex-col justify-center py-10" : ""
             }`}
             style={asBackground ? { textShadow: "0 2px 24px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4)" } : undefined}
           >
-            <p className="text-[11px] tracking-[0.3em] uppercase text-cream/85 mb-4">The Baobab Collective</p>
+            <p className="text-[11px] tracking-[0.38em] uppercase text-cream/85 mb-5">The Baobab Collective</p>
 
-            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-wide text-cream max-w-3xl">
+            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-wide text-cream max-w-4xl">
               <span className="block">{c.hero_title_line1}</span>
               <span className="block text-gold">{c.hero_title_line2}</span>
             </h1>
 
-            <p className="mt-5 md:mt-6 text-cream/90 text-sm sm:text-base md:text-lg max-w-md">{c.hero_subtitle}</p>
+            <p className="mt-6 md:mt-7 text-cream/90 text-base sm:text-lg md:text-xl leading-relaxed max-w-xl">
+              {c.hero_subtitle}
+            </p>
 
-            <div className="mt-6 md:mt-8 flex flex-wrap items-center gap-3 md:gap-4">
-              <Link
-                to="/adventures"
-                className="inline-flex items-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:bg-gold/90 transition-colors shadow-lg"
-              >
-                {c.hero_cta_primary}
-              </Link>
+            <div className="mt-7 md:mt-9 flex flex-wrap items-center gap-3 md:gap-4">
               <EnquireDialog
                 sourceUrl="/"
                 autosaveKey="enquire-home-hero"
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex items-center rounded-full border border-cream/60 text-cream uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:border-gold hover:text-gold transition-colors backdrop-blur-sm"
+                    className="group inline-flex items-center gap-3 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:bg-gold/90 transition-colors shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
                   >
-                    {c.hero_cta_secondary}
+                    {c.hero_cta_primary}
+                    <ArrowRight
+                      className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1"
+                      aria-hidden="true"
+                    />
                   </button>
                 }
               />
+              <Link
+                to="/journeys"
+                className="group inline-flex items-center gap-3 rounded-full border border-cream/60 text-cream uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:border-gold hover:text-gold transition-colors backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
+              >
+                {c.hero_cta_secondary}
+                <ArrowRight
+                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
             </div>
 
             {!hideSearch && (
@@ -145,16 +155,16 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
               </div>
             )}
 
-            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[10px] sm:text-[11px] uppercase tracking-[0.16em] text-cream/75">
-              <span>Tailor-made journeys</span>
+            <div className="mt-9 flex flex-wrap gap-x-5 gap-y-2 text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-cream/75">
+              <span>Private safaris</span>
               <span className="text-gold" aria-hidden="true">
                 •
               </span>
-              <span>Local expertise</span>
+              <span>Kenya specialists</span>
               <span className="text-gold" aria-hidden="true">
                 •
               </span>
-              <span>24/7 support</span>
+              <span>Thoughtfully tailor-made</span>
             </div>
           </div>
 
@@ -177,6 +187,15 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
             </div>
           )}
         </div>
+        {asBackground && (
+          <div
+            className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-cream/70 md:flex"
+            aria-hidden="true"
+          >
+            <span className="text-[10px] uppercase tracking-[0.28em]">Scroll</span>
+            <span className="h-10 w-px bg-cream/45" />
+          </div>
+        )}
       </div>
     </section>
   );
