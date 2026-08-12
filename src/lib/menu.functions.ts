@@ -28,21 +28,21 @@ export type MenuConfig = {
 };
 
 export const MENU_DEFAULTS: MenuConfig = {
-  topBarText: "Curated Safari Journeys. Authentic Connections. Extraordinary Experiences.",
+  topBarText: "Kenya, curated personally.",
   topBarEnabled: true,
   transparentOverHero: false,
   primary: [
-    { label: "Home", to: "/" },
-    { label: "Adventures", to: "/adventures", children: [{ label: "Destinations", to: "/destinations" }] },
+    { label: "Journeys", to: "/journeys" },
+    { label: "Destinations", to: "/destinations" },
     { label: "Lodges", to: "/lodges" },
+    { label: "About", to: "/about" },
     { label: "Journal", to: "/journal" },
   ],
   more: [
-    { label: "About", to: "/about" },
     { label: "Testimonials", to: "/testimonials" },
     { label: "FAQ", to: "/faq" },
   ],
-  ctaLabel: "Enquire",
+  ctaLabel: "Let's Create Your Journey",
   ctaTo: "",
   footerTagline: "Journeys That Connect",
   footerColumns: [
@@ -96,16 +96,10 @@ const MenuSchema = z.object({
 });
 
 export const getMenuConfig = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
-  const { data: row } = await supabase
-    .from("site_settings")
-    .select("value")
-    .eq("key", "menu_config")
-    .maybeSingle();
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+  const { data: row } = await supabase.from("site_settings").select("value").eq("key", "menu_config").maybeSingle();
   if (!row?.value) return MENU_DEFAULTS;
   return { ...MENU_DEFAULTS, ...(row.value as Partial<MenuConfig>) } satisfies MenuConfig;
 });
