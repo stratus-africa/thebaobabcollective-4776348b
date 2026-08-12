@@ -349,7 +349,7 @@ function PrimaryWithSubmenu({
         className={`text-[15px] tracking-[0.22em] uppercase font-semibold inline-flex items-center gap-1 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 ${
           overlay ? "text-cream/85 hover:text-cream" : "text-foreground/80 hover:text-foreground"
         }`}
-        activeProps={{ className: `${linkBase} ${overlay ? "text-cream" : "text-foreground"} after:w-full` }}
+        activeProps={{ className: overlay ? "text-cream" : "text-foreground" }}
       >
         {item.label} <ChevronDown className="w-3 h-3" aria-hidden="true" />
       </Link>
