@@ -43,15 +43,17 @@ export const PAGE_DEFAULTS = {
   about_team: {
     eyebrow: "The people",
     title: "Meet the collective",
-    body: "A small team of Africa specialists, guides and storytellers based between London and Nairobi.",
+    body: "A small team of Africa specialists, guides and storytellers with deep roots in Kenya.",
     image_1_url: "",
-    image_1_name: "",
-    image_1_role: "",
-    image_1_bio: "",
+    image_1_name: "Michael D'Souza",
+    image_1_role: "Co-Founder",
+    image_1_bio:
+      "Kenya has been home for most of my life. I created Baobab to share the places and people I know best.",
     image_2_url: "",
-    image_2_name: "",
-    image_2_role: "",
-    image_2_bio: "",
+    image_2_name: "Samra D'Souza",
+    image_2_role: "Co-Founder",
+    image_2_bio:
+      "Samra brings a deeply personal eye to each journey, shaping travel with warmth, care and an instinct for meaningful connection.",
     image_3_url: "",
     image_3_name: "",
     image_3_role: "",
@@ -65,8 +67,7 @@ export const PAGE_DEFAULTS = {
   private_travel: {
     eyebrow: "Private Travel",
     title: "Designed entirely around you.",
-    subtitle:
-      "For travellers who want something truly bespoke — every camp, guide and moment shaped to your story.",
+    subtitle: "For travellers who want something truly bespoke — every camp, guide and moment shaped to your story.",
     success_title: "Request received",
     success_body:
       "A confirmation has been sent to your inbox. One of our journey designers will reach out within 48 hours.",
@@ -119,7 +120,6 @@ export const PAGE_DEFAULTS = {
     image_7_caption: "",
   },
 
-
   top_bar: {
     text: "Curated Safari Journeys. Authentic Connections. Extraordinary Experiences.",
     enabled: true,
@@ -154,7 +154,8 @@ export const PAGE_DEFAULTS = {
     // Rhythm section (editable)
     rhythm_eyebrow: "A Day in the Field",
     rhythm_title: "The rhythm of an adventure day.",
-    rhythm_body: "No two days repeat — but the cadence is the same. Up before the bush, slow through the heat, alive again at dusk.",
+    rhythm_body:
+      "No two days repeat — but the cadence is the same. Up before the bush, slow through the heat, alive again at dusk.",
     // Signature section header
     signature_eyebrow: "Signature Adventures",
     signature_title: "Journeys we'd take ourselves.",
@@ -228,7 +229,7 @@ export type PageKey = keyof PageDefaults;
 
 export function mergePageContent<K extends PageKey>(
   key: K,
-  override: Record<string, any> | null | undefined,
+  override: Record<string, unknown> | null | undefined,
 ): PageDefaults[K] {
   return { ...PAGE_DEFAULTS[key], ...(override ?? {}) } as PageDefaults[K];
 }
