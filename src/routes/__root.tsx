@@ -1,12 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-  HeadContent,
-  Scripts,
-} from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 
@@ -17,7 +10,7 @@ import { installPreviewListener } from "@/lib/preview-overrides";
 import { PAGE_DEFAULTS, mergePageContent } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { recordVisit } from "@/lib/analytics.functions";
-
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   const c = usePreviewMerge("not_found", mergePageContent("not_found", null));
@@ -26,9 +19,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">{c.title}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {c.body}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{c.body}</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -52,9 +43,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
@@ -86,17 +75,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Baobab Collective" },
-      { name: "description", content: "The Baobab Collective website offers curated luxury safari journeys and authentic African experiences." },
+      {
+        name: "description",
+        content:
+          "The Baobab Collective website offers curated luxury safari journeys and authentic African experiences.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Baobab Collective" },
-      { property: "og:description", content: "The Baobab Collective website offers curated luxury safari journeys and authentic African experiences." },
+      {
+        property: "og:description",
+        content:
+          "The Baobab Collective website offers curated luxury safari journeys and authentic African experiences.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Baobab Collective" },
-      { name: "twitter:description", content: "The Baobab Collective website offers curated luxury safari journeys and authentic African experiences." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/88c3b0b3-36b3-472d-9ae0-b28332a8e693/id-preview-45faa79e--d702f976-096d-4eec-878b-b661d48940a1.lovable.app-1781269926378.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/88c3b0b3-36b3-472d-9ae0-b28332a8e693/id-preview-45faa79e--d702f976-096d-4eec-878b-b661d48940a1.lovable.app-1781269926378.png" },
+      {
+        name: "twitter:description",
+        content:
+          "The Baobab Collective website offers curated luxury safari journeys and authentic African experiences.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/88c3b0b3-36b3-472d-9ae0-b28332a8e693/id-preview-45faa79e--d702f976-096d-4eec-878b-b661d48940a1.lovable.app-1781269926378.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/88c3b0b3-36b3-472d-9ae0-b28332a8e693/id-preview-45faa79e--d702f976-096d-4eec-878b-b661d48940a1.lovable.app-1781269926378.png",
+      },
     ],
     links: [
       {
@@ -132,19 +141,38 @@ function RootComponent() {
   useEffect(() => {
     installPreviewListener();
 
-    // Record one visit per browser session for the public-site visitor counter.
+    // Record one visit per browser session for public visitors only.
     if (typeof sessionStorage !== "undefined" && !sessionStorage.getItem("visitor_recorded")) {
-      record()
-        .then((res) => {
+      void (async () => {
+        try {
+          const { data } = await supabase.auth.getUser();
+          const user = data.user;
+
+          if (user) {
+            const { data: role } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", user.id)
+              .eq("role", "admin")
+              .maybeSingle();
+
+            if (role?.role === "admin") {
+              sessionStorage.setItem("visitor_recorded", "admin-skipped");
+              return;
+            }
+          }
+
+          const res = await record();
           if (!res.ok) console.warn("Visit recording failed:", res.error);
-        })
-        .catch((err) => console.warn("Visit recording error:", err));
-      sessionStorage.setItem("visitor_recorded", "1");
+          sessionStorage.setItem("visitor_recorded", "1");
+        } catch (err) {
+          console.warn("Visit recording error:", err);
+        }
+      })();
     }
-  }, []);
+  }, [record]);
 
   return (
-
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
@@ -152,4 +180,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
