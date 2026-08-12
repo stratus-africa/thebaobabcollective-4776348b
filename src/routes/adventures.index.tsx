@@ -134,7 +134,9 @@ function AdventuresPage() {
       <main>
         <HeroSection hero={page.hero} />
         <SignaturesSection signatures={page.signatures} content={content} />
-        {(page.cta.notIncluded ?? []).length > 0 && <NotIncludedSection items={page.cta.notIncluded} />}
+        {((page.cta.included ?? []).length > 0 || (page.cta.notIncluded ?? []).length > 0) && (
+          <InclusionsSection included={page.cta.included ?? []} notIncluded={page.cta.notIncluded ?? []} />
+        )}
         {content.show_rhythm && <RhythmSection content={content} />}
         {content.show_enquiry_cta && <CtaSection cta={page.cta} />}
       </main>
@@ -143,19 +145,34 @@ function AdventuresPage() {
   );
 }
 
-function NotIncludedSection({ items }: { items: string[] }) {
+function InclusionsSection({ included, notIncluded }: { included: string[]; notIncluded: string[] }) {
   return (
     <section className="bg-cream py-16 md:py-20">
       <div className="mx-auto max-w-5xl px-6">
         <p className="text-[11px] uppercase tracking-[0.3em] text-gold">Planning notes</p>
-        <h2 className="mt-3 font-serif text-4xl text-foreground">What is not included</h2>
-        <ul className="mt-8 grid gap-px border border-border bg-border sm:grid-cols-2">
-          {items.map((item) => (
-            <li key={item} className="bg-cream px-5 py-4 text-sm text-foreground/75">
-              {item}
-            </li>
-          ))}
-        </ul>
+        <h2 className="mt-3 font-serif text-4xl text-foreground">What is included</h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <div className="border border-border bg-background p-5">
+            <h3 className="font-serif text-2xl">Included</h3>
+            <ul className="mt-4 space-y-3">
+              {included.map((item) => (
+                <li key={item} className="border-t border-border pt-3 text-sm text-foreground/75">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="border border-border bg-background p-5">
+            <h3 className="font-serif text-2xl">Not included</h3>
+            <ul className="mt-4 space-y-3">
+              {notIncluded.map((item) => (
+                <li key={item} className="border-t border-border pt-3 text-sm text-foreground/75">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
   );
