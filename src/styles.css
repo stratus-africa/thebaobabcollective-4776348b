@@ -100,6 +100,18 @@
   --border: oklch(0.85 0.02 75);
   --input: oklch(0.85 0.02 75);
   --ring: oklch(0.65 0.13 65);
+
+  /* WordPress-style admin chrome */
+  --admin-bar: oklch(0.24 0.025 130);
+  --admin-menu: oklch(0.29 0.035 130);
+  --admin-menu-hover: oklch(0.35 0.04 130);
+  --admin-menu-fg: oklch(0.95 0.015 85);
+  --admin-menu-muted: oklch(0.75 0.02 90);
+  --admin-accent: oklch(0.65 0.13 65);
+  --admin-accent-fg: oklch(0.99 0 0);
+  --admin-canvas: oklch(0.95 0.008 85);
+  --admin-panel: oklch(1 0 0);
+  --admin-panel-border: oklch(0.87 0.012 80);
 }
 
 .dark { color-scheme: dark; }
