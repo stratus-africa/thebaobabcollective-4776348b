@@ -23,15 +23,10 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 
 import { Label } from "@/components/ui/label";
 import heroBaobab from "@/assets/hero-baobab.jpg";
-import {
-  adventuresDefaults,
-  getAdventuresPage,
-  type AdventuresPage,
-} from "@/lib/adventures.functions";
+import { adventuresDefaults, getAdventuresPage, type AdventuresPage } from "@/lib/adventures.functions";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
-
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -82,7 +77,9 @@ export const Route = createFileRoute("/adventures/")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-4xl mb-4">Page not found</h1>
-        <Link to="/" className="text-gold underline">Back home</Link>
+        <Link to="/" className="text-gold underline">
+          Back home
+        </Link>
       </main>
       <Footer />
     </div>
@@ -91,7 +88,14 @@ export const Route = createFileRoute("/adventures/")({
 });
 
 const iconMap = {
-  Mountain, Waves, Sun, Footprints, Tent, Binoculars, Plane, Compass,
+  Mountain,
+  Waves,
+  Sun,
+  Footprints,
+  Tent,
+  Binoculars,
+  Plane,
+  Compass,
 } as const;
 type IconKey = keyof typeof iconMap;
 
@@ -138,7 +142,6 @@ function AdventuresPage() {
   );
 }
 
-
 function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
   const heroSrc = hero.image || heroBaobab;
   return (
@@ -147,17 +150,14 @@ function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
         src={heroSrc}
         alt={hero.imageAlt || "Sunrise over the African bush — a guide leads a walking safari toward distant baobabs"}
         className="absolute inset-0 w-full h-full object-cover"
+        style={{ objectPosition: `${hero.focalX ?? 50}% ${hero.focalY ?? 50}%` }}
       />
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/20" />
       <div className="relative max-w-[1920px] mx-auto px-6 lg:px-10 pb-20 text-background w-full">
         <p className="text-[11px] tracking-[0.35em] uppercase text-gold mb-5">{hero.eyebrow}</p>
-        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[1] mb-6 max-w-4xl">
-          {hero.headline}
-        </h1>
-        <p className="text-lg md:text-xl text-background/85 max-w-2xl leading-relaxed mb-8">
-          {hero.subhead}
-        </p>
+        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[1] mb-6 max-w-4xl">{hero.headline}</h1>
+        <p className="text-lg md:text-xl text-background/85 max-w-2xl leading-relaxed mb-8">{hero.subhead}</p>
         <div className="flex flex-wrap gap-3">
           <a
             href="#signature"
@@ -183,10 +183,15 @@ function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
   );
 }
 
-
 type AdventuresIndexContent = typeof PAGE_DEFAULTS.adventures_index;
 
-function SignaturesSection({ signatures, content }: { signatures: AdventuresPage["signatures"]; content: AdventuresIndexContent }) {
+function SignaturesSection({
+  signatures,
+  content,
+}: {
+  signatures: AdventuresPage["signatures"];
+  content: AdventuresIndexContent;
+}) {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
@@ -217,7 +222,12 @@ function SignaturesSection({ signatures, content }: { signatures: AdventuresPage
     });
   }, [signatures, search]);
 
-  const hasFilters = !!((search.q ?? "") || (search.region ?? "") || (search.terrain ?? "") || (search.difficulty ?? ""));
+  const hasFilters = !!(
+    (search.q ?? "") ||
+    (search.region ?? "") ||
+    (search.terrain ?? "") ||
+    (search.difficulty ?? "")
+  );
 
   const setParam = (k: "q" | "region" | "terrain" | "difficulty", v: string) =>
     navigate({
@@ -225,25 +235,18 @@ function SignaturesSection({ signatures, content }: { signatures: AdventuresPage
       replace: true,
     });
 
-  const clearAll = () =>
-    navigate({ search: { q: "", region: "", terrain: "", difficulty: "" }, replace: true });
+  const clearAll = () => navigate({ search: { q: "", region: "", terrain: "", difficulty: "" }, replace: true });
 
   return (
     <section id="signature" className="py-24 md:py-32 scroll-mt-20">
       <div className="max-w-[1920px] mx-auto px-6 lg:px-10">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-4">{content.signature_eyebrow}</p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
-            {content.signature_title}
-          </h2>
-          <p className="text-foreground/70 mt-5">
-            {content.signature_body}
-          </p>
-
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">{content.signature_title}</h2>
+          <p className="text-foreground/70 mt-5">{content.signature_body}</p>
         </div>
 
         <div className="mb-12" />
-
 
         {filtered.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-border/60 bg-cream/40">
@@ -280,6 +283,7 @@ function SignaturesSection({ signatures, content }: { signatures: AdventuresPage
                       alt={`${a.name} — ${a.region}`}
                       loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      style={{ objectPosition: `${a.focalX ?? 50}% ${a.focalY ?? 50}%` }}
                     />
                   </Link>
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] tracking-[0.2em] uppercase text-foreground/60 mb-3">
@@ -333,7 +337,6 @@ function SignaturesSection({ signatures, content }: { signatures: AdventuresPage
                         </button>
                       }
                     />
-
                   </div>
                 </article>
               );
@@ -358,9 +361,7 @@ function FilterSelect({
 }) {
   return (
     <div className="md:col-span-2 lg:col-span-2">
-      <Label className="text-[10px] tracking-[0.25em] uppercase text-foreground/60 mb-1.5 block">
-        {label}
-      </Label>
+      <Label className="text-[10px] tracking-[0.25em] uppercase text-foreground/60 mb-1.5 block">{label}</Label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -368,7 +369,9 @@ function FilterSelect({
       >
         <option value="">All</option>
         {options.map((o) => (
-          <option key={o} value={o}>{o}</option>
+          <option key={o} value={o}>
+            {o}
+          </option>
         ))}
       </select>
     </div>
@@ -404,24 +407,20 @@ function RhythmSection({ content }: { content: AdventuresIndexContent }) {
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-4 lg:sticky lg:top-32">
             <p className="text-[11px] tracking-[0.3em] uppercase text-gold mb-4">{content.rhythm_eyebrow}</p>
-            <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-6">
-              {content.rhythm_title}
-            </h2>
-            <p className="text-foreground/70 leading-relaxed">
-              {content.rhythm_body}
-            </p>
-
+            <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-6">{content.rhythm_title}</h2>
+            <p className="text-foreground/70 leading-relaxed">{content.rhythm_body}</p>
           </div>
           <ol className="lg:col-span-8 space-y-10">
             {rhythm.map((r, i) => (
-              <li key={r.when} className="grid grid-cols-[5.5rem_1fr] md:grid-cols-[6.5rem_1fr] gap-6 md:gap-10 items-start">
+              <li
+                key={r.when}
+                className="grid grid-cols-[5.5rem_1fr] md:grid-cols-[6.5rem_1fr] gap-6 md:gap-10 items-start"
+              >
                 <div className="text-left pt-1">
                   <div className="font-serif text-4xl text-terracotta leading-none">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div className="text-[11px] tracking-[0.25em] uppercase text-foreground/55 mt-2">
-                    {r.when}
-                  </div>
+                  <div className="text-[11px] tracking-[0.25em] uppercase text-foreground/55 mt-2">{r.when}</div>
                 </div>
                 <div className="border-l border-border pl-6 md:pl-8">
                   <h3 className="font-serif text-2xl text-foreground mb-2">{r.title}</h3>
@@ -435,7 +434,6 @@ function RhythmSection({ content }: { content: AdventuresIndexContent }) {
     </section>
   );
 }
-
 
 function CtaSection({ cta }: { cta: AdventuresPage["cta"] }) {
   return (
@@ -455,7 +453,6 @@ function CtaSection({ cta }: { cta: AdventuresPage["cta"] }) {
             </button>
           }
         />
-
       </div>
     </section>
   );
