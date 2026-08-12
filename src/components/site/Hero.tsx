@@ -71,6 +71,13 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
           />
         )}
 
+        {asBackground && (
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-forest/85 via-forest/45 to-forest/10"
+            aria-hidden="true"
+          />
+        )}
+
         {/* Decorative dotted flight paths */}
         <svg
           className="pointer-events-none absolute inset-0 w-full h-full opacity-30"
@@ -92,9 +99,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
 
         <div
           className={`relative grid gap-8 lg:gap-10 px-5 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-32 ${overlayNavSpacer} pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-14 md:pb-20 ${
-            asBackground
-              ? "grid-cols-1"
-              : "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]"
+            asBackground ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]"
           }`}
         >
           {/* LEFT — copy */}
@@ -102,19 +107,16 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
             className={`max-w-2xl animate-fade-up ${
               asBackground ? "min-h-[520px] md:min-h-[620px] flex flex-col justify-center py-8" : ""
             }`}
-            style={
-              asBackground
-                ? { textShadow: "0 2px 24px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4)" }
-                : undefined
-            }
+            style={asBackground ? { textShadow: "0 2px 24px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4)" } : undefined}
           >
-            <p className="text-[11px] tracking-[0.3em] uppercase text-cream/85 mb-4">
-              The Baobab Collective
-            </p>
+            <p className="text-[11px] tracking-[0.3em] uppercase text-cream/85 mb-4">The Baobab Collective</p>
 
-            <p className="mt-5 md:mt-6 text-cream/90 text-sm sm:text-base md:text-lg max-w-md">
-              {c.hero_subtitle}
-            </p>
+            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-wide text-cream max-w-3xl">
+              <span className="block">{c.hero_title_line1}</span>
+              <span className="block text-gold">{c.hero_title_line2}</span>
+            </h1>
+
+            <p className="mt-5 md:mt-6 text-cream/90 text-sm sm:text-base md:text-lg max-w-md">{c.hero_subtitle}</p>
 
             <div className="mt-6 md:mt-8 flex flex-wrap items-center gap-3 md:gap-4">
               <Link
@@ -142,6 +144,18 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
                 <SearchCapsule onSubmit={onSearch} adventures={adventures} />
               </div>
             )}
+
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[10px] sm:text-[11px] uppercase tracking-[0.16em] text-cream/75">
+              <span>Tailor-made journeys</span>
+              <span className="text-gold" aria-hidden="true">
+                •
+              </span>
+              <span>Local expertise</span>
+              <span className="text-gold" aria-hidden="true">
+                •
+              </span>
+              <span>24/7 support</span>
+            </div>
           </div>
 
           {/* RIGHT — hero image (hidden when background mode) */}
@@ -195,7 +209,9 @@ function SearchCapsule({
           >
             <option value="">All adventures</option>
             {adventures.map((a) => (
-              <option key={a.slug} value={a.slug}>{a.name}</option>
+              <option key={a.slug} value={a.slug}>
+                {a.name}
+              </option>
             ))}
           </select>
         </span>
