@@ -14,7 +14,7 @@ type HeroContent = Partial<typeof PAGE_DEFAULTS.home>;
 
 export function Hero({ content }: { content?: HeroContent | null } = {}) {
   const base = { ...PAGE_DEFAULTS.home, ...(content ?? {}) };
-  const c: any = usePreviewMerge("home", base);
+  const c = usePreviewMerge("home", base);
   const asBackground = Boolean(c.hero_image_as_background);
   const hideSearch = Boolean(c.hero_hide_search);
   const heroSrc = c.hero_image_url || heroImg;
@@ -23,7 +23,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
   const overlay = !!menu.transparentOverHero;
 
   // Focal point (0–100). Clamp and pass to object-position.
-  const clamp = (n: any) => {
+  const clamp = (n: unknown) => {
     const v = Number(n);
     if (!Number.isFinite(v)) return 50;
     return Math.max(0, Math.min(100, v));
@@ -105,7 +105,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
           {/* LEFT — copy */}
           <div
             className={`max-w-2xl animate-fade-up ${
-              asBackground ? "min-h-[640px] md:min-h-[760px] flex flex-col justify-center py-10" : ""
+              asBackground ? "min-h-[580px] md:min-h-[660px] flex flex-col justify-center py-8" : ""
             }`}
             style={asBackground ? { textShadow: "0 2px 24px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4)" } : undefined}
           >
