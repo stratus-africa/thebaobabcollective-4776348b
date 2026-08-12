@@ -134,11 +134,30 @@ function AdventuresPage() {
       <main>
         <HeroSection hero={page.hero} />
         <SignaturesSection signatures={page.signatures} content={content} />
+        {(page.cta.notIncluded ?? []).length > 0 && <NotIncludedSection items={page.cta.notIncluded} />}
         {content.show_rhythm && <RhythmSection content={content} />}
         {content.show_enquiry_cta && <CtaSection cta={page.cta} />}
       </main>
       <Footer />
     </div>
+  );
+}
+
+function NotIncludedSection({ items }: { items: string[] }) {
+  return (
+    <section className="bg-cream py-16 md:py-20">
+      <div className="mx-auto max-w-5xl px-6">
+        <p className="text-[11px] uppercase tracking-[0.3em] text-gold">Planning notes</p>
+        <h2 className="mt-3 font-serif text-4xl text-foreground">What is not included</h2>
+        <ul className="mt-8 grid gap-px border border-border bg-border sm:grid-cols-2">
+          {items.map((item) => (
+            <li key={item} className="bg-cream px-5 py-4 text-sm text-foreground/75">
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 

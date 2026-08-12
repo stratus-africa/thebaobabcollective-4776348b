@@ -36,7 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 
-export const Route = createFileRoute("/_authenticated/admin/adventures")({
+export const Route = createFileRoute("/_authenticated/admin/content/$table")({
   component: AdminAdventures,
 });
 
