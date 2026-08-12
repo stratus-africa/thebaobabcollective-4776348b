@@ -8,6 +8,8 @@ export type AdventuresHero = {
   subhead: string;
   image: string;
   imageAlt: string;
+  focalX?: number;
+  focalY?: number;
 };
 
 export type AdventuresCta = {
@@ -24,6 +26,9 @@ export type AdventuresSignature = {
   nights: string;
   difficulty: "Easy" | "Moderate" | "Active" | "Challenging" | string;
   image: string;
+  imageAlt?: string;
+  focalX?: number;
+  focalY?: number;
   description: string;
   highlights: string[];
 };
@@ -54,29 +59,25 @@ export const adventuresDefaults: AdventuresPage = {
   signatures: [],
 };
 
-export const getAdventuresPage = createServerFn({ method: "GET" }).handler(
-  async (): Promise<AdventuresPage> => {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-    );
-    const { data } = await supabase
-      .from("adventures_page_blocks" as any)
-      .select("id, hero, cta, signatures")
-      .limit(1)
-      .maybeSingle();
-    if (!data) return adventuresDefaults;
-    return {
-      id: (data as any).id,
-      hero: { ...adventuresDefaults.hero, ...((data as any).hero ?? {}) },
+export const getAdventuresPage = createServerFn({ method: "GET" }).handler(async (): Promise<AdventuresPage> => {
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+  const { data } = await supabase
+    .from("adventures_page_blocks" as any)
+    .select("id, hero, cta, signatures")
+    .limit(1)
+    .maybeSingle();
+  if (!data) return adventuresDefaults;
+  return {
+    id: (data as any).id,
+    hero: { ...adventuresDefaults.hero, ...((data as any).hero ?? {}) },
 
-      cta: { ...adventuresDefaults.cta, ...((data as any).cta ?? {}) },
-      signatures: ((data as any).signatures ?? []) as AdventuresSignature[],
-    };
-  },
-);
+    cta: { ...adventuresDefaults.cta, ...((data as any).cta ?? {}) },
+    signatures: ((data as any).signatures ?? []) as AdventuresSignature[],
+  };
+});
 
 const SavePayload = z.object({
   hero: z.object({
@@ -85,6 +86,8 @@ const SavePayload = z.object({
     subhead: z.string(),
     image: z.string().default(""),
     imageAlt: z.string().default(""),
+    focalX: z.number().min(0).max(100).optional().default(50),
+    focalY: z.number().min(0).max(100).optional().default(50),
   }),
 
   cta: z.object({
@@ -102,6 +105,9 @@ const SavePayload = z.object({
       nights: z.string(),
       difficulty: z.string(),
       image: z.string(),
+      imageAlt: z.string().optional().default(""),
+      focalX: z.number().min(0).max(100).optional().default(50),
+      focalY: z.number().min(0).max(100).optional().default(50),
       description: z.string(),
       highlights: z.array(z.string()),
     }),
@@ -136,9 +142,7 @@ export const saveAdventuresPage = createServerFn({ method: "POST" })
         .eq("id", (existing as any).id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin
-        .from("adventures_page_blocks" as any)
-        .insert(payload);
+      const { error } = await supabaseAdmin.from("adventures_page_blocks" as any).insert(payload);
       if (error) throw new Error(error.message);
     }
     return { ok: true as const };
