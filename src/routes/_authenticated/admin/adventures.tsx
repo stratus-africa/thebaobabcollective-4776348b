@@ -4,8 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  Loader2, Plus, Trash2, Save, Upload, X, Sparkles, Megaphone,
-  Map as MapIcon, Image as ImageIcon,
+  Loader2,
+  Plus,
+  Trash2,
+  Save,
+  Upload,
+  X,
+  Sparkles,
+  Megaphone,
+  Map as MapIcon,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   getAdventuresPage,
@@ -24,7 +32,6 @@ export const Route = createFileRoute("/_authenticated/admin/adventures")({
   component: AdminAdventures,
 });
 
-const ICONS = ["Mountain", "Waves", "Sun", "Footprints", "Tent", "Binoculars", "Plane", "Compass"];
 const DIFFICULTIES = ["Easy", "Moderate", "Active", "Challenging"];
 
 function slugify(s: string) {
@@ -84,34 +91,31 @@ function AdminAdventures() {
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
         <div>
-          <h1 className="font-serif text-3xl">Adventures page</h1>
+          <p className="text-[10px] tracking-[0.28em] uppercase text-gold">Page Editor</p>
+          <h1 className="font-serif text-3xl text-foreground">Adventures page</h1>
           <p className="text-sm text-foreground/60 mt-1">
             Edit the live content for <code className="text-xs px-1 py-0.5 bg-cream rounded">/adventures</code>.
           </p>
         </div>
-        <Button
-          onClick={save}
-          disabled={saving}
-          className="bg-gold text-gold-foreground hover:bg-gold/90"
-        >
+        <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
           {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
           Save changes
         </Button>
       </div>
 
       {/* Quick navigation */}
-      <div className="bg-background border border-border p-3 mb-6 flex flex-wrap gap-2 sticky top-16 z-10">
+      <div className="bg-background/95 backdrop-blur border border-border rounded-lg p-3 flex flex-wrap gap-2 sticky top-20 z-10 shadow-sm">
         {sections.map((s) => {
           const Icon = s.icon;
           return (
             <a
               key={s.id}
               href={`#${s.id}`}
-              className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-md border border-border hover:bg-cream hover:border-gold/40 transition-colors"
+              className="inline-flex items-center gap-2 text-xs px-3 py-2 rounded-md border border-border bg-background hover:bg-cream hover:border-gold/40 transition-colors"
             >
               <Icon className="w-3.5 h-3.5 text-gold" />
               {s.label}
@@ -125,18 +129,29 @@ function AdminAdventures() {
         })}
       </div>
 
-      <div className="space-y-8">
+      <div className="grid gap-6">
         <Card id="hero" title="Hero" icon={Sparkles} description="Top of the Adventures page.">
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Eyebrow">
-              <Input value={draft.hero.eyebrow} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })} />
+              <Input
+                value={draft.hero.eyebrow}
+                onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
+              />
             </Field>
           </div>
           <Field label="Headline">
-            <Textarea rows={2} value={draft.hero.headline} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })} />
+            <Textarea
+              rows={2}
+              value={draft.hero.headline}
+              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
+            />
           </Field>
           <Field label="Subhead">
-            <Textarea rows={3} value={draft.hero.subhead} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })} />
+            <Textarea
+              rows={3}
+              value={draft.hero.subhead}
+              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
+            />
           </Field>
           <Field label="Hero background image">
             <ImageUpload
@@ -160,24 +175,40 @@ function AdminAdventures() {
           </Field>
         </Card>
 
-
-        <Card id="cta" title="Closing CTA" icon={Megaphone} description="The final invitation at the bottom of the page.">
+        <Card
+          id="cta"
+          title="Closing CTA"
+          icon={Megaphone}
+          description="The final invitation at the bottom of the page."
+        >
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Eyebrow">
-              <Input value={draft.cta.eyebrow} onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })} />
+              <Input
+                value={draft.cta.eyebrow}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
+              />
             </Field>
             <Field label="Button label">
-              <Input value={draft.cta.buttonLabel} onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })} />
+              <Input
+                value={draft.cta.buttonLabel}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
+              />
             </Field>
           </div>
           <Field label="Headline">
-            <Input value={draft.cta.headline} onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })} />
+            <Input
+              value={draft.cta.headline}
+              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
+            />
           </Field>
           <Field label="Body">
-            <Textarea rows={3} value={draft.cta.body} onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })} />
+            <Textarea
+              rows={3}
+              value={draft.cta.body}
+              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
+            />
           </Field>
         </Card>
-
 
         <ListCard
           id="signatures"
@@ -203,7 +234,10 @@ function AdminAdventures() {
             <>
               <div className="grid md:grid-cols-2 gap-4">
                 <Field label="Name">
-                  <Input value={s.name} onChange={(e) => set({ ...s, name: e.target.value, slug: s.slug || slugify(e.target.value) })} />
+                  <Input
+                    value={s.name}
+                    onChange={(e) => set({ ...s, name: e.target.value, slug: s.slug || slugify(e.target.value) })}
+                  />
                 </Field>
                 <Field label="Slug (matches /itineraries/$slug)">
                   <Input value={s.slug} onChange={(e) => set({ ...s, slug: e.target.value })} />
@@ -217,7 +251,11 @@ function AdminAdventures() {
                   <Input value={s.terrain} onChange={(e) => set({ ...s, terrain: e.target.value })} />
                 </Field>
                 <Field label="Nights">
-                  <Input value={s.nights} onChange={(e) => set({ ...s, nights: e.target.value })} placeholder="8 nights" />
+                  <Input
+                    value={s.nights}
+                    onChange={(e) => set({ ...s, nights: e.target.value })}
+                    placeholder="8 nights"
+                  />
                 </Field>
               </div>
               <div className="grid md:grid-cols-[220px_1fr] gap-4">
@@ -227,11 +265,17 @@ function AdminAdventures() {
                     onChange={(e) => set({ ...s, difficulty: e.target.value })}
                     className="h-10 bg-background border border-border rounded-md px-3 text-sm w-full"
                   >
-                    {DIFFICULTIES.map((d) => <option key={d}>{d}</option>)}
+                    {DIFFICULTIES.map((d) => (
+                      <option key={d}>{d}</option>
+                    ))}
                   </select>
                 </Field>
                 <Field label="Description">
-                  <Textarea rows={2} value={s.description} onChange={(e) => set({ ...s, description: e.target.value })} />
+                  <Textarea
+                    rows={2}
+                    value={s.description}
+                    onChange={(e) => set({ ...s, description: e.target.value })}
+                  />
                 </Field>
               </div>
               <Field label="Hero image">
@@ -241,7 +285,15 @@ function AdminAdventures() {
                 <Textarea
                   rows={4}
                   value={(s.highlights ?? []).join("\n")}
-                  onChange={(e) => set({ ...s, highlights: e.target.value.split("\n").map((x) => x.trim()).filter(Boolean) })}
+                  onChange={(e) =>
+                    set({
+                      ...s,
+                      highlights: e.target.value
+                        .split("\n")
+                        .map((x) => x.trim())
+                        .filter(Boolean),
+                    })
+                  }
                 />
               </Field>
             </>
@@ -250,7 +302,7 @@ function AdminAdventures() {
       </div>
 
       {/* Sticky save footer */}
-      <div className="sticky bottom-0 mt-10 -mx-4 md:-mx-8 lg:-mx-10 px-4 md:px-8 lg:px-10 py-4 bg-background/95 backdrop-blur border-t border-border flex justify-end">
+      <div className="sticky bottom-0 mt-10 -mx-4 md:-mx-8 lg:-mx-10 px-4 md:px-8 lg:px-10 py-4 bg-background/95 backdrop-blur border-t border-border flex justify-end shadow-[0_-10px_30px_rgba(0,0,0,0.04)]">
         <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
           {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
           Save changes
@@ -261,11 +313,21 @@ function AdminAdventures() {
 }
 
 function Card({
-  id, title, icon: Icon, description, children,
-}: { id?: string; title: string; icon: any; description?: string; children: React.ReactNode }) {
+  id,
+  title,
+  icon: Icon,
+  description,
+  children,
+}: {
+  id?: string;
+  title: string;
+  icon: any;
+  description?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <section id={id} className="bg-background border border-border rounded-md overflow-hidden scroll-mt-32">
-      <header className="flex items-start gap-3 px-6 py-4 border-b border-border bg-cream/40">
+    <section id={id} className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm">
+      <header className="flex items-start gap-3 px-6 py-4 border-b border-border bg-cream/50">
         <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4" />
         </div>
@@ -288,20 +350,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function IconSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="h-10 bg-background border border-border rounded-md px-3 text-sm w-full"
-    >
-      {ICONS.map((i) => <option key={i}>{i}</option>)}
-    </select>
-  );
-}
-
 function ListCard<T extends object>({
-  id, title, icon: Icon, description, items, onChange, empty, render, previewLabel, previewImage,
+  id,
+  title,
+  icon: Icon,
+  description,
+  items,
+  onChange,
+  empty,
+  render,
+  previewLabel,
+  previewImage,
 }: {
   id?: string;
   title: string;
@@ -330,8 +389,8 @@ function ListCard<T extends object>({
   };
 
   return (
-    <section id={id} className="bg-background border border-border rounded-md overflow-hidden scroll-mt-32">
-      <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/40">
+    <section id={id} className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm">
+      <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
         <div className="flex items-start gap-3">
           <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
             <Icon className="w-4 h-4" />
@@ -344,7 +403,12 @@ function ListCard<T extends object>({
             {description && <p className="text-xs text-foreground/55 mt-0.5">{description}</p>}
           </div>
         </div>
-        <Button onClick={addNew} size="sm" variant="outline" className="border-gold text-gold hover:bg-gold hover:text-gold-foreground">
+        <Button
+          onClick={addNew}
+          size="sm"
+          variant="outline"
+          className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
+        >
           <Plus className="w-3.5 h-3.5 mr-1" /> Add
         </Button>
       </header>
@@ -360,9 +424,9 @@ function ListCard<T extends object>({
           const label = previewLabel?.(item) ?? `Item ${idx + 1}`;
           const img = previewImage?.(item);
           return (
-            <div key={idx} className="border border-border rounded-md bg-background overflow-hidden">
+            <div key={idx} className="border border-border rounded-md bg-background overflow-hidden shadow-sm">
               <div
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-cream/50"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-cream/50 transition-colors"
                 onClick={() => setOpenIdx(isOpen ? null : idx)}
               >
                 <div className="h-10 w-14 rounded bg-cream overflow-hidden flex items-center justify-center shrink-0">
@@ -376,7 +440,10 @@ function ListCard<T extends object>({
                 <span className="font-medium text-sm flex-1 truncate">{label}</span>
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); removeAt(idx); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeAt(idx);
+                  }}
                   className="text-foreground/50 hover:text-destructive p-1.5"
                   aria-label="Delete"
                 >
@@ -445,7 +512,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
         onChange={(e) => pick(e.target.files?.[0])}
       />
       {value ? (
-        <div className="border-2 border-border rounded-md overflow-hidden bg-background">
+        <div className="border-2 border-border rounded-md overflow-hidden bg-background shadow-sm">
           <div className="bg-cream">
             <img src={value} alt="" className="w-full max-h-72 object-contain mx-auto" />
           </div>
@@ -455,7 +522,9 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
               Replace
             </Button>
             <Button
-              type="button" size="sm" variant="outline"
+              type="button"
+              size="sm"
+              variant="outline"
               onClick={() => onChange("")}
               className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
             >
@@ -470,7 +539,10 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDrag(true);
+          }}
           onDragLeave={() => setDrag(false)}
           onDrop={(e) => {
             e.preventDefault();
