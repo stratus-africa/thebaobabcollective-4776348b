@@ -54,7 +54,20 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+
+  /* WordPress-style admin chrome */
+  --color-admin-bar: var(--admin-bar);
+  --color-admin-menu: var(--admin-menu);
+  --color-admin-menu-hover: var(--admin-menu-hover);
+  --color-admin-menu-fg: var(--admin-menu-fg);
+  --color-admin-menu-muted: var(--admin-menu-muted);
+  --color-admin-accent: var(--admin-accent);
+  --color-admin-accent-fg: var(--admin-accent-fg);
+  --color-admin-canvas: var(--admin-canvas);
+  --color-admin-panel: var(--admin-panel);
+  --color-admin-panel-border: var(--admin-panel-border);
 }
+
 
 :root {
   --radius: 0.25rem;
