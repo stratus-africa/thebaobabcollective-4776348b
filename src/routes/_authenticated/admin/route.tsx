@@ -196,17 +196,17 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-admin-canvas">
       {/* WP-style admin bar */}
-      <header className="fixed inset-x-0 top-0 z-50 h-8 bg-admin-bar text-admin-menu-fg text-[12px] flex items-center px-2 gap-1">
+      <header className="fixed inset-x-0 top-0 z-50 flex h-10 items-center gap-1 bg-admin-bar px-2 text-[12px] text-admin-menu-fg sm:h-8">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
             <button
-              className="md:hidden h-8 w-8 inline-flex items-center justify-center hover:bg-admin-menu-hover"
+              className="inline-flex h-10 w-10 items-center justify-center hover:bg-admin-menu-hover sm:h-8 sm:w-8 md:hidden"
               aria-label="Open admin navigation"
             >
               <Menu className="w-4 h-4" />
             </button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-[200px] border-r-0 bg-admin-menu">
+          <SheetContent side="left" className="w-[min(86vw,320px)] border-r-0 bg-admin-menu p-0">
             <SheetTitle className="sr-only">Admin navigation</SheetTitle>
             <div className="pt-8 h-full">
               <SidebarBody pathname={pathname} collapsed={false} onNavigate={() => setMobileOpen(false)} />
@@ -216,7 +216,7 @@ function AdminLayout() {
 
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-2 h-8 hover:bg-admin-menu-hover hover:text-admin-accent transition-colors"
+          className="inline-flex h-10 items-center gap-2 px-2 transition-colors hover:bg-admin-menu-hover hover:text-admin-accent sm:h-8"
         >
           <Home className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">The Baobab Collective</span>
@@ -224,7 +224,7 @@ function AdminLayout() {
         <Link
           to="/"
           target="_blank"
-          className="hidden sm:inline-flex items-center gap-1.5 px-2 h-8 hover:bg-admin-menu-hover hover:text-admin-accent transition-colors"
+          className="hidden h-8 items-center gap-1.5 px-2 transition-colors hover:bg-admin-menu-hover hover:text-admin-accent sm:inline-flex"
         >
           <ExternalLink className="w-3.5 h-3.5" /> Visit Site
         </Link>
@@ -237,13 +237,13 @@ function AdminLayout() {
         </span>
         <button
           onClick={signOut}
-          className="inline-flex items-center gap-1.5 px-2 h-8 hover:bg-admin-menu-hover hover:text-admin-accent transition-colors"
+          className="inline-flex h-10 items-center gap-1.5 px-2 transition-colors hover:bg-admin-menu-hover hover:text-admin-accent sm:h-8"
         >
           <LogOut className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Log Out</span>
         </button>
       </header>
 
-      <div className="flex pt-8">
+      <div className="flex pt-10 sm:pt-8">
         <aside
           className={`hidden md:block shrink-0 sticky top-8 h-[calc(100vh-2rem)] transition-[width] duration-200 ${
             collapsed ? "w-14" : "w-[200px]"
@@ -253,12 +253,12 @@ function AdminLayout() {
         </aside>
 
         <main className="flex-1 min-w-0">
-          <div className="px-4 md:px-8 pt-6 pb-3">
+          <div className="px-3 pt-4 pb-3 sm:px-4 md:px-8 md:pt-6">
             <h1 className="font-serif text-2xl md:text-[28px] text-foreground leading-tight">
               {currentTitle(pathname)}
             </h1>
           </div>
-          <div className="px-4 md:px-8 pb-10 overflow-x-auto">
+          <div className="min-w-0 overflow-x-hidden px-3 pb-7 sm:px-4 md:px-8 md:pb-10">
             <Outlet />
           </div>
         </main>
