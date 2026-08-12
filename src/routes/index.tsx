@@ -68,9 +68,9 @@ function WhyBaobab() {
     ["05", "Thoughtful travel", "Designed with people, wildlife and place in mind."],
   ];
   return (
-    <section className="bg-background py-20 md:py-28">
+    <section className="bg-background py-14 md:py-20">
       <div className="mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10">
-        <div className="grid gap-10 border-t border-foreground/15 pt-8 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
+        <div className="grid gap-8 border-t border-foreground/15 pt-7 lg:grid-cols-[0.75fr_1.25fr] lg:gap-14">
           <div>
             <p className="mb-5 text-[11px] uppercase tracking-[0.35em] text-gold">Why Baobab?</p>
             <h2 className="font-serif text-4xl leading-[1.05] text-foreground md:text-6xl">
@@ -79,7 +79,7 @@ function WhyBaobab() {
           </div>
           <div className="divide-y divide-foreground/15">
             {reasons.map(([number, title, body]) => (
-              <div key={number} className="grid gap-5 py-7 sm:grid-cols-[80px_1fr]">
+              <div key={number} className="grid gap-4 py-5 sm:grid-cols-[70px_1fr] sm:py-6">
                 <span className="font-serif text-3xl text-gold">{number}</span>
                 <div>
                   <h3 className="mb-2 text-[12px] uppercase tracking-[0.28em] text-foreground">{title}</h3>
@@ -87,7 +87,7 @@ function WhyBaobab() {
                 </div>
               </div>
             ))}
-            <div className="pt-8">
+            <div className="pt-6">
               <PrimaryJourneyCta />
             </div>
           </div>
