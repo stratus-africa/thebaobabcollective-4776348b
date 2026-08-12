@@ -3,8 +3,24 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
-  LayoutDashboard, Calendar, Mail, MessageSquare, Globe, Building, MapPin, Star,
-  HelpCircle, FileText, Plane, Compass, BookOpen, Bell, Menu, LogOut, ArrowLeft, Settings,
+  LayoutDashboard,
+  Calendar,
+  Mail,
+  MessageSquare,
+  Globe,
+  Building,
+  MapPin,
+  Star,
+  HelpCircle,
+  FileText,
+  Plane,
+  Compass,
+  BookOpen,
+  Bell,
+  Menu,
+  LogOut,
+  ArrowLeft,
+  Settings,
 } from "lucide-react";
 
 type NavItem = { to: string; label: string; icon: any; exact?: boolean };
@@ -54,35 +70,45 @@ const groups: NavGroup[] = [
   },
 ];
 
-
-
-
 export const Route = createFileRoute("/_authenticated/admin")({
   ssr: false,
   beforeLoad: async ({ location }) => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) throw redirect({ to: "/auth", search: { redirect: location.href } });
     const { data: role } = await supabase
-      .from("user_roles").select("role")
-      .eq("user_id", u.user.id).eq("role", "admin").maybeSingle();
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", u.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
     if (!role) throw redirect({ to: "/" });
   },
   component: AdminLayout,
 });
 
 function SidebarBody({
-  pathname, email, onSignOut, onNavigate,
-}: { pathname: string; email: string | null; onSignOut: () => void; onNavigate?: () => void }) {
+  pathname,
+  email,
+  onSignOut,
+  onNavigate,
+}: {
+  pathname: string;
+  email: string | null;
+  onSignOut: () => void;
+  onNavigate?: () => void;
+}) {
   const initial = (email?.[0] ?? "B").toUpperCase();
   return (
     <div className="flex flex-col h-full bg-forest text-forest-foreground">
-      <div className="px-6 py-6 border-b border-forest-foreground/10">
+      <div className="px-5 py-6 border-b border-forest-foreground/10 bg-forest-foreground/[0.03]">
         <Link to="/" onClick={onNavigate} className="flex items-center gap-3 group">
-          <span className="h-10 w-10 rounded-lg bg-gold text-gold-foreground flex items-center justify-center font-serif text-lg">
+          <span className="h-11 w-11 rounded-md bg-gold text-gold-foreground flex items-center justify-center font-serif text-lg shadow-sm">
             {initial}
           </span>
           <span className="min-w-0">
-            <span className="block font-serif text-lg leading-tight group-hover:text-gold transition-colors">Baobab Admin</span>
+            <span className="block font-serif text-lg leading-tight group-hover:text-gold transition-colors">
+              Baobab Admin
+            </span>
             <span className="block text-[10px] tracking-[0.25em] uppercase text-forest-foreground/60 truncate">
               {email ?? "—"}
             </span>
@@ -93,9 +119,7 @@ function SidebarBody({
       <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
         {groups.map((g) => (
           <div key={g.label}>
-            <p className="px-3 mb-2 text-[10px] tracking-[0.3em] uppercase text-forest-foreground/50">
-              {g.label}
-            </p>
+            <p className="px-3 mb-2 text-[10px] tracking-[0.3em] uppercase text-forest-foreground/50">{g.label}</p>
             <ul className="space-y-0.5">
               {g.items.map((item) => {
                 const Icon = item.icon;
@@ -105,9 +129,9 @@ function SidebarBody({
                     <Link
                       to={item.to as any}
                       onClick={onNavigate}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
                         active
-                          ? "bg-gold text-gold-foreground font-medium"
+                          ? "bg-gold text-gold-foreground font-medium shadow-sm before:absolute before:left-[-6px] before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-cream"
                           : "text-forest-foreground/80 hover:bg-forest-foreground/10 hover:text-forest-foreground"
                       }`}
                     >
@@ -126,13 +150,13 @@ function SidebarBody({
         <Link
           to="/"
           onClick={onNavigate}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-forest-foreground/80 hover:bg-forest-foreground/10"
+          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-forest-foreground/80 hover:bg-forest-foreground/10 hover:text-forest-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Website
         </Link>
         <button
           onClick={onSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-forest-foreground/80 hover:bg-forest-foreground/10"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-forest-foreground/80 hover:bg-forest-foreground/10 hover:text-forest-foreground transition-colors"
         >
           <LogOut className="w-4 h-4" /> Sign out
         </button>
@@ -160,18 +184,18 @@ function AdminLayout() {
   return (
     <div className="min-h-screen flex bg-cream">
       {/* Desktop sidebar */}
-      <aside className="w-64 shrink-0 hidden md:block sticky top-0 h-screen">
+      <aside className="w-72 shrink-0 hidden md:block sticky top-0 h-screen shadow-xl shadow-forest/10">
         <SidebarBody pathname={pathname} email={user} onSignOut={signOut} />
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+        <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-xl border-b border-border">
           <div className="h-16 px-4 md:px-8 flex items-center gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <button
-                  className="md:hidden h-10 w-10 inline-flex items-center justify-center rounded-md border border-border hover:bg-muted"
+                  className="md:hidden h-10 w-10 inline-flex items-center justify-center rounded-md border border-border bg-background hover:bg-muted"
                   aria-label="Open admin navigation"
                 >
                   <Menu className="w-5 h-5" />
@@ -190,18 +214,18 @@ function AdminLayout() {
 
             <div className="flex-1 min-w-0">
               <p className="text-[10px] tracking-[0.3em] uppercase text-foreground/50">Admin</p>
-              <p className="font-serif text-base truncate text-foreground">The Baobab Collective</p>
+              <p className="font-serif text-lg truncate text-foreground">The Baobab Collective</p>
             </div>
 
             <button
               aria-label="Notifications"
-              className="relative h-10 w-10 inline-flex items-center justify-center rounded-md border border-border hover:bg-muted"
+              className="relative h-10 w-10 inline-flex items-center justify-center rounded-md border border-border bg-background hover:bg-muted transition-colors"
             >
               <Bell className="w-4 h-4" />
               <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-gold" />
             </button>
             <div
-              className="h-10 w-10 rounded-full bg-forest text-forest-foreground flex items-center justify-center font-serif"
+              className="h-10 w-10 rounded-full bg-forest text-forest-foreground flex items-center justify-center font-serif shadow-sm"
               aria-label={user ?? "Admin"}
               title={user ?? undefined}
             >
