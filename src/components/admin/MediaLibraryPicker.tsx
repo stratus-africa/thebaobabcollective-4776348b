@@ -151,8 +151,8 @@ export function MediaLibraryPicker({
         onOpenChange(v);
       }}
     >
-      <DialogContent className="max-w-5xl">
-        <DialogHeader>
+      <DialogContent className="max-w-7xl gap-4 sm:w-[calc(100%-3rem)]">
+        <DialogHeader className="pr-8">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             {multi
@@ -162,7 +162,7 @@ export function MediaLibraryPicker({
         </DialogHeader>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[220px]">
+          <div className="relative min-w-0 flex-1 sm:min-w-[220px]">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
             <Input
               value={searchInput}
@@ -178,7 +178,7 @@ export function MediaLibraryPicker({
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -231,7 +231,7 @@ export function MediaLibraryPicker({
           </Button>
         </div>
 
-        <div className="max-h-[55vh] overflow-y-auto rounded-md border border-border bg-cream/30 p-3">
+        <div className="max-h-[52vh] overflow-y-auto rounded-md border border-border bg-cream/30 p-2 sm:p-3">
           {isLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {Array.from({ length: 8 }).map((_, i) => (
