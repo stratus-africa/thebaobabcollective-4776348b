@@ -46,9 +46,9 @@ const groups: NavGroup[] = [
   {
     label: "Management",
     items: [
+      { to: "/admin/content/destinations", label: "Manage Destinations", icon: MapPin },
       { to: "/admin/adventures", label: "Manage Adventures", icon: Compass },
       { to: "/admin/content/lodges", label: "Manage Lodges", icon: Building },
-      { to: "/admin/content/destinations", label: "Manage Destinations", icon: MapPin },
     ],
   },
   {
@@ -249,11 +249,7 @@ function AdminLayout() {
             collapsed ? "w-14" : "w-[200px]"
           }`}
         >
-          <SidebarBody
-            pathname={pathname}
-            collapsed={collapsed}
-            onToggleCollapse={toggleCollapse}
-          />
+          <SidebarBody pathname={pathname} collapsed={collapsed} onToggleCollapse={toggleCollapse} />
         </aside>
 
         <main className="flex-1 min-w-0">
