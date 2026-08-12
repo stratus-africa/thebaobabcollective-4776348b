@@ -69,7 +69,9 @@ export const Route = createFileRoute("/adventures/$slug")({
       <Navbar />
       <div className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-4xl mb-4">Adventure not found</h1>
-        <Link to="/adventures" className="text-gold underline">Browse all adventures</Link>
+        <Link to="/adventures" className="text-gold underline">
+          Browse all adventures
+        </Link>
       </div>
       <Footer />
     </div>
@@ -83,9 +85,14 @@ export const Route = createFileRoute("/adventures/$slug")({
           <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
           <p className="text-foreground/70 mb-6">{error.message}</p>
           <button
-            onClick={() => { reset(); router.invalidate(); }}
+            onClick={() => {
+              reset();
+              router.invalidate();
+            }}
             className="bg-gold text-gold-foreground px-6 py-3 uppercase tracking-[0.25em] text-[11px]"
-          >Retry</button>
+          >
+            Retry
+          </button>
         </div>
         <Footer />
       </div>
@@ -98,9 +105,8 @@ function AdventureDetail() {
   const { slug } = Route.useParams();
   const { data: page } = useSuspenseQuery(adventuresQuery);
   const a = page.signatures.find((s) => s.slug === slug)!;
-  const url = typeof window !== "undefined"
-    ? window.location.href
-    : `https://thebaobabcollective.co.uk/adventures/${slug}`;
+  const url =
+    typeof window !== "undefined" ? window.location.href : `https://thebaobabcollective.co.uk/adventures/${slug}`;
 
   return (
     <div className="bg-background min-h-screen">
@@ -108,7 +114,12 @@ function AdventureDetail() {
       <main>
         {/* Hero */}
         <section className="relative h-[70vh] min-h-[480px] flex items-end">
-          <img src={a.image} alt={a.name} className="absolute inset-0 w-full h-full object-cover" />
+          <img
+            src={a.image}
+            alt={a.imageAlt || a.name}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: `${a.focalX ?? 50}% ${a.focalY ?? 50}%` }}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-10 pb-16 text-background w-full">
             <Link
@@ -117,25 +128,27 @@ function AdventureDetail() {
             >
               ← All Adventures
             </Link>
-            <h1 className="font-serif text-5xl md:text-7xl leading-[1.05] mb-4 max-w-3xl">
-              {a.name}
-            </h1>
+            <h1 className="font-serif text-5xl md:text-7xl leading-[1.05] mb-4 max-w-3xl">{a.name}</h1>
             <div className="flex flex-wrap gap-6 text-sm text-background/90">
-              <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gold" /> {a.region}</span>
-              <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-gold" /> {a.nights}</span>
-              <span className="flex items-center gap-2"><Mountain className="w-4 h-4 text-gold" /> {a.terrain}</span>
-              <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-gold" /> {a.difficulty}</span>
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gold" /> {a.region}
+              </span>
+              <span className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-gold" /> {a.nights}
+              </span>
+              <span className="flex items-center gap-2">
+                <Mountain className="w-4 h-4 text-gold" /> {a.terrain}
+              </span>
+              <span className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-gold" /> {a.difficulty}
+              </span>
             </div>
           </div>
         </section>
 
         <div className="max-w-[1920px] mx-auto px-6 lg:px-10 pt-6">
           <Breadcrumbs
-            items={[
-              { label: "Home", to: "/" },
-              { label: "Adventures", to: "/adventures" },
-              { label: a.name },
-            ]}
+            items={[{ label: "Home", to: "/" }, { label: "Adventures", to: "/adventures" }, { label: a.name }]}
           />
         </div>
 
@@ -145,9 +158,7 @@ function AdventureDetail() {
             <div className="lg:col-span-2 space-y-10">
               <div>
                 <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-4">Overview</p>
-                <p className="font-serif text-2xl md:text-3xl text-foreground leading-relaxed mb-6">
-                  {a.description}
-                </p>
+                <p className="font-serif text-2xl md:text-3xl text-foreground leading-relaxed mb-6">{a.description}</p>
               </div>
 
               {a.highlights?.length > 0 && (
@@ -177,7 +188,8 @@ function AdventureDetail() {
                         <div>
                           <h3 className="font-serif text-xl text-foreground mb-2">{h}</h3>
                           <p className="text-foreground/70 text-sm leading-relaxed">
-                            Days of immersive guiding, intimate camps and conservation-led experiences crafted around this chapter of your adventure.
+                            Days of immersive guiding, intimate camps and conservation-led experiences crafted around
+                            this chapter of your adventure.
                           </p>
                         </div>
                       </div>
@@ -210,9 +222,7 @@ function AdventureDetail() {
               <div className="bg-cream p-8">
                 <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-3">Reserve Your Adventure</p>
                 <p className="font-serif text-3xl text-foreground mb-1">On request</p>
-                <p className="text-xs text-foreground/60 mb-6">
-                  per person, twin share · {a.nights}
-                </p>
+                <p className="text-xs text-foreground/60 mb-6">per person, twin share · {a.nights}</p>
                 <EnquireDialog
                   defaultSubject={a.name}
                   defaultDestination={a.name}
@@ -241,9 +251,7 @@ function AdventureDetail() {
         {/* Share */}
         <section className="border-t border-border/40 py-10">
           <div className="max-w-[1920px] mx-auto px-6 lg:px-10 flex flex-wrap items-center justify-between gap-6">
-            <p className="font-serif text-xl text-foreground">
-              Inspired? Share {a.name} with a fellow traveller.
-            </p>
+            <p className="font-serif text-xl text-foreground">Inspired? Share {a.name} with a fellow traveller.</p>
             <ShareButtons
               title={`${a.name} — The Baobab Collective`}
               url={url}
@@ -257,9 +265,7 @@ function AdventureDetail() {
         <section className="bg-cream py-20 md:py-24">
           <div className="max-w-3xl mx-auto px-6 text-center">
             <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-4">Enquire</p>
-            <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
-              Speak with an Adventure Designer
-            </h2>
+            <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-4">Speak with an Adventure Designer</h2>
             <p className="text-foreground/70 mb-8">
               Share a few details about your dream {a.name} experience — we'll respond within 24 hours.
             </p>
