@@ -10,7 +10,6 @@ import {
   PlusCircle,
   CheckCircle2,
   Compass,
-  FileText,
   ArrowRight,
   Briefcase,
   MapPin,
@@ -37,15 +36,7 @@ function Skeleton({ className = "" }: { className?: string }) {
   return <div className={`bg-muted/60 animate-pulse rounded-sm ${className}`} />;
 }
 
-function Panel({
-  title,
-  action,
-  children,
-}: {
-  title: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function Panel({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="bg-admin-panel border border-admin-panel-border shadow-[0_1px_1px_rgba(0,0,0,0.04)]">
       <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-admin-panel-border">
@@ -69,10 +60,10 @@ function Dashboard() {
   ];
 
   const quickTasks = [
+    { to: "/admin/content/destinations", label: "Manage Destinations", icon: MapPin },
     { to: "/admin/content/itineraries", label: "Add an Itinerary", icon: PlusCircle },
     { to: "/admin/enquiries", label: "Review Enquiries", icon: CheckCircle2 },
     { to: "/admin/adventures", label: "Update Adventures Page", icon: Compass },
-    { to: "/admin/content/journal_articles", label: "Publish an Article", icon: FileText },
   ];
 
   const tools = [
@@ -95,10 +86,10 @@ function Dashboard() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              to="/admin/adventures"
+              to="/admin/content/destinations"
               className="inline-flex items-center gap-2 bg-admin-accent text-admin-accent-fg text-[13px] px-3.5 py-2 rounded-sm hover:opacity-90 transition-opacity"
             >
-              <Compass className="w-4 h-4" /> Update Adventures
+              <MapPin className="w-4 h-4" /> Manage Destinations
             </Link>
             <Link
               to="/admin/enquiries"
