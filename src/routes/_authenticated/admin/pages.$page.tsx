@@ -14,7 +14,18 @@ import { Switch } from "@/components/ui/switch";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 import { toast } from "sonner";
-import { Loader2, RefreshCw, ExternalLink, Save, Eye, EyeOff, ArrowUp, ArrowDown, GripVertical, Images } from "lucide-react";
+import {
+  Loader2,
+  RefreshCw,
+  ExternalLink,
+  Save,
+  Eye,
+  EyeOff,
+  ArrowUp,
+  ArrowDown,
+  GripVertical,
+  Images,
+} from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -51,11 +62,7 @@ const REORDER_GROUPS: Partial<Record<PageKey, { count: number; suffixes: string[
 
 // Reorder all group values by applying an old->new index permutation.
 // order[newPos-1] = oldPos (1-indexed).
-function reorderGroup(
-  draft: Record<string, any>,
-  suffixes: string[],
-  order: number[],
-): Record<string, any> {
+function reorderGroup(draft: Record<string, any>, suffixes: string[], order: number[]): Record<string, any> {
   const next = { ...draft };
   for (const s of suffixes) {
     const snapshot: Record<number, any> = {};
@@ -69,7 +76,6 @@ function reorderGroup(
   }
   return next;
 }
-
 
 type FieldDef = {
   name: string;
@@ -93,8 +99,6 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
       { name: "hero_proof_text", label: "Social Proof Text", type: "text" },
       { name: "hero_image_as_background", label: "Use Hero Image as Full Background", type: "boolean" },
       { name: "hero_hide_search", label: "Hide Search Filter", type: "boolean" },
-      { name: "hero_focal_x", label: "Hero focal point — Horizontal (0=left, 100=right)", type: "text", placeholder: "50" },
-      { name: "hero_focal_y", label: "Hero focal point — Vertical (0=top, 100=bottom)", type: "text", placeholder: "50" },
       { name: "hero_bg_size", label: "Background size ('cover' or 'contain')", type: "text", placeholder: "cover" },
     ],
   },
@@ -251,7 +255,6 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
     ],
   },
 
-
   top_bar: {
     title: "Top Announcement Bar",
     description: "The dark bar at the very top of every page.",
@@ -349,7 +352,8 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
   },
   footer: {
     title: "Footer",
-    description: "Newsletter copy, contact heading, copyright line, and social media icons. Footer columns are managed under Menu & Navigation.",
+    description:
+      "Newsletter copy, contact heading, copyright line, and social media icons. Footer columns are managed under Menu & Navigation.",
     preview: "/",
     fields: [
       { name: "contact_heading", label: "Contact Column Heading", type: "text" },
@@ -441,7 +445,12 @@ export function PageEditor({ pageKey: page }: { pageKey: PageKey }) {
   });
 
   function reset() {
-    if (!confirm("Reset all fields on this page to defaults? This will overwrite the current saved version when you click Save.")) return;
+    if (
+      !confirm(
+        "Reset all fields on this page to defaults? This will overwrite the current saved version when you click Save.",
+      )
+    )
+      return;
     setDraft({ ...PAGE_DEFAULTS[page] });
   }
 
@@ -543,7 +552,6 @@ export function PageEditor({ pageKey: page }: { pageKey: PageKey }) {
               ))}
             </div>
           )}
-
         </div>
         {showPreview && (
           <div className="min-h-[600px]">
@@ -555,15 +563,7 @@ export function PageEditor({ pageKey: page }: { pageKey: PageKey }) {
   );
 }
 
-function FieldRow({
-  field,
-  value,
-  onChange,
-}: {
-  field: FieldDef;
-  value: any;
-  onChange: (v: any) => void;
-}) {
+function FieldRow({ field, value, onChange }: { field: FieldDef; value: any; onChange: (v: any) => void }) {
   if (field.type === "image") {
     return <ImageUploader label={field.label} value={value ?? ""} onChange={onChange} />;
   }
@@ -707,11 +707,7 @@ function SortableItem({
     zIndex: isDragging ? 10 : "auto",
   };
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="border border-border rounded-md p-4 bg-cream/30 space-y-3"
-    >
+    <div ref={setNodeRef} style={style} className="border border-border rounded-md p-4 bg-cream/30 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <button
@@ -726,10 +722,26 @@ function SortableItem({
           <p className="font-medium text-sm">{label}</p>
         </div>
         <div className="flex items-center gap-1">
-          <Button type="button" size="icon" variant="outline" onClick={onUp} disabled={!canUp} aria-label="Move up" className="h-10 w-10 md:h-9 md:w-9">
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={onUp}
+            disabled={!canUp}
+            aria-label="Move up"
+            className="h-10 w-10 md:h-9 md:w-9"
+          >
             <ArrowUp className="w-4 h-4" />
           </Button>
-          <Button type="button" size="icon" variant="outline" onClick={onDown} disabled={!canDown} aria-label="Move down" className="h-10 w-10 md:h-9 md:w-9">
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={onDown}
+            disabled={!canDown}
+            aria-label="Move down"
+            className="h-10 w-10 md:h-9 md:w-9"
+          >
             <ArrowDown className="w-4 h-4" />
           </Button>
         </div>
@@ -749,8 +761,9 @@ function InstagramGallerySelector({
   onCommit: (next: Record<string, any>) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const currentUrls: string[] = Array.from({ length: count }, (_, i) =>
-    (draft[`image_${i + 1}_url`] as string) || "",
+  const currentUrls: string[] = Array.from(
+    { length: count },
+    (_, i) => (draft[`image_${i + 1}_url`] as string) || "",
   ).filter(Boolean);
 
   function applySelection(urls: string[]) {
@@ -764,7 +777,7 @@ function InstagramGallerySelector({
     for (let i = 1; i <= count; i++) {
       const url = picked[i - 1] ?? "";
       next[`image_${i}_url`] = url;
-      next[`image_${i}_caption`] = url ? captionByUrl.get(url) ?? next[`image_${i}_caption`] ?? "" : "";
+      next[`image_${i}_caption`] = url ? (captionByUrl.get(url) ?? next[`image_${i}_caption`] ?? "") : "";
     }
     onCommit(next);
   }
@@ -785,7 +798,8 @@ function InstagramGallerySelector({
         <div>
           <p className="text-[11px] tracking-[0.2em] uppercase text-foreground/60">Instagram Gallery</p>
           <p className="text-sm text-foreground/80">
-            Pick up to {count} photos from your media library. Selection order becomes gallery order — captions stay with each photo.
+            Pick up to {count} photos from your media library. Selection order becomes gallery order — captions stay
+            with each photo.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -804,7 +818,10 @@ function InstagramGallerySelector({
       {currentUrls.length > 0 ? (
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-2">
           {currentUrls.map((url, i) => (
-            <div key={`${url}-${i}`} className="relative aspect-square overflow-hidden rounded border border-border bg-background">
+            <div
+              key={`${url}-${i}`}
+              className="relative aspect-square overflow-hidden rounded border border-border bg-background"
+            >
               <img src={url} alt={`Gallery photo ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
               <span className="absolute top-1 left-1 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-white">
                 {i + 1}
@@ -826,7 +843,3 @@ function InstagramGallerySelector({
     </div>
   );
 }
-
-
-
-
