@@ -7,6 +7,7 @@ import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { RichText } from "@/components/site/RichText";
 
 export const Route = createFileRoute("/about")({
   loader: async () => {
@@ -47,7 +48,7 @@ function MissionSection({ content }: { content: Partial<typeof PAGE_DEFAULTS.abo
       <div className="max-w-[1920px] mx-auto px-6 lg:px-10 max-w-3xl text-center">
         <p className="text-[11px] tracking-[0.3em] uppercase text-foreground/70 mb-3">{c.eyebrow}</p>
         <h2 className="font-serif text-3xl md:text-4xl mb-6">{c.title}</h2>
-        <p className="text-foreground/75 leading-relaxed">{c.body}</p>
+        <RichText html={c.body} className="text-foreground/75" />
       </div>
     </section>
   );
@@ -75,7 +76,7 @@ function ValuesSection({ content }: { content: Partial<typeof PAGE_DEFAULTS.abou
           {items.map((it, i) => (
             <div key={i} className="bg-background border border-border p-6">
               <h3 className="text-[13px] tracking-[0.2em] uppercase mb-3 text-gold">{it.title}</h3>
-              <p className="text-sm text-foreground/75 leading-relaxed">{it.body}</p>
+              <RichText html={it.body} className="text-sm text-foreground/75" />
             </div>
           ))}
         </div>
@@ -203,7 +204,7 @@ function TeamSection({ content }: { content: Partial<typeof PAGE_DEFAULTS.about_
             </div>
             <h2 className="font-serif text-4xl md:text-5xl leading-tight text-foreground">{c.title}</h2>
           </div>
-          <p className="max-w-2xl text-foreground/72 leading-relaxed lg:pb-2">{c.body}</p>
+          <RichText html={c.body} className="max-w-2xl text-foreground/72 lg:pb-2" />
         </div>
 
         {members.length > 0 && (
