@@ -1,339 +1,46 @@
-import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminList, adminUpsert, adminDelete } from "@/lib/admin.functions";
-import { ImageUploader } from "@/components/admin/ImageUploader";
-import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  Trash2,
+  ArrowDown,
+  ArrowUp,
+  CheckCircle2,
+  CircleAlert,
+  FolderOpen,
+  GripVertical,
+  Loader2,
   Plus,
-  Pencil,
-  Eye,
-  Search,
-  Star,
-  MapPin,
-  Image as ImageIcon,
+  Trash2,
+  Save,
   Upload,
   X,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
+  Sparkles,
+  Megaphone,
+  Map as MapIcon,
+  Image as ImageIcon,
 } from "lucide-react";
-import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import {
+  getAdventuresPage,
+  saveAdventuresPage,
+  type AdventuresPage,
+  type AdventuresSignature,
+  adventuresDefaults,
+} from "@/lib/adventures.functions";
+import { adminUploadImage } from "@/lib/admin.functions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 
-const TABLE_LABELS: Record<string, string> = {
-  journey_categories: "Journey Categories",
-  itineraries: "Journeys",
-  journal_articles: "Articles",
-  lodges: "Lodges",
-  destinations: "Destinations",
-  testimonials: "Testimonials",
-  faqs: "FAQs",
-};
+export const Route = createFileRoute("/_authenticated/admin/adventures")({
+  component: AdminAdventures,
+});
 
-const TABLE_SINGULAR: Record<string, string> = {
-  journey_categories: "Category",
-  itineraries: "Journey",
-  journal_articles: "Article",
-  lodges: "Lodge",
-  destinations: "Destination",
-  testimonials: "Testimonial",
-  faqs: "FAQ",
-};
-
-const VIEW_PATH: Record<string, (row: any) => string | null> = {
-  itineraries: (r) => (r.slug ? `/journeys/${r.slug}` : null),
-  destinations: (r) => (r.slug ? `/destinations/${r.slug}` : null),
-  lodges: (r) => (r.slug ? `/lodges/${r.slug}` : null),
-  journal_articles: (r) => (r.slug ? `/journal/${r.slug}` : null),
-  journey_categories: (r) => (r.slug ? `/journeys?cat=${r.slug}` : null),
-  testimonials: () => null,
-  faqs: () => null,
-};
-
-const GROUP_FIELD: Record<string, { field: string; label: string }> = {
-  destinations: { field: "region", label: "regions" },
-  lodges: { field: "location", label: "locations" },
-  itineraries: { field: "nights", label: "lengths" },
-  journal_articles: { field: "category", label: "categories" },
-  testimonials: { field: "location", label: "locations" },
-  faqs: { field: "category", label: "categories" },
-  journey_categories: { field: "slug", label: "categories" },
-};
-
-const IMAGE_FIELD: Record<string, string> = {
-  destinations: "image",
-  lodges: "hero_image",
-  itineraries: "image",
-  journal_articles: "image",
-  journey_categories: "hero_image",
-};
-
-const SUBTITLE: Record<string, (r: any) => string> = {
-  destinations: (r) => [r.country, r.region].filter(Boolean).join(", "),
-  lodges: (r) => r.location ?? "",
-  itineraries: (r) => r.nights ?? "",
-  journal_articles: (r) => [r.category, r.date].filter(Boolean).join(" · "),
-  testimonials: (r) => r.location ?? "",
-  faqs: (r) => r.category ?? "",
-  journey_categories: (r) => r.tagline ?? "",
-};
-
-type FieldType = "text" | "textarea" | "rich" | "number" | "bool" | "array" | "image" | "images";
-type FieldDef = {
-  name: string;
-  label: string;
-  type: FieldType;
-  placeholder?: string;
-  icon?: "pin" | "hash";
-};
-
-const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
-  destinations: {
-    rows: [
-      [{ name: "name", label: "Name", type: "text", placeholder: "e.g. Bali", icon: "pin" }],
-      [
-        { name: "country", label: "Country", type: "text", placeholder: "e.g. Indonesia" },
-        { name: "region", label: "Region", type: "text", placeholder: "e.g. Asia" },
-      ],
-      [
-        { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
-        { name: "best_season", label: "Best Season", type: "text", placeholder: "e.g. May – Oct" },
-      ],
-      [
-        {
-          name: "description",
-          label: "Description",
-          type: "rich",
-          placeholder: "Describe this destination…",
-        },
-      ],
-      [{ name: "image", label: "Hero Image", type: "image" }],
-      [{ name: "featured_trips", label: "Featured Trips (one per line)", type: "array" }],
-      [
-        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
-        { name: "published", label: "Active", type: "bool" },
-      ],
-    ],
-  },
-  lodges: {
-    rows: [
-      [
-        {
-          name: "name",
-          label: "Name",
-          type: "text",
-          placeholder: "e.g. Singita Sabi Sand",
-          icon: "pin",
-        },
-      ],
-      [
-        {
-          name: "location",
-          label: "Location",
-          type: "text",
-          placeholder: "e.g. Sabi Sand, South Africa",
-        },
-        { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
-      ],
-      [
-        {
-          name: "description",
-          label: "Description",
-          type: "rich",
-          placeholder: "Describe this lodge…",
-        },
-      ],
-      [{ name: "hero_image", label: "Hero Image", type: "image" }],
-      [{ name: "gallery", label: "Gallery", type: "images" }],
-      [{ name: "amenities", label: "Amenities (one per line)", type: "array" }],
-      [
-        { name: "price_from_usd", label: "Price from (USD)", type: "number" },
-        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
-      ],
-      [{ name: "published", label: "Active", type: "bool" }],
-    ],
-  },
-  itineraries: {
-    rows: [
-      [
-        {
-          name: "name",
-          label: "Name",
-          type: "text",
-          placeholder: "e.g. Okavango Reverie",
-          icon: "pin",
-        },
-      ],
-      [
-        { name: "nights", label: "Nights", type: "text", placeholder: "e.g. 8 nights" },
-        { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
-      ],
-      [
-        {
-          name: "category_id",
-          label: "Category ID",
-          type: "text",
-          placeholder: "uuid of journey_categories row",
-        },
-      ],
-      [
-        {
-          name: "description",
-          label: "Description",
-          type: "rich",
-          placeholder: "Describe this journey…",
-        },
-      ],
-      [{ name: "highlights", label: "Highlights (one per line)", type: "array" }],
-      [{ name: "image", label: "Hero Image", type: "image" }],
-      [{ name: "price_from_usd", label: "Price from (USD)", type: "number" }],
-      [
-        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
-        { name: "published", label: "Active", type: "bool" },
-      ],
-    ],
-  },
-  journal_articles: {
-    rows: [
-      [{ name: "title", label: "Title", type: "text" }],
-      [
-        { name: "slug", label: "Slug", type: "text" },
-        { name: "category", label: "Category", type: "text" },
-      ],
-      [
-        { name: "date", label: "Date", type: "text", placeholder: "e.g. Oct 2026" },
-        { name: "read_time", label: "Read time", type: "text", placeholder: "e.g. 6 min" },
-      ],
-      [{ name: "excerpt", label: "Excerpt", type: "textarea" }],
-      [{ name: "image", label: "Hero Image", type: "image" }],
-      [{ name: "content", label: "Paragraphs (one per line)", type: "array" }],
-      [
-        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
-        { name: "published", label: "Active", type: "bool" },
-      ],
-    ],
-  },
-  journey_categories: {
-    rows: [
-      [{ name: "title", label: "Title", type: "text" }],
-      [
-        { name: "slug", label: "Slug", type: "text" },
-        { name: "tagline", label: "Tagline", type: "text" },
-      ],
-      [{ name: "intro", label: "Intro", type: "rich" }],
-      [{ name: "hero_image", label: "Hero Image", type: "image" }],
-      [
-        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
-        { name: "published", label: "Active", type: "bool" },
-      ],
-    ],
-  },
-  testimonials: {
-    rows: [
-      [{ name: "name", label: "Name", type: "text" }],
-      [
-        { name: "location", label: "Location", type: "text" },
-        { name: "trip_taken", label: "Trip", type: "text" },
-      ],
-      [{ name: "quote", label: "Quote", type: "rich" }],
-      [
-        { name: "rating", label: "Rating (1–5)", type: "number" },
-        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
-      ],
-      [{ name: "published", label: "Active", type: "bool" }],
-    ],
-  },
-  faqs: {
-    rows: [
-      [{ name: "question", label: "Question", type: "text" }],
-      [
-        {
-          name: "category",
-          label: "Category",
-          type: "text",
-          placeholder: "planning | conservation | logistics",
-        },
-      ],
-      [{ name: "answer", label: "Answer", type: "rich" }],
-      [
-        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
-        { name: "published", label: "Active", type: "bool" },
-      ],
-    ],
-  },
-};
-
-const SORT_OPTIONS: Record<string, { value: string; label: string }[]> = {
-  destinations: [
-    { value: "sort_order", label: "Sort Order" },
-    { value: "name", label: "Name" },
-    { value: "country", label: "Country" },
-    { value: "created_at", label: "Newest" },
-  ],
-  lodges: [
-    { value: "sort_order", label: "Sort Order" },
-    { value: "name", label: "Name" },
-    { value: "price_from_usd", label: "Price" },
-    { value: "created_at", label: "Newest" },
-  ],
-  itineraries: [
-    { value: "sort_order", label: "Sort Order" },
-    { value: "name", label: "Name" },
-    { value: "price_from_usd", label: "Price" },
-    { value: "created_at", label: "Newest" },
-  ],
-  journal_articles: [
-    { value: "sort_order", label: "Sort Order" },
-    { value: "title", label: "Title" },
-    { value: "published_at", label: "Published" },
-    { value: "created_at", label: "Newest" },
-  ],
-  journey_categories: [
-    { value: "sort_order", label: "Sort Order" },
-    { value: "title", label: "Title" },
-  ],
-  testimonials: [
-    { value: "sort_order", label: "Sort Order" },
-    { value: "name", label: "Name" },
-    { value: "rating", label: "Rating" },
-  ],
-  faqs: [
-    { value: "sort_order", label: "Sort Order" },
-    { value: "category", label: "Category" },
-  ],
-};
-
-const PAGE_SIZE = 12;
+const DIFFICULTIES = ["Easy", "Moderate", "Active", "Challenging"];
 
 function slugify(s: string) {
   return s
@@ -343,529 +50,988 @@ function slugify(s: string) {
     .replace(/^-|-$/g, "");
 }
 
-function fileToBase64(file: File): Promise<{ base64: string; contentType: string; filename: string }> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      const base64 = result.split(",")[1] ?? "";
-      resolve({ base64, contentType: file.type || "image/jpeg", filename: file.name });
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-export const Route = createFileRoute("/_authenticated/admin/content/$table")({
-  component: ContentAdmin,
-});
-
-function ContentAdmin() {
-  const { table } = Route.useParams();
-  const list = useServerFn(adminList);
-  const upsert = useServerFn(adminUpsert);
-  const del = useServerFn(adminDelete);
-  const qc = useQueryClient();
-
-  const [editing, setEditing] = useState<any | null>(null);
-  const [open, setOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
-  const [search, setSearch] = useState("");
-  const [groupFilter, setGroupFilter] = useState<string>("__all__");
-  const [featuredOnly, setFeaturedOnly] = useState(false);
-  const [activeOnly, setActiveOnly] = useState(false);
-
-  const [page, setPage] = useState(1);
-  const [orderBy, setOrderBy] = useState<string>("sort_order");
-  const [orderDir, setOrderDir] = useState<"asc" | "desc">("asc");
-
-  const layout = FORM_LAYOUT[table];
-  const flatFields = useMemo(() => (layout?.rows ?? []).flat(), [layout]);
-  const group = GROUP_FIELD[table];
-  const imageField = IMAGE_FIELD[table];
-  const subtitleFn = SUBTITLE[table] ?? (() => "");
-  const viewPath = VIEW_PATH[table] ?? (() => null);
-  const label = TABLE_LABELS[table] ?? table;
-  const singular = TABLE_SINGULAR[table] ?? "Item";
-  const sortOptions = SORT_OPTIONS[table] ?? [{ value: "sort_order", label: "Sort Order" }];
-
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["admin", table, { page, orderBy, orderDir }],
-    queryFn: () => list({ data: { table: table as any, page, pageSize: PAGE_SIZE, orderBy, orderDir } }),
-  });
-  const rows = data?.rows ?? [];
-  const total = data?.count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
-  const mUpsert = useMutation({
-    mutationFn: (row: any) => upsert({ data: { table: table as any, row } }),
-    onSuccess: (_d, vars: any) => {
-      qc.invalidateQueries({ queryKey: ["admin", table] });
-      toast.success("Saved");
-      // Clear any rich-text drafts for this record
-      try {
-        Object.keys(localStorage).forEach((k) => {
-          if (k.startsWith(`cms:rt:${table}:${vars.id || "new"}:`)) localStorage.removeItem(k);
-        });
-      } catch {}
-      setOpen(false);
-    },
-    onError: (e: any) => toast.error(e.message ?? "Error"),
-  });
-  const mDel = useMutation({
-    mutationFn: (id: string) => del({ data: { table: table as any, id } }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin", table] });
-      toast.success("Deleted");
-      setDeleteTarget(null);
-    },
-    onError: (e: any) => toast.error(e.message ?? "Error"),
+function AdminAdventures() {
+  const fetchFn = useServerFn(getAdventuresPage);
+  const saveFn = useServerFn(saveAdventuresPage);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["admin-adventures-page"],
+    queryFn: () => fetchFn(),
   });
 
-  const groupOptions = useMemo(() => {
-    if (!group) return [] as string[];
-    const set = new Set<string>();
-    rows.forEach((r: any) => {
-      const v = r[group.field];
-      if (typeof v === "string" && v.trim()) set.add(v);
-    });
-    return Array.from(set).sort();
-  }, [rows, group]);
+  const [draft, setDraft] = useState<AdventuresPage>(adventuresDefaults);
+  const [saving, setSaving] = useState(false);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return rows.filter((r: any) => {
-      if (activeOnly && !r.published) return false;
-      if (featuredOnly && (r.sort_order ?? 0) <= 0) return false;
-      if (group && groupFilter !== "__all__" && r[group.field] !== groupFilter) return false;
-      if (!q) return true;
-      const title = r.name ?? r.title ?? r.question ?? "";
-      const sub = subtitleFn(r);
-      return (title + " " + sub).toLowerCase().includes(q);
-    });
-  }, [rows, search, groupFilter, activeOnly, featuredOnly, group, subtitleFn]);
+  useEffect(() => {
+    if (data) setDraft(data);
+  }, [data]);
 
-  const startCreate = () => {
-    const blank: any = { id: "" };
-    flatFields.forEach((f) => {
-      blank[f.name] =
-        f.type === "bool" ? true : f.type === "number" ? 0 : f.type === "array" || f.type === "images" ? [] : "";
-    });
-    setEditing(blank);
-    if (table !== "destinations") setOpen(true);
-  };
-  const startEdit = (row: any) => {
-    setEditing({ ...row });
-    if (table !== "destinations") setOpen(true);
-  };
-  const save = (e: React.FormEvent) => {
-    e.preventDefault();
-    const row: any = { ...editing };
-    if ("slug" in row && !row.slug) {
-      const seed = row.name ?? row.title ?? row.question ?? "";
-      if (seed) row.slug = slugify(String(seed));
+  async function save() {
+    setSaving(true);
+    try {
+      await saveFn({
+        data: {
+          hero: draft.hero,
+          cta: draft.cta,
+          signatures: draft.signatures,
+        },
+      });
+      toast.success("Adventures page saved");
+      await refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not save");
+    } finally {
+      setSaving(false);
     }
-    flatFields.forEach((f) => {
-      if (f.type === "number" && row[f.name] !== null && row[f.name] !== "") row[f.name] = Number(row[f.name]);
-      if (f.type === "array" && typeof row[f.name] === "string") {
-        row[f.name] = (row[f.name] as string)
-          .split("\n")
-          .map((s) => s.trim())
-          .filter(Boolean);
-      }
-      if (f.type === "images") {
-        const raw = row[f.name];
-        if (typeof raw === "string") {
-          row[f.name] = raw
-            .split("\n")
-            .map((s) => s.trim())
-            .filter(Boolean);
-        } else if (!Array.isArray(raw)) {
-          row[f.name] = [];
-        }
-      }
-    });
-    mUpsert.mutate(row);
-  };
+  }
 
-  if (table === "destinations" && editing) {
+  if (isLoading) {
     return (
-      <DestinationEditor
-        editing={editing}
-        fields={flatFields}
-        saving={mUpsert.isPending}
-        onChange={(name, value) => setEditing({ ...editing, [name]: value })}
-        onBack={() => setEditing(null)}
-        onSave={save}
-      />
+      <div className="flex items-center gap-2 text-foreground/60">
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+      </div>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Page header */}
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3 sm:mb-6 sm:gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
         <div>
-          <h1 className="font-serif text-3xl">{label}</h1>
+          <p className="text-[10px] tracking-[0.28em] uppercase text-gold">Page Editor</p>
+          <h1 className="font-serif text-3xl text-foreground">Adventures page</h1>
           <p className="text-sm text-foreground/60 mt-1">
-            Manage your {label.toLowerCase()} catalog — create, edit, and publish.
+            Edit the live content for <code className="text-xs px-1 py-0.5 bg-cream rounded">/adventures</code>.
           </p>
         </div>
-        <Button onClick={startCreate} className="w-full bg-gold text-gold-foreground hover:bg-gold/90 sm:w-auto">
-          <Plus className="w-4 h-4 mr-1" /> Add {singular}
+        <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
+          {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+          Save changes
         </Button>
       </div>
 
-      {/* Filter bar */}
-      <div className="mb-5 border border-border bg-background p-3 sm:mb-6 sm:p-4">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_200px_200px_auto]">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={`Search ${label.toLowerCase()}…`}
-              className="pl-9"
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+        <div className="grid gap-6 min-w-0">
+          <SignatureItineraries draft={draft} setDraft={setDraft} />
+          {/*
+          <Card id="hero" title="Hero image" icon={ImageIcon} description="Image, crop and accessibility settings.">
+          <Field label="Hero background image">
+            <ManagedImageUpload
+              value={draft.hero.image}
+              onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
+              recommendedRatio="16:9 or wider"
+              altText={draft.hero.imageAlt}
+              focalX={draft.hero.focalX ?? 50}
+              focalY={draft.hero.focalY ?? 50}
+              onFocalChange={(focalX, focalY) => setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })}
             />
+          </Field>
+          <Field label="Hero image — alt text (for accessibility & SEO)">
+            <Input
+              value={draft.hero.imageAlt ?? ""}
+              placeholder="Describe the hero image"
+              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
+            />
+          </Field>
+        </Card>*/}
+
+          {/*<Card
+          id="cta"
+          title="Closing CTA"
+          icon={Megaphone}
+          description="The final invitation at the bottom of the page."
+        >
+          <div className="grid md:grid-cols-2 gap-4">
+            <Field label="Eyebrow">
+              <Input
+                value={draft.cta.eyebrow}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
+              />
+            </Field>
+            <Field label="Button label">
+              <Input
+                value={draft.cta.buttonLabel}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
+              />
+            </Field>
           </div>
-          {group ? (
-            <Select value={groupFilter} onValueChange={setGroupFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder={`All ${group.label}`} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All {group.label}</SelectItem>
-                {groupOptions.map((o) => (
-                  <SelectItem key={o} value={o}>
-                    {o}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <div className="hidden xl:block" />
-          )}
-          <Select
-            value={`${orderBy}:${orderDir}`}
-            onValueChange={(v) => {
-              const [col, dir] = v.split(":");
-              setOrderBy(col);
-              setOrderDir(dir as "asc" | "desc");
-              setPage(1);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {sortOptions.map((s) => (
-                <span key={s.value}>
-                  <SelectItem value={`${s.value}:asc`}>{s.label} ↑</SelectItem>
-                  <SelectItem value={`${s.value}:desc`}>{s.label} ↓</SelectItem>
-                </span>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="flex items-center gap-5 px-1 sm:col-span-2 xl:col-span-1">
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <Checkbox checked={featuredOnly} onCheckedChange={(v) => setFeaturedOnly(!!v)} />
-              <span>Featured</span>
-            </label>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <Checkbox checked={activeOnly} onCheckedChange={(v) => setActiveOnly(!!v)} />
-              <span>Active</span>
-            </label>
-          </div>
+          <Field label="Headline">
+            <Input
+              value={draft.cta.headline}
+              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
+            />
+          </Field>
+          <Field label="Body">
+            <Textarea
+              rows={3}
+              value={draft.cta.body}
+              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
+            />
+          </Field>
+        </Card>*/}
         </div>
+
+        <aside className="min-w-0">
+          <div className="sticky top-24 space-y-4">
+            <Card
+              id="cta"
+              title="Closing CTA"
+              icon={Megaphone}
+              description="The final invitation at the bottom of the page."
+            >
+              <Field label="Eyebrow">
+                <Input
+                  value={draft.cta.eyebrow}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
+                />
+              </Field>
+              <Field label="Headline">
+                <Input
+                  value={draft.cta.headline}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
+                />
+              </Field>
+              <Field label="Body">
+                <Textarea
+                  rows={3}
+                  value={draft.cta.body}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
+                />
+              </Field>
+              <Field label="Button label">
+                <Input
+                  value={draft.cta.buttonLabel}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
+                />
+              </Field>
+            </Card>
+            <Card id="hero" title="Hero image" icon={ImageIcon} description="Image and accessibility settings.">
+              <Field label="Hero background image">
+                <ManagedImageUpload
+                  value={draft.hero.image}
+                  onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
+                  recommendedRatio="16:9 or wider"
+                  altText={draft.hero.imageAlt}
+                />
+              </Field>
+              <Field label="Hero image alt text">
+                <Input
+                  value={draft.hero.imageAlt ?? ""}
+                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
+                />
+              </Field>
+            </Card>
+            <Card title="Hero copy" icon={Sparkles} description="Words shown over the hero image.">
+              <Field label="Eyebrow">
+                <Input
+                  value={draft.hero.eyebrow}
+                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
+                />
+              </Field>
+              <Field label="Headline">
+                <Textarea
+                  rows={2}
+                  value={draft.hero.headline}
+                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
+                />
+              </Field>
+              <Field label="Subhead">
+                <Textarea
+                  rows={3}
+                  value={draft.hero.subhead}
+                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
+                />
+              </Field>
+            </Card>
+            <Card
+              title="What is not included"
+              icon={CircleAlert}
+              description="One item per line, shown beneath the adventure collection."
+            >
+              <Field label="Not included">
+                <Textarea
+                  rows={5}
+                  value={(draft.cta.notIncluded ?? []).join("\n")}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      cta: {
+                        ...draft.cta,
+                        notIncluded: e.target.value
+                          .split("\n")
+                          .map((item) => item.trim())
+                          .filter(Boolean),
+                      },
+                    })
+                  }
+                />
+              </Field>
+            </Card>
+            <SignatureOrder signatures={draft.signatures} />
+          </div>
+        </aside>
       </div>
 
-      {/* Card grid */}
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="border border-border bg-background overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-4 space-y-2">
-                <Skeleton className="h-5 w-2/3" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="border border-border bg-background p-16 text-center text-foreground/60">
-          No {label.toLowerCase()} match your filters.
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
-          {filtered.map((row: any) => {
-            const img = imageField ? row[imageField] : null;
-            const title = row.name ?? row.title ?? row.question ?? "Untitled";
-            const sub = subtitleFn(row);
-            const featured = (row.sort_order ?? 0) > 0;
-            const href = viewPath(row);
-            return (
-              <article
-                key={row.id}
-                className="group border border-border bg-background overflow-hidden flex flex-col transition-shadow hover:shadow-lg"
-              >
-                <div className="relative aspect-[16/10] bg-cream overflow-hidden">
-                  {img ? (
-                    <img
-                      src={img}
-                      alt={title}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-foreground/30">
-                      <ImageIcon className="w-10 h-10" />
-                    </div>
-                  )}
-                  {featured && (
-                    <Badge className="absolute top-3 right-3 bg-gold text-gold-foreground hover:bg-gold border-0 shadow">
-                      <Star className="w-3 h-3 mr-1 fill-current" /> Featured
-                    </Badge>
-                  )}
-                  {!row.published && (
-                    <Badge variant="secondary" className="absolute top-3 left-3">
-                      Draft
-                    </Badge>
-                  )}
-                </div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <h3 className="font-serif text-lg leading-tight">{title}</h3>
-                  {sub && (
-                    <p className="text-sm text-foreground/60 mt-1 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 opacity-60" /> {sub}
-                    </p>
-                  )}
-                  <div className="mt-4 pt-3 border-t border-border flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => startEdit(row)}>
-                      <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-                    </Button>
-                    {href ? (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={href} target="_blank" rel="noreferrer">
-                          <Eye className="w-3.5 h-3.5 mr-1" /> View
-                        </a>
-                      </Button>
-                    ) : null}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="ml-auto text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
-                      onClick={() => setDeleteTarget(row)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                    </Button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {total > PAGE_SIZE && (
-        <div className="flex items-center justify-between mt-6">
-          <p className="text-sm text-foreground/60">
-            Page {page} of {totalPages} · {total} total
-            {isFetching && <Loader2 className="w-3 h-3 inline ml-2 animate-spin" />}
-          </p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
-              <ChevronLeft className="w-4 h-4" /> Prev
-            </Button>
-            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
-              Next <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Create / Edit dialog */}
-      {table !== "destinations" && (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-7xl gap-0 overflow-hidden p-0 sm:w-[calc(100%-3rem)]">
-            <DialogHeader className="shrink-0 border-b border-border bg-cream/60 px-5 py-4 pr-12 sm:px-7 sm:py-5">
-              <DialogTitle className="font-serif text-2xl">
-                {editing?.id ? `Edit ${singular}` : `New ${singular}`}
-              </DialogTitle>
-              <DialogDescription>
-                {editing?.id
-                  ? `Update the details for this ${singular.toLowerCase()}.`
-                  : `Create a new ${singular.toLowerCase()} to showcase on your platform.`}
-              </DialogDescription>
-            </DialogHeader>
-
-            {editing && layout && (
-              <form onSubmit={save} className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-cream/20 p-4 sm:p-6">
-                  {layout.rows.map((row, ri) => (
-                    <div key={ri} className={row.length > 1 ? "grid gap-4 lg:grid-cols-2" : ""}>
-                      {row.map((f) => (
-                        <FieldInput
-                          key={f.name}
-                          field={f}
-                          value={editing[f.name]}
-                          onChange={(v) => setEditing({ ...editing, [f.name]: v })}
-                          autosaveKey={`cms:rt:${table}:${editing.id || "new"}:${f.name}`}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-
-                <DialogFooter className="shrink-0 border-t border-border bg-background px-4 py-3 sm:px-6 sm:py-4 gap-2">
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={mUpsert.isPending}
-                    className="bg-gold text-gold-foreground hover:bg-gold/90"
-                  >
-                    {mUpsert.isPending ? "Saving…" : editing?.id ? `Update ${singular}` : `Create ${singular}`}
-                  </Button>
-                </DialogFooter>
-              </form>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Delete confirmation */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {singular.toLowerCase()}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You're about to permanently delete{" "}
-              <span className="font-medium text-foreground">
-                {deleteTarget?.name ?? deleteTarget?.title ?? deleteTarget?.question ?? "this item"}
-              </span>
-              . This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteTarget && mDel.mutate(deleteTarget.id)}
-              disabled={mDel.isPending}
-            >
-              {mDel.isPending ? "Deleting…" : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Sticky save footer */}
+      <div className="sticky bottom-0 mt-10 -mx-4 md:-mx-8 lg:-mx-10 px-4 md:px-8 lg:px-10 py-4 bg-background/95 backdrop-blur border-t border-border flex justify-end shadow-[0_-10px_30px_rgba(0,0,0,0.04)]">
+        <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
+          {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+          Save changes
+        </Button>
+      </div>
     </div>
   );
 }
 
-function FieldInput({
-  field,
-  value,
-  onChange,
-  autosaveKey,
+function Card({
+  id,
+  title,
+  icon: Icon,
+  description,
+  children,
 }: {
-  field: FieldDef;
-  value: any;
-  onChange: (v: any) => void;
-  autosaveKey?: string;
+  id?: string;
+  title: string;
+  icon: any;
+  description?: string;
+  children: React.ReactNode;
 }) {
-  if (field.type === "bool") {
-    return (
-      <div className="flex items-center gap-2 pt-6">
-        <Checkbox checked={!!value} onCheckedChange={(v) => onChange(!!v)} id={field.name} />
-        <Label htmlFor={field.name} className="cursor-pointer">
-          {field.label}
-        </Label>
+  return (
+    <section id={id} className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm">
+      <header className="flex items-start gap-3 px-6 py-4 border-b border-border bg-cream/50">
+        <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4" />
+        </div>
+        <div>
+          <h2 className="font-serif text-xl leading-tight">{title}</h2>
+          {description && <p className="text-xs text-foreground/55 mt-0.5">{description}</p>}
+        </div>
+      </header>
+      <div className="p-6 space-y-4">{children}</div>
+    </section>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function SignatureItineraries({
+  draft,
+  setDraft,
+}: {
+  draft: AdventuresPage;
+  setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
+}) {
+  return (
+    <ListCard
+      id="signatures"
+      title="Signature itineraries"
+      icon={MapIcon}
+      description="Featured adventures, in their display order."
+      items={draft.signatures}
+      onChange={(signatures) => setDraft({ ...draft, signatures })}
+      empty={{
+        slug: "",
+        name: "",
+        region: "",
+        terrain: "",
+        nights: "",
+        difficulty: "Moderate",
+        image: "",
+        imageAlt: "",
+        focalX: 50,
+        focalY: 50,
+        description: "",
+        highlights: [],
+      }}
+      previewLabel={(s) => s.name || "New itinerary"}
+      previewImage={(s) => s.image}
+      render={(s, set) => (
+        <>
+          <Field label="Name">
+            <Input
+              value={s.name}
+              onChange={(e) => set({ ...s, name: e.target.value, slug: s.slug || slugify(e.target.value) })}
+            />
+          </Field>
+          <Field label="Slug">
+            <Input value={s.slug} onChange={(e) => set({ ...s, slug: e.target.value })} />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Region">
+              <Input value={s.region} onChange={(e) => set({ ...s, region: e.target.value })} />
+            </Field>
+            <Field label="Terrain">
+              <Input value={s.terrain} onChange={(e) => set({ ...s, terrain: e.target.value })} />
+            </Field>
+          </div>
+          <Field label="Nights">
+            <Input value={s.nights} onChange={(e) => set({ ...s, nights: e.target.value })} />
+          </Field>
+          <Field label="Description">
+            <Textarea rows={3} value={s.description} onChange={(e) => set({ ...s, description: e.target.value })} />
+          </Field>
+          <Field label="Hero image">
+            <ManagedImageUpload
+              value={s.image}
+              onChange={(url) => set({ ...s, image: url })}
+              recommendedRatio="4:3 card, 16:9 hero"
+              altText={s.imageAlt}
+              focalX={s.focalX ?? 50}
+              focalY={s.focalY ?? 50}
+              onFocalChange={(focalX, focalY) => set({ ...s, focalX, focalY })}
+            />
+          </Field>
+          <Field label="Image alt text">
+            <Input value={s.imageAlt ?? ""} onChange={(e) => set({ ...s, imageAlt: e.target.value })} />
+          </Field>
+          <Field label="Highlights (one per line)">
+            <Textarea
+              rows={4}
+              value={(s.highlights ?? []).join("\n")}
+              onChange={(e) =>
+                set({
+                  ...s,
+                  highlights: e.target.value
+                    .split("\n")
+                    .map((x) => x.trim())
+                    .filter(Boolean),
+                })
+              }
+            />
+          </Field>
+        </>
+      )}
+    />
+  );
+}
+
+function SignatureOrder({ signatures }: { signatures: AdventuresSignature[] }) {
+  return (
+    <section className="border border-border bg-background shadow-sm">
+      <header className="border-b border-border bg-cream/50 px-4 py-3">
+        <h2 className="font-serif text-xl">Signature order</h2>
+        <p className="mt-0.5 text-xs text-foreground/55">Use the controls in the main list to reorder.</p>
+      </header>
+      <ol className="divide-y divide-border">
+        {signatures.map((item, index) => (
+          <li key={`${item.slug}-${index}`} className="flex items-center gap-3 px-4 py-3">
+            <span className="w-5 text-xs text-foreground/45">{index + 1}</span>
+            <span className="h-9 w-12 overflow-hidden bg-muted">
+              {item.image && <img src={item.image} alt="" className="h-full w-full object-cover" />}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-sm">{item.name || "New itinerary"}</span>
+          </li>
+        ))}
+        {signatures.length === 0 && (
+          <li className="px-4 py-5 text-sm text-foreground/55">No signature itineraries yet.</li>
+        )}
+      </ol>
+    </section>
+  );
+}
+
+function ListCard<T extends object>({
+  id,
+  title,
+  icon: Icon,
+  description,
+  items,
+  onChange,
+  empty,
+  render,
+  previewLabel,
+  previewImage,
+}: {
+  id?: string;
+  title: string;
+  icon: any;
+  description?: string;
+  items: T[];
+  onChange: (items: T[]) => void;
+  empty: T;
+  render: (item: T, set: (next: T) => void) => React.ReactNode;
+  previewLabel?: (item: T) => string;
+  previewImage?: (item: T) => string | undefined;
+}) {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const setAt = (idx: number, next: T) => {
+    const copy = items.slice();
+    copy[idx] = next;
+    onChange(copy);
+  };
+  const moveTo = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= items.length) return;
+    const copy = items.slice();
+    const [moved] = copy.splice(from, 1);
+    copy.splice(to, 0, moved);
+    onChange(copy);
+    setOpenIdx(to);
+  };
+  const removeAt = (idx: number) => {
+    onChange(items.filter((_, i) => i !== idx));
+    if (openIdx === idx) setOpenIdx(null);
+  };
+  const addNew = () => {
+    onChange([...items, structuredClone(empty)]);
+    setOpenIdx(items.length);
+  };
+
+  return (
+    <section id={id} className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm">
+      <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
+        <div className="flex items-start gap-3">
+          <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
+            <Icon className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="font-serif text-xl leading-tight">
+              {title}
+              <span className="ml-2 text-xs text-foreground/50 font-sans">({items.length})</span>
+            </h2>
+            {description && <p className="text-xs text-foreground/55 mt-0.5">{description}</p>}
+          </div>
+        </div>
+        <Button
+          onClick={addNew}
+          size="sm"
+          variant="outline"
+          className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
+        >
+          <Plus className="w-3.5 h-3.5 mr-1" /> Add
+        </Button>
+      </header>
+
+      <div className="p-4 space-y-2">
+        {items.length === 0 && (
+          <p className="text-sm text-foreground/60 italic p-4 text-center border border-dashed border-border rounded-md">
+            No items yet. Click <span className="font-medium">Add</span> to create one.
+          </p>
+        )}
+        {items.map((item, idx) => {
+          const isOpen = openIdx === idx;
+          const label = previewLabel?.(item) ?? `Item ${idx + 1}`;
+          const img = previewImage?.(item);
+          return (
+            <div
+              key={idx}
+              draggable
+              onDragStart={() => setDragIdx(idx)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (dragIdx !== null) moveTo(dragIdx, idx);
+                setDragIdx(null);
+              }}
+              className="border border-border bg-background overflow-hidden shadow-sm"
+            >
+              <div
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-cream/50 transition-colors"
+                onClick={() => setOpenIdx(isOpen ? null : idx)}
+              >
+                <span className="cursor-grab text-foreground/35 hover:text-foreground/60" title="Drag to reorder">
+                  <GripVertical className="w-4 h-4" />
+                </span>
+                <div className="h-10 w-14 rounded bg-cream overflow-hidden flex items-center justify-center shrink-0">
+                  {img ? (
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="w-4 h-4 text-foreground/30" />
+                  )}
+                </div>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/40 w-6">#{idx + 1}</span>
+                <span className="font-medium text-sm flex-1 truncate">{label}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveTo(idx, idx - 1);
+                  }}
+                  disabled={idx === 0}
+                  className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                  aria-label="Move up"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveTo(idx, idx + 1);
+                  }}
+                  disabled={idx === items.length - 1}
+                  className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                  aria-label="Move down"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeAt(idx);
+                  }}
+                  className="text-foreground/50 hover:text-destructive p-1.5"
+                  aria-label="Delete"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <span className="text-xs text-foreground/50">{isOpen ? "Hide" : "Edit"}</span>
+              </div>
+              {isOpen && (
+                <div className="px-4 pb-5 pt-2 space-y-4 border-t border-border bg-cream/30">
+                  {render(item, (next) => setAt(idx, next))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-    );
-  }
-  const iconEl =
-    field.icon === "pin" ? (
-      <MapPin className="w-4 h-4" />
-    ) : field.icon === "hash" ? (
-      <span className="text-xs">#</span>
-    ) : null;
+    </section>
+  );
+}
 
-  if (field.type === "image") {
-    return <ImageField label={field.label} value={value ?? ""} onChange={onChange} />;
-  }
+function ImageUpload({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const upload = useServerFn(adminUploadImage);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [drag, setDrag] = useState(false);
 
-  if (field.type === "images") {
-    const arr = Array.isArray(value)
-      ? (value as string[])
-      : typeof value === "string" && value
-        ? (value as string)
-            .split("\n")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-    return <MultiImageUploader label={field.label} value={arr} onChange={onChange} />;
-  }
-
-  if (field.type === "rich") {
-    return (
-      <div>
-        <Label className="mb-1.5 block">{field.label}</Label>
-        <RichTextEditor
-          value={value ?? ""}
-          onChange={onChange}
-          autosaveKey={autosaveKey}
-          placeholder={field.placeholder}
-        />
-      </div>
-    );
+  async function pick(file: File | undefined) {
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp|gif|avif)/i.test(file.type)) {
+      toast.error("Choose a PNG, JPG, WEBP, GIF, or AVIF image.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be smaller than 8MB");
+      return;
+    }
+    setBusy(true);
+    try {
+      const buf = new Uint8Array(await file.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+      const res = await upload({
+        data: {
+          filename: file.name,
+          contentType: file.type || "image/jpeg",
+          base64: btoa(binary),
+        },
+      });
+      onChange(res.url);
+      toast.success("Image uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
   }
 
   return (
-    <div>
-      <Label className="mb-1.5 block">{field.label}</Label>
-      {field.type === "textarea" ? (
-        <Textarea
-          rows={4}
-          value={value ?? ""}
-          placeholder={field.placeholder}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : field.type === "array" ? (
-        <Textarea
-          rows={4}
-          value={Array.isArray(value) ? (value as string[]).join("\n") : (value ?? "")}
-          placeholder={field.placeholder ?? "One per line"}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : field.type === "number" ? (
-        <div className="relative">
-          {iconEl && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40">{iconEl}</span>}
-          <Input
-            type="number"
-            value={value ?? 0}
-            placeholder={field.placeholder}
-            onChange={(e) => onChange(e.target.value)}
-            className={iconEl ? "pl-9" : ""}
-          />
+    <div className="space-y-3">
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+        className="hidden"
+        onChange={(e) => pick(e.target.files?.[0])}
+      />
+      {value ? (
+        <div className="border-2 border-border rounded-md overflow-hidden bg-background shadow-sm">
+          <div className="bg-cream">
+            <img src={value} alt="" className="w-full max-h-72 object-contain mx-auto" />
+          </div>
+          <div className="flex flex-wrap items-center gap-2 p-3 border-t border-border bg-cream/40">
+            <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}>
+              {busy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1" />}
+              Replace
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => onChange("")}
+              className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <X className="w-3.5 h-3.5 mr-1" /> Remove
+            </Button>
+            <span className="ml-auto text-[11px] text-foreground/50 truncate max-w-[60%]" title={value}>
+              {value.split("/").pop()}
+            </span>
+          </div>
         </div>
       ) : (
-        <div className="relative">
-          {iconEl && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40">{iconEl}</span>}
-          <Input
-            value={value ?? ""}
-            placeholder={field.placeholder}
-            onChange={(e) => onChange(e.target.value)}
-            className={iconEl ? "pl-9" : ""}
-          />
-        </div>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDrag(true);
+          }}
+          onDragLeave={() => setDrag(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDrag(false);
+            pick(e.dataTransfer.files?.[0]);
+          }}
+          disabled={busy}
+          className={`w-full flex flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed px-6 py-12 text-center transition-colors ${
+            drag ? "border-gold bg-gold/5" : "border-border bg-cream/40 hover:border-gold hover:bg-gold/5"
+          }`}
+        >
+          <div className="h-14 w-14 rounded-full bg-gold/10 text-gold flex items-center justify-center">
+            {busy ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+          </div>
+          <div>
+            <p className="text-sm font-medium">Drop an image here or click to upload</p>
+            <p className="text-[11px] text-foreground/50 mt-1">PNG, JPG, WEBP, GIF, AVIF · up to 8MB</p>
+          </div>
+        </button>
       )}
+      <Input
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="…or paste an image URL"
+        className="text-xs"
+      />
     </div>
   );
 }
 
-function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return <ImageUploader label={label} value={value} onChange={onChange} />;
+function humanSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
+
+function ManagedImageUpload({
+  value,
+  onChange,
+  recommendedRatio,
+  altText,
+  focalX = 50,
+  focalY = 50,
+  onFocalChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  recommendedRatio: string;
+  altText?: string;
+  focalX?: number;
+  focalY?: number;
+  onFocalChange?: (x: number, y: number) => void;
+}) {
+  const upload = useServerFn(adminUploadImage);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [drag, setDrag] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+  const objectPosition = `${focalX}% ${focalY}%`;
+  const altComplete = Boolean(altText?.trim());
+
+  async function pick(file: File | undefined) {
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp|gif|avif)/i.test(file.type)) {
+      toast.error("Choose a PNG, JPG, WEBP, GIF, or AVIF image.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be smaller than 8MB");
+      return;
+    }
+    setBusy(true);
+    setFileMeta({ name: file.name, size: file.size });
+    try {
+      const buf = new Uint8Array(await file.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+      const res = await upload({
+        data: {
+          filename: file.name,
+          contentType: file.type || "image/jpeg",
+          base64: btoa(binary),
+        },
+      });
+      onChange(res.url);
+      toast.success("Image uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="grid gap-3 border border-border bg-background p-3 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+        className="hidden"
+        onChange={(e) => pick(e.target.files?.[0])}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3 lg:col-span-2">
+        <div>
+          <p className="text-xs font-medium text-foreground">Image requirements</p>
+          <p className="text-[11px] text-foreground/55">Recommended ratio: {recommendedRatio}</p>
+        </div>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] ${
+            altComplete ? "bg-forest/10 text-forest" : "bg-terracotta/10 text-terracotta"
+          }`}
+        >
+          {altComplete ? <CheckCircle2 className="w-3.5 h-3.5" /> : <CircleAlert className="w-3.5 h-3.5" />}
+          {altComplete ? "Alt text complete" : "Alt text needed"}
+        </span>
+      </div>
+
+      {value ? (
+        <div className="border border-border bg-background lg:col-start-1">
+          <div className="bg-muted">
+            <img
+              src={value}
+              alt=""
+              className="mx-auto max-h-72 w-full object-contain"
+              onLoad={(e) =>
+                setDimensions({
+                  width: e.currentTarget.naturalWidth,
+                  height: e.currentTarget.naturalHeight,
+                })
+              }
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 p-3">
+            <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}>
+              {busy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1" />}
+              Replace
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setLibraryOpen(true)} disabled={busy}>
+              <FolderOpen className="w-3.5 h-3.5 mr-1" /> Library
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setFileMeta(null);
+                setDimensions(null);
+                onChange("");
+              }}
+              className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <X className="w-3.5 h-3.5 mr-1" /> Remove
+            </Button>
+            <span className="ml-auto max-w-[60%] truncate text-[11px] text-foreground/50" title={value}>
+              {fileMeta ? `${fileMeta.name} - ${humanSize(fileMeta.size)}` : value.split("/").pop()}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDrag(true);
+          }}
+          onDragLeave={() => setDrag(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDrag(false);
+            pick(e.dataTransfer.files?.[0]);
+          }}
+          disabled={busy}
+          className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed px-6 py-10 text-center transition-colors lg:col-start-1 ${
+            drag ? "border-gold bg-gold/5" : "border-border bg-muted/30 hover:border-gold hover:bg-gold/5"
+          }`}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground/70">
+            {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+          </div>
+          <div>
+            <p className="text-sm font-medium">Drop an image here or click to upload</p>
+            <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF - up to 8MB</p>
+          </div>
+        </button>
+      )}
+
+      <div className="hidden grid gap-3 md:grid-cols-3 lg:col-start-2 lg:row-start-2 lg:grid-cols-1">
+        <MetaTile label="Dimensions" value={dimensions ? `${dimensions.width} x ${dimensions.height}px` : "Unknown"} />
+        <MetaTile label="File size" value={fileMeta ? humanSize(fileMeta.size) : "From library/URL"} />
+        <MetaTile label="Focal point" value={`${Math.round(focalX)}% / ${Math.round(focalY)}%`} />
+      </div>
+
+      {value && (
+        <div className="hidden grid gap-4 lg:col-start-2 lg:row-start-3">
+          <div className="space-y-3">
+            <FocalSlider
+              label="Horizontal focal point"
+              value={focalX}
+              onChange={(next) => onFocalChange?.(next, focalY)}
+            />
+            <FocalSlider
+              label="Vertical focal point"
+              value={focalY}
+              onChange={(next) => onFocalChange?.(focalX, next)}
+            />
+          </div>
+          <div>
+            <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-foreground/55">Crop previews</p>
+            <div className="grid grid-cols-2 gap-2">
+              <CropPreview label="16:9" ratio="aspect-video" src={value} objectPosition={objectPosition} />
+              <CropPreview label="4:3" ratio="aspect-[4/3]" src={value} objectPosition={objectPosition} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setLibraryOpen(true)}
+        className="w-full lg:col-start-1"
+      >
+        <FolderOpen className="w-3.5 h-3.5 mr-1" /> Choose from media library
+      </Button>
+      <Input
+        value={value ?? ""}
+        onChange={(e) => {
+          setFileMeta(null);
+          setDimensions(null);
+          onChange(e.target.value);
+        }}
+        placeholder="...or paste an image URL"
+        className="text-xs lg:col-start-1"
+      />
+
+      <MediaLibraryPicker
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        onSelect={(urls) => {
+          const [url] = urls;
+          if (!url) return;
+          setFileMeta(null);
+          setDimensions(null);
+          onChange(url);
+        }}
+      />
+    </div>
+  );
+}
+
+function MetaTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border border-border bg-muted/25 px-3 py-2">
+      <p className="text-[10px] uppercase tracking-[0.18em] text-foreground/45">{label}</p>
+      <p className="mt-1 text-xs text-foreground/75">{value}</p>
+    </div>
+  );
+}
+
+function FocalSlider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className="text-xs font-medium text-foreground/75">{label}</p>
+        <span className="text-[11px] tabular-nums text-foreground/50">{Math.round(value)}%</span>
+      </div>
+      <Slider value={[value]} min={0} max={100} step={1} onValueChange={([next]) => onChange(next ?? value)} />
+    </div>
+  );
+}
+
+function CropPreview({
+  label,
+  ratio,
+  src,
+  objectPosition,
+}: {
+  label: string;
+  ratio: string;
+  src: string;
+  objectPosition: string;
+}) {
+  return (
+    <div>
+      <div className={`${ratio} overflow-hidden border border-border bg-muted`}>
+        <img src={src} alt="" className="h-full w-full object-cover" style={{ objectPosition }} />
+      </div>
+      <p className="mt-1 text-[10px] text-foreground/50">{label}</p>
+    </div>
+  );
+}
+
+function PagePreview({ draft }: { draft: AdventuresPage }) {
+  const heroPosition = `${draft.hero.focalX ?? 50}% ${draft.hero.focalY ?? 50}%`;
+  return (
+    <section className="border border-border bg-background shadow-sm">
+      <header className="border-b border-border px-4 py-3">
+        <h2 className="font-sans text-sm font-semibold text-foreground">Preview</h2>
+      </header>
+      <div className="p-4 space-y-4">
+        <div className="overflow-hidden border border-border bg-forest">
+          <div className="relative aspect-video">
+            {draft.hero.image ? (
+              <img
+                src={draft.hero.image}
+                alt=""
+                className="h-full w-full object-cover opacity-75"
+                style={{ objectPosition: heroPosition }}
+              />
+            ) : (
+              <div className="h-full w-full bg-muted" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-3 text-background">
+              <p className="text-[9px] uppercase tracking-[0.22em] text-gold">{draft.hero.eyebrow || "Adventures"}</p>
+              <p className="mt-1 line-clamp-2 font-serif text-lg leading-tight">
+                {draft.hero.headline || "Untitled hero"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-foreground/50">Signature order</p>
+          <ol className="space-y-2">
+            {draft.signatures.slice(0, 5).map((s, idx) => (
+              <li key={`${s.slug}-${idx}`} className="flex items-center gap-2 text-sm">
+                <span className="w-5 text-[11px] text-foreground/45">{idx + 1}</span>
+                <span className="h-8 w-10 overflow-hidden bg-muted">
+                  {s.image && (
+                    <img
+                      src={s.image}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: `${s.focalX ?? 50}% ${s.focalY ?? 50}%` }}
+                    />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{s.name || "New itinerary"}</span>
+              </li>
+            ))}
+            {draft.signatures.length === 0 && (
+              <li className="text-sm text-foreground/55">No signature itineraries yet.</li>
+            )}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Silence type imports
+void ImageUpload;
+void (null as unknown as AdventuresSignature);
