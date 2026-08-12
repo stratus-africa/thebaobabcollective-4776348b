@@ -186,7 +186,7 @@ function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
         src={heroSrc}
         alt={hero.imageAlt || "Sunrise over the African bush — a guide leads a walking safari toward distant baobabs"}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ objectPosition: `${hero.focalX ?? 50}% ${hero.focalY ?? 50}%` }}
+        style={{ objectPosition: "center" }}
       />
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/20" />
@@ -319,7 +319,7 @@ function SignaturesSection({
                       alt={`${a.name} — ${a.region}`}
                       loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      style={{ objectPosition: `${a.focalX ?? 50}% ${a.focalY ?? 50}%` }}
+                      style={{ objectPosition: "center" }}
                     />
                   </Link>
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] tracking-[0.2em] uppercase text-foreground/60 mb-3">
