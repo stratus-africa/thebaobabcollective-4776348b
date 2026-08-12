@@ -14,13 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   Plus,
@@ -144,10 +138,7 @@ function JournalAdmin() {
         !(!a.published && a.scheduled_at && new Date(a.scheduled_at).getTime() > Date.now())
       )
         return false;
-      if (
-        filter === "draft" &&
-        (a.published || (a.scheduled_at && new Date(a.scheduled_at).getTime() > Date.now()))
-      )
+      if (filter === "draft" && (a.published || (a.scheduled_at && new Date(a.scheduled_at).getTime() > Date.now())))
         return false;
       if (!needle) return true;
       return (
@@ -210,10 +201,11 @@ function JournalAdmin() {
       slug: editing.slug.trim() || slugify(editing.title),
       content: Array.isArray(editing.content)
         ? editing.content
-        : String(editing.content || "").split("\n").map((s) => s.trim()).filter(Boolean),
-      scheduled_at: editing.scheduled_at
-        ? new Date(editing.scheduled_at).toISOString()
-        : null,
+        : String(editing.content || "")
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean),
+      scheduled_at: editing.scheduled_at ? new Date(editing.scheduled_at).toISOString() : null,
     };
     mUpsert.mutate(row);
   };
@@ -222,7 +214,7 @@ function JournalAdmin() {
     mUpsert.mutate({
       ...a,
       published: !a.published,
-      scheduled_at: !a.published ? null : a.scheduled_at ?? null,
+      scheduled_at: !a.published ? null : (a.scheduled_at ?? null),
     });
   };
 
@@ -231,9 +223,7 @@ function JournalAdmin() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl text-foreground">Journal</h1>
-          <p className="text-sm text-foreground/60">
-            Create, schedule and publish stories from the field.
-          </p>
+          <p className="text-sm text-foreground/60">Create, schedule and publish stories from the field.</p>
         </div>
         <Button onClick={startNew} className="bg-gold text-gold-foreground hover:bg-gold/90">
           <Plus className="w-4 h-4 mr-1.5" /> New Article
@@ -297,11 +287,7 @@ function JournalAdmin() {
                   <td className="p-3">
                     <div className="flex gap-3 items-start">
                       {a.image ? (
-                        <img
-                          src={a.image}
-                          alt=""
-                          className="w-14 h-14 rounded-md object-cover border border-border"
-                        />
+                        <img src={a.image} alt="" className="w-14 h-14 rounded-md object-cover border border-border" />
                       ) : (
                         <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center text-foreground/40">
                           <FileText className="w-5 h-5" />
@@ -323,8 +309,8 @@ function JournalAdmin() {
                     {a.scheduled_at
                       ? new Date(a.scheduled_at).toLocaleString()
                       : a.published_at
-                      ? `Published ${new Date(a.published_at).toLocaleDateString()}`
-                      : "—"}
+                        ? `Published ${new Date(a.published_at).toLocaleDateString()}`
+                        : "—"}
                   </td>
                   <td className="p-3 text-right whitespace-nowrap">
                     <button
@@ -354,155 +340,140 @@ function JournalAdmin() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-2xl">
-              {editing?.id ? "Edit article" : "New article"}
-            </DialogTitle>
-            <DialogDescription>
-              Save as draft, schedule for later, or publish immediately.
-            </DialogDescription>
+        <DialogContent className="max-w-5xl gap-0 overflow-hidden p-0 sm:w-[calc(100%-3rem)]">
+          <DialogHeader className="shrink-0 border-b border-border bg-cream/60 px-5 py-4 pr-12 sm:px-7 sm:py-5">
+            <DialogTitle className="font-serif text-2xl">{editing?.id ? "Edit article" : "New article"}</DialogTitle>
+            <DialogDescription>Save as draft, schedule for later, or publish immediately.</DialogDescription>
           </DialogHeader>
 
           {editing && (
-            <form onSubmit={save} className="space-y-5">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <Label>Title</Label>
-                  <Input
-                    value={editing.title}
-                    onChange={(e) => {
-                      const t = e.target.value;
-                      setEditing((p) =>
-                        p ? { ...p, title: t, slug: p.slug || slugify(t) } : p,
-                      );
-                    }}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label>Slug</Label>
-                  <Input
-                    value={editing.slug}
-                    onChange={(e) => onChange("slug", slugify(e.target.value))}
-                    placeholder="auto-generated-from-title"
-                  />
-                </div>
-                <div>
-                  <Label>Category</Label>
-                  <Input
-                    value={editing.category ?? ""}
-                    onChange={(e) => onChange("category", e.target.value)}
-                    placeholder="Conservation, Field Notes…"
-                  />
-                </div>
-                <div>
-                  <Label>Author</Label>
-                  <Input
-                    value={editing.author ?? ""}
-                    onChange={(e) => onChange("author", e.target.value)}
-                    placeholder="By line"
-                  />
-                </div>
-                <div>
-                  <Label>Read time</Label>
-                  <Input
-                    value={editing.read_time ?? ""}
-                    onChange={(e) => onChange("read_time", e.target.value)}
-                    placeholder="5 min read"
-                  />
-                </div>
-                <div>
-                  <Label>Display date</Label>
-                  <Input
-                    value={editing.date ?? ""}
-                    onChange={(e) => onChange("date", e.target.value)}
-                    placeholder="June 2026"
-                  />
-                </div>
-                <div>
-                  <Label>Sort order</Label>
-                  <Input
-                    type="number"
-                    value={editing.sort_order ?? 0}
-                    onChange={(e) => onChange("sort_order", Number(e.target.value))}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>Hero image</Label>
-                <ImageUploader
-                  value={editing.image ?? ""}
-                  onChange={(v: string) => onChange("image", v)}
-                  uploadFn={upload as any}
-                  maxSizeMB={5}
-                />
-              </div>
-
-              <div>
-                <Label>Excerpt</Label>
-                <Textarea
-                  rows={2}
-                  value={editing.excerpt ?? ""}
-                  onChange={(e) => onChange("excerpt", e.target.value)}
-                  placeholder="One-line summary shown on the journal index"
-                />
-              </div>
-
-              <div>
-                <Label>Content (one paragraph per line)</Label>
-                <Textarea
-                  rows={10}
-                  value={Array.isArray(editing.content) ? editing.content.join("\n") : editing.content ?? ""}
-                  onChange={(e) =>
-                    onChange(
-                      "content",
-                      e.target.value.split("\n").map((s) => s) as any,
-                    )
-                  }
-                />
-                <p className="text-xs text-foreground/50 mt-1">
-                  Each blank line starts a new paragraph in the article.
-                </p>
-              </div>
-
-              <div className="border border-border rounded-lg p-4 bg-cream/40 space-y-4">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div>
-                    <p className="font-medium text-foreground inline-flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-gold" /> Publishing
-                    </p>
-                    <p className="text-xs text-foreground/60">
-                      Toggle live, or set a future time to auto-publish.
-                    </p>
-                  </div>
-                  <label className="inline-flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={!!editing.published}
-                      onCheckedChange={(v) => onChange("published", !!v)}
+            <form onSubmit={save} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-cream/20 p-4 sm:p-6">
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <Label>Title</Label>
+                    <Input
+                      value={editing.title}
+                      onChange={(e) => {
+                        const t = e.target.value;
+                        setEditing((p) => (p ? { ...p, title: t, slug: p.slug || slugify(t) } : p));
+                      }}
+                      required
                     />
-                    <span className="text-sm">Published</span>
-                  </label>
+                  </div>
+                  <div>
+                    <Label>Slug</Label>
+                    <Input
+                      value={editing.slug}
+                      onChange={(e) => onChange("slug", slugify(e.target.value))}
+                      placeholder="auto-generated-from-title"
+                    />
+                  </div>
+                  <div>
+                    <Label>Category</Label>
+                    <Input
+                      value={editing.category ?? ""}
+                      onChange={(e) => onChange("category", e.target.value)}
+                      placeholder="Conservation, Field Notes…"
+                    />
+                  </div>
+                  <div>
+                    <Label>Author</Label>
+                    <Input
+                      value={editing.author ?? ""}
+                      onChange={(e) => onChange("author", e.target.value)}
+                      placeholder="By line"
+                    />
+                  </div>
+                  <div>
+                    <Label>Read time</Label>
+                    <Input
+                      value={editing.read_time ?? ""}
+                      onChange={(e) => onChange("read_time", e.target.value)}
+                      placeholder="5 min read"
+                    />
+                  </div>
+                  <div>
+                    <Label>Display date</Label>
+                    <Input
+                      value={editing.date ?? ""}
+                      onChange={(e) => onChange("date", e.target.value)}
+                      placeholder="June 2026"
+                    />
+                  </div>
+                  <div>
+                    <Label>Sort order</Label>
+                    <Input
+                      type="number"
+                      value={editing.sort_order ?? 0}
+                      onChange={(e) => onChange("sort_order", Number(e.target.value))}
+                    />
+                  </div>
                 </div>
+
                 <div>
-                  <Label className="inline-flex items-center gap-2">
-                    <CalendarClock className="w-4 h-4 text-gold" /> Schedule (optional)
-                  </Label>
-                  <Input
-                    type="datetime-local"
-                    value={toLocalInput(editing.scheduled_at)}
-                    onChange={(e) =>
-                      onChange("scheduled_at", e.target.value ? new Date(e.target.value).toISOString() : null)
-                    }
+                  <Label>Hero image</Label>
+                  <ImageUploader
+                    value={editing.image ?? ""}
+                    onChange={(v: string) => onChange("image", v)}
+                    uploadFn={upload as any}
+                    maxSizeMB={5}
+                  />
+                </div>
+
+                <div>
+                  <Label>Excerpt</Label>
+                  <Textarea
+                    rows={2}
+                    value={editing.excerpt ?? ""}
+                    onChange={(e) => onChange("excerpt", e.target.value)}
+                    placeholder="One-line summary shown on the journal index"
+                  />
+                </div>
+
+                <div>
+                  <Label>Content (one paragraph per line)</Label>
+                  <Textarea
+                    rows={10}
+                    value={Array.isArray(editing.content) ? editing.content.join("\n") : (editing.content ?? "")}
+                    onChange={(e) => onChange("content", e.target.value.split("\n").map((s) => s) as any)}
                   />
                   <p className="text-xs text-foreground/50 mt-1">
-                    When this time arrives, the article auto-publishes on the next view.
+                    Each blank line starts a new paragraph in the article.
                   </p>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
+                <div className="border border-border rounded-lg p-4 bg-cream/40 space-y-4">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <p className="font-medium text-foreground inline-flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-gold" /> Publishing
+                      </p>
+                      <p className="text-xs text-foreground/60">Toggle live, or set a future time to auto-publish.</p>
+                    </div>
+                    <label className="inline-flex items-center gap-2 cursor-pointer">
+                      <Checkbox checked={!!editing.published} onCheckedChange={(v) => onChange("published", !!v)} />
+                      <span className="text-sm">Published</span>
+                    </label>
+                  </div>
+                  <div>
+                    <Label className="inline-flex items-center gap-2">
+                      <CalendarClock className="w-4 h-4 text-gold" /> Schedule (optional)
+                    </Label>
+                    <Input
+                      type="datetime-local"
+                      value={toLocalInput(editing.scheduled_at)}
+                      onChange={(e) =>
+                        onChange("scheduled_at", e.target.value ? new Date(e.target.value).toISOString() : null)
+                      }
+                    />
+                    <p className="text-xs text-foreground/50 mt-1">
+                      When this time arrives, the article auto-publishes on the next view.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-3 border-t border-border bg-background px-4 py-3 sm:px-6 sm:py-4">
                 <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                   Cancel
                 </Button>
