@@ -10,11 +10,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,8 +33,20 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
-  Trash2, Plus, Pencil, Eye, Search, Star, MapPin, Image as ImageIcon,
-  Upload, X, RefreshCw, ChevronLeft, ChevronRight, Loader2,
+  Trash2,
+  Plus,
+  Pencil,
+  Eye,
+  Search,
+  Star,
+  MapPin,
+  Image as ImageIcon,
+  Upload,
+  X,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
@@ -86,7 +109,13 @@ const SUBTITLE: Record<string, (r: any) => string> = {
 };
 
 type FieldType = "text" | "textarea" | "rich" | "number" | "bool" | "array" | "image" | "images";
-type FieldDef = { name: string; label: string; type: FieldType; placeholder?: string; icon?: "pin" | "hash" };
+type FieldDef = {
+  name: string;
+  label: string;
+  type: FieldType;
+  placeholder?: string;
+  icon?: "pin" | "hash";
+};
 
 const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   destinations: {
@@ -100,7 +129,14 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
         { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
         { name: "best_season", label: "Best Season", type: "text", placeholder: "e.g. May – Oct" },
       ],
-      [{ name: "description", label: "Description", type: "rich", placeholder: "Describe this destination…" }],
+      [
+        {
+          name: "description",
+          label: "Description",
+          type: "rich",
+          placeholder: "Describe this destination…",
+        },
+      ],
       [{ name: "image", label: "Hero Image", type: "image" }],
       [{ name: "featured_trips", label: "Featured Trips (one per line)", type: "array" }],
       [
@@ -111,12 +147,32 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   },
   lodges: {
     rows: [
-      [{ name: "name", label: "Name", type: "text", placeholder: "e.g. Singita Sabi Sand", icon: "pin" }],
       [
-        { name: "location", label: "Location", type: "text", placeholder: "e.g. Sabi Sand, South Africa" },
+        {
+          name: "name",
+          label: "Name",
+          type: "text",
+          placeholder: "e.g. Singita Sabi Sand",
+          icon: "pin",
+        },
+      ],
+      [
+        {
+          name: "location",
+          label: "Location",
+          type: "text",
+          placeholder: "e.g. Sabi Sand, South Africa",
+        },
         { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
       ],
-      [{ name: "description", label: "Description", type: "rich", placeholder: "Describe this lodge…" }],
+      [
+        {
+          name: "description",
+          label: "Description",
+          type: "rich",
+          placeholder: "Describe this lodge…",
+        },
+      ],
       [{ name: "hero_image", label: "Hero Image", type: "image" }],
       [{ name: "gallery", label: "Gallery", type: "images" }],
       [{ name: "amenities", label: "Amenities (one per line)", type: "array" }],
@@ -129,13 +185,35 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   },
   itineraries: {
     rows: [
-      [{ name: "name", label: "Name", type: "text", placeholder: "e.g. Okavango Reverie", icon: "pin" }],
+      [
+        {
+          name: "name",
+          label: "Name",
+          type: "text",
+          placeholder: "e.g. Okavango Reverie",
+          icon: "pin",
+        },
+      ],
       [
         { name: "nights", label: "Nights", type: "text", placeholder: "e.g. 8 nights" },
         { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
       ],
-      [{ name: "category_id", label: "Category ID", type: "text", placeholder: "uuid of journey_categories row" }],
-      [{ name: "description", label: "Description", type: "rich", placeholder: "Describe this journey…" }],
+      [
+        {
+          name: "category_id",
+          label: "Category ID",
+          type: "text",
+          placeholder: "uuid of journey_categories row",
+        },
+      ],
+      [
+        {
+          name: "description",
+          label: "Description",
+          type: "rich",
+          placeholder: "Describe this journey…",
+        },
+      ],
       [{ name: "highlights", label: "Highlights (one per line)", type: "array" }],
       [{ name: "image", label: "Hero Image", type: "image" }],
       [{ name: "price_from_usd", label: "Price from (USD)", type: "number" }],
@@ -198,7 +276,14 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   faqs: {
     rows: [
       [{ name: "question", label: "Question", type: "text" }],
-      [{ name: "category", label: "Category", type: "text", placeholder: "planning | conservation | logistics" }],
+      [
+        {
+          name: "category",
+          label: "Category",
+          type: "text",
+          placeholder: "planning | conservation | logistics",
+        },
+      ],
       [{ name: "answer", label: "Answer", type: "rich" }],
       [
         { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
@@ -251,7 +336,11 @@ const SORT_OPTIONS: Record<string, { value: string; label: string }[]> = {
 const PAGE_SIZE = 12;
 
 function slugify(s: string) {
-  return s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return s
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 function fileToBase64(file: File): Promise<{ base64: string; contentType: string; filename: string }> {
@@ -302,8 +391,7 @@ function ContentAdmin() {
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["admin", table, { page, orderBy, orderDir }],
-    queryFn: () =>
-      list({ data: { table: table as any, page, pageSize: PAGE_SIZE, orderBy, orderDir } }),
+    queryFn: () => list({ data: { table: table as any, page, pageSize: PAGE_SIZE, orderBy, orderDir } }),
   });
   const rows = data?.rows ?? [];
   const total = data?.count ?? 0;
@@ -361,10 +449,7 @@ function ContentAdmin() {
     const blank: any = { id: "" };
     flatFields.forEach((f) => {
       blank[f.name] =
-        f.type === "bool" ? true :
-        f.type === "number" ? 0 :
-        f.type === "array" || f.type === "images" ? [] :
-        "";
+        f.type === "bool" ? true : f.type === "number" ? 0 : f.type === "array" || f.type === "images" ? [] : "";
     });
     setEditing(blank);
     setOpen(true);
@@ -383,12 +468,18 @@ function ContentAdmin() {
     flatFields.forEach((f) => {
       if (f.type === "number" && row[f.name] !== null && row[f.name] !== "") row[f.name] = Number(row[f.name]);
       if (f.type === "array" && typeof row[f.name] === "string") {
-        row[f.name] = (row[f.name] as string).split("\n").map((s) => s.trim()).filter(Boolean);
+        row[f.name] = (row[f.name] as string)
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
       }
       if (f.type === "images") {
         const raw = row[f.name];
         if (typeof raw === "string") {
-          row[f.name] = raw.split("\n").map((s) => s.trim()).filter(Boolean);
+          row[f.name] = raw
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean);
         } else if (!Array.isArray(raw)) {
           row[f.name] = [];
         }
@@ -400,21 +491,21 @@ function ContentAdmin() {
   return (
     <div>
       {/* Page header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3 sm:mb-6 sm:gap-4">
         <div>
           <h1 className="font-serif text-3xl">{label}</h1>
           <p className="text-sm text-foreground/60 mt-1">
             Manage your {label.toLowerCase()} catalog — create, edit, and publish.
           </p>
         </div>
-        <Button onClick={startCreate} className="bg-gold text-gold-foreground hover:bg-gold/90">
+        <Button onClick={startCreate} className="w-full bg-gold text-gold-foreground hover:bg-gold/90 sm:w-auto">
           <Plus className="w-4 h-4 mr-1" /> Add {singular}
         </Button>
       </div>
 
       {/* Filter bar */}
-      <div className="bg-background border border-border p-4 mb-6">
-        <div className="grid gap-3 md:grid-cols-[1fr_200px_200px_auto]">
+      <div className="mb-5 border border-border bg-background p-3 sm:mb-6 sm:p-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_200px_200px_auto]">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
             <Input
@@ -426,15 +517,21 @@ function ContentAdmin() {
           </div>
           {group ? (
             <Select value={groupFilter} onValueChange={setGroupFilter}>
-              <SelectTrigger><SelectValue placeholder={`All ${group.label}`} /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder={`All ${group.label}`} />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">All {group.label}</SelectItem>
                 {groupOptions.map((o) => (
-                  <SelectItem key={o} value={o}>{o}</SelectItem>
+                  <SelectItem key={o} value={o}>
+                    {o}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          ) : <div />}
+          ) : (
+            <div className="hidden xl:block" />
+          )}
           <Select
             value={`${orderBy}:${orderDir}`}
             onValueChange={(v) => {
@@ -444,7 +541,9 @@ function ContentAdmin() {
               setPage(1);
             }}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {sortOptions.map((s) => (
                 <span key={s.value}>
@@ -454,7 +553,7 @@ function ContentAdmin() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex items-center gap-5 px-1">
+          <div className="flex items-center gap-5 px-1 sm:col-span-2 xl:col-span-1">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <Checkbox checked={featuredOnly} onCheckedChange={(v) => setFeaturedOnly(!!v)} />
               <span>Featured</span>
@@ -469,7 +568,7 @@ function ContentAdmin() {
 
       {/* Card grid */}
       {isLoading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="border border-border bg-background overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -485,7 +584,7 @@ function ContentAdmin() {
           No {label.toLowerCase()} match your filters.
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
           {filtered.map((row: any) => {
             const img = imageField ? row[imageField] : null;
             const title = row.name ?? row.title ?? row.question ?? "Untitled";
@@ -516,7 +615,9 @@ function ContentAdmin() {
                     </Badge>
                   )}
                   {!row.published && (
-                    <Badge variant="secondary" className="absolute top-3 left-3">Draft</Badge>
+                    <Badge variant="secondary" className="absolute top-3 left-3">
+                      Draft
+                    </Badge>
                   )}
                 </div>
                 <div className="p-4 flex-1 flex flex-col">
@@ -573,8 +674,8 @@ function ContentAdmin() {
 
       {/* Create / Edit dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-5xl w-[95vw] max-h-[92vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-7xl gap-0 overflow-hidden p-0 sm:w-[calc(100%-3rem)]">
+          <DialogHeader className="shrink-0 border-b border-border bg-cream/60 px-5 py-4 pr-12 sm:px-7 sm:py-5">
             <DialogTitle className="font-serif text-2xl">
               {editing?.id ? `Edit ${singular}` : `New ${singular}`}
             </DialogTitle>
@@ -586,10 +687,10 @@ function ContentAdmin() {
           </DialogHeader>
 
           {editing && layout && (
-            <form onSubmit={save} className="space-y-5 pt-2">
-              <div className="bg-cream/40 border border-border p-5 space-y-4">
+            <form onSubmit={save} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-cream/20 p-4 sm:p-6">
                 {layout.rows.map((row, ri) => (
-                  <div key={ri} className={row.length > 1 ? "grid gap-4 sm:grid-cols-2" : ""}>
+                  <div key={ri} className={row.length > 1 ? "grid gap-4 lg:grid-cols-2" : ""}>
                     {row.map((f) => (
                       <FieldInput
                         key={f.name}
@@ -603,8 +704,10 @@ function ContentAdmin() {
                 ))}
               </div>
 
-              <DialogFooter className="gap-2">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <DialogFooter className="shrink-0 border-t border-border bg-background px-4 py-3 sm:px-6 sm:py-4 gap-2">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
                 <Button
                   type="submit"
                   disabled={mUpsert.isPending}
@@ -662,13 +765,18 @@ function FieldInput({
     return (
       <div className="flex items-center gap-2 pt-6">
         <Checkbox checked={!!value} onCheckedChange={(v) => onChange(!!v)} id={field.name} />
-        <Label htmlFor={field.name} className="cursor-pointer">{field.label}</Label>
+        <Label htmlFor={field.name} className="cursor-pointer">
+          {field.label}
+        </Label>
       </div>
     );
   }
   const iconEl =
-    field.icon === "pin" ? <MapPin className="w-4 h-4" /> :
-    field.icon === "hash" ? <span className="text-xs">#</span> : null;
+    field.icon === "pin" ? (
+      <MapPin className="w-4 h-4" />
+    ) : field.icon === "hash" ? (
+      <span className="text-xs">#</span>
+    ) : null;
 
   if (field.type === "image") {
     return <ImageField label={field.label} value={value ?? ""} onChange={onChange} />;
@@ -678,7 +786,10 @@ function FieldInput({
     const arr = Array.isArray(value)
       ? (value as string[])
       : typeof value === "string" && value
-        ? (value as string).split("\n").map((s) => s.trim()).filter(Boolean)
+        ? (value as string)
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [];
     return <MultiImageUploader label={field.label} value={arr} onChange={onChange} />;
   }
@@ -710,15 +821,13 @@ function FieldInput({
       ) : field.type === "array" ? (
         <Textarea
           rows={4}
-          value={Array.isArray(value) ? (value as string[]).join("\n") : value ?? ""}
+          value={Array.isArray(value) ? (value as string[]).join("\n") : (value ?? "")}
           placeholder={field.placeholder ?? "One per line"}
           onChange={(e) => onChange(e.target.value)}
         />
       ) : field.type === "number" ? (
         <div className="relative">
-          {iconEl && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40">{iconEl}</span>
-          )}
+          {iconEl && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40">{iconEl}</span>}
           <Input
             type="number"
             value={value ?? 0}
@@ -729,9 +838,7 @@ function FieldInput({
         </div>
       ) : (
         <div className="relative">
-          {iconEl && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40">{iconEl}</span>
-          )}
+          {iconEl && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40">{iconEl}</span>}
           <Input
             value={value ?? ""}
             placeholder={field.placeholder}
@@ -744,14 +851,6 @@ function FieldInput({
   );
 }
 
-function ImageField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
+function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return <ImageUploader label={label} value={value} onChange={onChange} />;
 }
