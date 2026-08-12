@@ -2,6 +2,7 @@ import lodge from "@/assets/lodge-tent.jpg";
 import elephant from "@/assets/elephant.jpg";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
+import { RichText } from "@/components/site/RichText";
 
 type AboutContent = Partial<typeof PAGE_DEFAULTS.about>;
 
@@ -41,7 +42,7 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
             <br />
             {c.title_line3}
           </h2>
-          <p className="text-foreground/75 leading-relaxed max-w-xl">{c.body}</p>
+          <RichText html={c.body} className="max-w-xl text-foreground/75" />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="overflow-hidden">
@@ -62,19 +63,19 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
           </div>
         </div>
       </div>
-      <div className="max-w-[1500px] mx-auto px-6 lg:px-10 mt-20 md:mt-28">
+      <div className="mx-auto mt-20 max-w-[1500px] px-6 lg:px-10 md:mt-28">
         <div className="grid gap-8 md:grid-cols-3">
           {pillars.map((pillar, index) => (
             <article
               key={pillar.label}
-              className="group border-t border-foreground/15 pt-7 transition-colors duration-500 hover:border-gold"
+              className="group bg-forest p-7 text-cream transition-colors duration-500 md:p-8"
             >
               <div className="mb-7 flex items-center justify-between">
                 <p className="text-[11px] uppercase tracking-[0.3em] text-gold">{pillar.label}</p>
-                <span className="font-serif text-2xl text-foreground/25">0{index + 1}</span>
+                <span className="font-serif text-2xl text-cream/25">0{index + 1}</span>
               </div>
-              <h3 className="mb-5 font-serif text-3xl leading-tight text-foreground">{pillar.title}</h3>
-              <p className="text-sm leading-relaxed text-foreground/65">{pillar.body}</p>
+              <h3 className="mb-5 font-serif text-3xl leading-tight text-cream">{pillar.title}</h3>
+              <RichText html={pillar.body} className="text-sm text-cream/70" />
             </article>
           ))}
         </div>
