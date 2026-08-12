@@ -109,40 +109,92 @@ function AdminAdventures() {
         </Button>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
         <div className="grid gap-6 min-w-0">
+          <SignatureItineraries draft={draft} setDraft={setDraft} />
+          {/*
           <Card id="hero" title="Hero image" icon={ImageIcon} description="Image, crop and accessibility settings.">
-            <Field label="Hero background image">
-              <ManagedImageUpload
-                value={draft.hero.image}
-                onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
-                recommendedRatio="16:9 or wider"
-                altText={draft.hero.imageAlt}
-                focalX={draft.hero.focalX ?? 50}
-                focalY={draft.hero.focalY ?? 50}
-                onFocalChange={(focalX, focalY) => setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })}
-              />
-            </Field>
-            <Field label="Hero image — alt text (for accessibility & SEO)">
-              <Input
-                value={draft.hero.imageAlt ?? ""}
-                placeholder="Describe the hero image"
-                onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
-              />
-            </Field>
-          </Card>
+          <Field label="Hero background image">
+            <ManagedImageUpload
+              value={draft.hero.image}
+              onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
+              recommendedRatio="16:9 or wider"
+              altText={draft.hero.imageAlt}
+              focalX={draft.hero.focalX ?? 50}
+              focalY={draft.hero.focalY ?? 50}
+              onFocalChange={(focalX, focalY) => setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })}
+            />
+          </Field>
+          <Field label="Hero image — alt text (for accessibility & SEO)">
+            <Input
+              value={draft.hero.imageAlt ?? ""}
+              placeholder="Describe the hero image"
+              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
+            />
+          </Field>
+        </Card>*/}
 
-          <Card
-            id="cta"
-            title="Closing CTA"
-            icon={Megaphone}
-            description="The final invitation at the bottom of the page."
-          >
-            <div className="grid md:grid-cols-2 gap-4">
+          {/*<Card
+          id="cta"
+          title="Closing CTA"
+          icon={Megaphone}
+          description="The final invitation at the bottom of the page."
+        >
+          <div className="grid md:grid-cols-2 gap-4">
+            <Field label="Eyebrow">
+              <Input
+                value={draft.cta.eyebrow}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
+              />
+            </Field>
+            <Field label="Button label">
+              <Input
+                value={draft.cta.buttonLabel}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
+              />
+            </Field>
+          </div>
+          <Field label="Headline">
+            <Input
+              value={draft.cta.headline}
+              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
+            />
+          </Field>
+          <Field label="Body">
+            <Textarea
+              rows={3}
+              value={draft.cta.body}
+              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
+            />
+          </Field>
+        </Card>*/}
+        </div>
+
+        <aside className="min-w-0">
+          <div className="sticky top-24 space-y-4">
+            <Card
+              id="cta"
+              title="Closing CTA"
+              icon={Megaphone}
+              description="The final invitation at the bottom of the page."
+            >
               <Field label="Eyebrow">
                 <Input
                   value={draft.cta.eyebrow}
                   onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
+                />
+              </Field>
+              <Field label="Headline">
+                <Input
+                  value={draft.cta.headline}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
+                />
+              </Field>
+              <Field label="Body">
+                <Textarea
+                  rows={3}
+                  value={draft.cta.body}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
                 />
               </Field>
               <Field label="Button label">
@@ -151,25 +203,26 @@ function AdminAdventures() {
                   onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
                 />
               </Field>
-            </div>
-            <Field label="Headline">
-              <Input
-                value={draft.cta.headline}
-                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
-              />
-            </Field>
-            <Field label="Body">
-              <Textarea
-                rows={3}
-                value={draft.cta.body}
-                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
-              />
-            </Field>
-          </Card>
-        </div>
-
-        <aside className="min-w-0">
-          <div className="sticky top-24 space-y-4">
+            </Card>
+            <Card id="hero" title="Hero image" icon={ImageIcon} description="Image and accessibility settings.">
+              <Field label="Hero background image">
+                <ManagedImageUpload
+                  value={draft.hero.image}
+                  onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
+                  recommendedRatio="16:9 or wider"
+                  altText={draft.hero.imageAlt}
+                  focalX={draft.hero.focalX ?? 50}
+                  focalY={draft.hero.focalY ?? 50}
+                  onFocalChange={(focalX, focalY) => setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })}
+                />
+              </Field>
+              <Field label="Hero image alt text">
+                <Input
+                  value={draft.hero.imageAlt ?? ""}
+                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
+                />
+              </Field>
+            </Card>
             <Card title="Hero copy" icon={Sparkles} description="Words shown over the hero image.">
               <Field label="Eyebrow">
                 <Input
@@ -192,8 +245,51 @@ function AdminAdventures() {
                 />
               </Field>
             </Card>
-            <PagePreview draft={draft} />
-            <SignatureItineraries draft={draft} setDraft={setDraft} />
+            <Card
+              title="What is included & not included"
+              icon={CircleAlert}
+              description="Add one item per line for each public-facing column."
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Included">
+                  <Textarea
+                    rows={5}
+                    value={(draft.cta.included ?? []).join("\n")}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        cta: {
+                          ...draft.cta,
+                          included: e.target.value
+                            .split("\n")
+                            .map((item) => item.trim())
+                            .filter(Boolean),
+                        },
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Not included">
+                  <Textarea
+                    rows={5}
+                    value={(draft.cta.notIncluded ?? []).join("\n")}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        cta: {
+                          ...draft.cta,
+                          notIncluded: e.target.value
+                            .split("\n")
+                            .map((item) => item.trim())
+                            .filter(Boolean),
+                        },
+                      })
+                    }
+                  />
+                </Field>
+              </div>
+            </Card>
+            <SignatureOrder signatures={draft.signatures} />
           </div>
         </aside>
       </div>
@@ -297,22 +393,9 @@ function SignatureItineraries({
               <Input value={s.terrain} onChange={(e) => set({ ...s, terrain: e.target.value })} />
             </Field>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Nights">
-              <Input value={s.nights} onChange={(e) => set({ ...s, nights: e.target.value })} />
-            </Field>
-            <Field label="Difficulty">
-              <select
-                value={s.difficulty}
-                onChange={(e) => set({ ...s, difficulty: e.target.value })}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
-              >
-                {DIFFICULTIES.map((d) => (
-                  <option key={d}>{d}</option>
-                ))}
-              </select>
-            </Field>
-          </div>
+          <Field label="Nights">
+            <Input value={s.nights} onChange={(e) => set({ ...s, nights: e.target.value })} />
+          </Field>
           <Field label="Description">
             <Textarea rows={3} value={s.description} onChange={(e) => set({ ...s, description: e.target.value })} />
           </Field>
@@ -330,7 +413,7 @@ function SignatureItineraries({
           <Field label="Image alt text">
             <Input value={s.imageAlt ?? ""} onChange={(e) => set({ ...s, imageAlt: e.target.value })} />
           </Field>
-          <Field label="Highlights (one per line)">
+          <Field label="Highlights">
             <Textarea
               rows={4}
               value={(s.highlights ?? []).join("\n")}
@@ -344,10 +427,56 @@ function SignatureItineraries({
                 })
               }
             />
+            <p className="mt-1.5 text-xs text-foreground/55">
+              Enter one highlight per line. They appear as the itinerary’s key experiences.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(s.highlights ?? []).map((highlight, index) => (
+                <button
+                  key={`${highlight}-${index}`}
+                  type="button"
+                  onClick={() =>
+                    set({
+                      ...s,
+                      highlights: s.highlights.filter((_, itemIndex) => itemIndex !== index),
+                    })
+                  }
+                  className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-foreground/70 hover:border-destructive hover:text-destructive"
+                  title="Remove highlight"
+                >
+                  {highlight} ×
+                </button>
+              ))}
+            </div>
           </Field>
         </>
       )}
     />
+  );
+}
+
+function SignatureOrder({ signatures }: { signatures: AdventuresSignature[] }) {
+  return (
+    <section className="border border-border bg-background shadow-sm">
+      <header className="border-b border-border bg-cream/50 px-4 py-3">
+        <h2 className="font-serif text-xl">Signature order</h2>
+        <p className="mt-0.5 text-xs text-foreground/55">Use the controls in the main list to reorder.</p>
+      </header>
+      <ol className="divide-y divide-border">
+        {signatures.map((item, index) => (
+          <li key={`${item.slug}-${index}`} className="flex items-center gap-3 px-4 py-3">
+            <span className="w-5 text-xs text-foreground/45">{index + 1}</span>
+            <span className="h-9 w-12 overflow-hidden bg-muted">
+              {item.image && <img src={item.image} alt="" className="h-full w-full object-cover" />}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-sm">{item.name || "New itinerary"}</span>
+          </li>
+        ))}
+        {signatures.length === 0 && (
+          <li className="px-4 py-5 text-sm text-foreground/55">No signature itineraries yet.</li>
+        )}
+      </ol>
+    </section>
   );
 }
 
@@ -781,14 +910,9 @@ function ManagedImageUpload({
         </button>
       )}
 
-      <div className="grid gap-3 md:grid-cols-3 lg:col-start-2 lg:row-start-2 lg:grid-cols-1">
-        <MetaTile label="Dimensions" value={dimensions ? `${dimensions.width} x ${dimensions.height}px` : "Unknown"} />
-        <MetaTile label="File size" value={fileMeta ? humanSize(fileMeta.size) : "From library/URL"} />
+      <div className="grid gap-3 lg:col-start-2 lg:row-start-2">
         <MetaTile label="Focal point" value={`${Math.round(focalX)}% / ${Math.round(focalY)}%`} />
-      </div>
-
-      {value && (
-        <div className="grid gap-4 lg:col-start-2 lg:row-start-3">
+        {value && (
           <div className="space-y-3">
             <FocalSlider
               label="Horizontal focal point"
@@ -801,15 +925,8 @@ function ManagedImageUpload({
               onChange={(next) => onFocalChange?.(focalX, next)}
             />
           </div>
-          <div>
-            <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-foreground/55">Crop previews</p>
-            <div className="grid grid-cols-2 gap-2">
-              <CropPreview label="16:9" ratio="aspect-video" src={value} objectPosition={objectPosition} />
-              <CropPreview label="4:3" ratio="aspect-[4/3]" src={value} objectPosition={objectPosition} />
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <Button
         type="button"
