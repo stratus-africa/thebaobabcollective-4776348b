@@ -27,9 +27,7 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
     setLoading(true);
     try {
       const res = await subscribe({ data: { email } });
-      toast.success(
-        res.alreadySubscribed ? "You're already on the list — thank you." : "Welcome aboard.",
-      );
+      toast.success(res.alreadySubscribed ? "You're already on the list — thank you." : "Welcome aboard.");
       setEmail("");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not subscribe.";
@@ -55,14 +53,14 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
         <div className="lg:col-span-1 flex flex-col">
           <Link
             to="/"
-            className="inline-flex items-center h-36 sm:h-44 lg:h-52 w-auto -mt-2 mb-3 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
+            className="inline-flex items-center h-28 sm:h-32 lg:h-36 w-auto -mt-2 mb-3 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
             aria-label="The Baobab Collective home"
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt="The Baobab Collective"
-                className="h-36 sm:h-44 lg:h-52 w-auto max-w-[260px] object-contain object-left"
+                className="h-28 sm:h-32 lg:h-36 w-auto max-w-[220px] object-contain object-left"
               />
             ) : (
               <BaobabLogo className="w-28 h-28" />
@@ -95,10 +93,14 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
         <address className="not-italic">
           <h4 className="text-[11px] tracking-[0.25em] uppercase text-foreground mb-5">{f.contact_heading}</h4>
           <p className="text-sm text-foreground/75 mb-1">
-            <a href={`mailto:${contactEmail}`} className="hover:text-gold break-all">{contactEmail}</a>
+            <a href={`mailto:${contactEmail}`} className="hover:text-gold break-all">
+              {contactEmail}
+            </a>
           </p>
           <p className="text-sm text-foreground/75 mb-5">
-            <a href={`tel:${contactPhoneTel}`} className="hover:text-gold">{contactPhone}</a>
+            <a href={`tel:${contactPhoneTel}`} className="hover:text-gold">
+              {contactPhone}
+            </a>
           </p>
           {socials.length > 0 && (
             <div className="flex items-center gap-4 text-foreground/70">
@@ -122,7 +124,9 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
           <h4 className="text-[11px] tracking-[0.25em] uppercase text-foreground mb-5">{f.newsletter_title}</h4>
           <p className="text-sm text-foreground/75 mb-4">{f.newsletter_body}</p>
           <form onSubmit={onSubmit} className="flex border border-border bg-background" noValidate>
-            <label htmlFor="newsletter-email" className="sr-only">Email address</label>
+            <label htmlFor="newsletter-email" className="sr-only">
+              Email address
+            </label>
             <input
               id="newsletter-email"
               type="email"
@@ -138,7 +142,11 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
               className="bg-forest text-forest-foreground px-4 disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-inset"
               aria-label={loading ? "Subscribing to newsletter" : "Subscribe to newsletter"}
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <ArrowRight className="w-4 h-4" aria-hidden="true" />}
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              )}
             </button>
           </form>
         </div>
