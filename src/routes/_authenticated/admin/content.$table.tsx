@@ -452,11 +452,11 @@ function ContentAdmin() {
         f.type === "bool" ? true : f.type === "number" ? 0 : f.type === "array" || f.type === "images" ? [] : "";
     });
     setEditing(blank);
-    setOpen(true);
+    if (table !== "destinations") setOpen(true);
   };
   const startEdit = (row: any) => {
     setEditing({ ...row });
-    setOpen(true);
+    if (table !== "destinations") setOpen(true);
   };
   const save = (e: React.FormEvent) => {
     e.preventDefault();
@@ -487,6 +487,19 @@ function ContentAdmin() {
     });
     mUpsert.mutate(row);
   };
+
+  if (table === "destinations" && editing) {
+    return (
+      <DestinationEditor
+        editing={editing}
+        fields={flatFields}
+        saving={mUpsert.isPending}
+        onChange={(name, value) => setEditing({ ...editing, [name]: value })}
+        onBack={() => setEditing(null)}
+        onSave={save}
+      />
+    );
+  }
 
   return (
     <div>
@@ -673,53 +686,55 @@ function ContentAdmin() {
       )}
 
       {/* Create / Edit dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-7xl gap-0 overflow-hidden p-0 sm:w-[calc(100%-3rem)]">
-          <DialogHeader className="shrink-0 border-b border-border bg-cream/60 px-5 py-4 pr-12 sm:px-7 sm:py-5">
-            <DialogTitle className="font-serif text-2xl">
-              {editing?.id ? `Edit ${singular}` : `New ${singular}`}
-            </DialogTitle>
-            <DialogDescription>
-              {editing?.id
-                ? `Update the details for this ${singular.toLowerCase()}.`
-                : `Create a new ${singular.toLowerCase()} to showcase on your platform.`}
-            </DialogDescription>
-          </DialogHeader>
+      {table !== "destinations" && (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-7xl gap-0 overflow-hidden p-0 sm:w-[calc(100%-3rem)]">
+            <DialogHeader className="shrink-0 border-b border-border bg-cream/60 px-5 py-4 pr-12 sm:px-7 sm:py-5">
+              <DialogTitle className="font-serif text-2xl">
+                {editing?.id ? `Edit ${singular}` : `New ${singular}`}
+              </DialogTitle>
+              <DialogDescription>
+                {editing?.id
+                  ? `Update the details for this ${singular.toLowerCase()}.`
+                  : `Create a new ${singular.toLowerCase()} to showcase on your platform.`}
+              </DialogDescription>
+            </DialogHeader>
 
-          {editing && layout && (
-            <form onSubmit={save} className="flex min-h-0 flex-1 flex-col overflow-hidden">
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-cream/20 p-4 sm:p-6">
-                {layout.rows.map((row, ri) => (
-                  <div key={ri} className={row.length > 1 ? "grid gap-4 lg:grid-cols-2" : ""}>
-                    {row.map((f) => (
-                      <FieldInput
-                        key={f.name}
-                        field={f}
-                        value={editing[f.name]}
-                        onChange={(v) => setEditing({ ...editing, [f.name]: v })}
-                        autosaveKey={`cms:rt:${table}:${editing.id || "new"}:${f.name}`}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
+            {editing && layout && (
+              <form onSubmit={save} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-cream/20 p-4 sm:p-6">
+                  {layout.rows.map((row, ri) => (
+                    <div key={ri} className={row.length > 1 ? "grid gap-4 lg:grid-cols-2" : ""}>
+                      {row.map((f) => (
+                        <FieldInput
+                          key={f.name}
+                          field={f}
+                          value={editing[f.name]}
+                          onChange={(v) => setEditing({ ...editing, [f.name]: v })}
+                          autosaveKey={`cms:rt:${table}:${editing.id || "new"}:${f.name}`}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
 
-              <DialogFooter className="shrink-0 border-t border-border bg-background px-4 py-3 sm:px-6 sm:py-4 gap-2">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={mUpsert.isPending}
-                  className="bg-gold text-gold-foreground hover:bg-gold/90"
-                >
-                  {mUpsert.isPending ? "Saving…" : editing?.id ? `Update ${singular}` : `Create ${singular}`}
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+                <DialogFooter className="shrink-0 border-t border-border bg-background px-4 py-3 sm:px-6 sm:py-4 gap-2">
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={mUpsert.isPending}
+                    className="bg-gold text-gold-foreground hover:bg-gold/90"
+                  >
+                    {mUpsert.isPending ? "Saving…" : editing?.id ? `Update ${singular}` : `Create ${singular}`}
+                  </Button>
+                </DialogFooter>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
