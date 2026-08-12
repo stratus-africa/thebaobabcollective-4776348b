@@ -45,7 +45,7 @@ const sortOptions: FilterOption[] = [
 
 function JourneysIndex() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/journeys" });
+  const navigate = useNavigate();
   const q = search.q ?? "";
   const category = search.category ?? "all";
   const sort = search.sort ?? "featured";
@@ -68,7 +68,7 @@ function JourneysIndex() {
 
   const hasFilters = q !== "" || category !== "all" || sort !== "featured";
   const setSearch = (patch: Record<string, unknown>) =>
-    navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, ...patch }), replace: true });
+    navigate({ to: "/journeys", search: ((prev: Record<string, unknown>) => ({ ...prev, ...patch })) as any, replace: true });
 
   return (
     <div className="bg-background min-h-screen">
@@ -100,7 +100,7 @@ function JourneysIndex() {
               resultCount={filtered.length}
               totalCount={journeys.length}
               hasFilters={hasFilters}
-              onReset={() => navigate({ search: {}, replace: true })}
+              onReset={() => navigate({ to: "/journeys", search: {} as any, replace: true })}
             />
 
             <Suspense fallback={<CardGridSkeleton count={6} />}>
