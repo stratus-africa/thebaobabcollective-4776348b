@@ -4,6 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+  ArrowDown,
+  ArrowUp,
+  CheckCircle2,
+  CircleAlert,
+  FolderOpen,
+  GripVertical,
   Loader2,
   Plus,
   Trash2,
@@ -27,6 +33,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 
 export const Route = createFileRoute("/_authenticated/admin/adventures")({
   component: AdminAdventures,
@@ -107,198 +115,234 @@ function AdminAdventures() {
         </Button>
       </div>
 
-      {/* Quick navigation */}
-      <div className="bg-background/95 backdrop-blur border border-border rounded-lg p-3 flex flex-wrap gap-2 sticky top-20 z-10 shadow-sm">
-        {sections.map((s) => {
-          const Icon = s.icon;
-          return (
-            <a
-              key={s.id}
-              href={`#${s.id}`}
-              className="inline-flex items-center gap-2 text-xs px-3 py-2 rounded-md border border-border bg-background hover:bg-cream hover:border-gold/40 transition-colors"
-            >
-              <Icon className="w-3.5 h-3.5 text-gold" />
-              {s.label}
-              {typeof s.count === "number" && (
-                <span className="ml-1 inline-flex items-center justify-center min-w-[20px] h-[18px] px-1 rounded-full bg-cream text-[10px] text-foreground/70">
-                  {s.count}
-                </span>
-              )}
-            </a>
-          );
-        })}
-      </div>
-
-      <div className="grid gap-6">
-        <Card id="hero" title="Hero" icon={Sparkles} description="Top of the Adventures page.">
-          <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Eyebrow">
-              <Input
-                value={draft.hero.eyebrow}
-                onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
-              />
-            </Field>
-          </div>
-          <Field label="Headline">
-            <Textarea
-              rows={2}
-              value={draft.hero.headline}
-              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
-            />
-          </Field>
-          <Field label="Subhead">
-            <Textarea
-              rows={3}
-              value={draft.hero.subhead}
-              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
-            />
-          </Field>
-          <Field label="Hero background image">
-            <ImageUpload
-              value={draft.hero.image}
-              onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
-            />
-            {draft.hero.image && (
-              <img
-                src={draft.hero.image}
-                alt={draft.hero.imageAlt || "Hero preview"}
-                className="mt-3 w-full max-h-64 object-cover rounded border border-border"
-              />
-            )}
-          </Field>
-          <Field label="Hero image — alt text (for accessibility & SEO)">
-            <Input
-              value={draft.hero.imageAlt ?? ""}
-              placeholder="Describe the hero image"
-              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
-            />
-          </Field>
-        </Card>
-
-        <Card
-          id="cta"
-          title="Closing CTA"
-          icon={Megaphone}
-          description="The final invitation at the bottom of the page."
-        >
-          <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Eyebrow">
-              <Input
-                value={draft.cta.eyebrow}
-                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
-              />
-            </Field>
-            <Field label="Button label">
-              <Input
-                value={draft.cta.buttonLabel}
-                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
-              />
-            </Field>
-          </div>
-          <Field label="Headline">
-            <Input
-              value={draft.cta.headline}
-              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
-            />
-          </Field>
-          <Field label="Body">
-            <Textarea
-              rows={3}
-              value={draft.cta.body}
-              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
-            />
-          </Field>
-        </Card>
-
-        <ListCard
-          id="signatures"
-          title="Signature itineraries"
-          icon={MapIcon}
-          description="Hero adventures featured at the bottom of the page."
-          items={draft.signatures}
-          onChange={(signatures) => setDraft({ ...draft, signatures })}
-          empty={{
-            slug: "",
-            name: "",
-            region: "",
-            terrain: "",
-            nights: "",
-            difficulty: "Moderate",
-            image: "",
-            description: "",
-            highlights: [],
-          }}
-          previewLabel={(s) => s.name || "New itinerary"}
-          previewImage={(s) => s.image}
-          render={(s, set) => (
-            <>
-              <div className="grid md:grid-cols-2 gap-4">
-                <Field label="Name">
-                  <Input
-                    value={s.name}
-                    onChange={(e) => set({ ...s, name: e.target.value, slug: s.slug || slugify(e.target.value) })}
-                  />
-                </Field>
-                <Field label="Slug (matches /itineraries/$slug)">
-                  <Input value={s.slug} onChange={(e) => set({ ...s, slug: e.target.value })} />
-                </Field>
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
-                <Field label="Region">
-                  <Input value={s.region} onChange={(e) => set({ ...s, region: e.target.value })} />
-                </Field>
-                <Field label="Terrain">
-                  <Input value={s.terrain} onChange={(e) => set({ ...s, terrain: e.target.value })} />
-                </Field>
-                <Field label="Nights">
-                  <Input
-                    value={s.nights}
-                    onChange={(e) => set({ ...s, nights: e.target.value })}
-                    placeholder="8 nights"
-                  />
-                </Field>
-              </div>
-              <div className="grid md:grid-cols-[220px_1fr] gap-4">
-                <Field label="Difficulty">
-                  <select
-                    value={s.difficulty}
-                    onChange={(e) => set({ ...s, difficulty: e.target.value })}
-                    className="h-10 bg-background border border-border rounded-md px-3 text-sm w-full"
-                  >
-                    {DIFFICULTIES.map((d) => (
-                      <option key={d}>{d}</option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="Description">
-                  <Textarea
-                    rows={2}
-                    value={s.description}
-                    onChange={(e) => set({ ...s, description: e.target.value })}
-                  />
-                </Field>
-              </div>
-              <Field label="Hero image">
-                <ImageUpload value={s.image} onChange={(url) => set({ ...s, image: url })} />
-              </Field>
-              <Field label="Highlights (one per line)">
-                <Textarea
-                  rows={4}
-                  value={(s.highlights ?? []).join("\n")}
-                  onChange={(e) =>
-                    set({
-                      ...s,
-                      highlights: e.target.value
-                        .split("\n")
-                        .map((x) => x.trim())
-                        .filter(Boolean),
-                    })
-                  }
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-6 min-w-0">
+          <Card id="hero" title="Hero" icon={Sparkles} description="Top of the Adventures page.">
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="Eyebrow">
+                <Input
+                  value={draft.hero.eyebrow}
+                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
                 />
               </Field>
-            </>
-          )}
-        />
+            </div>
+            <Field label="Headline">
+              <Textarea
+                rows={2}
+                value={draft.hero.headline}
+                onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
+              />
+            </Field>
+            <Field label="Subhead">
+              <Textarea
+                rows={3}
+                value={draft.hero.subhead}
+                onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
+              />
+            </Field>
+            <Field label="Hero background image">
+              <ManagedImageUpload
+                value={draft.hero.image}
+                onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
+                recommendedRatio="16:9 or wider"
+                altText={draft.hero.imageAlt}
+                focalX={draft.hero.focalX ?? 50}
+                focalY={draft.hero.focalY ?? 50}
+                onFocalChange={(focalX, focalY) => setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })}
+              />
+              {draft.hero.image && (
+                <img
+                  src={draft.hero.image}
+                  alt={draft.hero.imageAlt || "Hero preview"}
+                  className="mt-3 w-full max-h-64 object-cover rounded border border-border"
+                  style={{ objectPosition: `${draft.hero.focalX ?? 50}% ${draft.hero.focalY ?? 50}%` }}
+                />
+              )}
+            </Field>
+            <Field label="Hero image — alt text (for accessibility & SEO)">
+              <Input
+                value={draft.hero.imageAlt ?? ""}
+                placeholder="Describe the hero image"
+                onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
+              />
+            </Field>
+          </Card>
+
+          <Card
+            id="cta"
+            title="Closing CTA"
+            icon={Megaphone}
+            description="The final invitation at the bottom of the page."
+          >
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="Eyebrow">
+                <Input
+                  value={draft.cta.eyebrow}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
+                />
+              </Field>
+              <Field label="Button label">
+                <Input
+                  value={draft.cta.buttonLabel}
+                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
+                />
+              </Field>
+            </div>
+            <Field label="Headline">
+              <Input
+                value={draft.cta.headline}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
+              />
+            </Field>
+            <Field label="Body">
+              <Textarea
+                rows={3}
+                value={draft.cta.body}
+                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
+              />
+            </Field>
+          </Card>
+
+          <ListCard
+            id="signatures"
+            title="Signature itineraries"
+            icon={MapIcon}
+            description="Hero adventures featured at the bottom of the page."
+            items={draft.signatures}
+            onChange={(signatures) => setDraft({ ...draft, signatures })}
+            empty={{
+              slug: "",
+              name: "",
+              region: "",
+              terrain: "",
+              nights: "",
+              difficulty: "Moderate",
+              image: "",
+              imageAlt: "",
+              focalX: 50,
+              focalY: 50,
+              description: "",
+              highlights: [],
+            }}
+            previewLabel={(s) => s.name || "New itinerary"}
+            previewImage={(s) => s.image}
+            render={(s, set) => (
+              <>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Field label="Name">
+                    <Input
+                      value={s.name}
+                      onChange={(e) => set({ ...s, name: e.target.value, slug: s.slug || slugify(e.target.value) })}
+                    />
+                  </Field>
+                  <Field label="Slug (matches /itineraries/$slug)">
+                    <Input value={s.slug} onChange={(e) => set({ ...s, slug: e.target.value })} />
+                  </Field>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Field label="Region">
+                    <Input value={s.region} onChange={(e) => set({ ...s, region: e.target.value })} />
+                  </Field>
+                  <Field label="Terrain">
+                    <Input value={s.terrain} onChange={(e) => set({ ...s, terrain: e.target.value })} />
+                  </Field>
+                  <Field label="Nights">
+                    <Input
+                      value={s.nights}
+                      onChange={(e) => set({ ...s, nights: e.target.value })}
+                      placeholder="8 nights"
+                    />
+                  </Field>
+                </div>
+                <div className="grid md:grid-cols-[220px_1fr] gap-4">
+                  <Field label="Difficulty">
+                    <select
+                      value={s.difficulty}
+                      onChange={(e) => set({ ...s, difficulty: e.target.value })}
+                      className="h-10 bg-background border border-border rounded-md px-3 text-sm w-full"
+                    >
+                      {DIFFICULTIES.map((d) => (
+                        <option key={d}>{d}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Description">
+                    <Textarea
+                      rows={2}
+                      value={s.description}
+                      onChange={(e) => set({ ...s, description: e.target.value })}
+                    />
+                  </Field>
+                </div>
+                <Field label="Hero image">
+                  <ManagedImageUpload
+                    value={s.image}
+                    onChange={(url) => set({ ...s, image: url })}
+                    recommendedRatio="4:3 card, 16:9 hero"
+                    altText={s.imageAlt}
+                    focalX={s.focalX ?? 50}
+                    focalY={s.focalY ?? 50}
+                    onFocalChange={(focalX, focalY) => set({ ...s, focalX, focalY })}
+                  />
+                </Field>
+                <Field label="Image alt text">
+                  <Input
+                    value={s.imageAlt ?? ""}
+                    placeholder="Describe the itinerary image"
+                    onChange={(e) => set({ ...s, imageAlt: e.target.value })}
+                  />
+                </Field>
+                <Field label="Highlights (one per line)">
+                  <Textarea
+                    rows={4}
+                    value={(s.highlights ?? []).join("\n")}
+                    onChange={(e) =>
+                      set({
+                        ...s,
+                        highlights: e.target.value
+                          .split("\n")
+                          .map((x) => x.trim())
+                          .filter(Boolean),
+                      })
+                    }
+                  />
+                </Field>
+              </>
+            )}
+          />
+        </div>
+
+        <aside className="hidden xl:block">
+          <div className="sticky top-24 space-y-4">
+            <section className="border border-border bg-background shadow-sm">
+              <header className="border-b border-border px-4 py-3">
+                <h2 className="font-sans text-sm font-semibold text-foreground">Sections</h2>
+              </header>
+              <nav className="p-2">
+                {sections.map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <a
+                      key={s.id}
+                      href={`#${s.id}`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-foreground/75 hover:bg-muted hover:text-foreground"
+                    >
+                      <Icon className="w-4 h-4 text-foreground/50" />
+                      <span className="flex-1">{s.label}</span>
+                      {typeof s.count === "number" && (
+                        <span className="min-w-6 rounded-full bg-muted px-2 py-0.5 text-center text-[11px] text-foreground/60">
+                          {s.count}
+                        </span>
+                      )}
+                    </a>
+                  );
+                })}
+              </nav>
+            </section>
+
+            <PagePreview draft={draft} />
+          </div>
+        </aside>
       </div>
 
       {/* Sticky save footer */}
@@ -374,10 +418,19 @@ function ListCard<T extends object>({
   previewImage?: (item: T) => string | undefined;
 }) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
   const setAt = (idx: number, next: T) => {
     const copy = items.slice();
     copy[idx] = next;
     onChange(copy);
+  };
+  const moveTo = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= items.length) return;
+    const copy = items.slice();
+    const [moved] = copy.splice(from, 1);
+    copy.splice(to, 0, moved);
+    onChange(copy);
+    setOpenIdx(to);
   };
   const removeAt = (idx: number) => {
     onChange(items.filter((_, i) => i !== idx));
@@ -424,11 +477,24 @@ function ListCard<T extends object>({
           const label = previewLabel?.(item) ?? `Item ${idx + 1}`;
           const img = previewImage?.(item);
           return (
-            <div key={idx} className="border border-border rounded-md bg-background overflow-hidden shadow-sm">
+            <div
+              key={idx}
+              draggable
+              onDragStart={() => setDragIdx(idx)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (dragIdx !== null) moveTo(dragIdx, idx);
+                setDragIdx(null);
+              }}
+              className="border border-border bg-background overflow-hidden shadow-sm"
+            >
               <div
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-cream/50 transition-colors"
                 onClick={() => setOpenIdx(isOpen ? null : idx)}
               >
+                <span className="cursor-grab text-foreground/35 hover:text-foreground/60" title="Drag to reorder">
+                  <GripVertical className="w-4 h-4" />
+                </span>
                 <div className="h-10 w-14 rounded bg-cream overflow-hidden flex items-center justify-center shrink-0">
                   {img ? (
                     <img src={img} alt="" className="w-full h-full object-cover" />
@@ -438,6 +504,30 @@ function ListCard<T extends object>({
                 </div>
                 <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/40 w-6">#{idx + 1}</span>
                 <span className="font-medium text-sm flex-1 truncate">{label}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveTo(idx, idx - 1);
+                  }}
+                  disabled={idx === 0}
+                  className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                  aria-label="Move up"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveTo(idx, idx + 1);
+                  }}
+                  disabled={idx === items.length - 1}
+                  className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                  aria-label="Move down"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </button>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -573,5 +663,327 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
   );
 }
 
+function humanSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function ManagedImageUpload({
+  value,
+  onChange,
+  recommendedRatio,
+  altText,
+  focalX = 50,
+  focalY = 50,
+  onFocalChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  recommendedRatio: string;
+  altText?: string;
+  focalX?: number;
+  focalY?: number;
+  onFocalChange?: (x: number, y: number) => void;
+}) {
+  const upload = useServerFn(adminUploadImage);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [drag, setDrag] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+  const objectPosition = `${focalX}% ${focalY}%`;
+  const altComplete = Boolean(altText?.trim());
+
+  async function pick(file: File | undefined) {
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp|gif|avif)/i.test(file.type)) {
+      toast.error("Choose a PNG, JPG, WEBP, GIF, or AVIF image.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be smaller than 8MB");
+      return;
+    }
+    setBusy(true);
+    setFileMeta({ name: file.name, size: file.size });
+    try {
+      const buf = new Uint8Array(await file.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+      const res = await upload({
+        data: {
+          filename: file.name,
+          contentType: file.type || "image/jpeg",
+          base64: btoa(binary),
+        },
+      });
+      onChange(res.url);
+      toast.success("Image uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="space-y-3 border border-border bg-background p-3">
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+        className="hidden"
+        onChange={(e) => pick(e.target.files?.[0])}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+        <div>
+          <p className="text-xs font-medium text-foreground">Image requirements</p>
+          <p className="text-[11px] text-foreground/55">Recommended ratio: {recommendedRatio}</p>
+        </div>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] ${
+            altComplete ? "bg-forest/10 text-forest" : "bg-terracotta/10 text-terracotta"
+          }`}
+        >
+          {altComplete ? <CheckCircle2 className="w-3.5 h-3.5" /> : <CircleAlert className="w-3.5 h-3.5" />}
+          {altComplete ? "Alt text complete" : "Alt text needed"}
+        </span>
+      </div>
+
+      {value ? (
+        <div className="border border-border bg-background">
+          <div className="bg-muted">
+            <img
+              src={value}
+              alt=""
+              className="mx-auto max-h-72 w-full object-contain"
+              onLoad={(e) =>
+                setDimensions({
+                  width: e.currentTarget.naturalWidth,
+                  height: e.currentTarget.naturalHeight,
+                })
+              }
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 p-3">
+            <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}>
+              {busy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1" />}
+              Replace
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setLibraryOpen(true)} disabled={busy}>
+              <FolderOpen className="w-3.5 h-3.5 mr-1" /> Library
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setFileMeta(null);
+                setDimensions(null);
+                onChange("");
+              }}
+              className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <X className="w-3.5 h-3.5 mr-1" /> Remove
+            </Button>
+            <span className="ml-auto max-w-[60%] truncate text-[11px] text-foreground/50" title={value}>
+              {fileMeta ? `${fileMeta.name} - ${humanSize(fileMeta.size)}` : value.split("/").pop()}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDrag(true);
+          }}
+          onDragLeave={() => setDrag(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDrag(false);
+            pick(e.dataTransfer.files?.[0]);
+          }}
+          disabled={busy}
+          className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed px-6 py-10 text-center transition-colors ${
+            drag ? "border-gold bg-gold/5" : "border-border bg-muted/30 hover:border-gold hover:bg-gold/5"
+          }`}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground/70">
+            {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+          </div>
+          <div>
+            <p className="text-sm font-medium">Drop an image here or click to upload</p>
+            <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF - up to 8MB</p>
+          </div>
+        </button>
+      )}
+
+      <div className="grid gap-3 md:grid-cols-3">
+        <MetaTile label="Dimensions" value={dimensions ? `${dimensions.width} x ${dimensions.height}px` : "Unknown"} />
+        <MetaTile label="File size" value={fileMeta ? humanSize(fileMeta.size) : "From library/URL"} />
+        <MetaTile label="Focal point" value={`${Math.round(focalX)}% / ${Math.round(focalY)}%`} />
+      </div>
+
+      {value && (
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+          <div className="space-y-3">
+            <FocalSlider
+              label="Horizontal focal point"
+              value={focalX}
+              onChange={(next) => onFocalChange?.(next, focalY)}
+            />
+            <FocalSlider
+              label="Vertical focal point"
+              value={focalY}
+              onChange={(next) => onFocalChange?.(focalX, next)}
+            />
+          </div>
+          <div>
+            <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-foreground/55">Crop previews</p>
+            <div className="grid grid-cols-2 gap-2">
+              <CropPreview label="16:9" ratio="aspect-video" src={value} objectPosition={objectPosition} />
+              <CropPreview label="4:3" ratio="aspect-[4/3]" src={value} objectPosition={objectPosition} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Button type="button" variant="outline" size="sm" onClick={() => setLibraryOpen(true)} className="w-full">
+        <FolderOpen className="w-3.5 h-3.5 mr-1" /> Choose from media library
+      </Button>
+      <Input
+        value={value ?? ""}
+        onChange={(e) => {
+          setFileMeta(null);
+          setDimensions(null);
+          onChange(e.target.value);
+        }}
+        placeholder="...or paste an image URL"
+        className="text-xs"
+      />
+
+      <MediaLibraryPicker
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        onSelect={(urls) => {
+          const [url] = urls;
+          if (!url) return;
+          setFileMeta(null);
+          setDimensions(null);
+          onChange(url);
+        }}
+      />
+    </div>
+  );
+}
+
+function MetaTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border border-border bg-muted/25 px-3 py-2">
+      <p className="text-[10px] uppercase tracking-[0.18em] text-foreground/45">{label}</p>
+      <p className="mt-1 text-xs text-foreground/75">{value}</p>
+    </div>
+  );
+}
+
+function FocalSlider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className="text-xs font-medium text-foreground/75">{label}</p>
+        <span className="text-[11px] tabular-nums text-foreground/50">{Math.round(value)}%</span>
+      </div>
+      <Slider value={[value]} min={0} max={100} step={1} onValueChange={([next]) => onChange(next ?? value)} />
+    </div>
+  );
+}
+
+function CropPreview({
+  label,
+  ratio,
+  src,
+  objectPosition,
+}: {
+  label: string;
+  ratio: string;
+  src: string;
+  objectPosition: string;
+}) {
+  return (
+    <div>
+      <div className={`${ratio} overflow-hidden border border-border bg-muted`}>
+        <img src={src} alt="" className="h-full w-full object-cover" style={{ objectPosition }} />
+      </div>
+      <p className="mt-1 text-[10px] text-foreground/50">{label}</p>
+    </div>
+  );
+}
+
+function PagePreview({ draft }: { draft: AdventuresPage }) {
+  const heroPosition = `${draft.hero.focalX ?? 50}% ${draft.hero.focalY ?? 50}%`;
+  return (
+    <section className="border border-border bg-background shadow-sm">
+      <header className="border-b border-border px-4 py-3">
+        <h2 className="font-sans text-sm font-semibold text-foreground">Preview</h2>
+      </header>
+      <div className="p-4 space-y-4">
+        <div className="overflow-hidden border border-border bg-forest">
+          <div className="relative aspect-video">
+            {draft.hero.image ? (
+              <img
+                src={draft.hero.image}
+                alt=""
+                className="h-full w-full object-cover opacity-75"
+                style={{ objectPosition: heroPosition }}
+              />
+            ) : (
+              <div className="h-full w-full bg-muted" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-3 text-background">
+              <p className="text-[9px] uppercase tracking-[0.22em] text-gold">{draft.hero.eyebrow || "Adventures"}</p>
+              <p className="mt-1 line-clamp-2 font-serif text-lg leading-tight">
+                {draft.hero.headline || "Untitled hero"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-foreground/50">Signature order</p>
+          <ol className="space-y-2">
+            {draft.signatures.slice(0, 5).map((s, idx) => (
+              <li key={`${s.slug}-${idx}`} className="flex items-center gap-2 text-sm">
+                <span className="w-5 text-[11px] text-foreground/45">{idx + 1}</span>
+                <span className="h-8 w-10 overflow-hidden bg-muted">
+                  {s.image && (
+                    <img
+                      src={s.image}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: `${s.focalX ?? 50}% ${s.focalY ?? 50}%` }}
+                    />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{s.name || "New itinerary"}</span>
+              </li>
+            ))}
+            {draft.signatures.length === 0 && (
+              <li className="text-sm text-foreground/55">No signature itineraries yet.</li>
+            )}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // Silence type imports
+void ImageUpload;
 void (null as unknown as AdventuresSignature);
