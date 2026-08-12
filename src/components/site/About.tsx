@@ -30,12 +30,12 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
   ];
 
   return (
-    <section className="bg-cream py-20 md:py-28">
-      <div className="max-w-[1920px] mx-auto px-6 lg:px-10 grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+    <section className="bg-cream py-14 md:py-20">
+      <div className="max-w-[1920px] mx-auto px-5 lg:px-10 grid md:grid-cols-2 gap-9 lg:gap-14 items-center">
         <div>
-          <p className="text-[11px] tracking-[0.3em] uppercase text-foreground/70 mb-6">{c.eyebrow}</p>
-          <div className="w-12 h-px bg-gold mb-8" />
-          <h2 className="font-serif text-4xl md:text-6xl leading-[1.02] text-foreground mb-8">
+          <p className="text-[11px] tracking-[0.3em] uppercase text-foreground/70 mb-4">{c.eyebrow}</p>
+          <div className="w-12 h-px bg-gold mb-6" />
+          <h2 className="font-serif text-4xl md:text-6xl leading-[1.02] text-foreground mb-6">
             {c.title_line1}
             <br />
             {c.title_line2}
@@ -50,7 +50,7 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
               src={leftSrc}
               alt="Luxury safari lodge tent at sunset"
               loading="lazy"
-              className="w-full h-[420px] object-cover hover:scale-105 transition-transform duration-700"
+              className="w-full h-[360px] md:h-[400px] object-cover hover:scale-105 transition-transform duration-700"
             />
           </div>
           <div className="overflow-hidden mt-12">
@@ -58,23 +58,23 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
               src={rightSrc}
               alt="African elephant in savannah"
               loading="lazy"
-              className="w-full h-[420px] object-cover hover:scale-105 transition-transform duration-700"
+              className="w-full h-[360px] md:h-[400px] object-cover hover:scale-105 transition-transform duration-700"
             />
           </div>
         </div>
       </div>
-      <div className="mx-auto mt-20 max-w-[1500px] px-6 lg:px-10 md:mt-28">
-        <div className="grid gap-8 md:grid-cols-3">
+      <div className="mx-auto mt-12 max-w-[1500px] px-5 lg:px-10 md:mt-16">
+        <div className="grid gap-4 md:grid-cols-3 md:gap-6">
           {pillars.map((pillar, index) => (
             <article
               key={pillar.label}
-              className="group bg-forest p-7 text-cream transition-colors duration-500 md:p-8"
+              className="group bg-forest p-6 text-cream transition-colors duration-500 md:p-7"
             >
-              <div className="mb-7 flex items-center justify-between">
+              <div className="mb-5 flex items-center justify-between">
                 <p className="text-[11px] uppercase tracking-[0.3em] text-gold">{pillar.label}</p>
                 <span className="font-serif text-2xl text-cream/25">0{index + 1}</span>
               </div>
-              <h3 className="mb-5 font-serif text-3xl leading-tight text-cream">{pillar.title}</h3>
+              <h3 className="mb-4 font-serif text-3xl leading-tight text-cream">{pillar.title}</h3>
               <RichText html={pillar.body} className="text-sm text-cream/70" />
             </article>
           ))}
