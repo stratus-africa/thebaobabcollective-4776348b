@@ -582,7 +582,7 @@ function ContentAdmin() {
 
       {/* Card grid */}
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+        <div className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}>
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="border border-border bg-background overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -598,7 +598,7 @@ function ContentAdmin() {
           No {label.toLowerCase()} match your filters.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+        <div className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}>
           {filtered.map((row: any) => {
             const img = imageField ? row[imageField] : null;
             const title = row.name ?? row.title ?? row.question ?? "Untitled";

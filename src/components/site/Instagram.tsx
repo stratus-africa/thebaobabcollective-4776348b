@@ -23,8 +23,8 @@ export function InstagramStrip({ content }: { content?: Content | null } = {}) {
   }));
   return (
     <section className="bg-forest text-forest-foreground py-6">
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col lg:flex-row items-center gap-6">
-        <div className="flex items-center gap-4 shrink-0 lg:w-64">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col items-center justify-center gap-6">
+        <div className="flex items-center gap-4 shrink-0">
           <IgIcon className="w-8 h-8" strokeWidth={1.2} />
           <div>
             <p className="text-[11px] tracking-[0.25em] uppercase">{c.heading}</p>
@@ -33,7 +33,7 @@ export function InstagramStrip({ content }: { content?: Content | null } = {}) {
             </a>
           </div>
         </div>
-        <div className="flex-1 flex gap-2 overflow-x-auto lg:overflow-visible">
+        <div className="flex flex-wrap justify-center gap-2">
           {photos.map((p, i) => (
             <a
               key={i}
