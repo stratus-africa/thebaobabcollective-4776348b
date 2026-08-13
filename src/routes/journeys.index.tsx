@@ -1,74 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Suspense, useMemo } from "react";
-import { ArrowRight } from "lucide-react";
-import { z } from "zod";
-import { zodValidator } from "@tanstack/zod-adapter";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { FilterBar, type FilterOption } from "@/components/site/FilterBar";
-import { CardGridSkeleton } from "@/components/site/CardSkeleton";
-import { journeys } from "@/lib/content";
-
-const searchSchema = z.object({
-  q: z.string().optional().catch(undefined),
-  category: z.string().optional().catch(undefined),
-  sort: z.enum(["featured", "name-asc", "name-desc"]).optional().catch("featured"),
-});
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/journeys/")({
-  validateSearch: zodValidator(searchSchema),
-  head: () => ({
-    meta: [
-      { title: "Our Journeys — The Baobab Collective" },
-      { name: "description", content: "Handpicked safari experiences that celebrate adventure, connection, heritage and conservation across Africa." },
-      { property: "og:title", content: "Our Journeys — The Baobab Collective" },
-      { property: "og:description", content: "Curated safari journeys across Africa." },
-      { property: "og:url", content: "/journeys" },
-    ],
-    links: [{ rel: "canonical", href: "/journeys" }],
-  }),
-  component: JourneysIndex,
+  beforeLoad: () => {
+    throw redirect({ to: "/adventures" });
+  },
+  component: () => null,
 });
-
-const categoryOptions: FilterOption[] = [
-  { value: "adventure", label: "Adventure" },
-  { value: "connection", label: "Connection" },
-  { value: "heritage", label: "Heritage" },
-  { value: "conservation", label: "Conservation" },
-];
-
-const sortOptions: FilterOption[] = [
-  { value: "featured", label: "Featured order" },
-  { value: "name-asc", label: "Name A–Z" },
-  { value: "name-desc", label: "Name Z–A" },
-];
-
-function JourneysIndex() {
-  const search = Route.useSearch();
-  const navigate = useNavigate();
-  const q = search.q ?? "";
-  const category = search.category ?? "all";
-  const sort = search.sort ?? "featured";
-
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    let list = journeys.filter((j) => {
-      if (category !== "all" && j.slug !== category) return false;
-      if (!needle) return true;
-      return (
-        j.title.toLowerCase().includes(needle) ||
-        j.tagline.toLowerCase().includes(needle) ||
-        j.intro.toLowerCase().includes(needle)
-      );
-    });
-    if (sort === "name-asc") list = [...list].sort((a, b) => a.title.localeCompare(b.title));
-    if (sort === "name-desc") list = [...list].sort((a, b) => b.title.localeCompare(a.title));
-    return list;
-  }, [q, category, sort]);
-
-  const hasFilters = q !== "" || category !== "all" || sort !== "featured";
-  const setSearch = (patch: Record<string, unknown>) =>
-    navigate({ to: "/journeys", search: ((prev: Record<string, unknown>) => ({ ...prev, ...patch })) as any, replace: true });
 
   return (
     <div className="bg-background min-h-screen">

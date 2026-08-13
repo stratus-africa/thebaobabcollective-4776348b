@@ -1,15 +1,11 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useQuery, queryOptions } from "@tanstack/react-query";
-import { useState } from "react";
-import { ArrowRight, Check, MapPin } from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { ShareButtons } from "@/components/site/ShareButtons";
-import { EnquireDialog } from "@/components/site/EnquireDialog";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { Lightbox } from "@/components/site/Lightbox";
-import { getJourney, journeys, type Itinerary } from "@/lib/content";
-import { getDestinations } from "@/lib/cms.functions";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/journeys/$slug")({
+  beforeLoad: () => {
+    throw redirect({ to: "/adventures" });
+  },
+  component: () => null,
+});
 
 const featuredDestinationsQuery = queryOptions({
   queryKey: ["destinations", "featured"],
