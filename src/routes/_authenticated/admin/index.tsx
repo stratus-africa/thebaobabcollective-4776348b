@@ -86,7 +86,8 @@ function Dashboard() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              to="/admin/content/destinations"
+              to="/admin/content/$table"
+              params={{ table: "destinations" }}
               className="inline-flex items-center gap-2 bg-admin-accent text-admin-accent-fg text-[13px] px-3.5 py-2 rounded-sm hover:opacity-90 transition-opacity"
             >
               <MapPin className="w-4 h-4" /> Manage Destinations
