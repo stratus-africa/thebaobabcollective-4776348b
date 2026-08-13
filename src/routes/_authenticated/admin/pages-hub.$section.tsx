@@ -25,26 +25,6 @@ const SECTIONS: Record<string, HubSection> = {
         ],
       },
       {
-        value: "adventures", label: "Adventures", icon: Compass,
-        editors: [
-          { pageKey: "home_adventures",   label: "Home — Adventures Strip",     icon: HomeIcon, description: "Adventures preview strip on the homepage." },
-          { pageKey: "adventures_index",  label: "Adventures Landing",          icon: Compass,  description: "The /adventures listing page." },
-          { pageKey: "detail_journey",    label: "Adventures Detail Template",  icon: FileText, description: "Template used for each adventure detail page." },
-        ],
-      },
-      {
-        value: "destinations", label: "Destinations", icon: MapPin,
-        editors: [{ pageKey: "home_destinations", label: "Home — Destinations Strip", icon: Map, description: "Destinations preview strip on the homepage." }],
-      },
-      {
-        value: "lodges", label: "Lodges", icon: Building,
-        editors: [
-          { pageKey: "home_lodges",  label: "Home — Lodges Strip",   icon: HomeIcon,  description: "Lodges preview strip on the homepage." },
-          { pageKey: "lodges_index", label: "Lodges Landing",        icon: Hotel,     description: "The /lodges listing page." },
-          { pageKey: "detail_lodge", label: "Lodge Detail Template", icon: FileText,  description: "Template used for each lodge detail page." },
-        ],
-      },
-      {
         value: "journal", label: "Journal", icon: BookOpen,
         editors: [{ pageKey: "home_journal", label: "Home — Journal Strip", icon: BookOpen, description: "Journal preview strip on the homepage." }],
       },
@@ -62,6 +42,43 @@ const SECTIONS: Record<string, HubSection> = {
       { value: "mission", label: "Mission",    icon: BookOpen,  editors: [{ pageKey: "about_mission", label: "About — Mission",      icon: BookOpen,  description: "Mission section content." }] },
       { value: "values",  label: "Values",     icon: Bell,      editors: [{ pageKey: "about_values",  label: "About — Values",       icon: Bell,      description: "Core values section." }] },
       { value: "team",    label: "Team",       icon: UsersIcon, editors: [{ pageKey: "about_team",    label: "About — Team",         icon: UsersIcon, description: "Team members section." }] },
+      { value: "destinations", label: "Destinations", icon: MapPin, editors: [{ pageKey: "home_destinations", label: "Home — Destinations Strip", icon: Map, description: "Destinations preview strip on the homepage." }] },
+    ],
+  },
+  adventures: {
+    title: "Adventures Hub",
+    description: "Adventures section pages and homepage content.",
+    tabs: [
+      {
+        value: "adventures", label: "Adventures", icon: Compass,
+        editors: [
+          { pageKey: "home_adventures",   label: "Home — Adventures Strip",     icon: HomeIcon, description: "Adventures preview strip on the homepage." },
+          { pageKey: "adventures_index",  label: "Adventures Landing",          icon: Compass,  description: "The /adventures listing page." },
+          { pageKey: "detail_journey",    label: "Adventures Detail Template",  icon: FileText, description: "Template used for each adventure detail page." },
+        ],
+      },
+      {
+        value: "lodges", label: "Lodges", icon: Building,
+        editors: [
+          { pageKey: "home_lodges",  label: "Home — Lodges Strip",   icon: HomeIcon,  description: "Lodges preview strip on the homepage." },
+          { pageKey: "lodges_index", label: "Lodges Landing",        icon: Hotel,     description: "The /lodges listing page." },
+          { pageKey: "detail_lodge", label: "Lodge Detail Template", icon: FileText,  description: "Template used for each lodge detail page." },
+        ],
+      },
+    ],
+  },
+  destinations: {
+    title: "Destinations Hub",
+    description: "Destinations section pages and related content.",
+    tabs: [
+      {
+        value: "adventures", label: "Adventures", icon: Compass,
+        editors: [
+          { pageKey: "home_adventures",   label: "Home — Adventures Strip",     icon: HomeIcon, description: "Adventures preview strip on the homepage." },
+          { pageKey: "adventures_index",  label: "Adventures Landing",          icon: Compass,  description: "The /adventures listing page." },
+          { pageKey: "detail_journey",    label: "Adventures Detail Template",  icon: FileText, description: "Template used for each adventure detail page." },
+        ],
+      },
     ],
   },
 };

@@ -40,6 +40,8 @@ const groups: NavGroup[] = [
     items: [
       { to: "/admin/pages-hub/home", label: "Home", icon: LayoutDashboard },
       { to: "/admin/pages-hub/about", label: "About", icon: BookOpen },
+      { to: "/admin/pages-hub/adventures", label: "Adventures", icon: Compass },
+      { to: "/admin/pages-hub/destinations", label: "Destinations", icon: MapPin },
       { to: "/admin/pages/contact", label: "Contact", icon: Mail },
     ],
   },
