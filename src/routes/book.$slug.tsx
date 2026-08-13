@@ -23,7 +23,7 @@ export const Route = createFileRoute("/book/$slug")({
   notFoundComponent: () => (
     <div className="p-10 text-center">
       <p>Journey not found.</p>
-      <Link to="/journeys" className="text-gold underline">Back to journeys</Link>
+      <Link to="/adventures" className="text-gold underline">Back to adventures</Link>
     </div>
   ),
   head: ({ loaderData }) => ({

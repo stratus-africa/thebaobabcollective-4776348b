@@ -73,7 +73,7 @@ export const createBooking = createServerFn({ method: "POST" })
         const body = new URLSearchParams();
         body.set("mode", "payment");
         body.set("success_url", `${origin}/booking/success?booking_id=${booking.id}`);
-        body.set("cancel_url", `${origin}/journeys`);
+        body.set("cancel_url", `${origin}/adventures`);
         body.set("customer_email", data.guest_email);
         body.set("client_reference_id", booking.id);
         body.set("metadata[booking_id]", booking.id);

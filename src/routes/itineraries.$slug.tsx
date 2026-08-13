@@ -42,7 +42,7 @@ export const Route = createFileRoute("/itineraries/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-4xl mb-4">Itinerary not found</h1>
-        <Link to="/journeys" className="text-gold underline">Browse all journeys</Link>
+        <Link to="/adventures" className="text-gold underline">Browse all adventures</Link>
       </main>
       <Footer />
     </div>

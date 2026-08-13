@@ -71,7 +71,7 @@ const TABLE_SINGULAR: Record<string, string> = {
 };
 
 const VIEW_PATH: Record<string, (row: any) => string | null> = {
-  itineraries: (r) => (r.slug ? `/journeys/${r.slug}` : null),
+  itineraries: (r) => (r.slug ? `/adventures/${r.slug}` : null),
   destinations: (r) => (r.slug ? `/destinations/${r.slug}` : null),
   lodges: (r) => (r.slug ? `/lodges/${r.slug}` : null),
   journal_articles: (r) => (r.slug ? `/journal/${r.slug}` : null),

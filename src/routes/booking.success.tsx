@@ -33,8 +33,8 @@ function BookingSuccess() {
             </p>
           )}
           <div className="flex justify-center gap-4">
-            <Link to="/journeys" className="inline-flex items-center border border-gold text-gold uppercase tracking-[0.25em] text-[11px] px-5 py-3 hover:bg-gold hover:text-gold-foreground">
-              View journeys
+            <Link to="/adventures" className="inline-flex items-center border border-gold text-gold uppercase tracking-[0.25em] text-[11px] px-5 py-3 hover:bg-gold hover:text-gold-foreground">
+              View adventures
             </Link>
             <Link to="/contact" className="inline-flex items-center text-foreground/70 hover:text-foreground uppercase tracking-[0.25em] text-[11px] px-5 py-3">
               Browse more
