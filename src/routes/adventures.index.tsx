@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { z } from "zod";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { zodValidator } from "@tanstack/zod-adapter";
 import {
   ArrowRight,
   Check,
