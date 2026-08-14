@@ -75,7 +75,7 @@ const VIEW_PATH: Record<string, (row: any) => string | null> = {
   destinations: (r) => (r.slug ? `/destinations/${r.slug}` : null),
   lodges: (r) => (r.slug ? `/lodges/${r.slug}` : null),
   journal_articles: (r) => (r.slug ? `/journal/${r.slug}` : null),
-  journey_categories: (r) => (r.slug ? `/journeys?cat=${r.slug}` : null),
+  journey_categories: () => "/adventures",
   testimonials: () => null,
   faqs: () => null,
 };
@@ -582,7 +582,9 @@ function ContentAdmin() {
 
       {/* Card grid */}
       {isLoading ? (
-        <div className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}>
+        <div
+          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
+        >
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="border border-border bg-background overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -598,7 +600,9 @@ function ContentAdmin() {
           No {label.toLowerCase()} match your filters.
         </div>
       ) : (
-        <div className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}>
+        <div
+          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
+        >
           {filtered.map((row: any) => {
             const img = imageField ? row[imageField] : null;
             const title = row.name ?? row.title ?? row.question ?? "Untitled";
