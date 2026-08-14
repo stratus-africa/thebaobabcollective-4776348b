@@ -42,6 +42,55 @@ export type AdventuresPage = {
   signatures: AdventuresSignature[];
 };
 
+export function slugifyAdventureSegment(input: string): string {
+  return String(input ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-");
+}
+
+export function buildAdventureSlug(name: string, existingSlugs: Iterable<string> = []): string {
+  const base = slugifyAdventureSegment(name || "untitled-adventure") || "untitled-adventure";
+  const seen = new Set(
+    Array.from(existingSlugs)
+      .map((value) => String(value || "").trim())
+      .filter(Boolean),
+  );
+  if (!seen.has(base)) return base;
+
+  let suffix = 2;
+  let candidate = `${base}-${suffix}`;
+  while (seen.has(candidate)) {
+    suffix += 1;
+    candidate = `${base}-${suffix}`;
+  }
+  return candidate;
+}
+
+export function normalizeAdventureSignatures(
+  signatures: AdventuresSignature[] | null | undefined,
+): AdventuresSignature[] {
+  const list = (signatures ?? []).map((item) => ({ ...item }));
+  const seen = new Set<string>();
+
+  return list.map((item) => {
+    const raw = typeof item.slug === "string" ? item.slug.trim() : "";
+    const safeRaw = raw && raw === slugifyAdventureSegment(raw) ? raw : "";
+    const base = safeRaw || slugifyAdventureSegment(item.name || "untitled-adventure") || "untitled-adventure";
+    const candidate = buildAdventureSlug(base, seen);
+    seen.add(candidate);
+
+    return {
+      ...item,
+      slug: candidate,
+      name: item.name ?? "",
+    };
+  });
+}
+
 export const adventuresDefaults: AdventuresPage = {
   hero: {
     eyebrow: "Adventures",
@@ -72,13 +121,13 @@ export const getAdventuresPage = createServerFn({ method: "GET" }).handler(async
     .limit(1)
     .maybeSingle();
   if (!data) return adventuresDefaults;
-  return {
+  const page: AdventuresPage = {
     id: (data as any).id,
     hero: { ...adventuresDefaults.hero, ...((data as any).hero ?? {}) },
-
     cta: { ...adventuresDefaults.cta, ...((data as any).cta ?? {}) },
-    signatures: ((data as any).signatures ?? []) as AdventuresSignature[],
+    signatures: normalizeAdventureSignatures(((data as any).signatures ?? []) as AdventuresSignature[]),
   };
+  return page;
 });
 
 const SavePayload = z.object({
@@ -118,15 +167,29 @@ const SavePayload = z.object({
   ),
 });
 
+const normalizeSaveInput = (d: unknown) => {
+  if (!d || typeof d !== "object") return SavePayload.parse(d);
+  const value = d as any;
+  return SavePayload.parse({
+    ...value,
+    signatures: normalizeAdventureSignatures(Array.isArray(value.signatures) ? value.signatures : []),
+  });
+};
+
 export const saveAdventuresPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => SavePayload.parse(d))
+  .inputValidator((d: unknown) => normalizeSaveInput(d))
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
     });
     if (!isAdmin) throw new Error("Forbidden");
+
+    const cleaned = {
+      ...data,
+      signatures: normalizeAdventureSignatures(data.signatures),
+    };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: existing } = await supabaseAdmin
@@ -135,7 +198,7 @@ export const saveAdventuresPage = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
     const payload = {
-      ...data,
+      ...cleaned,
       updated_by: context.userId,
       singleton: true,
     } as any;
