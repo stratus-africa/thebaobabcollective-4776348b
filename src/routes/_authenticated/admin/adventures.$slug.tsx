@@ -59,24 +59,12 @@ function AdminAdventureEdit() {
 
   const [draft, setDraft] = useState<AdventuresPage>(adventuresDefaults);
   const [saving, setSaving] = useState(false);
-  // Track which item we're editing by its array position, not by its live slug value.
-  // The slug field can change as the user types (auto-generated from name, or edited
-  // directly), and re-matching against the URL param on every render would cause the
-  // item to "disappear" the moment its slug no longer equals the original URL slug.
-  const [matchedIdx, setMatchedIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (data) setDraft(data);
   }, [data]);
 
-  useEffect(() => {
-    if (matchedIdx === null && draft.signatures.length > 0) {
-      const idx = draft.signatures.findIndex((s) => s.slug === slug);
-      if (idx >= 0) setMatchedIdx(idx);
-    }
-  }, [draft.signatures, slug, matchedIdx]);
-
-  const adventure = matchedIdx !== null ? draft.signatures[matchedIdx] : undefined;
+  const adventure = draft.signatures.find((s) => s.slug === slug);
 
   async function save() {
     if (!adventure) return;
@@ -150,10 +138,12 @@ function AdminAdventureEdit() {
           <AdventureForm
             adventure={adventure}
             onUpdate={(updated) => {
-              if (matchedIdx === null) return;
-              const copy = draft.signatures.slice();
-              copy[matchedIdx] = updated;
-              setDraft({ ...draft, signatures: copy });
+              const idx = draft.signatures.findIndex((s) => s.slug === slug);
+              if (idx >= 0) {
+                const copy = draft.signatures.slice();
+                copy[idx] = updated;
+                setDraft({ ...draft, signatures: copy });
+              }
             }}
           />
         </div>
@@ -186,11 +176,7 @@ function AdventureForm({
           <Input
             value={adventure.name}
             onChange={(e) =>
-              set({
-                ...adventure,
-                name: e.target.value,
-                slug: !adventure.slug || adventure.slug.startsWith("new-") ? slugify(e.target.value) : adventure.slug,
-              })
+              set({ ...adventure, name: e.target.value, slug: adventure.slug || slugify(e.target.value) })
             }
           />
         </Field>
