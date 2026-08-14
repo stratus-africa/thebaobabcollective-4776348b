@@ -28,7 +28,6 @@ import {
   type AdventuresPage,
   type AdventuresSignature,
   adventuresDefaults,
-  buildAdventureSlug,
 } from "@/lib/adventures.functions";
 import { adminUploadImage } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
@@ -37,6 +36,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 export const Route = createFileRoute("/_authenticated/admin/adventures")({
   component: AdminAdventures,
@@ -313,8 +320,8 @@ function SignatureItineraries({
   draft: AdventuresPage;
   setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
 }) {
-  const navigate = useNavigate();
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   const moveTo = (from: number, to: number) => {
     if (from === to || to < 0 || to >= draft.signatures.length) return;
@@ -329,29 +336,12 @@ function SignatureItineraries({
   };
 
   const addNew = () => {
-    const nextName = `New adventure ${draft.signatures.length + 1}`;
-    const base = nextName.trim() || "New adventure";
-    const existing = new Set(draft.signatures.map((item) => item.slug).filter(Boolean));
-    let slug =
-      base
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "new-adventure";
-    let n = 2;
-    while (existing.has(slug)) {
-      slug = `${base
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")}-${n}`;
-      n += 1;
-    }
-
     setDraft({
       ...draft,
       signatures: [
         ...draft.signatures,
         {
-          slug,
+          slug: `new-${Date.now().toString(36)}`,
           name: "",
           region: "",
           terrain: "",
@@ -437,21 +427,24 @@ function SignatureItineraries({
                 title="Edit"
                 aria-label={`Edit ${item.name || "adventure"}`}
                 onClick={() => {
-                  const nextSlug =
-                    item.slug ||
-                    buildAdventureSlug(
-                      item.name || "untitled-adventure",
-                      draft.signatures.map((v) => v.slug),
-                    );
-                  if (!item.slug) {
-                    const next = { ...item, slug: nextSlug };
-                    const list = draft.signatures.map((entry, i) => (i === idx ? next : entry));
-                    setDraft({ ...draft, signatures: list });
+                  let targetSlug = item.slug;
+                  if (!targetSlug) {
+                    // Legacy/stuck item with no slug yet — generate one now instead of
+                    // permanently blocking access to the edit page.
+                    const base = item.name ? slugify(item.name) : "";
+                    targetSlug = base || `new-${Date.now().toString(36)}`;
+                    const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
+                    let unique = targetSlug;
+                    let n = 2;
+                    while (existingSlugs.has(unique)) {
+                      unique = `${targetSlug}-${n++}`;
+                    }
+                    targetSlug = unique;
+                    const copy = draft.signatures.slice();
+                    copy[idx] = { ...item, slug: targetSlug };
+                    setDraft({ ...draft, signatures: copy });
                   }
-                  navigate({
-                    to: "/admin/adventures/$slug" as any,
-                    params: { slug: nextSlug } as any,
-                  });
+                  navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
                 }}
               >
                 <Edit className="w-4 h-4" />
