@@ -8,892 +8,912 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route";
-import { Route as AboutRouteImport } from "./routes/about";
-import { Route as AdventuresRouteImport } from "./routes/adventures";
-import { Route as AuthRouteImport } from "./routes/auth";
-import { Route as ContactRouteImport } from "./routes/contact";
-import { Route as FaqRouteImport } from "./routes/faq";
-import { Route as JournalRouteImport } from "./routes/journal";
-import { Route as PrivateTravelRouteImport } from "./routes/private-travel";
-import { Route as TestimonialsRouteImport } from "./routes/testimonials";
-import { Route as AuthenticatedAdminRouteRouteImport } from "./routes/_authenticated/admin/route";
-import { Route as AdventuresIndexRouteImport } from "./routes/adventures.index";
-import { Route as AdventuresSlugRouteImport } from "./routes/adventures.$slug";
-import { Route as BookSlugRouteImport } from "./routes/book.$slug";
-import { Route as BookingSuccessRouteImport } from "./routes/booking.success";
-import { Route as DestinationsIndexRouteImport } from "./routes/destinations.index";
-import { Route as DestinationsSlugRouteImport } from "./routes/destinations.$slug";
-import { Route as EmailUnsubscribeRouteImport } from "./routes/email/unsubscribe";
-import { Route as ItinerariesSlugRouteImport } from "./routes/itineraries.$slug";
-import { Route as JournalSlugRouteImport } from "./routes/journal.$slug";
-import { Route as LodgesIndexRouteImport } from "./routes/lodges.index";
-import { Route as LodgesSlugRouteImport } from "./routes/lodges.$slug";
-import { Route as AuthenticatedAdminIndexRouteImport } from "./routes/_authenticated/admin/index";
-import { Route as AuthenticatedAdminAdventuresRouteImport } from "./routes/_authenticated/admin/adventures";
-import { Route as AuthenticatedAdminEnquiriesRouteImport } from "./routes/_authenticated/admin/enquiries";
-import { Route as AuthenticatedAdminJournalRouteImport } from "./routes/_authenticated/admin/journal";
-import { Route as AuthenticatedAdminMenuRouteImport } from "./routes/_authenticated/admin/menu";
-import { Route as AuthenticatedAdminPrivateTravelRouteImport } from "./routes/_authenticated/admin/private-travel";
-import { Route as AuthenticatedAdminSettingsRouteImport } from "./routes/_authenticated/admin/settings";
-import { Route as AuthenticatedAdminSubscribersRouteImport } from "./routes/_authenticated/admin/subscribers";
-import { Route as LovableEmailSuppressionRouteImport } from "./routes/lovable/email/suppression";
-import { Route as AuthenticatedAdminContentTableRouteImport } from "./routes/_authenticated/admin/content.$table";
-import { Route as AuthenticatedAdminPagesHubSectionRouteImport } from "./routes/_authenticated/admin/pages-hub.$section";
-import { Route as AuthenticatedAdminPagesPageRouteImport } from "./routes/_authenticated/admin/pages.$page";
-import { Route as ApiPublicMediaSplatRouteImport } from "./routes/api/public/media/$";
-import { Route as ApiPublicPaymentsWebhookRouteImport } from "./routes/api/public/payments/webhook";
-import { Route as LovableEmailAuthPreviewRouteImport } from "./routes/lovable/email/auth/preview";
-import { Route as LovableEmailAuthWebhookRouteImport } from "./routes/lovable/email/auth/webhook";
-import { Route as LovableEmailQueueProcessRouteImport } from "./routes/lovable/email/queue/process";
-import { Route as LovableEmailTransactionalPreviewRouteImport } from "./routes/lovable/email/transactional/preview";
-import { Route as LovableEmailTransactionalSendRouteImport } from "./routes/lovable/email/transactional/send";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdventuresRouteImport } from './routes/adventures'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as JournalRouteImport } from './routes/journal'
+import { Route as PrivateTravelRouteImport } from './routes/private-travel'
+import { Route as TestimonialsRouteImport } from './routes/testimonials'
+import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AdventuresIndexRouteImport } from './routes/adventures.index'
+import { Route as AdventuresSlugRouteImport } from './routes/adventures.$slug'
+import { Route as BookSlugRouteImport } from './routes/book.$slug'
+import { Route as BookingSuccessRouteImport } from './routes/booking.success'
+import { Route as DestinationsIndexRouteImport } from './routes/destinations.index'
+import { Route as DestinationsSlugRouteImport } from './routes/destinations.$slug'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ItinerariesSlugRouteImport } from './routes/itineraries.$slug'
+import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
+import { Route as LodgesIndexRouteImport } from './routes/lodges.index'
+import { Route as LodgesSlugRouteImport } from './routes/lodges.$slug'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminAdventuresRouteImport } from './routes/_authenticated/admin/adventures'
+import { Route as AuthenticatedAdminEnquiriesRouteImport } from './routes/_authenticated/admin/enquiries'
+import { Route as AuthenticatedAdminJournalRouteImport } from './routes/_authenticated/admin/journal'
+import { Route as AuthenticatedAdminMenuRouteImport } from './routes/_authenticated/admin/menu'
+import { Route as AuthenticatedAdminPrivateTravelRouteImport } from './routes/_authenticated/admin/private-travel'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminSubscribersRouteImport } from './routes/_authenticated/admin/subscribers'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as AuthenticatedAdminContentTableRouteImport } from './routes/_authenticated/admin/content.$table'
+import { Route as AuthenticatedAdminPagesHubSectionRouteImport } from './routes/_authenticated/admin/pages-hub.$section'
+import { Route as AuthenticatedAdminPagesPageRouteImport } from './routes/_authenticated/admin/pages.$page'
+import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: "/_authenticated",
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AboutRoute = AboutRouteImport.update({
-  id: "/about",
-  path: "/about",
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdventuresRoute = AdventuresRouteImport.update({
-  id: "/adventures",
-  path: "/adventures",
+  id: '/adventures',
+  path: '/adventures',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthRoute = AuthRouteImport.update({
-  id: "/auth",
-  path: "/auth",
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ContactRoute = ContactRouteImport.update({
-  id: "/contact",
-  path: "/contact",
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const FaqRoute = FaqRouteImport.update({
-  id: "/faq",
-  path: "/faq",
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const JournalRoute = JournalRouteImport.update({
-  id: "/journal",
-  path: "/journal",
+  id: '/journal',
+  path: '/journal',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const PrivateTravelRoute = PrivateTravelRouteImport.update({
-  id: "/private-travel",
-  path: "/private-travel",
+  id: '/private-travel',
+  path: '/private-travel',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TestimonialsRoute = TestimonialsRouteImport.update({
-  id: "/testimonials",
-  path: "/testimonials",
+  id: '/testimonials',
+  path: '/testimonials',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
-  id: "/admin",
-  path: "/admin",
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
+} as any)
 const AdventuresIndexRoute = AdventuresIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AdventuresRoute,
-} as any);
+} as any)
 const AdventuresSlugRoute = AdventuresSlugRouteImport.update({
-  id: "/$slug",
-  path: "/$slug",
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => AdventuresRoute,
-} as any);
+} as any)
 const BookSlugRoute = BookSlugRouteImport.update({
-  id: "/book/$slug",
-  path: "/book/$slug",
+  id: '/book/$slug',
+  path: '/book/$slug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const BookingSuccessRoute = BookingSuccessRouteImport.update({
-  id: "/booking/success",
-  path: "/booking/success",
+  id: '/booking/success',
+  path: '/booking/success',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DestinationsIndexRoute = DestinationsIndexRouteImport.update({
-  id: "/destinations/",
-  path: "/destinations/",
+  id: '/destinations/',
+  path: '/destinations/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DestinationsSlugRoute = DestinationsSlugRouteImport.update({
-  id: "/destinations/$slug",
-  path: "/destinations/$slug",
+  id: '/destinations/$slug',
+  path: '/destinations/$slug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: "/email/unsubscribe",
-  path: "/email/unsubscribe",
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ItinerariesSlugRoute = ItinerariesSlugRouteImport.update({
-  id: "/itineraries/$slug",
-  path: "/itineraries/$slug",
+  id: '/itineraries/$slug',
+  path: '/itineraries/$slug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const JournalSlugRoute = JournalSlugRouteImport.update({
-  id: "/$slug",
-  path: "/$slug",
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => JournalRoute,
-} as any);
+} as any)
 const LodgesIndexRoute = LodgesIndexRouteImport.update({
-  id: "/lodges/",
-  path: "/lodges/",
+  id: '/lodges/',
+  path: '/lodges/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LodgesSlugRoute = LodgesSlugRouteImport.update({
-  id: "/lodges/$slug",
-  path: "/lodges/$slug",
+  id: '/lodges/$slug',
+  path: '/lodges/$slug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminAdventuresRoute = AuthenticatedAdminAdventuresRouteImport.update({
-  id: "/adventures",
-  path: "/adventures",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminEnquiriesRoute = AuthenticatedAdminEnquiriesRouteImport.update({
-  id: "/enquiries",
-  path: "/enquiries",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminJournalRoute = AuthenticatedAdminJournalRouteImport.update({
-  id: "/journal",
-  path: "/journal",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
+} as any)
+const AuthenticatedAdminAdventuresRoute =
+  AuthenticatedAdminAdventuresRouteImport.update({
+    id: '/adventures',
+    path: '/adventures',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminEnquiriesRoute =
+  AuthenticatedAdminEnquiriesRouteImport.update({
+    id: '/enquiries',
+    path: '/enquiries',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminJournalRoute =
+  AuthenticatedAdminJournalRouteImport.update({
+    id: '/journal',
+    path: '/journal',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminMenuRoute = AuthenticatedAdminMenuRouteImport.update({
-  id: "/menu",
-  path: "/menu",
+  id: '/menu',
+  path: '/menu',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminPrivateTravelRoute = AuthenticatedAdminPrivateTravelRouteImport.update({
-  id: "/private-travel",
-  path: "/private-travel",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminSettingsRoute = AuthenticatedAdminSettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminSubscribersRoute = AuthenticatedAdminSubscribersRouteImport.update({
-  id: "/subscribers",
-  path: "/subscribers",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
+} as any)
+const AuthenticatedAdminPrivateTravelRoute =
+  AuthenticatedAdminPrivateTravelRouteImport.update({
+    id: '/private-travel',
+    path: '/private-travel',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminSubscribersRoute =
+  AuthenticatedAdminSubscribersRouteImport.update({
+    id: '/subscribers',
+    path: '/subscribers',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: "/lovable/email/suppression",
-  path: "/lovable/email/suppression",
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
-} as any);
-const AuthenticatedAdminContentTableRoute = AuthenticatedAdminContentTableRouteImport.update({
-  id: "/content/$table",
-  path: "/content/$table",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminPagesHubSectionRoute = AuthenticatedAdminPagesHubSectionRouteImport.update({
-  id: "/pages-hub/$section",
-  path: "/pages-hub/$section",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
-const AuthenticatedAdminPagesPageRoute = AuthenticatedAdminPagesPageRouteImport.update({
-  id: "/pages/$page",
-  path: "/pages/$page",
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any);
+} as any)
+const AuthenticatedAdminContentTableRoute =
+  AuthenticatedAdminContentTableRouteImport.update({
+    id: '/content/$table',
+    path: '/content/$table',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminPagesHubSectionRoute =
+  AuthenticatedAdminPagesHubSectionRouteImport.update({
+    id: '/pages-hub/$section',
+    path: '/pages-hub/$section',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminPagesPageRoute =
+  AuthenticatedAdminPagesPageRouteImport.update({
+    id: '/pages/$page',
+    path: '/pages/$page',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
-  id: "/api/public/media/$",
-  path: "/api/public/media/$",
+  id: '/api/public/media/$',
+  path: '/api/public/media/$',
   getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicPaymentsWebhookRoute = ApiPublicPaymentsWebhookRouteImport.update({
-  id: "/api/public/payments/webhook",
-  path: "/api/public/payments/webhook",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: "/lovable/email/auth/preview",
-  path: "/lovable/email/auth/preview",
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: "/lovable/email/auth/webhook",
-  path: "/lovable/email/auth/webhook",
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
-} as any);
-const LovableEmailQueueProcessRoute = LovableEmailQueueProcessRouteImport.update({
-  id: "/lovable/email/queue/process",
-  path: "/lovable/email/queue/process",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const LovableEmailTransactionalPreviewRoute = LovableEmailTransactionalPreviewRouteImport.update({
-  id: "/lovable/email/transactional/preview",
-  path: "/lovable/email/transactional/preview",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const LovableEmailTransactionalSendRoute = LovableEmailTransactionalSendRouteImport.update({
-  id: "/lovable/email/transactional/send",
-  path: "/lovable/email/transactional/send",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
-  "/adventures": typeof AdventuresRouteWithChildren;
-  "/auth": typeof AuthRoute;
-  "/contact": typeof ContactRoute;
-  "/faq": typeof FaqRoute;
-  "/journal": typeof JournalRouteWithChildren;
-  "/private-travel": typeof PrivateTravelRoute;
-  "/testimonials": typeof TestimonialsRoute;
-  "/admin": typeof AuthenticatedAdminRouteRouteWithChildren;
-  "/adventures/$slug": typeof AdventuresSlugRoute;
-  "/book/$slug": typeof BookSlugRoute;
-  "/booking/success": typeof BookingSuccessRoute;
-  "/destinations/$slug": typeof DestinationsSlugRoute;
-  "/email/unsubscribe": typeof EmailUnsubscribeRoute;
-  "/itineraries/$slug": typeof ItinerariesSlugRoute;
-  "/journal/$slug": typeof JournalSlugRoute;
-  "/lodges/$slug": typeof LodgesSlugRoute;
-  "/adventures/": typeof AdventuresIndexRoute;
-  "/destinations/": typeof DestinationsIndexRoute;
-  "/lodges/": typeof LodgesIndexRoute;
-  "/admin/adventures": typeof AuthenticatedAdminAdventuresRoute;
-  "/admin/enquiries": typeof AuthenticatedAdminEnquiriesRoute;
-  "/admin/journal": typeof AuthenticatedAdminJournalRoute;
-  "/admin/menu": typeof AuthenticatedAdminMenuRoute;
-  "/admin/private-travel": typeof AuthenticatedAdminPrivateTravelRoute;
-  "/admin/settings": typeof AuthenticatedAdminSettingsRoute;
-  "/admin/subscribers": typeof AuthenticatedAdminSubscribersRoute;
-  "/lovable/email/suppression": typeof LovableEmailSuppressionRoute;
-  "/admin/": typeof AuthenticatedAdminIndexRoute;
-  "/admin/content/$table": typeof AuthenticatedAdminContentTableRoute;
-  "/admin/pages-hub/$section": typeof AuthenticatedAdminPagesHubSectionRoute;
-  "/admin/pages/$page": typeof AuthenticatedAdminPagesPageRoute;
-  "/api/public/media/$": typeof ApiPublicMediaSplatRoute;
-  "/api/public/payments/webhook": typeof ApiPublicPaymentsWebhookRoute;
-  "/lovable/email/auth/preview": typeof LovableEmailAuthPreviewRoute;
-  "/lovable/email/auth/webhook": typeof LovableEmailAuthWebhookRoute;
-  "/lovable/email/queue/process": typeof LovableEmailQueueProcessRoute;
-  "/lovable/email/transactional/preview": typeof LovableEmailTransactionalPreviewRoute;
-  "/lovable/email/transactional/send": typeof LovableEmailTransactionalSendRoute;
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/adventures': typeof AdventuresRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/journal': typeof JournalRouteWithChildren
+  '/private-travel': typeof PrivateTravelRoute
+  '/testimonials': typeof TestimonialsRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/adventures/$slug': typeof AdventuresSlugRoute
+  '/book/$slug': typeof BookSlugRoute
+  '/booking/success': typeof BookingSuccessRoute
+  '/destinations/$slug': typeof DestinationsSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/itineraries/$slug': typeof ItinerariesSlugRoute
+  '/journal/$slug': typeof JournalSlugRoute
+  '/lodges/$slug': typeof LodgesSlugRoute
+  '/adventures/': typeof AdventuresIndexRoute
+  '/destinations/': typeof DestinationsIndexRoute
+  '/lodges/': typeof LodgesIndexRoute
+  '/admin/adventures': typeof AuthenticatedAdminAdventuresRoute
+  '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
+  '/admin/journal': typeof AuthenticatedAdminJournalRoute
+  '/admin/menu': typeof AuthenticatedAdminMenuRoute
+  '/admin/private-travel': typeof AuthenticatedAdminPrivateTravelRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
+  '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
-  "/auth": typeof AuthRoute;
-  "/contact": typeof ContactRoute;
-  "/faq": typeof FaqRoute;
-  "/journal": typeof JournalRouteWithChildren;
-  "/private-travel": typeof PrivateTravelRoute;
-  "/testimonials": typeof TestimonialsRoute;
-  "/adventures/$slug": typeof AdventuresSlugRoute;
-  "/book/$slug": typeof BookSlugRoute;
-  "/booking/success": typeof BookingSuccessRoute;
-  "/destinations/$slug": typeof DestinationsSlugRoute;
-  "/email/unsubscribe": typeof EmailUnsubscribeRoute;
-  "/itineraries/$slug": typeof ItinerariesSlugRoute;
-  "/journal/$slug": typeof JournalSlugRoute;
-  "/lodges/$slug": typeof LodgesSlugRoute;
-  "/adventures": typeof AdventuresIndexRoute;
-  "/destinations": typeof DestinationsIndexRoute;
-  "/lodges": typeof LodgesIndexRoute;
-  "/admin/adventures": typeof AuthenticatedAdminAdventuresRoute;
-  "/admin/enquiries": typeof AuthenticatedAdminEnquiriesRoute;
-  "/admin/journal": typeof AuthenticatedAdminJournalRoute;
-  "/admin/menu": typeof AuthenticatedAdminMenuRoute;
-  "/admin/private-travel": typeof AuthenticatedAdminPrivateTravelRoute;
-  "/admin/settings": typeof AuthenticatedAdminSettingsRoute;
-  "/admin/subscribers": typeof AuthenticatedAdminSubscribersRoute;
-  "/lovable/email/suppression": typeof LovableEmailSuppressionRoute;
-  "/admin": typeof AuthenticatedAdminIndexRoute;
-  "/admin/content/$table": typeof AuthenticatedAdminContentTableRoute;
-  "/admin/pages-hub/$section": typeof AuthenticatedAdminPagesHubSectionRoute;
-  "/admin/pages/$page": typeof AuthenticatedAdminPagesPageRoute;
-  "/api/public/media/$": typeof ApiPublicMediaSplatRoute;
-  "/api/public/payments/webhook": typeof ApiPublicPaymentsWebhookRoute;
-  "/lovable/email/auth/preview": typeof LovableEmailAuthPreviewRoute;
-  "/lovable/email/auth/webhook": typeof LovableEmailAuthWebhookRoute;
-  "/lovable/email/queue/process": typeof LovableEmailQueueProcessRoute;
-  "/lovable/email/transactional/preview": typeof LovableEmailTransactionalPreviewRoute;
-  "/lovable/email/transactional/send": typeof LovableEmailTransactionalSendRoute;
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/journal': typeof JournalRouteWithChildren
+  '/private-travel': typeof PrivateTravelRoute
+  '/testimonials': typeof TestimonialsRoute
+  '/adventures/$slug': typeof AdventuresSlugRoute
+  '/book/$slug': typeof BookSlugRoute
+  '/booking/success': typeof BookingSuccessRoute
+  '/destinations/$slug': typeof DestinationsSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/itineraries/$slug': typeof ItinerariesSlugRoute
+  '/journal/$slug': typeof JournalSlugRoute
+  '/lodges/$slug': typeof LodgesSlugRoute
+  '/adventures': typeof AdventuresIndexRoute
+  '/destinations': typeof DestinationsIndexRoute
+  '/lodges': typeof LodgesIndexRoute
+  '/admin/adventures': typeof AuthenticatedAdminAdventuresRoute
+  '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
+  '/admin/journal': typeof AuthenticatedAdminJournalRoute
+  '/admin/menu': typeof AuthenticatedAdminMenuRoute
+  '/admin/private-travel': typeof AuthenticatedAdminPrivateTravelRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
+  '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/_authenticated": typeof AuthenticatedRouteRouteWithChildren;
-  "/about": typeof AboutRoute;
-  "/adventures": typeof AdventuresRouteWithChildren;
-  "/auth": typeof AuthRoute;
-  "/contact": typeof ContactRoute;
-  "/faq": typeof FaqRoute;
-  "/journal": typeof JournalRouteWithChildren;
-  "/private-travel": typeof PrivateTravelRoute;
-  "/testimonials": typeof TestimonialsRoute;
-  "/_authenticated/admin": typeof AuthenticatedAdminRouteRouteWithChildren;
-  "/adventures/$slug": typeof AdventuresSlugRoute;
-  "/book/$slug": typeof BookSlugRoute;
-  "/booking/success": typeof BookingSuccessRoute;
-  "/destinations/$slug": typeof DestinationsSlugRoute;
-  "/email/unsubscribe": typeof EmailUnsubscribeRoute;
-  "/itineraries/$slug": typeof ItinerariesSlugRoute;
-  "/journal/$slug": typeof JournalSlugRoute;
-  "/lodges/$slug": typeof LodgesSlugRoute;
-  "/adventures/": typeof AdventuresIndexRoute;
-  "/destinations/": typeof DestinationsIndexRoute;
-  "/lodges/": typeof LodgesIndexRoute;
-  "/_authenticated/admin/adventures": typeof AuthenticatedAdminAdventuresRoute;
-  "/_authenticated/admin/enquiries": typeof AuthenticatedAdminEnquiriesRoute;
-  "/_authenticated/admin/journal": typeof AuthenticatedAdminJournalRoute;
-  "/_authenticated/admin/menu": typeof AuthenticatedAdminMenuRoute;
-  "/_authenticated/admin/private-travel": typeof AuthenticatedAdminPrivateTravelRoute;
-  "/_authenticated/admin/settings": typeof AuthenticatedAdminSettingsRoute;
-  "/_authenticated/admin/subscribers": typeof AuthenticatedAdminSubscribersRoute;
-  "/lovable/email/suppression": typeof LovableEmailSuppressionRoute;
-  "/_authenticated/admin/": typeof AuthenticatedAdminIndexRoute;
-  "/_authenticated/admin/content/$table": typeof AuthenticatedAdminContentTableRoute;
-  "/_authenticated/admin/pages-hub/$section": typeof AuthenticatedAdminPagesHubSectionRoute;
-  "/_authenticated/admin/pages/$page": typeof AuthenticatedAdminPagesPageRoute;
-  "/api/public/media/$": typeof ApiPublicMediaSplatRoute;
-  "/api/public/payments/webhook": typeof ApiPublicPaymentsWebhookRoute;
-  "/lovable/email/auth/preview": typeof LovableEmailAuthPreviewRoute;
-  "/lovable/email/auth/webhook": typeof LovableEmailAuthWebhookRoute;
-  "/lovable/email/queue/process": typeof LovableEmailQueueProcessRoute;
-  "/lovable/email/transactional/preview": typeof LovableEmailTransactionalPreviewRoute;
-  "/lovable/email/transactional/send": typeof LovableEmailTransactionalSendRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/about': typeof AboutRoute
+  '/adventures': typeof AdventuresRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/journal': typeof JournalRouteWithChildren
+  '/private-travel': typeof PrivateTravelRoute
+  '/testimonials': typeof TestimonialsRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/adventures/$slug': typeof AdventuresSlugRoute
+  '/book/$slug': typeof BookSlugRoute
+  '/booking/success': typeof BookingSuccessRoute
+  '/destinations/$slug': typeof DestinationsSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/itineraries/$slug': typeof ItinerariesSlugRoute
+  '/journal/$slug': typeof JournalSlugRoute
+  '/lodges/$slug': typeof LodgesSlugRoute
+  '/adventures/': typeof AdventuresIndexRoute
+  '/destinations/': typeof DestinationsIndexRoute
+  '/lodges/': typeof LodgesIndexRoute
+  '/_authenticated/admin/adventures': typeof AuthenticatedAdminAdventuresRoute
+  '/_authenticated/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
+  '/_authenticated/admin/journal': typeof AuthenticatedAdminJournalRoute
+  '/_authenticated/admin/menu': typeof AuthenticatedAdminMenuRoute
+  '/_authenticated/admin/private-travel': typeof AuthenticatedAdminPrivateTravelRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/_authenticated/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
+  '/_authenticated/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/about"
-    | "/adventures"
-    | "/auth"
-    | "/contact"
-    | "/faq"
-    | "/journal"
-    | "/private-travel"
-    | "/testimonials"
-    | "/admin"
-    | "/adventures/$slug"
-    | "/book/$slug"
-    | "/booking/success"
-    | "/destinations/$slug"
-    | "/email/unsubscribe"
-    | "/itineraries/$slug"
-    | "/journal/$slug"
-    | "/lodges/$slug"
-    | "/adventures/"
-    | "/destinations/"
-    | "/lodges/"
-    | "/admin/adventures"
-    | "/admin/enquiries"
-    | "/admin/journal"
-    | "/admin/menu"
-    | "/admin/private-travel"
-    | "/admin/settings"
-    | "/admin/subscribers"
-    | "/lovable/email/suppression"
-    | "/admin/"
-    | "/admin/content/$table"
-    | "/admin/pages-hub/$section"
-    | "/admin/pages/$page"
-    | "/api/public/media/$"
-    | "/api/public/payments/webhook"
-    | "/lovable/email/auth/preview"
-    | "/lovable/email/auth/webhook"
-    | "/lovable/email/queue/process"
-    | "/lovable/email/transactional/preview"
-    | "/lovable/email/transactional/send";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/about'
+    | '/adventures'
+    | '/auth'
+    | '/contact'
+    | '/faq'
+    | '/journal'
+    | '/private-travel'
+    | '/testimonials'
+    | '/admin'
+    | '/adventures/$slug'
+    | '/book/$slug'
+    | '/booking/success'
+    | '/destinations/$slug'
+    | '/email/unsubscribe'
+    | '/itineraries/$slug'
+    | '/journal/$slug'
+    | '/lodges/$slug'
+    | '/adventures/'
+    | '/destinations/'
+    | '/lodges/'
+    | '/admin/adventures'
+    | '/admin/enquiries'
+    | '/admin/journal'
+    | '/admin/menu'
+    | '/admin/private-travel'
+    | '/admin/settings'
+    | '/admin/subscribers'
+    | '/lovable/email/suppression'
+    | '/admin/'
+    | '/admin/content/$table'
+    | '/admin/pages-hub/$section'
+    | '/admin/pages/$page'
+    | '/api/public/media/$'
+    | '/api/public/payments/webhook'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
+    | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/about"
-    | "/auth"
-    | "/contact"
-    | "/faq"
-    | "/journal"
-    | "/private-travel"
-    | "/testimonials"
-    | "/adventures/$slug"
-    | "/book/$slug"
-    | "/booking/success"
-    | "/destinations/$slug"
-    | "/email/unsubscribe"
-    | "/itineraries/$slug"
-    | "/journal/$slug"
-    | "/lodges/$slug"
-    | "/adventures"
-    | "/destinations"
-    | "/lodges"
-    | "/admin/adventures"
-    | "/admin/enquiries"
-    | "/admin/journal"
-    | "/admin/menu"
-    | "/admin/private-travel"
-    | "/admin/settings"
-    | "/admin/subscribers"
-    | "/lovable/email/suppression"
-    | "/admin"
-    | "/admin/content/$table"
-    | "/admin/pages-hub/$section"
-    | "/admin/pages/$page"
-    | "/api/public/media/$"
-    | "/api/public/payments/webhook"
-    | "/lovable/email/auth/preview"
-    | "/lovable/email/auth/webhook"
-    | "/lovable/email/queue/process"
-    | "/lovable/email/transactional/preview"
-    | "/lovable/email/transactional/send";
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/contact'
+    | '/faq'
+    | '/journal'
+    | '/private-travel'
+    | '/testimonials'
+    | '/adventures/$slug'
+    | '/book/$slug'
+    | '/booking/success'
+    | '/destinations/$slug'
+    | '/email/unsubscribe'
+    | '/itineraries/$slug'
+    | '/journal/$slug'
+    | '/lodges/$slug'
+    | '/adventures'
+    | '/destinations'
+    | '/lodges'
+    | '/admin/adventures'
+    | '/admin/enquiries'
+    | '/admin/journal'
+    | '/admin/menu'
+    | '/admin/private-travel'
+    | '/admin/settings'
+    | '/admin/subscribers'
+    | '/lovable/email/suppression'
+    | '/admin'
+    | '/admin/content/$table'
+    | '/admin/pages-hub/$section'
+    | '/admin/pages/$page'
+    | '/api/public/media/$'
+    | '/api/public/payments/webhook'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
+    | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
-    | "__root__"
-    | "/"
-    | "/_authenticated"
-    | "/about"
-    | "/adventures"
-    | "/auth"
-    | "/contact"
-    | "/faq"
-    | "/journal"
-    | "/private-travel"
-    | "/testimonials"
-    | "/_authenticated/admin"
-    | "/adventures/$slug"
-    | "/book/$slug"
-    | "/booking/success"
-    | "/destinations/$slug"
-    | "/email/unsubscribe"
-    | "/itineraries/$slug"
-    | "/journal/$slug"
-    | "/lodges/$slug"
-    | "/adventures/"
-    | "/destinations/"
-    | "/lodges/"
-    | "/_authenticated/admin/adventures"
-    | "/_authenticated/admin/enquiries"
-    | "/_authenticated/admin/journal"
-    | "/_authenticated/admin/menu"
-    | "/_authenticated/admin/private-travel"
-    | "/_authenticated/admin/settings"
-    | "/_authenticated/admin/subscribers"
-    | "/lovable/email/suppression"
-    | "/_authenticated/admin/"
-    | "/_authenticated/admin/content/$table"
-    | "/_authenticated/admin/pages-hub/$section"
-    | "/_authenticated/admin/pages/$page"
-    | "/api/public/media/$"
-    | "/api/public/payments/webhook"
-    | "/lovable/email/auth/preview"
-    | "/lovable/email/auth/webhook"
-    | "/lovable/email/queue/process"
-    | "/lovable/email/transactional/preview"
-    | "/lovable/email/transactional/send";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/about'
+    | '/adventures'
+    | '/auth'
+    | '/contact'
+    | '/faq'
+    | '/journal'
+    | '/private-travel'
+    | '/testimonials'
+    | '/_authenticated/admin'
+    | '/adventures/$slug'
+    | '/book/$slug'
+    | '/booking/success'
+    | '/destinations/$slug'
+    | '/email/unsubscribe'
+    | '/itineraries/$slug'
+    | '/journal/$slug'
+    | '/lodges/$slug'
+    | '/adventures/'
+    | '/destinations/'
+    | '/lodges/'
+    | '/_authenticated/admin/adventures'
+    | '/_authenticated/admin/enquiries'
+    | '/_authenticated/admin/journal'
+    | '/_authenticated/admin/menu'
+    | '/_authenticated/admin/private-travel'
+    | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/subscribers'
+    | '/lovable/email/suppression'
+    | '/_authenticated/admin/'
+    | '/_authenticated/admin/content/$table'
+    | '/_authenticated/admin/pages-hub/$section'
+    | '/_authenticated/admin/pages/$page'
+    | '/api/public/media/$'
+    | '/api/public/payments/webhook'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
+    | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren;
-  AboutRoute: typeof AboutRoute;
-  AdventuresRoute: typeof AdventuresRouteWithChildren;
-  AuthRoute: typeof AuthRoute;
-  ContactRoute: typeof ContactRoute;
-  FaqRoute: typeof FaqRoute;
-  JournalRoute: typeof JournalRouteWithChildren;
-  PrivateTravelRoute: typeof PrivateTravelRoute;
-  TestimonialsRoute: typeof TestimonialsRoute;
-  BookSlugRoute: typeof BookSlugRoute;
-  BookingSuccessRoute: typeof BookingSuccessRoute;
-  DestinationsSlugRoute: typeof DestinationsSlugRoute;
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute;
-  ItinerariesSlugRoute: typeof ItinerariesSlugRoute;
-  LodgesSlugRoute: typeof LodgesSlugRoute;
-  DestinationsIndexRoute: typeof DestinationsIndexRoute;
-  LodgesIndexRoute: typeof LodgesIndexRoute;
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute;
-  ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute;
-  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute;
-  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute;
-  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute;
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute;
-  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute;
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute;
+  IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
+  AdventuresRoute: typeof AdventuresRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ContactRoute: typeof ContactRoute
+  FaqRoute: typeof FaqRoute
+  JournalRoute: typeof JournalRouteWithChildren
+  PrivateTravelRoute: typeof PrivateTravelRoute
+  TestimonialsRoute: typeof TestimonialsRoute
+  BookSlugRoute: typeof BookSlugRoute
+  BookingSuccessRoute: typeof BookingSuccessRoute
+  DestinationsSlugRoute: typeof DestinationsSlugRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ItinerariesSlugRoute: typeof ItinerariesSlugRoute
+  LodgesSlugRoute: typeof LodgesSlugRoute
+  DestinationsIndexRoute: typeof DestinationsIndexRoute
+  LodgesIndexRoute: typeof LodgesIndexRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_authenticated": {
-      id: "/_authenticated";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/about": {
-      id: "/about";
-      path: "/about";
-      fullPath: "/about";
-      preLoaderRoute: typeof AboutRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/adventures": {
-      id: "/adventures";
-      path: "/adventures";
-      fullPath: "/adventures";
-      preLoaderRoute: typeof AdventuresRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/auth": {
-      id: "/auth";
-      path: "/auth";
-      fullPath: "/auth";
-      preLoaderRoute: typeof AuthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/contact": {
-      id: "/contact";
-      path: "/contact";
-      fullPath: "/contact";
-      preLoaderRoute: typeof ContactRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/faq": {
-      id: "/faq";
-      path: "/faq";
-      fullPath: "/faq";
-      preLoaderRoute: typeof FaqRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/journal": {
-      id: "/journal";
-      path: "/journal";
-      fullPath: "/journal";
-      preLoaderRoute: typeof JournalRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/private-travel": {
-      id: "/private-travel";
-      path: "/private-travel";
-      fullPath: "/private-travel";
-      preLoaderRoute: typeof PrivateTravelRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/testimonials": {
-      id: "/testimonials";
-      path: "/testimonials";
-      fullPath: "/testimonials";
-      preLoaderRoute: typeof TestimonialsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_authenticated/admin": {
-      id: "/_authenticated/admin";
-      path: "/admin";
-      fullPath: "/admin";
-      preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/adventures/": {
-      id: "/adventures/";
-      path: "/";
-      fullPath: "/adventures/";
-      preLoaderRoute: typeof AdventuresIndexRouteImport;
-      parentRoute: typeof AdventuresRoute;
-    };
-    "/adventures/$slug": {
-      id: "/adventures/$slug";
-      path: "/$slug";
-      fullPath: "/adventures/$slug";
-      preLoaderRoute: typeof AdventuresSlugRouteImport;
-      parentRoute: typeof AdventuresRoute;
-    };
-    "/book/$slug": {
-      id: "/book/$slug";
-      path: "/book/$slug";
-      fullPath: "/book/$slug";
-      preLoaderRoute: typeof BookSlugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/booking/success": {
-      id: "/booking/success";
-      path: "/booking/success";
-      fullPath: "/booking/success";
-      preLoaderRoute: typeof BookingSuccessRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/destinations/": {
-      id: "/destinations/";
-      path: "/destinations";
-      fullPath: "/destinations/";
-      preLoaderRoute: typeof DestinationsIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/destinations/$slug": {
-      id: "/destinations/$slug";
-      path: "/destinations/$slug";
-      fullPath: "/destinations/$slug";
-      preLoaderRoute: typeof DestinationsSlugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/email/unsubscribe": {
-      id: "/email/unsubscribe";
-      path: "/email/unsubscribe";
-      fullPath: "/email/unsubscribe";
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/itineraries/$slug": {
-      id: "/itineraries/$slug";
-      path: "/itineraries/$slug";
-      fullPath: "/itineraries/$slug";
-      preLoaderRoute: typeof ItinerariesSlugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/journal/$slug": {
-      id: "/journal/$slug";
-      path: "/$slug";
-      fullPath: "/journal/$slug";
-      preLoaderRoute: typeof JournalSlugRouteImport;
-      parentRoute: typeof JournalRoute;
-    };
-    "/lodges/": {
-      id: "/lodges/";
-      path: "/lodges";
-      fullPath: "/lodges/";
-      preLoaderRoute: typeof LodgesIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lodges/$slug": {
-      id: "/lodges/$slug";
-      path: "/lodges/$slug";
-      fullPath: "/lodges/$slug";
-      preLoaderRoute: typeof LodgesSlugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_authenticated/admin/": {
-      id: "/_authenticated/admin/";
-      path: "/";
-      fullPath: "/admin/";
-      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/adventures": {
-      id: "/_authenticated/admin/adventures";
-      path: "/adventures";
-      fullPath: "/admin/adventures";
-      preLoaderRoute: typeof AuthenticatedAdminAdventuresRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/enquiries": {
-      id: "/_authenticated/admin/enquiries";
-      path: "/enquiries";
-      fullPath: "/admin/enquiries";
-      preLoaderRoute: typeof AuthenticatedAdminEnquiriesRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/journal": {
-      id: "/_authenticated/admin/journal";
-      path: "/journal";
-      fullPath: "/admin/journal";
-      preLoaderRoute: typeof AuthenticatedAdminJournalRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/menu": {
-      id: "/_authenticated/admin/menu";
-      path: "/menu";
-      fullPath: "/admin/menu";
-      preLoaderRoute: typeof AuthenticatedAdminMenuRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/private-travel": {
-      id: "/_authenticated/admin/private-travel";
-      path: "/private-travel";
-      fullPath: "/admin/private-travel";
-      preLoaderRoute: typeof AuthenticatedAdminPrivateTravelRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/settings": {
-      id: "/_authenticated/admin/settings";
-      path: "/settings";
-      fullPath: "/admin/settings";
-      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/subscribers": {
-      id: "/_authenticated/admin/subscribers";
-      path: "/subscribers";
-      fullPath: "/admin/subscribers";
-      preLoaderRoute: typeof AuthenticatedAdminSubscribersRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/lovable/email/suppression": {
-      id: "/lovable/email/suppression";
-      path: "/lovable/email/suppression";
-      fullPath: "/lovable/email/suppression";
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_authenticated/admin/content/$table": {
-      id: "/_authenticated/admin/content/$table";
-      path: "/content/$table";
-      fullPath: "/admin/content/$table";
-      preLoaderRoute: typeof AuthenticatedAdminContentTableRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/pages-hub/$section": {
-      id: "/_authenticated/admin/pages-hub/$section";
-      path: "/pages-hub/$section";
-      fullPath: "/admin/pages-hub/$section";
-      preLoaderRoute: typeof AuthenticatedAdminPagesHubSectionRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/_authenticated/admin/pages/$page": {
-      id: "/_authenticated/admin/pages/$page";
-      path: "/pages/$page";
-      fullPath: "/admin/pages/$page";
-      preLoaderRoute: typeof AuthenticatedAdminPagesPageRouteImport;
-      parentRoute: typeof AuthenticatedAdminRouteRoute;
-    };
-    "/api/public/media/$": {
-      id: "/api/public/media/$";
-      path: "/api/public/media/$";
-      fullPath: "/api/public/media/$";
-      preLoaderRoute: typeof ApiPublicMediaSplatRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/payments/webhook": {
-      id: "/api/public/payments/webhook";
-      path: "/api/public/payments/webhook";
-      fullPath: "/api/public/payments/webhook";
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/auth/preview": {
-      id: "/lovable/email/auth/preview";
-      path: "/lovable/email/auth/preview";
-      fullPath: "/lovable/email/auth/preview";
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/auth/webhook": {
-      id: "/lovable/email/auth/webhook";
-      path: "/lovable/email/auth/webhook";
-      fullPath: "/lovable/email/auth/webhook";
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/queue/process": {
-      id: "/lovable/email/queue/process";
-      path: "/lovable/email/queue/process";
-      fullPath: "/lovable/email/queue/process";
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/transactional/preview": {
-      id: "/lovable/email/transactional/preview";
-      path: "/lovable/email/transactional/preview";
-      fullPath: "/lovable/email/transactional/preview";
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/transactional/send": {
-      id: "/lovable/email/transactional/send";
-      path: "/lovable/email/transactional/send";
-      fullPath: "/lovable/email/transactional/send";
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adventures': {
+      id: '/adventures'
+      path: '/adventures'
+      fullPath: '/adventures'
+      preLoaderRoute: typeof AdventuresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/private-travel': {
+      id: '/private-travel'
+      path: '/private-travel'
+      fullPath: '/private-travel'
+      preLoaderRoute: typeof PrivateTravelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/testimonials': {
+      id: '/testimonials'
+      path: '/testimonials'
+      fullPath: '/testimonials'
+      preLoaderRoute: typeof TestimonialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/adventures/': {
+      id: '/adventures/'
+      path: '/'
+      fullPath: '/adventures/'
+      preLoaderRoute: typeof AdventuresIndexRouteImport
+      parentRoute: typeof AdventuresRoute
+    }
+    '/adventures/$slug': {
+      id: '/adventures/$slug'
+      path: '/$slug'
+      fullPath: '/adventures/$slug'
+      preLoaderRoute: typeof AdventuresSlugRouteImport
+      parentRoute: typeof AdventuresRoute
+    }
+    '/book/$slug': {
+      id: '/book/$slug'
+      path: '/book/$slug'
+      fullPath: '/book/$slug'
+      preLoaderRoute: typeof BookSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/booking/success': {
+      id: '/booking/success'
+      path: '/booking/success'
+      fullPath: '/booking/success'
+      preLoaderRoute: typeof BookingSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/destinations/': {
+      id: '/destinations/'
+      path: '/destinations'
+      fullPath: '/destinations/'
+      preLoaderRoute: typeof DestinationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/destinations/$slug': {
+      id: '/destinations/$slug'
+      path: '/destinations/$slug'
+      fullPath: '/destinations/$slug'
+      preLoaderRoute: typeof DestinationsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/itineraries/$slug': {
+      id: '/itineraries/$slug'
+      path: '/itineraries/$slug'
+      fullPath: '/itineraries/$slug'
+      preLoaderRoute: typeof ItinerariesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal/$slug': {
+      id: '/journal/$slug'
+      path: '/$slug'
+      fullPath: '/journal/$slug'
+      preLoaderRoute: typeof JournalSlugRouteImport
+      parentRoute: typeof JournalRoute
+    }
+    '/lodges/': {
+      id: '/lodges/'
+      path: '/lodges'
+      fullPath: '/lodges/'
+      preLoaderRoute: typeof LodgesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lodges/$slug': {
+      id: '/lodges/$slug'
+      path: '/lodges/$slug'
+      fullPath: '/lodges/$slug'
+      preLoaderRoute: typeof LodgesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/adventures': {
+      id: '/_authenticated/admin/adventures'
+      path: '/adventures'
+      fullPath: '/admin/adventures'
+      preLoaderRoute: typeof AuthenticatedAdminAdventuresRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/enquiries': {
+      id: '/_authenticated/admin/enquiries'
+      path: '/enquiries'
+      fullPath: '/admin/enquiries'
+      preLoaderRoute: typeof AuthenticatedAdminEnquiriesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/journal': {
+      id: '/_authenticated/admin/journal'
+      path: '/journal'
+      fullPath: '/admin/journal'
+      preLoaderRoute: typeof AuthenticatedAdminJournalRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/menu': {
+      id: '/_authenticated/admin/menu'
+      path: '/menu'
+      fullPath: '/admin/menu'
+      preLoaderRoute: typeof AuthenticatedAdminMenuRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/private-travel': {
+      id: '/_authenticated/admin/private-travel'
+      path: '/private-travel'
+      fullPath: '/admin/private-travel'
+      preLoaderRoute: typeof AuthenticatedAdminPrivateTravelRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/subscribers': {
+      id: '/_authenticated/admin/subscribers'
+      path: '/subscribers'
+      fullPath: '/admin/subscribers'
+      preLoaderRoute: typeof AuthenticatedAdminSubscribersRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/content/$table': {
+      id: '/_authenticated/admin/content/$table'
+      path: '/content/$table'
+      fullPath: '/admin/content/$table'
+      preLoaderRoute: typeof AuthenticatedAdminContentTableRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/pages-hub/$section': {
+      id: '/_authenticated/admin/pages-hub/$section'
+      path: '/pages-hub/$section'
+      fullPath: '/admin/pages-hub/$section'
+      preLoaderRoute: typeof AuthenticatedAdminPagesHubSectionRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/pages/$page': {
+      id: '/_authenticated/admin/pages/$page'
+      path: '/pages/$page'
+      fullPath: '/admin/pages/$page'
+      preLoaderRoute: typeof AuthenticatedAdminPagesPageRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/api/public/media/$': {
+      id: '/api/public/media/$'
+      path: '/api/public/media/$'
+      fullPath: '/api/public/media/$'
+      preLoaderRoute: typeof ApiPublicMediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
-  AuthenticatedAdminAdventuresRoute: typeof AuthenticatedAdminAdventuresRoute;
-  AuthenticatedAdminEnquiriesRoute: typeof AuthenticatedAdminEnquiriesRoute;
-  AuthenticatedAdminJournalRoute: typeof AuthenticatedAdminJournalRoute;
-  AuthenticatedAdminMenuRoute: typeof AuthenticatedAdminMenuRoute;
-  AuthenticatedAdminPrivateTravelRoute: typeof AuthenticatedAdminPrivateTravelRoute;
-  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute;
-  AuthenticatedAdminSubscribersRoute: typeof AuthenticatedAdminSubscribersRoute;
-  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute;
-  AuthenticatedAdminContentTableRoute: typeof AuthenticatedAdminContentTableRoute;
-  AuthenticatedAdminPagesHubSectionRoute: typeof AuthenticatedAdminPagesHubSectionRoute;
-  AuthenticatedAdminPagesPageRoute: typeof AuthenticatedAdminPagesPageRoute;
+  AuthenticatedAdminAdventuresRoute: typeof AuthenticatedAdminAdventuresRoute
+  AuthenticatedAdminEnquiriesRoute: typeof AuthenticatedAdminEnquiriesRoute
+  AuthenticatedAdminJournalRoute: typeof AuthenticatedAdminJournalRoute
+  AuthenticatedAdminMenuRoute: typeof AuthenticatedAdminMenuRoute
+  AuthenticatedAdminPrivateTravelRoute: typeof AuthenticatedAdminPrivateTravelRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminSubscribersRoute: typeof AuthenticatedAdminSubscribersRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminContentTableRoute: typeof AuthenticatedAdminContentTableRoute
+  AuthenticatedAdminPagesHubSectionRoute: typeof AuthenticatedAdminPagesHubSectionRoute
+  AuthenticatedAdminPagesPageRoute: typeof AuthenticatedAdminPagesPageRoute
 }
 
-const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren = {
-  AuthenticatedAdminAdventuresRoute: AuthenticatedAdminAdventuresRoute,
-  AuthenticatedAdminEnquiriesRoute: AuthenticatedAdminEnquiriesRoute,
-  AuthenticatedAdminJournalRoute: AuthenticatedAdminJournalRoute,
-  AuthenticatedAdminMenuRoute: AuthenticatedAdminMenuRoute,
-  AuthenticatedAdminPrivateTravelRoute: AuthenticatedAdminPrivateTravelRoute,
-  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
-  AuthenticatedAdminSubscribersRoute: AuthenticatedAdminSubscribersRoute,
-  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
-  AuthenticatedAdminContentTableRoute: AuthenticatedAdminContentTableRoute,
-  AuthenticatedAdminPagesHubSectionRoute: AuthenticatedAdminPagesHubSectionRoute,
-  AuthenticatedAdminPagesPageRoute: AuthenticatedAdminPagesPageRoute,
-};
+const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
+  {
+    AuthenticatedAdminAdventuresRoute: AuthenticatedAdminAdventuresRoute,
+    AuthenticatedAdminEnquiriesRoute: AuthenticatedAdminEnquiriesRoute,
+    AuthenticatedAdminJournalRoute: AuthenticatedAdminJournalRoute,
+    AuthenticatedAdminMenuRoute: AuthenticatedAdminMenuRoute,
+    AuthenticatedAdminPrivateTravelRoute: AuthenticatedAdminPrivateTravelRoute,
+    AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+    AuthenticatedAdminSubscribersRoute: AuthenticatedAdminSubscribersRoute,
+    AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminContentTableRoute: AuthenticatedAdminContentTableRoute,
+    AuthenticatedAdminPagesHubSectionRoute:
+      AuthenticatedAdminPagesHubSectionRoute,
+    AuthenticatedAdminPagesPageRoute: AuthenticatedAdminPagesPageRoute,
+  }
 
-const AuthenticatedAdminRouteRouteWithChildren = AuthenticatedAdminRouteRoute._addFileChildren(
-  AuthenticatedAdminRouteRouteChildren,
-);
+const AuthenticatedAdminRouteRouteWithChildren =
+  AuthenticatedAdminRouteRoute._addFileChildren(
+    AuthenticatedAdminRouteRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren;
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
-};
+}
 
-const AuthenticatedRouteRouteWithChildren = AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren);
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AdventuresRouteChildren {
-  AdventuresSlugRoute: typeof AdventuresSlugRoute;
-  AdventuresIndexRoute: typeof AdventuresIndexRoute;
+  AdventuresSlugRoute: typeof AdventuresSlugRoute
+  AdventuresIndexRoute: typeof AdventuresIndexRoute
 }
 
 const AdventuresRouteChildren: AdventuresRouteChildren = {
   AdventuresSlugRoute: AdventuresSlugRoute,
   AdventuresIndexRoute: AdventuresIndexRoute,
-};
+}
 
-const AdventuresRouteWithChildren = AdventuresRoute._addFileChildren(AdventuresRouteChildren);
+const AdventuresRouteWithChildren = AdventuresRoute._addFileChildren(
+  AdventuresRouteChildren,
+)
 
 interface JournalRouteChildren {
-  JournalSlugRoute: typeof JournalSlugRoute;
+  JournalSlugRoute: typeof JournalSlugRoute
 }
 
 const JournalRouteChildren: JournalRouteChildren = {
   JournalSlugRoute: JournalSlugRoute,
-};
+}
 
-const JournalRouteWithChildren = JournalRoute._addFileChildren(JournalRouteChildren);
+const JournalRouteWithChildren =
+  JournalRoute._addFileChildren(JournalRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -922,15 +942,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
-};
-export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
-
-import type { getRouter } from "./router.tsx";
-import type { startInstance } from "./start.ts";
-declare module "@tanstack/react-start" {
-  interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>;
-  }
 }
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()

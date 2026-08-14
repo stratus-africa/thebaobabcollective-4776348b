@@ -10,7 +10,6 @@ import { ShareButtons } from "@/components/site/ShareButtons";
 import { getItineraryBySlug } from "@/lib/cms.functions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-
 const itinerarySearchSchema = z.object({
   itinerary: fallback(z.string(), "").default(""),
 });
@@ -42,7 +41,9 @@ export const Route = createFileRoute("/itineraries/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-4xl mb-4">Itinerary not found</h1>
-        <Link to="/adventures" className="text-gold underline">Browse all adventures</Link>
+        <Link to="/adventures" className="text-gold underline">
+          Browse all adventures
+        </Link>
       </main>
       <Footer />
     </div>
@@ -56,9 +57,14 @@ export const Route = createFileRoute("/itineraries/$slug")({
           <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
           <p className="text-foreground/70 mb-6">{error.message}</p>
           <button
-            onClick={() => { reset(); router.invalidate(); }}
+            onClick={() => {
+              reset();
+              router.invalidate();
+            }}
             className="bg-gold text-gold-foreground px-6 py-3 uppercase tracking-[0.25em] text-[11px]"
-          >Retry</button>
+          >
+            Retry
+          </button>
         </main>
         <Footer />
       </div>
@@ -85,8 +91,7 @@ function ItineraryPage() {
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-10 pb-16 text-background w-full">
             {cat && (
               <Link
-                to="/journeys/$slug"
-                params={{ slug: cat.slug }}
+                to="/adventures"
                 className="text-[11px] tracking-[0.3em] uppercase text-gold mb-4 inline-block hover:underline"
               >
                 ← {cat.title}
@@ -94,11 +99,17 @@ function ItineraryPage() {
             )}
             <h1 className="font-serif text-5xl md:text-7xl leading-[1.05] mb-4 max-w-3xl">{itinerary.name}</h1>
             <div className="flex flex-wrap gap-6 text-sm text-background/90">
-              <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-gold" /> {itinerary.nights}</span>
+              <span className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-gold" /> {itinerary.nights}
+              </span>
               {itinerary.price_from_usd && (
-                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-gold" /> From {formatPrice(Number(itinerary.price_from_usd))} pp</span>
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-gold" /> From {formatPrice(Number(itinerary.price_from_usd))} pp
+                </span>
               )}
-              <span className="flex items-center gap-2"><Users className="w-4 h-4 text-gold" /> Private guided</span>
+              <span className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-gold" /> Private guided
+              </span>
             </div>
           </div>
         </section>
@@ -109,7 +120,9 @@ function ItineraryPage() {
             <div className="lg:col-span-2 space-y-10">
               <div>
                 <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-4">Overview</p>
-                <p className="font-serif text-2xl md:text-3xl text-foreground leading-relaxed mb-6">{itinerary.description}</p>
+                <p className="font-serif text-2xl md:text-3xl text-foreground leading-relaxed mb-6">
+                  {itinerary.description}
+                </p>
               </div>
 
               <div>
@@ -136,7 +149,8 @@ function ItineraryPage() {
                       <div>
                         <h3 className="font-serif text-xl text-foreground mb-2">{h}</h3>
                         <p className="text-foreground/70 text-sm leading-relaxed">
-                          Days of immersive guiding, intimate camps and conservation-led experiences crafted around this chapter of your journey.
+                          Days of immersive guiding, intimate camps and conservation-led experiences crafted around this
+                          chapter of your journey.
                         </p>
                       </div>
                     </div>
@@ -155,7 +169,9 @@ function ItineraryPage() {
                     "24/7 on-trip concierge",
                     "Conservation contribution",
                   ].map((x) => (
-                    <li key={x} className="flex gap-2"><Check className="w-4 h-4 text-gold mt-0.5 shrink-0" /> {x}</li>
+                    <li key={x} className="flex gap-2">
+                      <Check className="w-4 h-4 text-gold mt-0.5 shrink-0" /> {x}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -184,7 +200,8 @@ function ItineraryPage() {
                 />
               </div>
               <div className="border border-foreground/10 p-6 text-sm text-foreground/70">
-                <p className="flex items-start gap-2"><MapPin className="w-4 h-4 text-gold mt-0.5" />
+                <p className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-gold mt-0.5" />
                   Every itinerary is fully bespoke — adapt the route, lodges and pace to your travel style.
                 </p>
               </div>
@@ -192,11 +209,12 @@ function ItineraryPage() {
           </div>
         </section>
 
-
         {/* Share */}
         <section className="border-t border-border/40 py-10">
           <div className="max-w-[1920px] mx-auto px-6 lg:px-10 flex flex-wrap items-center justify-between gap-6">
-            <p className="font-serif text-xl text-foreground">Inspired? Share {itinerary.name} with a fellow traveller.</p>
+            <p className="font-serif text-xl text-foreground">
+              Inspired? Share {itinerary.name} with a fellow traveller.
+            </p>
             <ShareButtons
               title={`${itinerary.name} — The Baobab Collective`}
               description={itinerary.description?.slice(0, 140)}
@@ -232,4 +250,3 @@ function ItineraryPage() {
     </div>
   );
 }
-
