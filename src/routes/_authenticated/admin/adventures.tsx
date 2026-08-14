@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -18,9 +18,10 @@ import {
   X,
   Sparkles,
   Megaphone,
-  Map as MapIcon,
   Image as ImageIcon,
   Edit,
+  MapPin,
+  Search,
 } from "lucide-react";
 import {
   getAdventuresPage,
@@ -83,6 +84,42 @@ function AdminAdventures() {
     }
   }
 
+  async function addAdventure() {
+    const next = {
+      ...draft,
+      signatures: [
+        ...draft.signatures,
+        {
+          slug: `new-${Date.now().toString(36)}`,
+          name: "",
+          region: "",
+          terrain: "",
+          nights: "",
+          difficulty: "Moderate",
+          image: "",
+          imageAlt: "",
+          focalX: 50,
+          focalY: 50,
+          description: "",
+          highlights: [],
+          included: [],
+          notIncluded: [],
+        },
+      ],
+    };
+    setDraft(next);
+    setSaving(true);
+    try {
+      await saveFn({ data: { hero: next.hero, cta: next.cta, signatures: next.signatures } });
+      toast.success("Adventure created");
+      await refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not create adventure");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-foreground/60">
@@ -93,19 +130,20 @@ function AdminAdventures() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] tracking-[0.28em] uppercase text-gold">Page Editor</p>
-          <h1 className="font-serif text-3xl text-foreground">Adventures page</h1>
-          <p className="text-sm text-foreground/60 mt-1">
-            Edit the live content for <code className="text-xs px-1 py-0.5 bg-cream rounded">/adventures</code>.
-          </p>
+          <h1 className="font-serif text-3xl">Adventures</h1>
+          <p className="text-sm text-foreground/60 mt-1">Manage your adventures catalog — create, edit, and publish.</p>
         </div>
-        <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
-          {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-          Save changes
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={addAdventure} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
+            <Plus className="mr-1 h-4 w-4" /> Add Adventure
+          </Button>
+          <Button onClick={save} disabled={saving} variant="outline">
+            {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+            Save changes
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
@@ -248,14 +286,6 @@ function AdminAdventures() {
           </div>
         </aside>
       </div>
-
-      {/* Sticky save footer */}
-      <div className="sticky bottom-0 mt-10 -mx-4 md:-mx-8 lg:-mx-10 px-4 md:px-8 lg:px-10 py-4 bg-background/95 backdrop-blur border-t border-border flex justify-end shadow-[0_-10px_30px_rgba(0,0,0,0.04)]">
-        <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
-          {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-          Save changes
-        </Button>
-      </div>
     </div>
   );
 }
@@ -321,6 +351,8 @@ function SignatureItineraries({
   setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
 }) {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [regionFilter, setRegionFilter] = useState("__all__");
   const navigate = useNavigate();
 
   const moveTo = (from: number, to: number) => {
@@ -335,159 +367,150 @@ function SignatureItineraries({
     setDraft({ ...draft, signatures: draft.signatures.filter((_, i) => i !== idx) });
   };
 
-  const addNew = () => {
-    setDraft({
-      ...draft,
-      signatures: [
-        ...draft.signatures,
-        {
-          slug: `new-${Date.now().toString(36)}`,
-          name: "",
-          region: "",
-          terrain: "",
-          nights: "",
-          difficulty: "Moderate",
-          image: "",
-          imageAlt: "",
-          focalX: 50,
-          focalY: 50,
-          description: "",
-          highlights: [],
-          included: [],
-          notIncluded: [],
-        },
-      ],
+  const regions = Array.from(new Set(draft.signatures.map((item) => item.region.trim()).filter(Boolean))).sort();
+  const visibleSignatures = draft.signatures
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => {
+      const query = search.trim().toLowerCase();
+      const matchesSearch =
+        !query || [item.name, item.region, item.terrain].some((value) => value.toLowerCase().includes(query));
+      return matchesSearch && (regionFilter === "__all__" || item.region === regionFilter);
     });
-  };
 
   return (
-    <section
-      id="signatures"
-      className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm"
-    >
-      <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
-        <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
-            <MapIcon className="w-4 h-4" />
+    <section id="signatures" className="scroll-mt-32">
+      <div className="border border-border bg-background p-4">
+        <div className="grid gap-3 md:grid-cols-[1fr_200px]">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search adventures…"
+              className="pl-9"
+            />
           </div>
-          <div>
-            <h2 className="font-serif text-xl leading-tight">
-              Signature itineraries
-              <span className="ml-2 text-xs text-foreground/50 font-sans">({draft.signatures.length})</span>
-            </h2>
-            <p className="text-xs text-foreground/55 mt-0.5">
-              Featured adventures, in their display order. Click the edit icon to modify individual adventures.
-            </p>
-          </div>
-        </div>
-        <Button
-          onClick={addNew}
-          size="sm"
-          variant="outline"
-          className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
-        >
-          <Plus className="w-3.5 h-3.5 mr-1" /> Add
-        </Button>
-      </header>
-
-      <div className="p-4 space-y-2">
-        {draft.signatures.length === 0 && (
-          <p className="text-sm text-foreground/60 italic p-4 text-center border border-dashed border-border rounded-md">
-            No items yet. Click <span className="font-medium">Add</span> to create one.
-          </p>
-        )}
-        {draft.signatures.map((item, idx) => (
-          <div
-            key={`${item.slug}-${idx}`}
-            draggable
-            onDragStart={() => setDragIdx(idx)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => {
-              if (dragIdx !== null) moveTo(dragIdx, idx);
-              setDragIdx(null);
-            }}
-            className="border border-border bg-background overflow-hidden shadow-sm"
+          <select
+            value={regionFilter}
+            onChange={(event) => setRegionFilter(event.target.value)}
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
           >
-            <div className="flex items-center gap-3 px-4 py-3 hover:bg-cream/50 transition-colors">
-              <span className="cursor-grab text-foreground/35 hover:text-foreground/60" title="Drag to reorder">
-                <GripVertical className="w-4 h-4" />
-              </span>
-              <div className="h-10 w-14 rounded bg-cream overflow-hidden flex items-center justify-center shrink-0">
-                {item.image ? (
-                  <img src={item.image} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <ImageIcon className="w-4 h-4 text-foreground/30" />
-                )}
-              </div>
-              <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/40 w-6">#{idx + 1}</span>
-              <span className="font-medium text-sm flex-1 truncate">{item.name || "New itinerary"}</span>
-              <button
-                type="button"
-                className="text-foreground/60 hover:text-foreground p-1.5"
-                title="Edit"
-                aria-label={`Edit ${item.name || "adventure"}`}
-                onClick={() => {
-                  let targetSlug = item.slug;
-                  if (!targetSlug) {
-                    // Legacy/stuck item with no slug yet — generate one now instead of
-                    // permanently blocking access to the edit page.
-                    const base = item.name ? slugify(item.name) : "";
-                    targetSlug = base || `new-${Date.now().toString(36)}`;
-                    const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
-                    let unique = targetSlug;
-                    let n = 2;
-                    while (existingSlugs.has(unique)) {
-                      unique = `${targetSlug}-${n++}`;
-                    }
-                    targetSlug = unique;
-                    const copy = draft.signatures.slice();
-                    copy[idx] = { ...item, slug: targetSlug };
-                    setDraft({ ...draft, signatures: copy });
-                  }
-                  navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
-                }}
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  moveTo(idx, idx - 1);
-                }}
-                disabled={idx === 0}
-                className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                aria-label="Move up"
-              >
-                <ArrowUp className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  moveTo(idx, idx + 1);
-                }}
-                disabled={idx === draft.signatures.length - 1}
-                className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                aria-label="Move down"
-              >
-                <ArrowDown className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeAt(idx);
-                }}
-                className="text-foreground/50 hover:text-destructive p-1.5"
-                aria-label="Delete"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ))}
+            <option value="__all__">All regions</option>
+            {regions.map((region) => (
+              <option key={region} value={region}>
+                {region}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {visibleSignatures.length === 0 ? (
+        <div className="mt-6 border border-border bg-background p-16 text-center text-foreground/60">
+          No adventures match your filters.
+        </div>
+      ) : (
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {visibleSignatures.map(({ item, index: idx }) => (
+            <article
+              key={`${item.slug}-${idx}`}
+              draggable
+              onDragStart={() => setDragIdx(idx)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (dragIdx !== null) moveTo(dragIdx, idx);
+                setDragIdx(null);
+              }}
+              className="group flex flex-col overflow-hidden border border-border bg-background transition-shadow hover:shadow-lg"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden bg-cream">
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt=""
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-foreground/30">
+                    <ImageIcon className="h-10 w-10" />
+                  </div>
+                )}
+                <span className="absolute right-3 top-3 rounded bg-gold px-2 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-gold-foreground shadow">
+                  Signature
+                </span>
+                <span
+                  className="absolute left-3 top-3 cursor-grab rounded bg-background/90 p-1.5 text-foreground/55"
+                  title="Drag to reorder"
+                >
+                  <GripVertical className="h-4 w-4" />
+                </span>
+              </div>
+              <div className="flex flex-1 flex-col p-4">
+                <h3 className="font-serif text-lg leading-tight">{item.name || "New adventure"}</h3>
+                {(item.region || item.terrain) && (
+                  <p className="mt-1 flex items-center gap-1 text-sm text-foreground/60">
+                    <MapPin className="h-3.5 w-3.5 opacity-60" />{" "}
+                    {[item.region, item.terrain].filter(Boolean).join(" · ")}
+                  </p>
+                )}
+                <div className="mt-4 flex items-center gap-1 border-t border-border pt-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      let targetSlug = item.slug;
+                      if (!targetSlug) {
+                        const base = item.name ? slugify(item.name) : "";
+                        targetSlug = base || `new-${Date.now().toString(36)}`;
+                        const existingSlugs = new Set(
+                          draft.signatures.map((signature) => signature.slug).filter(Boolean),
+                        );
+                        let unique = targetSlug;
+                        let number = 2;
+                        while (existingSlugs.has(unique)) unique = `${targetSlug}-${number++}`;
+                        targetSlug = unique;
+                        const copy = draft.signatures.slice();
+                        copy[idx] = { ...item, slug: targetSlug };
+                        setDraft({ ...draft, signatures: copy });
+                      }
+                      navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
+                    }}
+                  >
+                    <Edit className="mr-1 h-3.5 w-3.5" /> Edit
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => moveTo(idx, idx - 1)}
+                    disabled={idx === 0}
+                    className="ml-auto p-1.5 text-foreground/45 hover:text-foreground disabled:opacity-25"
+                    aria-label="Move up"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveTo(idx, idx + 1)}
+                    disabled={idx === draft.signatures.length - 1}
+                    className="p-1.5 text-foreground/45 hover:text-foreground disabled:opacity-25"
+                    aria-label="Move down"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeAt(idx)}
+                    className="p-1.5 text-foreground/50 hover:text-destructive"
+                    aria-label="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
