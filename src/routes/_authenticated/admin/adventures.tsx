@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -28,6 +28,7 @@ import {
   type AdventuresPage,
   type AdventuresSignature,
   adventuresDefaults,
+  buildAdventureSlug,
 } from "@/lib/adventures.functions";
 import { adminUploadImage } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
@@ -312,6 +313,7 @@ function SignatureItineraries({
   draft: AdventuresPage;
   setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
 }) {
+  const navigate = useNavigate();
   const [dragIdx, setDragIdx] = useState<number | null>(null);
 
   const moveTo = (from: number, to: number) => {
@@ -327,12 +329,29 @@ function SignatureItineraries({
   };
 
   const addNew = () => {
+    const nextName = `New adventure ${draft.signatures.length + 1}`;
+    const base = nextName.trim() || "New adventure";
+    const existing = new Set(draft.signatures.map((item) => item.slug).filter(Boolean));
+    let slug =
+      base
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "new-adventure";
+    let n = 2;
+    while (existing.has(slug)) {
+      slug = `${base
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")}-${n}`;
+      n += 1;
+    }
+
     setDraft({
       ...draft,
       signatures: [
         ...draft.signatures,
         {
-          slug: "",
+          slug,
           name: "",
           region: "",
           terrain: "",
@@ -412,21 +431,31 @@ function SignatureItineraries({
               </div>
               <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/40 w-6">#{idx + 1}</span>
               <span className="font-medium text-sm flex-1 truncate">{item.name || "New itinerary"}</span>
-              <Link
-                to="/admin/adventures/$slug"
-                params={{ slug: item.slug || "" }}
+              <button
+                type="button"
                 className="text-foreground/60 hover:text-foreground p-1.5"
                 title="Edit"
                 aria-label={`Edit ${item.name || "adventure"}`}
-                onClick={(e) => {
+                onClick={() => {
+                  const nextSlug =
+                    item.slug ||
+                    buildAdventureSlug(
+                      item.name || "untitled-adventure",
+                      draft.signatures.map((v) => v.slug),
+                    );
                   if (!item.slug) {
-                    e.preventDefault();
-                    toast.error("Add a slug before editing this adventure.");
+                    const next = { ...item, slug: nextSlug };
+                    const list = draft.signatures.map((entry, i) => (i === idx ? next : entry));
+                    setDraft({ ...draft, signatures: list });
                   }
+                  navigate({
+                    to: "/admin/adventures/$slug" as any,
+                    params: { slug: nextSlug } as any,
+                  });
                 }}
               >
                 <Edit className="w-4 h-4" />
-              </Link>
+              </button>
               <button
                 type="button"
                 onClick={(e) => {
