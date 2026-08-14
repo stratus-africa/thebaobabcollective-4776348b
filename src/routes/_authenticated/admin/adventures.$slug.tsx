@@ -59,12 +59,24 @@ function AdminAdventureEdit() {
 
   const [draft, setDraft] = useState<AdventuresPage>(adventuresDefaults);
   const [saving, setSaving] = useState(false);
+  // Track which item we're editing by its array position, not by its live slug value.
+  // The slug field can change as the user types (auto-generated from name, or edited
+  // directly), and re-matching against the URL param on every render would cause the
+  // item to "disappear" the moment its slug no longer equals the original URL slug.
+  const [matchedIdx, setMatchedIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (data) setDraft(data);
   }, [data]);
 
-  const adventure = draft.signatures.find((s) => s.slug === slug);
+  useEffect(() => {
+    if (matchedIdx === null && draft.signatures.length > 0) {
+      const idx = draft.signatures.findIndex((s) => s.slug === slug);
+      if (idx >= 0) setMatchedIdx(idx);
+    }
+  }, [draft.signatures, slug, matchedIdx]);
+
+  const adventure = matchedIdx !== null ? draft.signatures[matchedIdx] : undefined;
 
   async function save() {
     if (!adventure) return;
@@ -122,7 +134,9 @@ function AdminAdventureEdit() {
           <div>
             <p className="text-[10px] tracking-[0.28em] uppercase text-gold">Edit Adventure</p>
             <h1 className="font-serif text-3xl text-foreground">{adventure.name || "New Adventure"}</h1>
-            <p className="text-sm text-foreground/60 mt-1">Slug: <code className="text-xs px-1 py-0.5 bg-cream rounded">{adventure.slug}</code></p>
+            <p className="text-sm text-foreground/60 mt-1">
+              Slug: <code className="text-xs px-1 py-0.5 bg-cream rounded">{adventure.slug}</code>
+            </p>
           </div>
         </div>
         <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
@@ -136,12 +150,10 @@ function AdminAdventureEdit() {
           <AdventureForm
             adventure={adventure}
             onUpdate={(updated) => {
-              const idx = draft.signatures.findIndex((s) => s.slug === slug);
-              if (idx >= 0) {
-                const copy = draft.signatures.slice();
-                copy[idx] = updated;
-                setDraft({ ...draft, signatures: copy });
-              }
+              if (matchedIdx === null) return;
+              const copy = draft.signatures.slice();
+              copy[matchedIdx] = updated;
+              setDraft({ ...draft, signatures: copy });
             }}
           />
         </div>
@@ -173,7 +185,13 @@ function AdventureForm({
         <Field label="Name">
           <Input
             value={adventure.name}
-            onChange={(e) => set({ ...adventure, name: e.target.value, slug: adventure.slug || slugify(e.target.value) })}
+            onChange={(e) =>
+              set({
+                ...adventure,
+                name: e.target.value,
+                slug: !adventure.slug || adventure.slug.startsWith("new-") ? slugify(e.target.value) : adventure.slug,
+              })
+            }
           />
         </Field>
         <Field label="Slug">
@@ -286,7 +304,10 @@ function AdventureForm({
               onChange={(e) =>
                 set({
                   ...adventure,
-                  included: e.target.value.split("\n").map((item) => item.trim()).filter(Boolean),
+                  included: e.target.value
+                    .split("\n")
+                    .map((item) => item.trim())
+                    .filter(Boolean),
                 })
               }
             />
@@ -298,7 +319,10 @@ function AdventureForm({
               onChange={(e) =>
                 set({
                   ...adventure,
-                  notIncluded: e.target.value.split("\n").map((item) => item.trim()).filter(Boolean),
+                  notIncluded: e.target.value
+                    .split("\n")
+                    .map((item) => item.trim())
+                    .filter(Boolean),
                 })
               }
             />
