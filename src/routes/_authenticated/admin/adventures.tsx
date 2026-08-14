@@ -290,6 +290,21 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function humanSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
 function SignatureItineraries({
   draft,
   setDraft,
@@ -399,9 +414,16 @@ function SignatureItineraries({
               <span className="font-medium text-sm flex-1 truncate">{item.name || "New itinerary"}</span>
               <Link
                 to="/admin/adventures/$slug"
-                params={{ slug: item.slug }}
+                params={{ slug: item.slug || "" }}
                 className="text-foreground/60 hover:text-foreground p-1.5"
                 title="Edit"
+                aria-label={`Edit ${item.name || "adventure"}`}
+                onClick={(e) => {
+                  if (!item.slug) {
+                    e.preventDefault();
+                    toast.error("Add a slug before editing this adventure.");
+                  }
+                }}
               >
                 <Edit className="w-4 h-4" />
               </Link>
@@ -782,6 +804,4 @@ function PagePreview({ draft }: { draft: AdventuresPage }) {
   );
 }
 
-// Silence type imports
-void ImageUpload;
 void (null as unknown as AdventuresSignature);

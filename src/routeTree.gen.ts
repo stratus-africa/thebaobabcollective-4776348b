@@ -40,6 +40,7 @@ import { Route as AuthenticatedAdminPrivateTravelRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminSubscribersRouteImport } from './routes/_authenticated/admin/subscribers'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as AuthenticatedAdminAdventuresSlugRouteImport } from './routes/_authenticated/admin/adventures.$slug'
 import { Route as AuthenticatedAdminContentTableRouteImport } from './routes/_authenticated/admin/content.$table'
 import { Route as AuthenticatedAdminPagesHubSectionRouteImport } from './routes/_authenticated/admin/pages-hub.$section'
 import { Route as AuthenticatedAdminPagesPageRouteImport } from './routes/_authenticated/admin/pages.$page'
@@ -211,6 +212,12 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminAdventuresSlugRoute =
+  AuthenticatedAdminAdventuresSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AuthenticatedAdminAdventuresRoute,
+  } as any)
 const AuthenticatedAdminContentTableRoute =
   AuthenticatedAdminContentTableRouteImport.update({
     id: '/content/$table',
@@ -291,7 +298,7 @@ export interface FileRoutesByFullPath {
   '/adventures/': typeof AdventuresIndexRoute
   '/destinations/': typeof DestinationsIndexRoute
   '/lodges/': typeof LodgesIndexRoute
-  '/admin/adventures': typeof AuthenticatedAdminAdventuresRoute
+  '/admin/adventures': typeof AuthenticatedAdminAdventuresRouteWithChildren
   '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/admin/journal': typeof AuthenticatedAdminJournalRoute
   '/admin/menu': typeof AuthenticatedAdminMenuRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
   '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
@@ -331,7 +339,7 @@ export interface FileRoutesByTo {
   '/adventures': typeof AdventuresIndexRoute
   '/destinations': typeof DestinationsIndexRoute
   '/lodges': typeof LodgesIndexRoute
-  '/admin/adventures': typeof AuthenticatedAdminAdventuresRoute
+  '/admin/adventures': typeof AuthenticatedAdminAdventuresRouteWithChildren
   '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/admin/journal': typeof AuthenticatedAdminJournalRoute
   '/admin/menu': typeof AuthenticatedAdminMenuRoute
@@ -340,6 +348,7 @@ export interface FileRoutesByTo {
   '/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
   '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
@@ -375,7 +384,7 @@ export interface FileRoutesById {
   '/adventures/': typeof AdventuresIndexRoute
   '/destinations/': typeof DestinationsIndexRoute
   '/lodges/': typeof LodgesIndexRoute
-  '/_authenticated/admin/adventures': typeof AuthenticatedAdminAdventuresRoute
+  '/_authenticated/admin/adventures': typeof AuthenticatedAdminAdventuresRouteWithChildren
   '/_authenticated/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/_authenticated/admin/journal': typeof AuthenticatedAdminJournalRoute
   '/_authenticated/admin/menu': typeof AuthenticatedAdminMenuRoute
@@ -384,6 +393,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/_authenticated/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
   '/_authenticated/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/_authenticated/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/lovable/email/suppression'
     | '/admin/'
+    | '/admin/adventures/$slug'
     | '/admin/content/$table'
     | '/admin/pages-hub/$section'
     | '/admin/pages/$page'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/lovable/email/suppression'
     | '/admin'
+    | '/admin/adventures/$slug'
     | '/admin/content/$table'
     | '/admin/pages-hub/$section'
     | '/admin/pages/$page'
@@ -511,6 +523,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/subscribers'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/adventures/$slug'
     | '/_authenticated/admin/content/$table'
     | '/_authenticated/admin/pages-hub/$section'
     | '/_authenticated/admin/pages/$page'
@@ -771,6 +784,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/adventures/$slug': {
+      id: '/_authenticated/admin/adventures/$slug'
+      path: '/$slug'
+      fullPath: '/admin/adventures/$slug'
+      preLoaderRoute: typeof AuthenticatedAdminAdventuresSlugRouteImport
+      parentRoute: typeof AuthenticatedAdminAdventuresRoute
+    }
     '/_authenticated/admin/content/$table': {
       id: '/_authenticated/admin/content/$table'
       path: '/content/$table'
@@ -844,8 +864,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminAdventuresRouteChildren {
+  AuthenticatedAdminAdventuresSlugRoute: typeof AuthenticatedAdminAdventuresSlugRoute
+}
+
+const AuthenticatedAdminAdventuresRouteChildren: AuthenticatedAdminAdventuresRouteChildren =
+  {
+    AuthenticatedAdminAdventuresSlugRoute:
+      AuthenticatedAdminAdventuresSlugRoute,
+  }
+
+const AuthenticatedAdminAdventuresRouteWithChildren =
+  AuthenticatedAdminAdventuresRoute._addFileChildren(
+    AuthenticatedAdminAdventuresRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteRouteChildren {
-  AuthenticatedAdminAdventuresRoute: typeof AuthenticatedAdminAdventuresRoute
+  AuthenticatedAdminAdventuresRoute: typeof AuthenticatedAdminAdventuresRouteWithChildren
   AuthenticatedAdminEnquiriesRoute: typeof AuthenticatedAdminEnquiriesRoute
   AuthenticatedAdminJournalRoute: typeof AuthenticatedAdminJournalRoute
   AuthenticatedAdminMenuRoute: typeof AuthenticatedAdminMenuRoute
@@ -860,7 +895,8 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
-    AuthenticatedAdminAdventuresRoute: AuthenticatedAdminAdventuresRoute,
+    AuthenticatedAdminAdventuresRoute:
+      AuthenticatedAdminAdventuresRouteWithChildren,
     AuthenticatedAdminEnquiriesRoute: AuthenticatedAdminEnquiriesRoute,
     AuthenticatedAdminJournalRoute: AuthenticatedAdminJournalRoute,
     AuthenticatedAdminMenuRoute: AuthenticatedAdminMenuRoute,
@@ -946,3 +982,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
