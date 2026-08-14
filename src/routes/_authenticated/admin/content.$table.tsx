@@ -409,7 +409,7 @@ function ContentAdmin() {
         });
       } catch {}
       setOpen(false);
-      if (table === "destinations") setEditing(null);
+      if (table === "destinations" || table === "itineraries") setEditing(null);
     },
     onError: (e: any) => toast.error(e.message ?? "Error"),
   });
@@ -453,11 +453,11 @@ function ContentAdmin() {
         f.type === "bool" ? true : f.type === "number" ? 0 : f.type === "array" || f.type === "images" ? [] : "";
     });
     setEditing(blank);
-    if (table !== "destinations") setOpen(true);
+    if (table !== "destinations" && table !== "itineraries") setOpen(true);
   };
   const startEdit = (row: any) => {
     setEditing({ ...row });
-    if (table !== "destinations") setOpen(true);
+    if (table !== "destinations" && table !== "itineraries") setOpen(true);
   };
   const save = (e: React.FormEvent) => {
     e.preventDefault();
@@ -492,6 +492,19 @@ function ContentAdmin() {
   if (table === "destinations" && editing) {
     return (
       <DestinationEditor
+        editing={editing}
+        fields={flatFields}
+        saving={mUpsert.isPending}
+        onChange={(name, value) => setEditing({ ...editing, [name]: value })}
+        onBack={() => setEditing(null)}
+        onSave={save}
+      />
+    );
+  }
+
+  if (table === "itineraries" && editing) {
+    return (
+      <AdventureEditor
         editing={editing}
         fields={flatFields}
         saving={mUpsert.isPending}
@@ -691,7 +704,7 @@ function ContentAdmin() {
       )}
 
       {/* Create / Edit dialog */}
-      {table !== "destinations" && (
+      {table !== "destinations" && table !== "itineraries" && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-7xl gap-0 overflow-hidden p-0 sm:w-[calc(100%-3rem)]">
             <DialogHeader className="shrink-0 border-b border-border bg-cream/60 px-5 py-4 pr-12 sm:px-7 sm:py-5">
@@ -913,6 +926,69 @@ function DestinationEditor({
                 value={editing[field.name]}
                 onChange={(value) => onChange(field.name, value)}
                 autosaveKey={`cms:rt:destinations:${editing.id || "new"}:${field.name}`}
+              />
+            ))}
+        </section>
+        <aside className="space-y-5">
+          {fields
+            .filter((field) => ["image", "sort_order", "published"].includes(field.name))
+            .map((field) => (
+              <div key={field.name} className="border border-border bg-background p-5">
+                <FieldInput
+                  field={field}
+                  value={editing[field.name]}
+                  onChange={(value) => onChange(field.name, value)}
+                />
+              </div>
+            ))}
+        </aside>
+      </div>
+    </form>
+  );
+}
+
+function AdventureEditor({
+  editing,
+  fields,
+  saving,
+  onChange,
+  onBack,
+  onSave,
+}: {
+  editing: any;
+  fields: FieldDef[];
+  saving: boolean;
+  onChange: (name: string, value: any) => void;
+  onBack: () => void;
+  onSave: (event: React.FormEvent) => void;
+}) {
+  return (
+    <form onSubmit={onSave} className="mx-auto max-w-7xl space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Adventure editor</p>
+          <h1 className="font-serif text-3xl">{editing.id ? "Edit adventure" : "New adventure"}</h1>
+        </div>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onBack}>
+            Back to adventures
+          </Button>
+          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
+            {saving ? "Saving…" : "Save adventure"}
+          </Button>
+        </div>
+      </header>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+        <section className="space-y-5 border border-border bg-background p-5 sm:p-6">
+          {fields
+            .filter((field) => !["image", "sort_order", "published"].includes(field.name))
+            .map((field) => (
+              <FieldInput
+                key={field.name}
+                field={field}
+                value={editing[field.name]}
+                onChange={(value) => onChange(field.name, value)}
+                autosaveKey={`cms:rt:itineraries:${editing.id || "new"}:${field.name}`}
               />
             ))}
         </section>
