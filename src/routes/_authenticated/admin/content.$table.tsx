@@ -58,6 +58,7 @@ const TABLE_LABELS: Record<string, string> = {
   destinations: "Destinations",
   testimonials: "Testimonials",
   faqs: "FAQs",
+  adventures: "Adventures",
 };
 
 const TABLE_SINGULAR: Record<string, string> = {
@@ -68,16 +69,18 @@ const TABLE_SINGULAR: Record<string, string> = {
   destinations: "Destination",
   testimonials: "Testimonial",
   faqs: "FAQ",
+  adventures: "Adventure",
 };
 
 const VIEW_PATH: Record<string, (row: any) => string | null> = {
-  itineraries: (r) => (r.slug ? `/adventures/${r.slug}` : null),
+  itineraries: (r) => (r.slug ? `/journeys/${r.slug}` : null),
   destinations: (r) => (r.slug ? `/destinations/${r.slug}` : null),
   lodges: (r) => (r.slug ? `/lodges/${r.slug}` : null),
   journal_articles: (r) => (r.slug ? `/journal/${r.slug}` : null),
-  journey_categories: () => "/adventures",
+  journey_categories: (r) => (r.slug ? `/journeys?cat=${r.slug}` : null),
   testimonials: () => null,
   faqs: () => null,
+  adventures: (r) => (r.slug ? `/adventures/${r.slug}` : null),
 };
 
 const GROUP_FIELD: Record<string, { field: string; label: string }> = {
@@ -88,6 +91,7 @@ const GROUP_FIELD: Record<string, { field: string; label: string }> = {
   testimonials: { field: "location", label: "locations" },
   faqs: { field: "category", label: "categories" },
   journey_categories: { field: "slug", label: "categories" },
+  adventures: { field: "region", label: "regions" },
 };
 
 const IMAGE_FIELD: Record<string, string> = {
@@ -96,6 +100,7 @@ const IMAGE_FIELD: Record<string, string> = {
   itineraries: "image",
   journal_articles: "image",
   journey_categories: "hero_image",
+  adventures: "image",
 };
 
 const SUBTITLE: Record<string, (r: any) => string> = {
@@ -106,16 +111,11 @@ const SUBTITLE: Record<string, (r: any) => string> = {
   testimonials: (r) => r.location ?? "",
   faqs: (r) => r.category ?? "",
   journey_categories: (r) => r.tagline ?? "",
+  adventures: (r) => [r.region, r.terrain].filter(Boolean).join(" · "),
 };
 
 type FieldType = "text" | "textarea" | "rich" | "number" | "bool" | "array" | "image" | "images";
-type FieldDef = {
-  name: string;
-  label: string;
-  type: FieldType;
-  placeholder?: string;
-  icon?: "pin" | "hash";
-};
+type FieldDef = { name: string; label: string; type: FieldType; placeholder?: string; icon?: "pin" | "hash" };
 
 const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   destinations: {
@@ -129,14 +129,7 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
         { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
         { name: "best_season", label: "Best Season", type: "text", placeholder: "e.g. May – Oct" },
       ],
-      [
-        {
-          name: "description",
-          label: "Description",
-          type: "rich",
-          placeholder: "Describe this destination…",
-        },
-      ],
+      [{ name: "description", label: "Description", type: "rich", placeholder: "Describe this destination…" }],
       [{ name: "image", label: "Hero Image", type: "image" }],
       [{ name: "featured_trips", label: "Featured Trips (one per line)", type: "array" }],
       [
@@ -147,32 +140,12 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   },
   lodges: {
     rows: [
+      [{ name: "name", label: "Name", type: "text", placeholder: "e.g. Singita Sabi Sand", icon: "pin" }],
       [
-        {
-          name: "name",
-          label: "Name",
-          type: "text",
-          placeholder: "e.g. Singita Sabi Sand",
-          icon: "pin",
-        },
-      ],
-      [
-        {
-          name: "location",
-          label: "Location",
-          type: "text",
-          placeholder: "e.g. Sabi Sand, South Africa",
-        },
+        { name: "location", label: "Location", type: "text", placeholder: "e.g. Sabi Sand, South Africa" },
         { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
       ],
-      [
-        {
-          name: "description",
-          label: "Description",
-          type: "rich",
-          placeholder: "Describe this lodge…",
-        },
-      ],
+      [{ name: "description", label: "Description", type: "rich", placeholder: "Describe this lodge…" }],
       [{ name: "hero_image", label: "Hero Image", type: "image" }],
       [{ name: "gallery", label: "Gallery", type: "images" }],
       [{ name: "amenities", label: "Amenities (one per line)", type: "array" }],
@@ -185,35 +158,13 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   },
   itineraries: {
     rows: [
-      [
-        {
-          name: "name",
-          label: "Name",
-          type: "text",
-          placeholder: "e.g. Okavango Reverie",
-          icon: "pin",
-        },
-      ],
+      [{ name: "name", label: "Name", type: "text", placeholder: "e.g. Okavango Reverie", icon: "pin" }],
       [
         { name: "nights", label: "Nights", type: "text", placeholder: "e.g. 8 nights" },
         { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
       ],
-      [
-        {
-          name: "category_id",
-          label: "Category ID",
-          type: "text",
-          placeholder: "uuid of journey_categories row",
-        },
-      ],
-      [
-        {
-          name: "description",
-          label: "Description",
-          type: "rich",
-          placeholder: "Describe this journey…",
-        },
-      ],
+      [{ name: "category_id", label: "Category ID", type: "text", placeholder: "uuid of journey_categories row" }],
+      [{ name: "description", label: "Description", type: "rich", placeholder: "Describe this journey…" }],
       [{ name: "highlights", label: "Highlights (one per line)", type: "array" }],
       [{ name: "image", label: "Hero Image", type: "image" }],
       [{ name: "price_from_usd", label: "Price from (USD)", type: "number" }],
@@ -276,15 +227,37 @@ const FORM_LAYOUT: Record<string, { rows: FieldDef[][] }> = {
   faqs: {
     rows: [
       [{ name: "question", label: "Question", type: "text" }],
-      [
-        {
-          name: "category",
-          label: "Category",
-          type: "text",
-          placeholder: "planning | conservation | logistics",
-        },
-      ],
+      [{ name: "category", label: "Category", type: "text", placeholder: "planning | conservation | logistics" }],
       [{ name: "answer", label: "Answer", type: "rich" }],
+      [
+        { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
+        { name: "published", label: "Active", type: "bool" },
+      ],
+    ],
+  },
+  adventures: {
+    rows: [
+      [{ name: "name", label: "Name", type: "text", placeholder: "e.g. Okavango on Foot", icon: "pin" }],
+      [
+        { name: "region", label: "Region", type: "text", placeholder: "e.g. Botswana" },
+        { name: "terrain", label: "Terrain", type: "text", placeholder: "e.g. Delta & Waterways" },
+      ],
+      [
+        { name: "nights", label: "Nights", type: "text", placeholder: "e.g. 8 nights" },
+        { name: "slug", label: "Slug", type: "text", placeholder: "auto-from-name" },
+      ],
+      [
+        { name: "difficulty", label: "Difficulty", type: "text", placeholder: "e.g. Moderate" },
+        { name: "tagline", label: "Tagline", type: "text", placeholder: "Short tagline" },
+      ],
+      [{ name: "description", label: "Description", type: "rich", placeholder: "Describe this adventure…" }],
+      [{ name: "highlights", label: "Highlights (one per line)", type: "array" }],
+      [{ name: "image", label: "Hero Image", type: "image" }],
+      [{ name: "gallery", label: "Gallery", type: "images" }],
+      [
+        { name: "price_from_usd", label: "Price from (USD)", type: "number" },
+        { name: "deposit_usd", label: "Deposit (USD)", type: "number" },
+      ],
       [
         { name: "sort_order", label: "Sort Order", type: "number", icon: "hash" },
         { name: "published", label: "Active", type: "bool" },
@@ -330,6 +303,12 @@ const SORT_OPTIONS: Record<string, { value: string; label: string }[]> = {
   faqs: [
     { value: "sort_order", label: "Sort Order" },
     { value: "category", label: "Category" },
+  ],
+  adventures: [
+    { value: "sort_order", label: "Sort Order" },
+    { value: "name", label: "Name" },
+    { value: "price_from_usd", label: "Price" },
+    { value: "created_at", label: "Newest" },
   ],
 };
 
@@ -409,7 +388,6 @@ function ContentAdmin() {
         });
       } catch {}
       setOpen(false);
-      if (table === "destinations" || table === "itineraries") setEditing(null);
     },
     onError: (e: any) => toast.error(e.message ?? "Error"),
   });
@@ -453,11 +431,11 @@ function ContentAdmin() {
         f.type === "bool" ? true : f.type === "number" ? 0 : f.type === "array" || f.type === "images" ? [] : "";
     });
     setEditing(blank);
-    if (table !== "destinations" && table !== "itineraries") setOpen(true);
+    setOpen(true);
   };
   const startEdit = (row: any) => {
     setEditing({ ...row });
-    if (table !== "destinations" && table !== "itineraries") setOpen(true);
+    setOpen(true);
   };
   const save = (e: React.FormEvent) => {
     e.preventDefault();
@@ -489,50 +467,24 @@ function ContentAdmin() {
     mUpsert.mutate(row);
   };
 
-  if (table === "destinations" && editing) {
-    return (
-      <DestinationEditor
-        editing={editing}
-        fields={flatFields}
-        saving={mUpsert.isPending}
-        onChange={(name, value) => setEditing({ ...editing, [name]: value })}
-        onBack={() => setEditing(null)}
-        onSave={save}
-      />
-    );
-  }
-
-  if (table === "itineraries" && editing) {
-    return (
-      <AdventureEditor
-        editing={editing}
-        fields={flatFields}
-        saving={mUpsert.isPending}
-        onChange={(name, value) => setEditing({ ...editing, [name]: value })}
-        onBack={() => setEditing(null)}
-        onSave={save}
-      />
-    );
-  }
-
   return (
     <div>
       {/* Page header */}
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3 sm:mb-6 sm:gap-4">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-serif text-3xl">{label}</h1>
           <p className="text-sm text-foreground/60 mt-1">
             Manage your {label.toLowerCase()} catalog — create, edit, and publish.
           </p>
         </div>
-        <Button onClick={startCreate} className="w-full bg-gold text-gold-foreground hover:bg-gold/90 sm:w-auto">
+        <Button onClick={startCreate} className="bg-gold text-gold-foreground hover:bg-gold/90">
           <Plus className="w-4 h-4 mr-1" /> Add {singular}
         </Button>
       </div>
 
       {/* Filter bar */}
-      <div className="mb-5 border border-border bg-background p-3 sm:mb-6 sm:p-4">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_200px_200px_auto]">
+      <div className="bg-background border border-border p-4 mb-6">
+        <div className="grid gap-3 md:grid-cols-[1fr_200px_200px_auto]">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
             <Input
@@ -557,7 +509,7 @@ function ContentAdmin() {
               </SelectContent>
             </Select>
           ) : (
-            <div className="hidden xl:block" />
+            <div />
           )}
           <Select
             value={`${orderBy}:${orderDir}`}
@@ -580,7 +532,7 @@ function ContentAdmin() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex items-center gap-5 px-1 sm:col-span-2 xl:col-span-1">
+          <div className="flex items-center gap-5 px-1">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <Checkbox checked={featuredOnly} onCheckedChange={(v) => setFeaturedOnly(!!v)} />
               <span>Featured</span>
@@ -595,9 +547,7 @@ function ContentAdmin() {
 
       {/* Card grid */}
       {isLoading ? (
-        <div
-          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" || table === "itineraries" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
-        >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="border border-border bg-background overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -613,9 +563,7 @@ function ContentAdmin() {
           No {label.toLowerCase()} match your filters.
         </div>
       ) : (
-        <div
-          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" || table === "itineraries" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
-        >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((row: any) => {
             const img = imageField ? row[imageField] : null;
             const title = row.name ?? row.title ?? row.question ?? "Untitled";
@@ -704,55 +652,53 @@ function ContentAdmin() {
       )}
 
       {/* Create / Edit dialog */}
-      {table !== "destinations" && table !== "itineraries" && (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-7xl gap-0 overflow-hidden p-0 sm:w-[calc(100%-3rem)]">
-            <DialogHeader className="shrink-0 border-b border-border bg-cream/60 px-5 py-4 pr-12 sm:px-7 sm:py-5">
-              <DialogTitle className="font-serif text-2xl">
-                {editing?.id ? `Edit ${singular}` : `New ${singular}`}
-              </DialogTitle>
-              <DialogDescription>
-                {editing?.id
-                  ? `Update the details for this ${singular.toLowerCase()}.`
-                  : `Create a new ${singular.toLowerCase()} to showcase on your platform.`}
-              </DialogDescription>
-            </DialogHeader>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-5xl w-[95vw] max-h-[92vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl">
+              {editing?.id ? `Edit ${singular}` : `New ${singular}`}
+            </DialogTitle>
+            <DialogDescription>
+              {editing?.id
+                ? `Update the details for this ${singular.toLowerCase()}.`
+                : `Create a new ${singular.toLowerCase()} to showcase on your platform.`}
+            </DialogDescription>
+          </DialogHeader>
 
-            {editing && layout && (
-              <form onSubmit={save} className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-cream/20 p-4 sm:p-6">
-                  {layout.rows.map((row, ri) => (
-                    <div key={ri} className={row.length > 1 ? "grid gap-4 lg:grid-cols-2" : ""}>
-                      {row.map((f) => (
-                        <FieldInput
-                          key={f.name}
-                          field={f}
-                          value={editing[f.name]}
-                          onChange={(v) => setEditing({ ...editing, [f.name]: v })}
-                          autosaveKey={`cms:rt:${table}:${editing.id || "new"}:${f.name}`}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
+          {editing && layout && (
+            <form onSubmit={save} className="space-y-5 pt-2">
+              <div className="bg-cream/40 border border-border p-5 space-y-4">
+                {layout.rows.map((row, ri) => (
+                  <div key={ri} className={row.length > 1 ? "grid gap-4 sm:grid-cols-2" : ""}>
+                    {row.map((f) => (
+                      <FieldInput
+                        key={f.name}
+                        field={f}
+                        value={editing[f.name]}
+                        onChange={(v) => setEditing({ ...editing, [f.name]: v })}
+                        autosaveKey={`cms:rt:${table}:${editing.id || "new"}:${f.name}`}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
 
-                <DialogFooter className="shrink-0 border-t border-border bg-background px-4 py-3 sm:px-6 sm:py-4 gap-2">
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={mUpsert.isPending}
-                    className="bg-gold text-gold-foreground hover:bg-gold/90"
-                  >
-                    {mUpsert.isPending ? "Saving…" : editing?.id ? `Update ${singular}` : `Create ${singular}`}
-                  </Button>
-                </DialogFooter>
-              </form>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={mUpsert.isPending}
+                  className="bg-gold text-gold-foreground hover:bg-gold/90"
+                >
+                  {mUpsert.isPending ? "Saving…" : editing?.id ? `Update ${singular}` : `Create ${singular}`}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
@@ -881,132 +827,6 @@ function FieldInput({
         </div>
       )}
     </div>
-  );
-}
-
-function DestinationEditor({
-  editing,
-  fields,
-  saving,
-  onChange,
-  onBack,
-  onSave,
-}: {
-  editing: any;
-  fields: FieldDef[];
-  saving: boolean;
-  onChange: (name: string, value: any) => void;
-  onBack: () => void;
-  onSave: (event: React.FormEvent) => void;
-}) {
-  return (
-    <form onSubmit={onSave} className="mx-auto max-w-7xl space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Destination editor</p>
-          <h1 className="font-serif text-3xl">{editing.id ? "Edit destination" : "New destination"}</h1>
-        </div>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back to destinations
-          </Button>
-          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
-            {saving ? "Saving…" : "Save destination"}
-          </Button>
-        </div>
-      </header>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-        <section className="space-y-5 border border-border bg-background p-5 sm:p-6">
-          {fields
-            .filter((field) => !["image", "sort_order", "published"].includes(field.name))
-            .map((field) => (
-              <FieldInput
-                key={field.name}
-                field={field}
-                value={editing[field.name]}
-                onChange={(value) => onChange(field.name, value)}
-                autosaveKey={`cms:rt:destinations:${editing.id || "new"}:${field.name}`}
-              />
-            ))}
-        </section>
-        <aside className="space-y-5">
-          {fields
-            .filter((field) => ["image", "sort_order", "published"].includes(field.name))
-            .map((field) => (
-              <div key={field.name} className="border border-border bg-background p-5">
-                <FieldInput
-                  field={field}
-                  value={editing[field.name]}
-                  onChange={(value) => onChange(field.name, value)}
-                />
-              </div>
-            ))}
-        </aside>
-      </div>
-    </form>
-  );
-}
-
-function AdventureEditor({
-  editing,
-  fields,
-  saving,
-  onChange,
-  onBack,
-  onSave,
-}: {
-  editing: any;
-  fields: FieldDef[];
-  saving: boolean;
-  onChange: (name: string, value: any) => void;
-  onBack: () => void;
-  onSave: (event: React.FormEvent) => void;
-}) {
-  return (
-    <form onSubmit={onSave} className="mx-auto max-w-7xl space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Adventure editor</p>
-          <h1 className="font-serif text-3xl">{editing.id ? "Edit adventure" : "New adventure"}</h1>
-        </div>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back to adventures
-          </Button>
-          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
-            {saving ? "Saving…" : "Save adventure"}
-          </Button>
-        </div>
-      </header>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-        <section className="space-y-5 border border-border bg-background p-5 sm:p-6">
-          {fields
-            .filter((field) => !["image", "sort_order", "published"].includes(field.name))
-            .map((field) => (
-              <FieldInput
-                key={field.name}
-                field={field}
-                value={editing[field.name]}
-                onChange={(value) => onChange(field.name, value)}
-                autosaveKey={`cms:rt:itineraries:${editing.id || "new"}:${field.name}`}
-              />
-            ))}
-        </section>
-        <aside className="space-y-5">
-          {fields
-            .filter((field) => ["image", "sort_order", "published"].includes(field.name))
-            .map((field) => (
-              <div key={field.name} className="border border-border bg-background p-5">
-                <FieldInput
-                  field={field}
-                  value={editing[field.name]}
-                  onChange={(value) => onChange(field.name, value)}
-                />
-              </div>
-            ))}
-        </aside>
-      </div>
-    </form>
   );
 }
 
