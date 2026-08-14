@@ -596,7 +596,7 @@ function ContentAdmin() {
       {/* Card grid */}
       {isLoading ? (
         <div
-          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
+          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" || table === "itineraries" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
         >
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="border border-border bg-background overflow-hidden">
@@ -614,7 +614,7 @@ function ContentAdmin() {
         </div>
       ) : (
         <div
-          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
+          className={`grid gap-4 sm:grid-cols-2 ${table === "destinations" || table === "itineraries" ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-3"} sm:gap-5`}
         >
           {filtered.map((row: any) => {
             const img = imageField ? row[imageField] : null;
