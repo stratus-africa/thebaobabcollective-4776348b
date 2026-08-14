@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +20,7 @@ import {
   Megaphone,
   Map as MapIcon,
   Image as ImageIcon,
+  Edit,
 } from "lucide-react";
 import {
   getAdventuresPage,
@@ -39,16 +40,6 @@ import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 export const Route = createFileRoute("/_authenticated/admin/adventures")({
   component: AdminAdventures,
 });
-
-const DIFFICULTIES = ["Easy", "Moderate", "Active", "Challenging"];
-
-function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 function AdminAdventures() {
   const fetchFn = useServerFn(getAdventuresPage);
@@ -245,50 +236,6 @@ function AdminAdventures() {
                 />
               </Field>
             </Card>
-            <Card
-              title="What is included & not included"
-              icon={CircleAlert}
-              description="Add one item per line for each public-facing column."
-            >
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Included">
-                  <Textarea
-                    rows={5}
-                    value={(draft.cta.included ?? []).join("\n")}
-                    onChange={(e) =>
-                      setDraft({
-                        ...draft,
-                        cta: {
-                          ...draft.cta,
-                          included: e.target.value
-                            .split("\n")
-                            .map((item) => item.trim())
-                            .filter(Boolean),
-                        },
-                      })
-                    }
-                  />
-                </Field>
-                <Field label="Not included">
-                  <Textarea
-                    rows={5}
-                    value={(draft.cta.notIncluded ?? []).join("\n")}
-                    onChange={(e) =>
-                      setDraft({
-                        ...draft,
-                        cta: {
-                          ...draft.cta,
-                          notIncluded: e.target.value
-                            .split("\n")
-                            .map((item) => item.trim())
-                            .filter(Boolean),
-                        },
-                      })
-                    }
-                  />
-                </Field>
-              </div>
-            </Card>
             <SignatureOrder signatures={draft.signatures} />
           </div>
         </aside>
@@ -350,108 +297,154 @@ function SignatureItineraries({
   draft: AdventuresPage;
   setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
 }) {
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  const moveTo = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= draft.signatures.length) return;
+    const copy = draft.signatures.slice();
+    const [moved] = copy.splice(from, 1);
+    copy.splice(to, 0, moved);
+    setDraft({ ...draft, signatures: copy });
+  };
+
+  const removeAt = (idx: number) => {
+    setDraft({ ...draft, signatures: draft.signatures.filter((_, i) => i !== idx) });
+  };
+
+  const addNew = () => {
+    setDraft({
+      ...draft,
+      signatures: [
+        ...draft.signatures,
+        {
+          slug: "",
+          name: "",
+          region: "",
+          terrain: "",
+          nights: "",
+          difficulty: "Moderate",
+          image: "",
+          imageAlt: "",
+          focalX: 50,
+          focalY: 50,
+          description: "",
+          highlights: [],
+          included: [],
+          notIncluded: [],
+        },
+      ],
+    });
+  };
+
   return (
-    <ListCard
+    <section
       id="signatures"
-      title="Signature itineraries"
-      icon={MapIcon}
-      description="Featured adventures, in their display order."
-      items={draft.signatures}
-      onChange={(signatures) => setDraft({ ...draft, signatures })}
-      empty={{
-        slug: "",
-        name: "",
-        region: "",
-        terrain: "",
-        nights: "",
-        difficulty: "Moderate",
-        image: "",
-        imageAlt: "",
-        focalX: 50,
-        focalY: 50,
-        description: "",
-        highlights: [],
-      }}
-      previewLabel={(s) => s.name || "New itinerary"}
-      previewImage={(s) => s.image}
-      render={(s, set) => (
-        <>
-          <Field label="Name">
-            <Input
-              value={s.name}
-              onChange={(e) => set({ ...s, name: e.target.value, slug: s.slug || slugify(e.target.value) })}
-            />
-          </Field>
-          <Field label="Slug">
-            <Input value={s.slug} onChange={(e) => set({ ...s, slug: e.target.value })} />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Region">
-              <Input value={s.region} onChange={(e) => set({ ...s, region: e.target.value })} />
-            </Field>
-            <Field label="Terrain">
-              <Input value={s.terrain} onChange={(e) => set({ ...s, terrain: e.target.value })} />
-            </Field>
+      className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm"
+    >
+      <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
+        <div className="flex items-start gap-3">
+          <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
+            <MapIcon className="w-4 h-4" />
           </div>
-          <Field label="Nights">
-            <Input value={s.nights} onChange={(e) => set({ ...s, nights: e.target.value })} />
-          </Field>
-          <Field label="Description">
-            <Textarea rows={3} value={s.description} onChange={(e) => set({ ...s, description: e.target.value })} />
-          </Field>
-          <Field label="Hero image">
-            <ManagedImageUpload
-              value={s.image}
-              onChange={(url) => set({ ...s, image: url })}
-              recommendedRatio="4:3 card, 16:9 hero"
-              altText={s.imageAlt}
-              focalX={s.focalX ?? 50}
-              focalY={s.focalY ?? 50}
-              onFocalChange={(focalX, focalY) => set({ ...s, focalX, focalY })}
-            />
-          </Field>
-          <Field label="Image alt text">
-            <Input value={s.imageAlt ?? ""} onChange={(e) => set({ ...s, imageAlt: e.target.value })} />
-          </Field>
-          <Field label="Highlights">
-            <Textarea
-              rows={4}
-              value={(s.highlights ?? []).join("\n")}
-              onChange={(e) =>
-                set({
-                  ...s,
-                  highlights: e.target.value
-                    .split("\n")
-                    .map((x) => x.trim())
-                    .filter(Boolean),
-                })
-              }
-            />
-            <p className="mt-1.5 text-xs text-foreground/55">
-              Enter one highlight per line. They appear as the itinerary’s key experiences.
+          <div>
+            <h2 className="font-serif text-xl leading-tight">
+              Signature itineraries
+              <span className="ml-2 text-xs text-foreground/50 font-sans">({draft.signatures.length})</span>
+            </h2>
+            <p className="text-xs text-foreground/55 mt-0.5">
+              Featured adventures, in their display order. Click the edit icon to modify individual adventures.
             </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {(s.highlights ?? []).map((highlight, index) => (
-                <button
-                  key={`${highlight}-${index}`}
-                  type="button"
-                  onClick={() =>
-                    set({
-                      ...s,
-                      highlights: s.highlights.filter((_, itemIndex) => itemIndex !== index),
-                    })
-                  }
-                  className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-foreground/70 hover:border-destructive hover:text-destructive"
-                  title="Remove highlight"
-                >
-                  {highlight} ×
-                </button>
-              ))}
+          </div>
+        </div>
+        <Button
+          onClick={addNew}
+          size="sm"
+          variant="outline"
+          className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
+        >
+          <Plus className="w-3.5 h-3.5 mr-1" /> Add
+        </Button>
+      </header>
+
+      <div className="p-4 space-y-2">
+        {draft.signatures.length === 0 && (
+          <p className="text-sm text-foreground/60 italic p-4 text-center border border-dashed border-border rounded-md">
+            No items yet. Click <span className="font-medium">Add</span> to create one.
+          </p>
+        )}
+        {draft.signatures.map((item, idx) => (
+          <div
+            key={`${item.slug}-${idx}`}
+            draggable
+            onDragStart={() => setDragIdx(idx)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => {
+              if (dragIdx !== null) moveTo(dragIdx, idx);
+              setDragIdx(null);
+            }}
+            className="border border-border bg-background overflow-hidden shadow-sm"
+          >
+            <div className="flex items-center gap-3 px-4 py-3 hover:bg-cream/50 transition-colors">
+              <span className="cursor-grab text-foreground/35 hover:text-foreground/60" title="Drag to reorder">
+                <GripVertical className="w-4 h-4" />
+              </span>
+              <div className="h-10 w-14 rounded bg-cream overflow-hidden flex items-center justify-center shrink-0">
+                {item.image ? (
+                  <img src={item.image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <ImageIcon className="w-4 h-4 text-foreground/30" />
+                )}
+              </div>
+              <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/40 w-6">#{idx + 1}</span>
+              <span className="font-medium text-sm flex-1 truncate">{item.name || "New itinerary"}</span>
+              <Link
+                to="/admin/adventures/$slug"
+                params={{ slug: item.slug }}
+                className="text-foreground/60 hover:text-foreground p-1.5"
+                title="Edit"
+              >
+                <Edit className="w-4 h-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  moveTo(idx, idx - 1);
+                }}
+                disabled={idx === 0}
+                className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                aria-label="Move up"
+              >
+                <ArrowUp className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  moveTo(idx, idx + 1);
+                }}
+                disabled={idx === draft.signatures.length - 1}
+                className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                aria-label="Move down"
+              >
+                <ArrowDown className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeAt(idx);
+                }}
+                className="text-foreground/50 hover:text-destructive p-1.5"
+                aria-label="Delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
-          </Field>
-        </>
-      )}
-    />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -478,281 +471,6 @@ function SignatureOrder({ signatures }: { signatures: AdventuresSignature[] }) {
       </ol>
     </section>
   );
-}
-
-function ListCard<T extends object>({
-  id,
-  title,
-  icon: Icon,
-  description,
-  items,
-  onChange,
-  empty,
-  render,
-  previewLabel,
-  previewImage,
-}: {
-  id?: string;
-  title: string;
-  icon: any;
-  description?: string;
-  items: T[];
-  onChange: (items: T[]) => void;
-  empty: T;
-  render: (item: T, set: (next: T) => void) => React.ReactNode;
-  previewLabel?: (item: T) => string;
-  previewImage?: (item: T) => string | undefined;
-}) {
-  const [openIdx, setOpenIdx] = useState<number | null>(null);
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const setAt = (idx: number, next: T) => {
-    const copy = items.slice();
-    copy[idx] = next;
-    onChange(copy);
-  };
-  const moveTo = (from: number, to: number) => {
-    if (from === to || to < 0 || to >= items.length) return;
-    const copy = items.slice();
-    const [moved] = copy.splice(from, 1);
-    copy.splice(to, 0, moved);
-    onChange(copy);
-    setOpenIdx(to);
-  };
-  const removeAt = (idx: number) => {
-    onChange(items.filter((_, i) => i !== idx));
-    if (openIdx === idx) setOpenIdx(null);
-  };
-  const addNew = () => {
-    onChange([...items, structuredClone(empty)]);
-    setOpenIdx(items.length);
-  };
-
-  return (
-    <section id={id} className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm">
-      <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
-        <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
-            <Icon className="w-4 h-4" />
-          </div>
-          <div>
-            <h2 className="font-serif text-xl leading-tight">
-              {title}
-              <span className="ml-2 text-xs text-foreground/50 font-sans">({items.length})</span>
-            </h2>
-            {description && <p className="text-xs text-foreground/55 mt-0.5">{description}</p>}
-          </div>
-        </div>
-        <Button
-          onClick={addNew}
-          size="sm"
-          variant="outline"
-          className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
-        >
-          <Plus className="w-3.5 h-3.5 mr-1" /> Add
-        </Button>
-      </header>
-
-      <div className="p-4 space-y-2">
-        {items.length === 0 && (
-          <p className="text-sm text-foreground/60 italic p-4 text-center border border-dashed border-border rounded-md">
-            No items yet. Click <span className="font-medium">Add</span> to create one.
-          </p>
-        )}
-        {items.map((item, idx) => {
-          const isOpen = openIdx === idx;
-          const label = previewLabel?.(item) ?? `Item ${idx + 1}`;
-          const img = previewImage?.(item);
-          return (
-            <div
-              key={idx}
-              draggable
-              onDragStart={() => setDragIdx(idx)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => {
-                if (dragIdx !== null) moveTo(dragIdx, idx);
-                setDragIdx(null);
-              }}
-              className="border border-border bg-background overflow-hidden shadow-sm"
-            >
-              <div
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-cream/50 transition-colors"
-                onClick={() => setOpenIdx(isOpen ? null : idx)}
-              >
-                <span className="cursor-grab text-foreground/35 hover:text-foreground/60" title="Drag to reorder">
-                  <GripVertical className="w-4 h-4" />
-                </span>
-                <div className="h-10 w-14 rounded bg-cream overflow-hidden flex items-center justify-center shrink-0">
-                  {img ? (
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <ImageIcon className="w-4 h-4 text-foreground/30" />
-                  )}
-                </div>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/40 w-6">#{idx + 1}</span>
-                <span className="font-medium text-sm flex-1 truncate">{label}</span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    moveTo(idx, idx - 1);
-                  }}
-                  disabled={idx === 0}
-                  className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                  aria-label="Move up"
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    moveTo(idx, idx + 1);
-                  }}
-                  disabled={idx === items.length - 1}
-                  className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                  aria-label="Move down"
-                >
-                  <ArrowDown className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeAt(idx);
-                  }}
-                  className="text-foreground/50 hover:text-destructive p-1.5"
-                  aria-label="Delete"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                <span className="text-xs text-foreground/50">{isOpen ? "Hide" : "Edit"}</span>
-              </div>
-              {isOpen && (
-                <div className="px-4 pb-5 pt-2 space-y-4 border-t border-border bg-cream/30">
-                  {render(item, (next) => setAt(idx, next))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function ImageUpload({ value, onChange }: { value: string; onChange: (url: string) => void }) {
-  const upload = useServerFn(adminUploadImage);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [drag, setDrag] = useState(false);
-
-  async function pick(file: File | undefined) {
-    if (!file) return;
-    if (!/^image\/(png|jpe?g|webp|gif|avif)/i.test(file.type)) {
-      toast.error("Choose a PNG, JPG, WEBP, GIF, or AVIF image.");
-      return;
-    }
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Image must be smaller than 8MB");
-      return;
-    }
-    setBusy(true);
-    try {
-      const buf = new Uint8Array(await file.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
-      const res = await upload({
-        data: {
-          filename: file.name,
-          contentType: file.type || "image/jpeg",
-          base64: btoa(binary),
-        },
-      });
-      onChange(res.url);
-      toast.success("Image uploaded");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Upload failed");
-    } finally {
-      setBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
-  }
-
-  return (
-    <div className="space-y-3">
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
-        className="hidden"
-        onChange={(e) => pick(e.target.files?.[0])}
-      />
-      {value ? (
-        <div className="border-2 border-border rounded-md overflow-hidden bg-background shadow-sm">
-          <div className="bg-cream">
-            <img src={value} alt="" className="w-full max-h-72 object-contain mx-auto" />
-          </div>
-          <div className="flex flex-wrap items-center gap-2 p-3 border-t border-border bg-cream/40">
-            <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}>
-              {busy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1" />}
-              Replace
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => onChange("")}
-              className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
-            >
-              <X className="w-3.5 h-3.5 mr-1" /> Remove
-            </Button>
-            <span className="ml-auto text-[11px] text-foreground/50 truncate max-w-[60%]" title={value}>
-              {value.split("/").pop()}
-            </span>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDrag(true);
-          }}
-          onDragLeave={() => setDrag(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDrag(false);
-            pick(e.dataTransfer.files?.[0]);
-          }}
-          disabled={busy}
-          className={`w-full flex flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed px-6 py-12 text-center transition-colors ${
-            drag ? "border-gold bg-gold/5" : "border-border bg-cream/40 hover:border-gold hover:bg-gold/5"
-          }`}
-        >
-          <div className="h-14 w-14 rounded-full bg-gold/10 text-gold flex items-center justify-center">
-            {busy ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
-          </div>
-          <div>
-            <p className="text-sm font-medium">Drop an image here or click to upload</p>
-            <p className="text-[11px] text-foreground/50 mt-1">PNG, JPG, WEBP, GIF, AVIF · up to 8MB</p>
-          </div>
-        </button>
-      )}
-      <Input
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="…or paste an image URL"
-        className="text-xs"
-      />
-    </div>
-  );
-}
-
-function humanSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function ManagedImageUpload({
