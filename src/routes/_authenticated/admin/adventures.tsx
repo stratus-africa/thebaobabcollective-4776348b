@@ -322,6 +322,8 @@ function SignatureItineraries({
 }) {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const navigate = useNavigate();
+  const persistFn = useServerFn(saveAdventuresPage);
+  const [openingSlug, setOpeningSlug] = useState<string | null>(null);
 
   const moveTo = (from: number, to: number) => {
     if (from === to || to < 0 || to >= draft.signatures.length) return;
