@@ -32,7 +32,6 @@ export const MENU_DEFAULTS: MenuConfig = {
   topBarEnabled: true,
   transparentOverHero: false,
   primary: [
-    { label: "Home", to: "/" },
     { label: "Journeys", to: "/adventures" },
     { label: "Destinations", to: "/destinations" },
     { label: "Lodges", to: "/lodges" },
@@ -128,8 +127,10 @@ export const saveMenuConfig = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => MenuSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const database = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? (await import("@/integrations/supabase/client.server")).supabaseAdmin
+      : context.supabase;
+    const { error } = await database
       .from("site_settings")
       .upsert({ key: "menu_config", value: data, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
