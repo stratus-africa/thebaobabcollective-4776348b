@@ -103,7 +103,7 @@ function AdminAdventureEdit() {
   }, [data]);
 
   const adventureIdx = isNew ? -1 : draft.signatures.findIndex((s) => s.slug === slug);
-  const adventure = isNew ? newForm : (adventureIdx >= 0 ? draft.signatures[adventureIdx] : null);
+  const adventure = isNew ? newForm : adventureIdx >= 0 ? draft.signatures[adventureIdx] : null;
 
   function updateAdventure(patch: Partial<AdventuresSignature>) {
     if (isNew) {
@@ -148,7 +148,7 @@ function AdminAdventureEdit() {
       });
       toast.success(`"${adventure.name}" ${isNew ? "created" : "updated"} successfully.`);
       await refetch();
-      
+
       if (isNew) {
         navigate({
           to: "/admin/adventures/$slug",
@@ -229,9 +229,7 @@ function AdminAdventureEdit() {
           </Link>
           <div className="flex items-center gap-3">
             <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Adventure" : "Edit Adventure"}</h1>
-            {!isNew && (
-              <Badge className="bg-forest text-forest-foreground">Signature Adventure</Badge>
-            )}
+            {!isNew && <Badge className="bg-forest text-forest-foreground">Signature Adventure</Badge>}
           </div>
           {!isNew && adventure && adventure.slug && (
             <div className="flex items-center gap-2 text-xs text-foreground/60 pt-1">
@@ -244,18 +242,10 @@ function AdminAdventureEdit() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate({ to: "/admin/adventures" })}
-          >
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={saving}
-            className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
-          >
+          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
@@ -471,9 +461,7 @@ function AdminAdventureEdit() {
           <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
             <header className="px-6 py-4 border-b border-border bg-cream/50">
               <h2 className="font-serif text-lg leading-none">Highlights</h2>
-              <p className="text-xs text-foreground/55 mt-1">
-                Enter each key highlight on a new line.
-              </p>
+              <p className="text-xs text-foreground/55 mt-1">Enter each key highlight on a new line.</p>
             </header>
             <div className="p-6 space-y-4">
               <Textarea
@@ -481,9 +469,7 @@ function AdminAdventureEdit() {
                 value={(adv.highlights ?? []).join("\n")}
                 onChange={(e) =>
                   updateAdventure({
-                    highlights: e.target.value
-                      .split("\n")
-                      .map((s) => s.trimEnd()),
+                    highlights: e.target.value.split("\n").map((s) => s.trimEnd()),
                   })
                 }
                 placeholder="Walking safaris in the Okavango Delta&#10;Night game drives with expert trackers&#10;Private mokoro expeditions"
@@ -516,9 +502,7 @@ function AdminAdventureEdit() {
           <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
             <header className="px-6 py-4 border-b border-border bg-cream/50">
               <h2 className="font-serif text-lg leading-none">Planning: Included & Not Included</h2>
-              <p className="text-xs text-foreground/55 mt-1">
-                List inclusions and exclusions (one item per line).
-              </p>
+              <p className="text-xs text-foreground/55 mt-1">List inclusions and exclusions (one item per line).</p>
             </header>
             <div className="p-6 grid gap-6 sm:grid-cols-2">
               <div>
@@ -530,9 +514,7 @@ function AdminAdventureEdit() {
                   value={(adv.included ?? []).join("\n")}
                   onChange={(e) =>
                     updateAdventure({
-                      included: e.target.value
-                        .split("\n")
-                        .map((s) => s.trimEnd()),
+                      included: e.target.value.split("\n").map((s) => s.trimEnd()),
                     })
                   }
                   placeholder="All meals & drinks&#10;Park fees&#10;Expert guide&#10;Internal charter flights"
@@ -548,9 +530,7 @@ function AdminAdventureEdit() {
                   value={(adv.notIncluded ?? []).join("\n")}
                   onChange={(e) =>
                     updateAdventure({
-                      notIncluded: e.target.value
-                        .split("\n")
-                        .map((s) => s.trimEnd()),
+                      notIncluded: e.target.value.split("\n").map((s) => s.trimEnd()),
                     })
                   }
                   placeholder="International flights&#10;Travel insurance&#10;Premium cellar wines&#10;Gratuities"
@@ -580,9 +560,7 @@ function AdminAdventureEdit() {
             </header>
             <div className="p-5 space-y-4">
               <div>
-                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                  Status
-                </Label>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Status</Label>
                 <select
                   value={adv.status || "published"}
                   onChange={(e) => updateAdventure({ status: e.target.value as any })}
@@ -629,7 +607,12 @@ function AdminAdventureEdit() {
                     </Button>
 
                     {liveHref && (
-                      <Button variant="ghost" size="sm" asChild className="text-xs text-foreground/60 hover:text-foreground px-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-xs text-foreground/60 hover:text-foreground px-2"
+                      >
                         <a href={liveHref} target="_blank" rel="noreferrer">
                           <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
                         </a>
@@ -704,7 +687,8 @@ function AdminAdventureEdit() {
             <AlertDialogTitle>Delete adventure?</AlertDialogTitle>
             <AlertDialogDescription>
               You're about to permanently remove{" "}
-              <span className="font-semibold text-foreground">"{adv.name || "this adventure"}"</span>. This action cannot be undone.
+              <span className="font-semibold text-foreground">"{adv.name || "this adventure"}"</span>. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
