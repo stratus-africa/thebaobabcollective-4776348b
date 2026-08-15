@@ -26,7 +26,6 @@ import heroBaobab from "@/assets/hero-baobab.jpg";
 import { adventuresDefaults, getAdventuresPage, type AdventuresPage } from "@/lib/adventures.functions";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
-import { usePreviewMerge } from "@/lib/preview-overrides";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -126,7 +125,7 @@ function AdventuresPage() {
     staleTime: 60_000,
   });
   const baseContent = { ...PAGE_DEFAULTS.adventures_index, ...(pcData ?? {}) };
-  const content = usePreviewMerge("adventures_index", baseContent);
+  const content = baseContent;
 
   return (
     <div className="bg-background min-h-screen">
