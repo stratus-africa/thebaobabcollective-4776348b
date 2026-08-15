@@ -1,155 +1,441 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { ArrowRight, ArrowDown, MapPin, Sparkles, Compass } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { ShareButtons } from "@/components/site/ShareButtons";
-import { getDestinations } from "@/lib/cms.functions";
-import { Input } from "@/components/ui/input";
-import { Search, MapPin } from "lucide-react";
+import { EnquireDialog } from "@/components/site/EnquireDialog";
+import { DestinationCard } from "@/components/site/DestinationCard";
+import { KenyaDestinationsMap } from "@/components/site/KenyaDestinationsMap";
+import { DestinationFinderSection } from "@/components/site/DestinationFinderSection";
+import { DestinationCombinations } from "@/components/site/DestinationCombinations";
+import { DestinationJourneysSection } from "@/components/site/DestinationJourneysSection";
+import { DestinationStaySection } from "@/components/site/DestinationStaySection";
+import { DestinationMatcherSection } from "@/components/site/DestinationMatcherSection";
+import { getDestinations, getLodges } from "@/lib/cms.functions";
+import { getAdventuresPage } from "@/lib/adventures.functions";
+import { mergeDestinationsWithDefaults, type DestinationMetadata } from "@/lib/destinations.data";
+import heroBaobab from "@/assets/hero-baobab.jpg";
+import g4Img from "@/assets/gallery-4.jpg";
 
-const q = queryOptions({ queryKey: ["destinations"], queryFn: () => getDestinations() });
-
-export const Route = createFileRoute("/destinations/")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(q),
-  head: () => ({
-    meta: [
-      { title: "Destinations — The Baobab Collective" },
-      { name: "description", content: "Discover the regions, parks and coasts of Africa we know best." },
-    ],
-  }),
-  errorComponent: ({ error }) => <div className="p-10 text-center">{error.message}</div>,
-  notFoundComponent: () => <div className="p-10 text-center">Not found</div>,
-  component: DestinationsPage,
+const destinationsQuery = queryOptions({
+  queryKey: ["destinations"],
+  queryFn: () => getDestinations(),
 });
 
-function DestinationsPage() {
-  const { data: all } = useSuspenseQuery(q);
-  const [search, setSearch] = useState("");
-  const [region, setRegion] = useState<string>("All");
-  const regions = ["All", ...Array.from(new Set(all.map((d) => d.region)))];
+const adventuresQuery = queryOptions({
+  queryKey: ["adventures-page"],
+  queryFn: () => getAdventuresPage(),
+});
 
-  const filtered = all.filter((d) => {
-    const matchesRegion = region === "All" || d.region === region;
-    const s = search.trim().toLowerCase();
-    const matchesSearch =
-      !s ||
-      d.name.toLowerCase().includes(s) ||
-      d.country.toLowerCase().includes(s) ||
-      d.description.toLowerCase().includes(s);
-    return matchesRegion && matchesSearch;
-  });
+const lodgesQuery = queryOptions({
+  queryKey: ["lodges"],
+  queryFn: () => getLodges(),
+});
 
-  return (
+export const Route = createFileRoute("/destinations/")({
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(destinationsQuery),
+      context.queryClient.ensureQueryData(adventuresQuery),
+      context.queryClient.ensureQueryData(lodgesQuery),
+    ]);
+  },
+  head: () => ({
+    meta: [
+      { title: "Kenya Safari & Beach Destinations | The Baobab Collective" },
+      {
+        name: "description",
+        content:
+          "Discover Kenya's most extraordinary safari, wilderness and coastal destinations. Explore tailor-made journeys with The Baobab Collective.",
+      },
+      { property: "og:title", content: "Kenya Safari & Beach Destinations | The Baobab Collective" },
+      {
+        property: "og:description",
+        content:
+          "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary.",
+      },
+      { property: "og:image", content: heroBaobab },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://thebaobabcollective.co.uk/destinations" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Kenya Safari & Beach Destinations | The Baobab Collective" },
+      {
+        name: "twitter:description",
+        content:
+          "Discover Kenya's most extraordinary safari, wilderness and coastal destinations. Explore tailor-made journeys with The Baobab Collective.",
+      },
+      { name: "twitter:image", content: heroBaobab },
+    ],
+    links: [{ rel: "canonical", href: "https://thebaobabcollective.co.uk/destinations" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Kenya Safari & Beach Destinations",
+          description:
+            "Discover Kenya's most extraordinary safari, wilderness and coastal destinations. Explore tailor-made journeys with The Baobab Collective.",
+          url: "https://thebaobabcollective.co.uk/destinations",
+          publisher: {
+            "@type": "Organization",
+            name: "The Baobab Collective",
+            url: "https://thebaobabcollective.co.uk",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
+            { "@type": "ListItem", position: 2, name: "Destinations", item: "https://thebaobabcollective.co.uk/destinations" },
+          ],
+        }),
+      },
+    ],
+  }),
+  errorComponent: ({ error }) => (
     <div className="bg-background min-h-screen">
       <Navbar />
-      <main>
-        <section className="bg-cream py-20 text-center px-6">
-          <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-4">The Continent</p>
-          <h1 className="font-serif text-5xl md:text-6xl mb-5">Destinations</h1>
-          <p className="max-w-2xl mx-auto text-foreground/75">
-            From the deltas of Botswana to the highlands of Ethiopia — explore where each journey could take you.
-          </p>
-        </section>
+      <main className="max-w-3xl mx-auto px-6 py-32 text-center">
+        <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
+        <p className="text-foreground/70">{error.message}</p>
+      </main>
+      <Footer />
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="bg-background min-h-screen">
+      <Navbar />
+      <main className="max-w-3xl mx-auto px-6 py-32 text-center">
+        <h1 className="font-serif text-4xl mb-4">Page not found</h1>
+        <Link to="/" className="text-gold underline">
+          Back home
+        </Link>
+      </main>
+      <Footer />
+    </div>
+  ),
+  component: DestinationsDiscoveryPage,
+});
 
-        <section className="py-12 border-b border-border/40">
-          <div className="max-w-[1920px] mx-auto px-6 lg:px-10 flex flex-col md:flex-row gap-4 items-stretch">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search destinations…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {regions.map((r) => (
+function DestinationsDiscoveryPage() {
+  const { data: rawDestinations } = useSuspenseQuery(destinationsQuery);
+  const { data: adventuresPage } = useSuspenseQuery(adventuresQuery);
+  const { data: lodges } = useSuspenseQuery(lodgesQuery);
+
+  // Merge database records with baseline Kenya data
+  const allDestinations = useMemo(() => {
+    return mergeDestinationsWithDefaults(rawDestinations || []);
+  }, [rawDestinations]);
+
+  // Filtering state
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const filteredDestinations = useMemo(() => {
+    return allDestinations.filter((d) => {
+      // Category filter (e.g. Wildlife, Beach, Romance, etc.)
+      const matchesCategory =
+        selectedCategory === "All" ||
+        (d.bestFor && d.bestFor.some((t) => t.toLowerCase() === selectedCategory.toLowerCase()));
+
+      // Text search filter
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        d.name.toLowerCase().includes(q) ||
+        d.region.toLowerCase().includes(q) ||
+        d.shortDescription.toLowerCase().includes(q) ||
+        (d.bestFor && d.bestFor.some((t) => t.toLowerCase().includes(q)));
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [allDestinations, selectedCategory, searchQuery]);
+
+  // Editorial Groupings
+  const icons = useMemo(() => {
+    return filteredDestinations.filter((d) => d.destinationCategory === "The Icons");
+  }, [filteredDestinations]);
+
+  const beyondClassics = useMemo(() => {
+    return filteredDestinations.filter((d) => d.destinationCategory === "Beyond the Classics");
+  }, [filteredDestinations]);
+
+  const indianOcean = useMemo(() => {
+    return filteredDestinations.filter((d) => d.destinationCategory === "The Indian Ocean");
+  }, [filteredDestinations]);
+
+  const isFiltered = selectedCategory !== "All" || searchQuery.trim().length > 0;
+
+  function scrollToDiscovery() {
+    const el = document.getElementById("discovery-grid");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  }
+
+  return (
+    <div className="bg-background min-h-screen selection:bg-gold selection:text-gold-foreground">
+      <Navbar />
+      <main id="main-content">
+        {/* ── 1. HERO SECTION ────────────────────────────────────────────── */}
+        <section
+          aria-label="Discover Kenya Hero"
+          className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center bg-forest text-cream overflow-hidden"
+        >
+          {/* Background Image */}
+          <img
+            src={heroBaobab}
+            alt="Golden sunrise across Kenya's wild savannah and acacia trees"
+            className="absolute inset-0 w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
+          />
+
+          {/* Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/60 to-black/40" />
+          <div className="absolute inset-0 bg-radial-gradient from-transparent via-forest/40 to-forest/80" />
+
+          {/* Hero Content */}
+          <div className="relative max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 text-center py-24 sm:py-32 w-full">
+            <div className="max-w-4xl mx-auto space-y-6">
+              <p className="text-[11px] sm:text-xs tracking-[0.4em] uppercase text-gold font-semibold flex items-center justify-center gap-2">
+                <Sparkles className="w-3.5 h-3.5" /> Destination Discovery
+              </p>
+
+              <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight text-cream leading-[1.02]">
+                DISCOVER KENYA
+              </h1>
+
+              <p className="text-base sm:text-xl md:text-2xl text-cream/90 font-serif max-w-2xl mx-auto leading-relaxed italic">
+                "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary."
+              </p>
+
+              <p className="text-xs sm:text-sm text-cream/75 max-w-xl mx-auto leading-relaxed">
+                Whether drawn to apex predators on the golden Mara plains, private rhino sanctuaries in Laikipia, or sunset dhow sailing in Lamu — find where your story begins.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
-                  key={r}
-                  onClick={() => setRegion(r)}
-                  className={`px-4 py-2 text-[11px] tracking-[0.2em] uppercase border ${region === r ? "bg-forest text-forest-foreground border-forest" : "border-border text-foreground/70 hover:border-gold hover:text-gold"}`}
+                  type="button"
+                  onClick={scrollToDiscovery}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-8 py-4 hover:bg-gold/90 transition-all shadow-lg hover:shadow-gold/20 cursor-pointer"
                 >
-                  {r}
+                  <span>Explore Destinations</span>
+                  <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
                 </button>
-              ))}
+
+                <EnquireDialog
+                  defaultSubject="Tailor-Made Kenya Journey Inquiry"
+                  defaultDestination="Kenya (All Destinations)"
+                  sourceUrl="/destinations"
+                  autosaveKey="enquire:destinations-hero"
+                  context={{
+                    kind: "Destination",
+                    title: "Discover Kenya",
+                    slug: "discover-kenya",
+                    image: heroBaobab,
+                  }}
+                  trigger={
+                    <button
+                      type="button"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-forest/80 text-cream backdrop-blur-md border border-gold/40 uppercase tracking-[0.22em] text-[11px] font-semibold px-8 py-4 hover:bg-forest hover:border-gold transition-all cursor-pointer shadow-md"
+                    >
+                      <span>Plan Your Journey</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  }
+                />
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="py-16">
-          <div className="max-w-[1920px] mx-auto px-6 lg:px-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filtered.map((d) => (
-              <article
-                key={d.id}
-                className="group bg-cream overflow-hidden rounded-xl border border-border motion-safe:transition-all motion-safe:duration-500 motion-safe:hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/10 hover:border-gold/40 focus-within:ring-2 focus-within:ring-gold focus-within:ring-offset-2 focus-within:ring-offset-background"
-              >
-                <Link
-                  to="/destinations/$slug"
-                  params={{ slug: d.slug }}
-                  aria-label={`View ${d.name}`}
-                  className="block focus:outline-none"
-                >
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img
-                      src={d.image}
-                      alt={d.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover motion-safe:transition-transform motion-safe:duration-700 motion-safe:group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-gold mb-2">
-                      <MapPin className="w-3 h-3" /> {d.country} · {d.region}
-                    </div>
-                    <h2 className="font-serif text-2xl text-foreground mb-2 group-hover:text-gold transition-colors">
-                      {d.name}
-                    </h2>
-                    <p className="text-foreground/70 text-sm leading-relaxed mb-4 line-clamp-3">{d.description}</p>
-                    {d.best_season && (
-                      <p className="text-[11px] tracking-[0.15em] uppercase text-foreground/60 mb-3">
-                        Best: {d.best_season}
-                      </p>
-                    )}
-                    {d.featured_trips?.length ? (
-                      <div className="flex flex-wrap gap-2">
-                        {d.featured_trips.slice(0, 3).map((t) => (
-                          <span
-                            key={t}
-                            className="text-[10px] tracking-wider uppercase border border-border px-2 py-1 text-foreground/60"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </Link>
-                <div className="px-6 pb-6 pt-2 border-t border-border/40 mt-2">
-                  <ShareButtons
-                    title={`${d.name}, ${d.country} — The Baobab Collective`}
-                    description={d.description?.slice(0, 140)}
-                    label="Share"
-                  />
-                </div>
-              </article>
-            ))}
-            {filtered.length === 0 && (
-              <p className="col-span-full text-center text-foreground/60 py-20">No destinations match your search.</p>
-            )}
-          </div>
-        </section>
+        {/* ── 2. DESTINATION FINDER ──────────────────────────────────────── */}
+        <DestinationFinderSection
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          matchCount={filteredDestinations.length}
+          totalCount={allDestinations.length}
+        />
 
-        <section className="bg-forest text-forest-foreground py-16 text-center">
-          <div className="max-w-2xl mx-auto px-6">
-            <h2 className="font-serif text-3xl mb-4">Not sure where to begin?</h2>
-            <p className="mb-6 text-forest-foreground/80">Let us match you to the region that suits your dream trip.</p>
-            <Link
-              to="/private-travel"
-              className="inline-flex items-center bg-gold text-gold-foreground uppercase tracking-[0.25em] text-[12px] px-8 py-3.5 hover:bg-gold/90"
-            >
-              Plan a private journey
-            </Link>
+        {/* ── 3. KENYA DESTINATION MAP ────────────────────────────────────── */}
+        <KenyaDestinationsMap destinations={allDestinations} />
+
+        {/* ── 4. EDITORIAL GROUPINGS GRID ────────────────────────────────── */}
+        <div id="discovery-grid" className="py-20 md:py-28 space-y-24 md:space-y-32">
+          {/* GROUP 1: THE ICONS */}
+          {icons.length > 0 && (
+            <section aria-labelledby="icons-heading" className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-border/60">
+                <div>
+                  <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
+                    Signature Kenya
+                  </p>
+                  <h2 id="icons-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
+                    The Icons
+                  </h2>
+                </div>
+                <p className="text-foreground/60 text-sm max-w-md">
+                  Kenya's world-famous wilderness heartlands — legendary predator density, great elephant herds, and dramatic arid frontiers.
+                </p>
+              </div>
+
+              {/* Asymmetric Large Cards Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {icons.map((dest, idx) => (
+                  <DestinationCard
+                    key={dest.slug}
+                    destination={dest}
+                    variant={idx === 0 ? "feature" : "standard"}
+                    className={idx === 0 ? "md:col-span-2 lg:col-span-2" : ""}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* GROUP 2: BEYOND THE CLASSICS */}
+          {beyondClassics.length > 0 && (
+            <section aria-labelledby="beyond-heading" className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-border/60">
+                <div>
+                  <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-2">
+                    Untamed & Extraordinary
+                  </p>
+                  <h2 id="beyond-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
+                    Beyond the Classics
+                  </h2>
+                </div>
+                <p className="text-foreground/60 text-sm max-w-md">
+                  Private conservancies, ancient volcanoes, and Great Rift Valley lakes where wildlife viewing is intimate, active, and conservation-focused.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {beyondClassics.map((dest) => (
+                  <DestinationCard key={dest.slug} destination={dest} variant="standard" />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* GROUP 3: THE INDIAN OCEAN */}
+          {indianOcean.length > 0 && (
+            <section aria-labelledby="ocean-heading" className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-border/60">
+                <div>
+                  <p className="text-[11px] tracking-[0.3em] uppercase text-cyan-600 dark:text-cyan-400 font-semibold mb-2">
+                    Swahili Coast & Coral Reefs
+                  </p>
+                  <h2 id="ocean-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
+                    The Indian Ocean
+                  </h2>
+                </div>
+                <p className="text-foreground/60 text-sm max-w-md">
+                  White sands, historic UNESCO Swahili ports, sunset dhow sailing, and marine national parks teeming with reef life.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {indianOcean.map((dest) => (
+                  <DestinationCard key={dest.slug} destination={dest} variant="standard" />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Empty State if Filter yields zero */}
+          {filteredDestinations.length === 0 && (
+            <div className="max-w-2xl mx-auto px-6 py-20 text-center bg-cream/40 rounded-2xl border border-border">
+              <Compass className="w-10 h-10 text-gold mx-auto mb-3" />
+              <h3 className="font-serif text-2xl text-foreground mb-2">No destinations match your search</h3>
+              <p className="text-foreground/70 text-sm mb-6">
+                Try selecting a different interest category or resetting your search term.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory("All");
+                  setSearchQuery("");
+                }}
+                className="inline-flex items-center gap-2 rounded-full bg-forest text-cream uppercase tracking-[0.2em] text-[11px] font-semibold px-6 py-3"
+              >
+                Reset All Filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── 5. FEATURED ADVENTURES ─────────────────────────────────────── */}
+        <DestinationJourneysSection adventures={adventuresPage?.signatures ?? []} />
+
+        {/* ── 6. WHERE YOU'LL STAY ───────────────────────────────────────── */}
+        <DestinationStaySection lodges={lodges ?? []} />
+
+        {/* ── 7. DESTINATION COMBINATIONS ────────────────────────────────── */}
+        <DestinationCombinations />
+
+        {/* ── 8. WHERE SHOULD KENYA TAKE YOU? (MATCHER) ─────────────────── */}
+        <DestinationMatcherSection />
+
+        {/* ── 9. FINAL CALL TO ACTION ────────────────────────────────────── */}
+        <section
+          aria-label="Final Journey Planning CTA"
+          className="relative py-24 md:py-32 bg-forest text-cream overflow-hidden text-center"
+        >
+          <img
+            src={g4Img}
+            alt="Majestic baobab tree and giraffe silhouetted at dusk"
+            className="absolute inset-0 w-full h-full object-cover opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/80 to-forest/60" />
+
+          <div className="relative max-w-4xl mx-auto px-6 space-y-6">
+            <p className="text-[11px] tracking-[0.4em] uppercase text-gold font-semibold">
+              Begin Your Kenyan Journey
+            </p>
+            <h2 className="font-serif text-4xl sm:text-6xl md:text-7xl text-cream leading-[1.06]">
+              Your Kenya is waiting.
+            </h2>
+            <p className="text-forest-foreground/85 text-base sm:text-xl font-serif max-w-2xl mx-auto leading-relaxed">
+              Not sure where to start? Tell us what you love, and we'll help you find the places and rhythm that are right for you.
+            </p>
+
+            <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <EnquireDialog
+                defaultSubject="Plan My Bespoke Kenya Journey"
+                defaultDestination="Kenya (Tailor-Made)"
+                sourceUrl="/destinations"
+                autosaveKey="enquire:destinations-final"
+                context={{
+                  kind: "Destination",
+                  title: "Your Kenya is Waiting",
+                  slug: "your-kenya-waiting",
+                  image: g4Img,
+                }}
+                trigger={
+                  <button
+                    type="button"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-9 py-4 hover:bg-gold/90 transition-all shadow-lg cursor-pointer"
+                  >
+                    <span>Plan My Journey</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                }
+              />
+
+              <Link
+                to="/adventures"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-forest-foreground/10 text-cream border border-forest-foreground/20 uppercase tracking-[0.22em] text-[11px] font-semibold px-8 py-4 hover:bg-forest-foreground/20 transition-all text-center"
+              >
+                <span>Explore Adventures</span>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
