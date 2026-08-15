@@ -29,20 +29,20 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
           <div className="max-w-2xl">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5" /> Places We Love
+              <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
             </p>
             <h2 id="lodges-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
-              Where You'll Stay
+              {c.title}
             </h2>
             <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">
-              Every camp and lodge has been walked, slept in, and chosen for soul as much as setting.
+              {c.body}
             </p>
           </div>
           <Link
             to="/lodges"
             className="self-start md:self-end group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] font-semibold text-cream hover:text-gold transition-colors"
           >
-            <span>Explore All Lodges</span>
+            <span>{c.cta_label}</span>
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
@@ -66,7 +66,7 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
-
+                  
                   {lodge.location && (
                     <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] uppercase font-medium bg-background/90 backdrop-blur text-foreground px-3 py-1 rounded-full">
                       <MapPin className="w-3 h-3 text-gold" /> {lodge.location}
@@ -97,8 +97,7 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
                       params={{ slug: lodge.slug }}
                       className="inline-flex items-center gap-2 text-[11px] tracking-[0.24em] uppercase font-semibold text-forest hover:text-gold transition-colors"
                     >
-                      Discover Lodge{" "}
-                      <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                      Discover Lodge <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                   </div>
                 </div>
