@@ -428,28 +428,42 @@ function SignatureItineraries({
                 className="text-foreground/60 hover:text-foreground p-1.5"
                 title="Edit"
                 aria-label={`Edit ${item.name || "adventure"}`}
-                onClick={() => {
+                onClick={async () => {
                   let targetSlug = item.slug;
+                  let signatures = draft.signatures;
                   if (!targetSlug) {
                     // Legacy/stuck item with no slug yet — generate one now instead of
                     // permanently blocking access to the edit page.
                     const base = item.name ? slugify(item.name) : "";
-                    targetSlug = base || `new-${Date.now().toString(36)}`;
+                    let unique = base || `new-${Date.now().toString(36)}`;
                     const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
-                    let unique = targetSlug;
                     let n = 2;
-                    while (existingSlugs.has(unique)) {
-                      unique = `${targetSlug}-${n++}`;
-                    }
+                    const root = unique;
+                    while (existingSlugs.has(unique)) unique = `${root}-${n++}`;
                     targetSlug = unique;
-                    const copy = draft.signatures.slice();
-                    copy[idx] = { ...item, slug: targetSlug };
-                    setDraft({ ...draft, signatures: copy });
+                    signatures = draft.signatures.slice();
+                    signatures[idx] = { ...item, slug: targetSlug };
+                    setDraft({ ...draft, signatures });
                   }
+                  // The edit page reads from the server, so make sure this adventure
+                  // exists there before navigating (otherwise it renders "not found").
+                  try {
+                    setOpeningSlug(targetSlug);
+                    await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
+                  } catch (err: any) {
+                    toast.error(err?.message ?? "Could not open adventure");
+                    setOpeningSlug(null);
+                    return;
+                  }
+                  setOpeningSlug(null);
                   navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
                 }}
               >
-                <Edit className="w-4 h-4" />
+                {openingSlug && openingSlug === item.slug ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Edit className="w-4 h-4" />
+                )}
               </button>
               <button
                 type="button"
