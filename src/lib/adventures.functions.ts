@@ -38,6 +38,8 @@ export type AdventuresSignature = {
   travelStyles?: string[];
   bestFor?: string[];
   featured?: boolean;
+  status?: "published" | "draft" | "archived";
+  updatedAt?: string;
   bestMonths?: string[];
   destinations?: string[];
   lodges?: string[];
@@ -98,11 +100,25 @@ export function normalizeAdventureSignatures(
       ...item,
       slug: candidate,
       name: item.name ?? "",
+      region: item.region ?? "",
+      terrain: item.terrain ?? "",
+      nights: item.nights ?? "",
+      difficulty: item.difficulty ?? "Moderate",
+      image: item.image ?? "",
+      imageAlt: item.imageAlt ?? "",
+      focalX: typeof item.focalX === "number" ? item.focalX : 50,
+      focalY: typeof item.focalY === "number" ? item.focalY : 50,
+      description: item.description ?? "",
       shortDescription: item.shortDescription ?? "",
+      highlights: Array.isArray(item.highlights) ? item.highlights : [],
+      included: Array.isArray(item.included) ? item.included : [],
+      notIncluded: Array.isArray(item.notIncluded) ? item.notIncluded : [],
       experienceTypes: Array.isArray(item.experienceTypes) ? item.experienceTypes : [],
       travelStyles: Array.isArray(item.travelStyles) ? item.travelStyles : [],
       bestFor: Array.isArray(item.bestFor) ? item.bestFor : [],
       featured: typeof item.featured === "boolean" ? item.featured : false,
+      status: item.status === "draft" || item.status === "archived" ? item.status : "published",
+      updatedAt: typeof item.updatedAt === "string" ? item.updatedAt : undefined,
       bestMonths: Array.isArray(item.bestMonths) ? item.bestMonths : [],
       destinations: Array.isArray(item.destinations) ? item.destinations : [],
       lodges: Array.isArray(item.lodges) ? item.lodges : [],
@@ -190,6 +206,8 @@ const SavePayload = z.object({
       travelStyles: z.array(z.string()).optional().default([]),
       bestFor: z.array(z.string()).optional().default([]),
       featured: z.boolean().optional().default(false),
+      status: z.enum(["published", "draft", "archived"]).optional().default("published"),
+      updatedAt: z.string().optional(),
       bestMonths: z.array(z.string()).optional().default([]),
       destinations: z.array(z.string()).optional().default([]),
       lodges: z.array(z.string()).optional().default([]),
