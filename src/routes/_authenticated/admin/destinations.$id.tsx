@@ -6,8 +6,6 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Calendar,
-  ExternalLink,
-  Eye,
   Globe,
   Hash,
   Image as ImageIcon,
@@ -116,7 +114,13 @@ function AdminDestinationEdit() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data: destination, isLoading, isError, error, refetch } = useQuery({
+  const {
+    data: destination,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["admin-destination", id],
     queryFn: async () => {
       if (isNew) return null;
@@ -148,9 +152,7 @@ function AdminDestinationEdit() {
         latitude: destination.latitude ?? null,
         longitude: destination.longitude ?? null,
         featured: destination.featured ?? false,
-        related_destinations: Array.isArray(destination.related_destinations)
-          ? destination.related_destinations
-          : [],
+        related_destinations: Array.isArray(destination.related_destinations) ? destination.related_destinations : [],
         image: destination.image ?? "",
         featured_trips: Array.isArray(destination.featured_trips)
           ? destination.featured_trips
@@ -258,8 +260,6 @@ function AdminDestinationEdit() {
     );
   }
 
-  const liveHref = form.slug ? `/destinations/${form.slug}` : null;
-
   return (
     <form onSubmit={handleSave} className="space-y-6 pb-12">
       {/* ── Top Bar Header ───────────────────────────────────────────── */}
@@ -275,7 +275,10 @@ function AdminDestinationEdit() {
           <div className="flex items-center gap-3">
             <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Destination" : "Edit Destination"}</h1>
             {!isNew && (
-              <Badge variant={form.published ? "default" : "secondary"} className={form.published ? "bg-forest text-forest-foreground" : ""}>
+              <Badge
+                variant={form.published ? "default" : "secondary"}
+                className={form.published ? "bg-forest text-forest-foreground" : ""}
+              >
                 {form.published ? "Active" : "Draft"}
               </Badge>
             )}
@@ -286,16 +289,6 @@ function AdminDestinationEdit() {
               <code className="bg-cream px-1.5 py-0.5 rounded text-foreground/80 font-mono text-[11px]">
                 /destinations/{form.slug}
               </code>
-              {liveHref && (
-                <a
-                  href={liveHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-gold hover:underline ml-1"
-                >
-                  <Eye className="w-3.5 h-3.5" /> View Page
-                </a>
-              )}
             </div>
           )}
         </div>
@@ -353,7 +346,7 @@ function AdminDestinationEdit() {
 
             <div>
               <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
-                Short Editorial Description (1–2 sentences for Index cards & previews)
+                Short Editorial Description (1–2 sentences for index cards)
               </Label>
               <Textarea
                 rows={2}
@@ -387,10 +380,7 @@ function AdminDestinationEdit() {
                   <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
                     Region
                   </Label>
-                  <Select
-                    value={form.region || "Southern Kenya"}
-                    onValueChange={(val) => patch("region", val)}
-                  >
+                  <Select value={form.region || "Southern Kenya"} onValueChange={(val) => patch("region", val)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select region" />
                     </SelectTrigger>
@@ -629,7 +619,10 @@ function AdminDestinationEdit() {
           <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
             <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
               <h3 className="font-serif text-base">Publish</h3>
-              <Badge variant={form.published ? "default" : "secondary"} className={form.published ? "bg-forest text-forest-foreground" : ""}>
+              <Badge
+                variant={form.published ? "default" : "secondary"}
+                className={form.published ? "bg-forest text-forest-foreground" : ""}
+              >
                 {form.published ? "Published" : "Draft"}
               </Badge>
             </header>
@@ -637,11 +630,7 @@ function AdminDestinationEdit() {
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground/60 uppercase tracking-wider">Status</span>
                 <label className="flex items-center gap-2 text-sm cursor-pointer font-medium">
-                  <Checkbox
-                    checked={form.published}
-                    onCheckedChange={(v) => patch("published", !!v)}
-                    id="published"
-                  />
+                  <Checkbox checked={form.published} onCheckedChange={(v) => patch("published", !!v)} id="published" />
                   <span>Active / Published</span>
                 </label>
               </div>
@@ -649,11 +638,7 @@ function AdminDestinationEdit() {
               <div className="flex items-center justify-between pt-2 border-t border-border/60">
                 <span className="text-xs text-foreground/60 uppercase tracking-wider">Iconic / Featured</span>
                 <label className="flex items-center gap-2 text-xs cursor-pointer font-medium">
-                  <Checkbox
-                    checked={!!form.featured}
-                    onCheckedChange={(v) => patch("featured", !!v)}
-                    id="featured"
-                  />
+                  <Checkbox checked={!!form.featured} onCheckedChange={(v) => patch("featured", !!v)} id="featured" />
                   <span>Highlight on Index</span>
                 </label>
               </div>
@@ -674,9 +659,7 @@ function AdminDestinationEdit() {
               {form.created_at && (
                 <div className="pt-2 border-t border-border/60 text-[11px] text-foreground/50 space-y-1">
                   <div>Created: {new Date(form.created_at).toLocaleDateString()}</div>
-                  {form.updated_at && (
-                    <div>Updated: {new Date(form.updated_at).toLocaleDateString()}</div>
-                  )}
+                  {form.updated_at && <div>Updated: {new Date(form.updated_at).toLocaleDateString()}</div>}
                 </div>
               )}
 
@@ -708,14 +691,6 @@ function AdminDestinationEdit() {
                     >
                       <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
                     </Button>
-
-                    {liveHref && (
-                      <Button variant="ghost" size="sm" asChild className="text-xs text-foreground/60 hover:text-foreground px-2">
-                        <a href={liveHref} target="_blank" rel="noreferrer">
-                          <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
-                        </a>
-                      </Button>
-                    )}
                   </div>
                 )}
               </div>
@@ -770,7 +745,8 @@ function AdminDestinationEdit() {
             <AlertDialogTitle>Delete destination?</AlertDialogTitle>
             <AlertDialogDescription>
               You're about to permanently delete{" "}
-              <span className="font-semibold text-foreground">"{form.name || "this destination"}"</span>. This action cannot be undone and will remove it from the live site.
+              <span className="font-semibold text-foreground">"{form.name || "this destination"}"</span>. This action
+              cannot be undone and will remove it from the live site.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
