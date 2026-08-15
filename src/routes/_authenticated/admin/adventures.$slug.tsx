@@ -94,6 +94,7 @@ function AdminAdventureEdit() {
     highlights: [],
     included: [],
     notIncluded: [],
+    status: "published",
   });
   const [saving, setSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -127,11 +128,17 @@ function AdminAdventureEdit() {
     setSaving(true);
     try {
       let updatedSignatures = [...draft.signatures];
+      const stampedAdventure: AdventuresSignature = {
+        ...adventure,
+        status: adventure.status || "published",
+        updatedAt: new Date().toISOString(),
+      };
+
       if (isNew) {
-        const finalSlug = slugify(adventure.name);
-        updatedSignatures.push({ ...adventure, slug: finalSlug });
+        const finalSlug = slugify(stampedAdventure.name);
+        updatedSignatures.push({ ...stampedAdventure, slug: finalSlug });
       } else {
-        updatedSignatures[adventureIdx] = adventure;
+        updatedSignatures[adventureIdx] = stampedAdventure;
       }
 
       await saveFn({
@@ -572,9 +579,34 @@ function AdminAdventureEdit() {
           <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
             <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
               <h3 className="font-serif text-base">Publish</h3>
-              <Badge className="bg-forest text-forest-foreground">Active</Badge>
+              <Badge
+                className={
+                  (adv.status || "published") === "published"
+                    ? "bg-forest text-forest-foreground"
+                    : (adv.status || "published") === "draft"
+                      ? "bg-amber-600 text-white"
+                      : "bg-muted-foreground text-background"
+                }
+              >
+                {(adv.status || "published").toUpperCase()}
+              </Badge>
             </header>
             <div className="p-5 space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Status
+                </Label>
+                <select
+                  value={adv.status || "published"}
+                  onChange={(e) => updateAdventure({ status: e.target.value as any })}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gold"
+                >
+                  <option value="published">Published (Visible on site)</option>
+                  <option value="draft">Draft (Admin only)</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground/60 uppercase tracking-wider">Type</span>
                 <span className="text-xs font-medium">Signature Itinerary</span>
