@@ -7,8 +7,6 @@ import {
   ArrowLeft,
   Calendar,
   Compass,
-  ExternalLink,
-  Eye,
   FolderOpen,
   Globe,
   Image as ImageIcon,
@@ -216,7 +214,6 @@ function AdminAdventureEdit() {
     );
   }
 
-  const liveHref = !isNew && adventure && adventure.slug ? `/adventures/${adventure.slug}` : null;
   // Non-null alias — at this point adventure is guaranteed to be non-null for isNew (newForm) and for existing (found above)
   const adv = adventure!;
 
@@ -242,16 +239,6 @@ function AdminAdventureEdit() {
               <code className="bg-cream px-1.5 py-0.5 rounded text-foreground/80 font-mono text-[11px]">
                 /adventures/{adventure.slug}
               </code>
-              {liveHref && (
-                <a
-                  href={liveHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-gold hover:underline ml-1"
-                >
-                  <Eye className="w-3.5 h-3.5" /> View Page
-                </a>
-              )}
             </div>
           )}
         </div>
