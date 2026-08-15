@@ -2,10 +2,10 @@
 export const PAGE_DEFAULTS = {
   home: {
     hero_title_line1: "KENYA,",
-    hero_title_line2: "CURATED PERSONALLY",
-    hero_subtitle: "Private safaris, wild places and meaningful connections — designed around you.",
-    hero_cta_primary: "Plan With Us",
-    hero_cta_secondary: "Explore Destinations",
+    hero_title_line2: "CURATED PERSONALLY.",
+    hero_subtitle: "Private safaris, wild landscapes and meaningful encounters — thoughtfully designed around you.",
+    hero_cta_primary: "Plan Your Journey",
+    hero_cta_secondary: "Explore Adventures",
     hero_proof_text: "Private Kenya journeys shaped with care, context and local knowledge.",
     hero_image_url: "",
     hero_image_as_background: true,
@@ -74,10 +74,10 @@ export const PAGE_DEFAULTS = {
     submit_label: "Request my bespoke journey",
   },
   home_adventures: {
-    eyebrow: "Journeys",
-    title: "ADVENTURE",
-    body: "For the wild at heart — migration country, remote wilderness, walking safaris and unforgettable encounters.",
-    cta_label: "Explore journeys",
+    eyebrow: "Signature Adventures",
+    title: "Find Your Adventure",
+    body: "Journeys designed around the places, experiences and moments that make Kenya unforgettable.",
+    cta_label: "Explore All Journeys",
   },
   home_destinations: {
     eyebrow: "The Continent",
