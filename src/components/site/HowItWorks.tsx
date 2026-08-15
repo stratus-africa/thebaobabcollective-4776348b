@@ -1,11 +1,13 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { usePreviewMerge } from "@/lib/preview-overrides";
 
 type HowItWorksContent = Partial<typeof PAGE_DEFAULTS.home_how_it_works>;
 
 export function HowItWorks({ content }: { content?: HowItWorksContent | null } = {}) {
-  const c = { ...PAGE_DEFAULTS.home_how_it_works, ...(content ?? {}) };
+  const base = { ...PAGE_DEFAULTS.home_how_it_works, ...(content ?? {}) };
+  const c = usePreviewMerge("home_how_it_works", base);
 
   const steps = [
     { num: c.step_1_num, title: c.step_1_title, body: c.step_1_body },
@@ -21,13 +23,12 @@ export function HowItWorks({ content }: { content?: HowItWorksContent | null } =
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center justify-center gap-2">
             <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
           </p>
-          <h2
-            id="how-it-works-heading"
-            className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]"
-          >
+          <h2 id="how-it-works-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
             {c.title}
           </h2>
-          <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">{c.body}</p>
+          <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">
+            {c.body}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-14">
@@ -37,9 +38,15 @@ export function HowItWorks({ content }: { content?: HowItWorksContent | null } =
               className="relative flex flex-col justify-between bg-forest/60 border border-forest-foreground/15 rounded-xl p-7 transition-all duration-300 hover:border-gold/50 hover:bg-forest/80"
             >
               <div>
-                <span className="font-serif text-4xl sm:text-5xl text-gold/80 block mb-4">{step.num}</span>
-                <h3 className="font-serif text-xl sm:text-2xl text-cream mb-3 leading-snug">{step.title}</h3>
-                <p className="text-sm text-forest-foreground/80 leading-relaxed">{step.body}</p>
+                <span className="font-serif text-4xl sm:text-5xl text-gold/80 block mb-4">
+                  {step.num}
+                </span>
+                <h3 className="font-serif text-xl sm:text-2xl text-cream mb-3 leading-snug">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-forest-foreground/80 leading-relaxed">
+                  {step.body}
+                </p>
               </div>
             </div>
           ))}
