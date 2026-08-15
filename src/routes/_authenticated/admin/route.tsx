@@ -75,7 +75,8 @@ const groups: NavGroup[] = [
         to: "/admin/journal",
         label: "Journal",
         icon: FileText,
-        getBadge: (d) => (d?.draft_articles ? `${d.draft_articles} draft${d.draft_articles === 1 ? "" : "s"}` : undefined),
+        getBadge: (d) =>
+          d?.draft_articles ? `${d.draft_articles} draft${d.draft_articles === 1 ? "" : "s"}` : undefined,
       },
       { to: "/admin/content/testimonials", label: "Testimonials", icon: Star },
       { to: "/admin/content/faqs", label: "FAQs", icon: HelpCircle },
