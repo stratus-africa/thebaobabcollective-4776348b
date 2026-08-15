@@ -106,12 +106,12 @@ function calculateCompleteness(adv: AdventuresSignature): CompletenessResult {
   const hasHighlights = Boolean(adv.highlights && adv.highlights.filter(Boolean).length > 0);
   const hasPlanning = Boolean(
     (adv.included && adv.included.filter(Boolean).length > 0) ||
-      (adv.notIncluded && adv.notIncluded.filter(Boolean).length > 0),
+    (adv.notIncluded && adv.notIncluded.filter(Boolean).length > 0),
   );
   const hasCategories = Boolean(
     (adv.experienceTypes && adv.experienceTypes.length > 0) ||
-      (adv.travelStyles && adv.travelStyles.length > 0) ||
-      (adv.destinations && adv.destinations.length > 0),
+    (adv.travelStyles && adv.travelStyles.length > 0) ||
+    (adv.destinations && adv.destinations.length > 0),
   );
   const hasItinerary = Boolean(adv.itinerary && adv.itinerary.length > 0);
 
@@ -212,54 +212,56 @@ function AdminAdventuresDashboard() {
   const filteredAndSortedSignatures = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
 
-    const filtered = draft.signatures.map((sig, originalIndex) => ({ sig, originalIndex })).filter(({ sig }) => {
-      // Status filter
-      const sigStatus = sig.status ?? "published";
-      if (statusFilter !== "all" && sigStatus !== statusFilter) return false;
+    const filtered = draft.signatures
+      .map((sig, originalIndex) => ({ sig, originalIndex }))
+      .filter(({ sig }) => {
+        // Status filter
+        const sigStatus = sig.status ?? "published";
+        if (statusFilter !== "all" && sigStatus !== statusFilter) return false;
 
-      // Featured filter
-      if (featuredFilter === "featured" && !sig.featured) return false;
-      if (featuredFilter === "unfeatured" && sig.featured) return false;
+        // Featured filter
+        if (featuredFilter === "featured" && !sig.featured) return false;
+        if (featuredFilter === "unfeatured" && sig.featured) return false;
 
-      // Difficulty filter
-      if (difficultyFilter !== "all" && (sig.difficulty || "").toLowerCase() !== difficultyFilter.toLowerCase()) {
-        return false;
-      }
+        // Difficulty filter
+        if (difficultyFilter !== "all" && (sig.difficulty || "").toLowerCase() !== difficultyFilter.toLowerCase()) {
+          return false;
+        }
 
-      // Region filter
-      if (regionFilter !== "all") {
-        const matchRegion = (sig.region || "").toLowerCase().includes(regionFilter.toLowerCase());
-        const matchDest = (sig.destinations || []).some((d) => d.toLowerCase().includes(regionFilter.toLowerCase()));
-        if (!matchRegion && !matchDest) return false;
-      }
+        // Region filter
+        if (regionFilter !== "all") {
+          const matchRegion = (sig.region || "").toLowerCase().includes(regionFilter.toLowerCase());
+          const matchDest = (sig.destinations || []).some((d) => d.toLowerCase().includes(regionFilter.toLowerCase()));
+          if (!matchRegion && !matchDest) return false;
+        }
 
-      // Terrain filter
-      if (terrainFilter !== "all" && (sig.terrain || "").toLowerCase() !== terrainFilter.toLowerCase()) {
-        return false;
-      }
+        // Terrain filter
+        if (terrainFilter !== "all" && (sig.terrain || "").toLowerCase() !== terrainFilter.toLowerCase()) {
+          return false;
+        }
 
-      // Search term
-      if (q) {
-        const haystack = [
-          sig.name,
-          sig.region,
-          sig.terrain,
-          sig.description,
-          sig.shortDescription,
-          ...(sig.destinations || []),
-          ...(sig.highlights || []),
-          ...(sig.experienceTypes || []),
-          ...(sig.travelStyles || []),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+        // Search term
+        if (q) {
+          const haystack = [
+            sig.name,
+            sig.region,
+            sig.terrain,
+            sig.description,
+            sig.shortDescription,
+            ...(sig.destinations || []),
+            ...(sig.highlights || []),
+            ...(sig.experienceTypes || []),
+            ...(sig.travelStyles || []),
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
-        if (!haystack.includes(q)) return false;
-      }
+          if (!haystack.includes(q)) return false;
+        }
 
-      return true;
-    });
+        return true;
+      });
 
     // Sorting
     filtered.sort((a, b) => {
@@ -301,11 +303,11 @@ function AdminAdventuresDashboard() {
 
   const hasActiveFilters = Boolean(
     searchTerm ||
-      statusFilter !== "all" ||
-      featuredFilter !== "all" ||
-      difficultyFilter !== "all" ||
-      regionFilter !== "all" ||
-      terrainFilter !== "all",
+    statusFilter !== "all" ||
+    featuredFilter !== "all" ||
+    difficultyFilter !== "all" ||
+    regionFilter !== "all" ||
+    terrainFilter !== "all",
   );
 
   const clearAllFilters = () => {
@@ -382,10 +384,7 @@ function AdminAdventuresDashboard() {
       return sig;
     });
     const target = draft.signatures.find((s) => s.slug === targetSlug);
-    await persistSignatures(
-      updated,
-      `Status for "${target?.name || "Adventure"}" changed to ${nextStatus}.`,
-    );
+    await persistSignatures(updated, `Status for "${target?.name || "Adventure"}" changed to ${nextStatus}.`);
   };
 
   // Duplicate Adventure
@@ -470,15 +469,15 @@ function AdminAdventuresDashboard() {
               <span className="text-[11px] text-foreground/55">/adventures</span>
             </div>
 
-            <h1 className="font-serif text-3xl md:text-4xl text-foreground tracking-tight">
-              Manage Adventures
-            </h1>
+            <h1 className="font-serif text-3xl md:text-4xl text-foreground tracking-tight">Manage Adventures</h1>
 
             {/* Summary statistics row */}
             <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-cream border border-border px-3.5 py-1 font-medium text-foreground">
                 <Compass className="w-3.5 h-3.5 text-gold" />
-                <span>{totalCount} {totalCount === 1 ? "Adventure" : "Adventures"}</span>
+                <span>
+                  {totalCount} {totalCount === 1 ? "Adventure" : "Adventures"}
+                </span>
               </div>
 
               <div className="inline-flex items-center gap-1.5 rounded-full bg-forest/10 border border-forest/20 px-3.5 py-1 font-medium text-forest">
@@ -519,17 +518,15 @@ function AdminAdventuresDashboard() {
                   disabled={saving}
                   className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
                 >
-                  {saving ? (
-                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-1.5" />
-                  )}
+                  {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
                   Save changes
                 </Button>
               </div>
             ) : (
               <span className="inline-flex items-center gap-1 text-xs text-forest font-medium mr-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
+              </span>
+            )}
             <Button
               onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } })}
               className="bg-forest text-forest-foreground hover:bg-forest/90 shadow-sm"
@@ -791,7 +788,9 @@ function AdminAdventuresDashboard() {
                     <button
                       type="button"
                       onClick={() => handleToggleFeatured(item.slug)}
-                      title={item.featured ? "Featured Adventure (Click to unfeature)" : "Click to feature this adventure"}
+                      title={
+                        item.featured ? "Featured Adventure (Click to unfeature)" : "Click to feature this adventure"
+                      }
                       className={`p-1.5 rounded-md backdrop-blur transition-all shadow-sm ${
                         item.featured
                           ? "bg-gold text-gold-foreground hover:bg-gold/90 ring-1 ring-gold"
@@ -982,9 +981,7 @@ function AdminAdventuresDashboard() {
         <header className="px-6 py-5 border-b border-border bg-cream/50 flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-gold">
-                CONFIGURATION
-              </span>
+              <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-gold">CONFIGURATION</span>
             </div>
             <h2 className="font-serif text-2xl text-foreground leading-tight mt-0.5">Page Settings</h2>
             <p className="text-xs text-foreground/60 mt-0.5">
@@ -1071,9 +1068,7 @@ function AdminAdventuresDashboard() {
                       <Input
                         value={draft.hero.imageAlt ?? ""}
                         placeholder="Describe the hero image for screen readers…"
-                        onChange={(e) =>
-                          setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })
-                        }
+                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
                       />
                     </div>
 
@@ -1083,9 +1078,7 @@ function AdminAdventuresDashboard() {
                       </Label>
                       <Input
                         value={draft.hero.eyebrow}
-                        onChange={(e) =>
-                          setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })
-                        }
+                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
                         placeholder="e.g. Adventures"
                       />
                     </div>
@@ -1097,9 +1090,7 @@ function AdminAdventuresDashboard() {
                       <Textarea
                         rows={2}
                         value={draft.hero.headline}
-                        onChange={(e) =>
-                          setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })
-                        }
+                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
                         placeholder="e.g. EXPERIENCE KENYA BEYOND THE ORDINARY."
                       />
                     </div>
@@ -1111,9 +1102,7 @@ function AdminAdventuresDashboard() {
                       <Textarea
                         rows={3}
                         value={draft.hero.subhead}
-                        onChange={(e) =>
-                          setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })
-                        }
+                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
                         placeholder="Journeys designed around your pace, your curiosity…"
                       />
                     </div>
@@ -1165,9 +1154,7 @@ function AdminAdventuresDashboard() {
                     </Label>
                     <Input
                       value={draft.cta.buttonLabel}
-                      onChange={(e) =>
-                        setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })
-                      }
+                      onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
                     />
                   </div>
 
@@ -1177,9 +1164,7 @@ function AdminAdventuresDashboard() {
                     </Label>
                     <Input
                       value={draft.cta.headline}
-                      onChange={(e) =>
-                        setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })
-                      }
+                      onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
                     />
                   </div>
 
@@ -1552,15 +1537,7 @@ function ManagedImageUpload({
 
 // ─── FocalSlider ──────────────────────────────────────────────────────────────
 
-function FocalSlider({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
+function FocalSlider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
@@ -1571,4 +1548,3 @@ function FocalSlider({
     </div>
   );
 }
- 
