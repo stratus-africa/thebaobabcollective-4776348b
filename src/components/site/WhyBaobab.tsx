@@ -1,6 +1,5 @@
 import { Sparkles } from "lucide-react";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
-import { usePreviewMerge } from "@/lib/preview-overrides";
 
 type WhyBaobabContent = Partial<typeof PAGE_DEFAULTS.home_why_baobab>;
 type FinalCtaContent = Partial<typeof PAGE_DEFAULTS.home_final_cta>;
@@ -14,8 +13,8 @@ export function WhyBaobab({
 } = {}) {
   const whyBase = { ...PAGE_DEFAULTS.home_why_baobab, ...(content ?? {}) };
   const finalCtaBase = { ...PAGE_DEFAULTS.home_final_cta, ...(finalCtaContent ?? {}) };
-  const c = usePreviewMerge("home_why_baobab", whyBase);
-  const finalCta = usePreviewMerge("home_final_cta", finalCtaBase);
+  const c = whyBase;
+  const finalCta = finalCtaBase;
 
   const pillars = [
     { num: c.pillar_1_num, title: c.pillar_1_title, body: c.pillar_1_body },
@@ -32,12 +31,13 @@ export function WhyBaobab({
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
             </p>
-            <h2 id="why-baobab-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
+            <h2
+              id="why-baobab-heading"
+              className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+            >
               {c.title}
             </h2>
-            <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed">
-              {c.body}
-            </p>
+            <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed">{c.body}</p>
 
             <div className="mt-10 pt-8 border-t border-border">
               <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3">{finalCta.eyebrow}</p>
