@@ -35,14 +35,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -308,12 +300,6 @@ function SignatureItineraries({
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const persistFn = useServerFn(saveAdventuresPage);
 
-  // Modal state (for New Adventure)
-  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalInitial, setModalInitial] = useState<AdventuresSignature | null>(null);
-  const [modalSaving, setModalSaving] = useState(false);
-
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<AdventuresSignature | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -327,11 +313,9 @@ function SignatureItineraries({
     setDraft({ ...draft, signatures: copy });
   };
 
-  // ── open modals / navigation ─────────────────────────────────────────────
+  // ── open modals / navigation ──────────────────────────────────────
   const openCreate = () => {
-    setModalMode("create");
-    setModalInitial(null);
-    setModalOpen(true);
+    navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } });
   };
 
   const openEdit = (item: AdventuresSignature) => {
@@ -345,32 +329,6 @@ function SignatureItineraries({
     await refetch();
     toast.success(successMsg);
   }
-
-  // ── save from modal ──────────────────────────────────────────────────────
-  const handleModalSave = async (formData: AdventuresSignature) => {
-    setModalSaving(true);
-    try {
-      let updatedSignatures: AdventuresSignature[];
-
-      if (modalMode === "create") {
-        // Generate a unique slug
-        const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
-        const slug = buildUniqueSlug(formData.name, existingSlugs);
-        updatedSignatures = [...draft.signatures, { ...formData, slug }];
-        await persistSignatures(updatedSignatures, `"${formData.name}" added successfully.`);
-      } else {
-        // Update in place — keep the original slug
-        updatedSignatures = draft.signatures.map((s) => (s.slug === formData.slug ? { ...formData } : s));
-        await persistSignatures(updatedSignatures, `"${formData.name}" updated successfully.`);
-      }
-
-      setModalOpen(false);
-    } catch (err: any) {
-      toast.error(err?.message ?? "Could not save adventure");
-    } finally {
-      setModalSaving(false);
-    }
-  };
 
   // ── delete ───────────────────────────────────────────────────────────────
   const handleDelete = async () => {
@@ -389,16 +347,6 @@ function SignatureItineraries({
 
   return (
     <>
-      {/* New / Edit modal */}
-      <AdventureModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        mode={modalMode}
-        initial={modalInitial}
-        saving={modalSaving}
-        onSave={handleModalSave}
-      />
-
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
@@ -578,295 +526,6 @@ function SignatureOrder({ signatures }: { signatures: AdventuresSignature[] }) {
         )}
       </ol>
     </section>
-  );
-}
-
-// ─── Adventure Modal (Create + Edit) ─────────────────────────────────────────
-
-const BLANK_SIG: AdventuresSignature = {
-  slug: "",
-  name: "",
-  region: "",
-  terrain: "",
-  nights: "",
-  difficulty: "Moderate",
-  image: "",
-  imageAlt: "",
-  focalX: 50,
-  focalY: 50,
-  description: "",
-  highlights: [],
-  included: [],
-  notIncluded: [],
-};
-
-function AdventureModal({
-  open,
-  onOpenChange,
-  mode,
-  initial,
-  saving,
-  onSave,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  mode: "create" | "edit";
-  initial: AdventuresSignature | null;
-  saving: boolean;
-  onSave: (data: AdventuresSignature) => void;
-}) {
-  const [form, setForm] = useState<AdventuresSignature>(BLANK_SIG);
-
-  // Reset / populate form when modal opens
-  useEffect(() => {
-    if (!open) return;
-    setForm(
-      mode === "edit" && initial
-        ? {
-            ...BLANK_SIG,
-            ...initial,
-            highlights: Array.isArray(initial.highlights) ? initial.highlights : [],
-            included: Array.isArray(initial.included) ? initial.included : [],
-            notIncluded: Array.isArray(initial.notIncluded) ? initial.notIncluded : [],
-          }
-        : { ...BLANK_SIG },
-    );
-  }, [open, mode, initial]);
-
-  function patch<K extends keyof AdventuresSignature>(key: K, val: AdventuresSignature[K]) {
-    setForm((prev) => ({ ...prev, [key]: val }));
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!form.name.trim()) {
-      toast.error("Adventure name is required.");
-      return;
-    }
-    onSave(form);
-  }
-
-  const isEdit = mode === "edit";
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl w-[96vw] max-h-[92vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">{isEdit ? "Edit Adventure" : "New Adventure"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update the details for this adventure."
-              : "Create a new signature adventure to showcase on your platform."}
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
-          {/* ── Adventure Information ─────────────────────────────────── */}
-          <FormSection title="Adventure Information">
-            {/* Name */}
-            <div>
-              <Label className={LABEL_CLASS}>
-                Name <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                value={form.name}
-                placeholder="e.g. Okavango on Foot"
-                onChange={(e) => patch("name", e.target.value)}
-                autoFocus={!isEdit}
-              />
-            </div>
-
-            {/* Region + Terrain */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label className={LABEL_CLASS}>Region</Label>
-                <Input
-                  value={form.region}
-                  placeholder="e.g. Botswana"
-                  onChange={(e) => patch("region", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label className={LABEL_CLASS}>Terrain</Label>
-                <Input
-                  value={form.terrain}
-                  placeholder="e.g. Delta & Waterways"
-                  onChange={(e) => patch("terrain", e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Nights + Difficulty */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label className={LABEL_CLASS}>Nights</Label>
-                <Input
-                  value={form.nights}
-                  placeholder="e.g. 8 nights"
-                  onChange={(e) => patch("nights", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label className={LABEL_CLASS}>Difficulty</Label>
-                <select
-                  value={form.difficulty}
-                  onChange={(e) => patch("difficulty", e.target.value)}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-                >
-                  {DIFFICULTIES.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </FormSection>
-
-          {/* ── Content ───────────────────────────────────────────────── */}
-          <FormSection title="Content">
-            {/* Description */}
-            <div>
-              <Label className={LABEL_CLASS}>Description</Label>
-              <Textarea
-                rows={4}
-                value={form.description}
-                placeholder="Describe this adventure…"
-                onChange={(e) => patch("description", e.target.value)}
-              />
-            </div>
-
-            {/* Highlights */}
-            <div>
-              <Label className={LABEL_CLASS}>Highlights (one per line)</Label>
-              <Textarea
-                rows={4}
-                value={form.highlights.join("\n")}
-                placeholder="Walking in the Okavango Delta&#10;Night drives with expert guides"
-                onChange={(e) =>
-                  patch(
-                    "highlights",
-                    e.target.value.split("\n").map((s) => s.trimEnd()),
-                  )
-                }
-              />
-              {form.highlights.filter(Boolean).length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {form.highlights.filter(Boolean).map((h, i) => (
-                    <button
-                      key={`${h}-${i}`}
-                      type="button"
-                      onClick={() =>
-                        patch(
-                          "highlights",
-                          form.highlights.filter((_, idx) => idx !== i),
-                        )
-                      }
-                      className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-foreground/70 hover:border-destructive hover:text-destructive"
-                      title="Remove highlight"
-                    >
-                      {h} ×
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </FormSection>
-
-          {/* ── Planning ──────────────────────────────────────────────── */}
-          <FormSection title="Planning">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label className={LABEL_CLASS}>Included (one per line)</Label>
-                <Textarea
-                  rows={4}
-                  value={form.included.join("\n")}
-                  placeholder="All meals&#10;Park fees&#10;Expert guide"
-                  onChange={(e) =>
-                    patch(
-                      "included",
-                      e.target.value.split("\n").map((s) => s.trimEnd()),
-                    )
-                  }
-                />
-              </div>
-              <div>
-                <Label className={LABEL_CLASS}>Not Included (one per line)</Label>
-                <Textarea
-                  rows={4}
-                  value={form.notIncluded.join("\n")}
-                  placeholder="International flights&#10;Travel insurance"
-                  onChange={(e) =>
-                    patch(
-                      "notIncluded",
-                      e.target.value.split("\n").map((s) => s.trimEnd()),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </FormSection>
-
-          {/* ── Media ─────────────────────────────────────────────────── */}
-          <FormSection title="Media">
-            <div>
-              <Label className={LABEL_CLASS}>Hero Image</Label>
-              <ManagedImageUpload
-                value={form.image}
-                onChange={(url) => patch("image", url)}
-                recommendedRatio="4:3 card · 16:9 hero"
-                altText={form.imageAlt}
-                focalX={form.focalX ?? 50}
-                focalY={form.focalY ?? 50}
-                onFocalChange={(focalX, focalY) => {
-                  setForm((prev) => ({ ...prev, focalX, focalY }));
-                }}
-              />
-            </div>
-            <div>
-              <Label className={LABEL_CLASS}>Image alt text</Label>
-              <Input
-                value={form.imageAlt ?? ""}
-                placeholder="Describe the hero image…"
-                onChange={(e) => patch("imageAlt", e.target.value)}
-              />
-            </div>
-          </FormSection>
-
-          <DialogFooter className="gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  Saving…
-                </>
-              ) : isEdit ? (
-                "Save Changes"
-              ) : (
-                "Create Adventure"
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ─── FormSection ──────────────────────────────────────────────────────────────
-
-function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <h3 className="text-[11px] tracking-[0.22em] uppercase text-foreground/50 font-medium">{title}</h3>
-        <div className="flex-1 h-px bg-border" />
-      </div>
-      {children}
-    </div>
   );
 }
 
