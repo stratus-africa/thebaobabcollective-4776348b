@@ -200,12 +200,18 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
   },
   home_find_journey: {
     title: "Home — Find Your Journey",
-    description: "The journey-type card grid section on the homepage.",
+    description: "The journey-type card grid section on the homepage. Upload custom images for each card below.",
     preview: "/",
     fields: [
       { name: "eyebrow", label: "Eyebrow", type: "text" },
       { name: "title", label: "Title", type: "text" },
       { name: "body", label: "Body", type: "textarea" },
+      { name: "card_1_image", label: "Safari & Wildlife — Image", type: "image" },
+      { name: "card_2_image", label: "The Great Migration — Image", type: "image" },
+      { name: "card_3_image", label: "Honeymoon & Romance — Image", type: "image" },
+      { name: "card_4_image", label: "Family Adventure — Image", type: "image" },
+      { name: "card_5_image", label: "Beach & Safari — Image", type: "image" },
+      { name: "card_6_image", label: "Culture & Connection — Image", type: "image" },
     ],
   },
   home_adventures: {
