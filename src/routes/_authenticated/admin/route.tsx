@@ -34,7 +34,6 @@ type NavItem = {
   label: string;
   icon: any;
   exact?: boolean;
-  href?: string;
   getBadge?: (data: any) => string | number | undefined;
 };
 
@@ -45,12 +44,11 @@ const groups: NavGroup[] = [
     label: "Main",
     items: [
       { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { to: "/", href: "/", label: "Homepage", icon: Home, exact: true },
       {
         to: "/admin/enquiries",
         label: "Enquiries",
         icon: MessageSquare,
-        getBadge: (d) => (d?.unhandled_enquiries ? d.unhandled_enquiries : undefined),
+        getBadge: (d) => (d?.unhandled_enquiries ? d.unhandled_enquiries : d?.enquiries),
       },
       {
         to: "/admin/subscribers",
@@ -69,23 +67,47 @@ const groups: NavGroup[] = [
         icon: Compass,
         getBadge: (d) => (d?.total_adventures ? d.total_adventures : undefined),
       },
-      { to: "/admin/content/destinations", label: "Destinations", icon: MapPin },
-      { to: "/admin/content/lodges", label: "Lodges", icon: Building },
+      {
+        to: "/admin/content/destinations",
+        label: "Destinations",
+        icon: MapPin,
+        getBadge: (d) => (d?.total_destinations ? d.total_destinations : undefined),
+      },
+      {
+        to: "/admin/content/lodges",
+        label: "Lodges",
+        icon: Building,
+        getBadge: (d) => (d?.total_lodges ? d.total_lodges : undefined),
+      },
       {
         to: "/admin/journal",
         label: "Journal",
         icon: FileText,
         getBadge: (d) =>
-          d?.draft_articles ? `${d.draft_articles} draft${d.draft_articles === 1 ? "" : "s"}` : undefined,
+          d?.draft_articles
+            ? `${d.draft_articles} draft${d.draft_articles === 1 ? "" : "s"}`
+            : d?.total_journal
+              ? d.total_journal
+              : undefined,
       },
-      { to: "/admin/content/testimonials", label: "Testimonials", icon: Star },
-      { to: "/admin/content/faqs", label: "FAQs", icon: HelpCircle },
+      {
+        to: "/admin/content/testimonials",
+        label: "Testimonials",
+        icon: Star,
+        getBadge: (d) => (d?.total_testimonials ? d.total_testimonials : undefined),
+      },
+      {
+        to: "/admin/content/faqs",
+        label: "FAQs",
+        icon: HelpCircle,
+        getBadge: (d) => (d?.total_faqs ? d.total_faqs : undefined),
+      },
     ],
   },
   {
     label: "Pages",
     items: [
-      { to: "/admin/pages-hub/home", label: "Home Page", icon: Home },
+      { to: "/admin/pages-hub/home", label: "Home", icon: Home },
       { to: "/admin/pages-hub/about", label: "About", icon: BookOpen },
       { to: "/admin/pages-hub/adventures", label: "Adventures Page", icon: Compass },
       { to: "/admin/pages-hub/destinations", label: "Destinations Page", icon: Map },
@@ -121,10 +143,22 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
+function isItemActive(pathname: string, item: NavItem): boolean {
+  if (item.exact) return pathname === item.to;
+  if (pathname === item.to) return true;
+  if (
+    item.to === "/admin/content/destinations" &&
+    (pathname.startsWith("/admin/destinations") || pathname === "/admin/content/destinations")
+  )
+    return true;
+  if (item.to === "/admin/adventures" && pathname.startsWith("/admin/adventures")) return true;
+  return pathname.startsWith(item.to + "/");
+}
+
 function currentTitle(pathname: string) {
   for (const g of groups) {
     for (const i of g.items) {
-      if (i.exact ? pathname === i.to : pathname.startsWith(i.to)) return i.label;
+      if (isItemActive(pathname, i)) return i.label;
     }
   }
   return "Dashboard";
@@ -144,78 +178,56 @@ function SidebarBody({
   onToggleCollapse?: () => void;
 }) {
   return (
-    <div className="flex flex-col h-full bg-admin-menu text-admin-menu-fg">
-      <nav className="flex-1 overflow-y-auto py-2">
-        {groups.map((g, gi) => (
-          <div key={g.label} className={gi > 0 ? "mt-2 border-t border-black/20 pt-2" : ""}>
+    <div className="flex flex-col h-full bg-admin-menu text-admin-menu-fg select-none">
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
+        {groups.map((g) => (
+          <div key={g.label}>
             {!collapsed && (
-              <p className="px-3.5 pt-2 pb-1 text-[10px] tracking-[0.24em] uppercase font-semibold text-admin-menu-muted/75">
+              <p className="px-2.5 pb-1.5 text-[10px] tracking-[0.22em] uppercase font-semibold text-admin-menu-muted/70">
                 {g.label}
               </p>
             )}
-            <ul className="space-y-0.5 px-1.5">
+            <ul className="space-y-0.5">
               {g.items.map((item) => {
                 const Icon = item.icon;
-                const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
+                const active = isItemActive(pathname, item);
                 const badge = item.getBadge?.(countsData);
 
                 return (
                   <li key={item.to}>
-                    {item.href ? (
-                      <a
-                        href={item.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={onNavigate}
-                        title={collapsed ? item.label : undefined}
-                        className={`group relative flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] leading-tight transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent text-admin-menu-fg/80 hover:bg-admin-menu-hover hover:text-admin-accent-fg ${collapsed ? "justify-center px-0" : ""}`}
-                      >
-                        <Icon
-                          className="w-[17px] h-[17px] shrink-0 text-admin-menu-muted group-hover:text-admin-accent"
-                          strokeWidth={1.8}
-                        />
-                        {!collapsed && (
-                          <div className="flex-1 min-w-0 flex items-center justify-between gap-1.5">
-                            <span className="truncate">{item.label}</span>
-                            <ExternalLink className="w-3 h-3 opacity-50 shrink-0" />
-                          </div>
-                        )}
-                      </a>
-                    ) : (
-                      <Link
-                        to={item.to as any}
-                        onClick={onNavigate}
-                        title={collapsed ? item.label : undefined}
-                        className={`group relative flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] leading-tight transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent ${
-                          active
-                            ? "bg-admin-bar text-admin-accent-fg font-semibold shadow-xs before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r before:bg-admin-accent"
-                            : "text-admin-menu-fg/80 hover:bg-admin-menu-hover hover:text-admin-accent-fg"
-                        } ${collapsed ? "justify-center px-0" : ""}`}
-                      >
-                        <Icon
-                          className={`w-[17px] h-[17px] shrink-0 ${
-                            active ? "text-admin-accent" : "text-admin-menu-muted group-hover:text-admin-accent"
-                          }`}
-                          strokeWidth={1.8}
-                        />
-                        {!collapsed && (
-                          <div className="flex-1 min-w-0 flex items-center justify-between gap-1.5">
-                            <span className="truncate">{item.label}</span>
-                            {badge !== undefined && (
-                              <span
-                                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-medium ${
-                                  active
-                                    ? "bg-admin-accent/20 text-admin-accent"
-                                    : "bg-black/30 text-admin-menu-muted group-hover:text-admin-menu-fg"
-                                }`}
-                              >
-                                {badge}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </Link>
-                    )}
+                    <Link
+                      to={item.to as any}
+                      onClick={onNavigate}
+                      title={collapsed ? `${item.label}${badge !== undefined ? ` (${badge})` : ""}` : undefined}
+                      className={`group relative flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] font-medium leading-tight transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent ${
+                        active
+                          ? "bg-admin-bar text-admin-accent-fg shadow-xs before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r before:bg-admin-accent"
+                          : "text-admin-menu-fg/80 hover:bg-admin-menu-hover hover:text-admin-accent-fg"
+                      } ${collapsed ? "justify-center px-0" : ""}`}
+                    >
+                      <Icon
+                        className={`w-[17px] h-[17px] shrink-0 ${
+                          active ? "text-admin-accent" : "text-admin-menu-muted group-hover:text-admin-accent"
+                        }`}
+                        strokeWidth={1.8}
+                      />
+                      {!collapsed && (
+                        <div className="flex-1 min-w-0 flex items-center justify-between gap-1.5">
+                          <span className="truncate">{item.label}</span>
+                          {badge !== undefined && (
+                            <span
+                              className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-medium ${
+                                active
+                                  ? "bg-admin-accent/20 text-admin-accent"
+                                  : "bg-black/35 text-admin-menu-muted group-hover:text-admin-menu-fg"
+                              }`}
+                            >
+                              {badge}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </Link>
                   </li>
                 );
               })}
@@ -240,6 +252,7 @@ function SidebarBody({
 
 function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pageTitle = currentTitle(pathname);
   const [user, setUser] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -305,7 +318,7 @@ function AdminLayout() {
         </Sheet>
 
         <Link
-          to="/"
+          to="/admin"
           className="inline-flex items-center gap-2 px-2 py-1 rounded transition-colors hover:bg-admin-menu-hover hover:text-admin-accent font-serif text-sm tracking-wide"
         >
           <Home className="w-3.5 h-3.5 text-admin-accent" />
@@ -313,9 +326,12 @@ function AdminLayout() {
           <span className="text-[10px] uppercase tracking-widest text-admin-menu-muted ml-0.5">Admin</span>
         </Link>
 
+        <span className="hidden md:inline text-admin-menu-muted/60 text-[11px]">/</span>
+        <span className="hidden md:inline text-admin-menu-fg/80 text-xs font-medium">{pageTitle}</span>
+
         <div className="flex-1" />
 
-        {/* Global Visit Site Action (The only site preview action in admin) */}
+        {/* Global public-site link */}
         <Link
           to="/"
           target="_blank"
