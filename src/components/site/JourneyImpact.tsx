@@ -1,28 +1,17 @@
 import { Shield, Users, TreeDeciduous, HeartHandshake } from "lucide-react";
+import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 
-export function JourneyImpact() {
+type ImpactContent = Partial<typeof PAGE_DEFAULTS.home_impact>;
+
+const PILLAR_ICONS = [Shield, Users, TreeDeciduous];
+
+export function JourneyImpact({ content }: { content?: ImpactContent | null } = {}) {
+  const c = { ...PAGE_DEFAULTS.home_impact, ...(content ?? {}) };
+
   const pillars = [
-    {
-      icon: Shield,
-      title: "Wild Habitat & Conservation",
-      subtitle: "Securing wilderness corridors",
-      description:
-        "Every safari directly funds conservancy lease fees, ranger patrols, and wildlife protection in critical biodiversity areas across Kenya.",
-    },
-    {
-      icon: Users,
-      title: "Community Partnerships",
-      subtitle: "Equitable local benefit",
-      description:
-        "We prioritize locally-owned camps, indigenous guides, and community projects ensuring travel revenue stays directly in the hands of traditional custodians.",
-    },
-    {
-      icon: TreeDeciduous,
-      title: "Ethical, Low-Impact Footprint",
-      subtitle: "Slow, respectful exploration",
-      description:
-        "Small private parties, solar-powered eco-camps, and strict non-invasive wildlife protocols ensure Africa remains wild for generations to come.",
-    },
+    { icon: PILLAR_ICONS[0], title: c.pillar_1_title, subtitle: c.pillar_1_subtitle, description: c.pillar_1_body },
+    { icon: PILLAR_ICONS[1], title: c.pillar_2_title, subtitle: c.pillar_2_subtitle, description: c.pillar_2_body },
+    { icon: PILLAR_ICONS[2], title: c.pillar_3_title, subtitle: c.pillar_3_subtitle, description: c.pillar_3_body },
   ];
 
   return (
@@ -30,14 +19,15 @@ export function JourneyImpact() {
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="max-w-3xl mb-12 md:mb-16">
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-            <HeartHandshake className="w-3.5 h-3.5" /> Responsible Tourism
+            <HeartHandshake className="w-3.5 h-3.5" /> {c.eyebrow}
           </p>
-          <h2 id="impact-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
-            Your Journey's Impact
+          <h2
+            id="impact-heading"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+          >
+            {c.title}
           </h2>
-          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">
-            We believe travel in Kenya should give back as much as it gives. When designed with intention, a safari is one of the most powerful catalysts for conservation and community resilience on earth.
-          </p>
+          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">{c.body}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -55,12 +45,8 @@ export function JourneyImpact() {
                   <p className="text-[10px] tracking-[0.25em] uppercase text-terracotta font-semibold mb-1.5">
                     {pillar.subtitle}
                   </p>
-                  <h3 className="font-serif text-2xl text-foreground mb-3 leading-snug">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-foreground/70 text-sm leading-relaxed">
-                    {pillar.description}
-                  </p>
+                  <h3 className="font-serif text-2xl text-foreground mb-3 leading-snug">{pillar.title}</h3>
+                  <p className="text-foreground/70 text-sm leading-relaxed">{pillar.description}</p>
                 </div>
               </div>
             );
