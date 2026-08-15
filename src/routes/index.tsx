@@ -17,7 +17,7 @@ import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")(({
   loader: async () => {
     const [
       home,
@@ -72,17 +72,19 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "The Baobab Collective — Kenya, Curated Personally" },
       {
         property: "og:description",
-        content:
-          "Private Kenya safaris and bespoke African journeys shaped with care, context and genuine local knowledge.",
+        content: "Private Kenya safaris and bespoke African journeys shaped with care, context and genuine local knowledge.",
       },
     ],
   }),
   component: Index,
-} as any);
+} as any));
 
-function WhyBaobab({ content }: { content?: any }) {
+function WhyBaobab({ content, ctaContent }: { content?: any; ctaContent?: any }) {
   const base = { ...PAGE_DEFAULTS.home_why_baobab, ...(content ?? {}) };
   const c = usePreviewMerge("home_why_baobab", base);
+
+  const baseCta = { ...PAGE_DEFAULTS.home_final_cta, ...(ctaContent ?? {}) };
+  const cta = usePreviewMerge("home_final_cta", baseCta);
 
   const pillars = [
     { num: c.pillar_1_num, title: c.pillar_1_title, body: c.pillar_1_body },
@@ -94,73 +96,63 @@ function WhyBaobab({ content }: { content?: any }) {
   return (
     <section id="why-baobab" aria-labelledby="why-baobab-heading" className="bg-background py-18 md:py-24">
       <div className="mx-auto max-w-[1920px] px-5 sm:px-8 lg:px-12 xl:px-16">
-        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 xl:gap-20 items-start">
-          <div className="space-y-4">
-            <p className="text-[11px] uppercase tracking-[0.35em] text-gold font-semibold flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
-            </p>
-            <h2
-              id="why-baobab-heading"
-              className="font-serif text-4xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground"
-            >
-              {c.title}
-            </h2>
-            <p className="text-foreground/75 text-base sm:text-lg leading-relaxed pt-2">{c.body}</p>
+        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 xl:gap-20 items-start">
+          {/* Left Column: Heading + Moved Final CTA in the open space */}
+          <div className="space-y-8 flex flex-col justify-between h-full">
+            <div className="space-y-4">
+              <p className="text-[11px] uppercase tracking-[0.35em] text-gold font-semibold flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
+              </p>
+              <h2 id="why-baobab-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground">
+                {c.title}
+              </h2>
+              <p className="text-foreground/75 text-base sm:text-lg leading-relaxed pt-2">
+                {c.body}
+              </p>
+            </div>
+
+            {/* Final CTA integrated into Why Baobab */}
+            <div className="pt-8 border-t border-foreground/15 space-y-4">
+              <p className="text-[10px] tracking-[0.35em] uppercase text-terracotta font-semibold">
+                {cta.eyebrow}
+              </p>
+              <h3 className="font-serif text-3xl sm:text-4xl text-foreground leading-[1.1]">
+                {cta.title_line1}{" "}
+                <span className="text-gold italic font-normal">{cta.title_line2}</span>
+              </h3>
+              <p className="text-foreground/70 text-sm sm:text-base leading-relaxed max-w-lg">
+                {cta.body}
+              </p>
+              <div className="pt-2">
+                <EnquireDialog
+                  sourceUrl="/"
+                  autosaveKey="enquire:home-why-baobab-cta"
+                  trigger={
+                    <button
+                      type="button"
+                      className="group inline-flex items-center gap-3 rounded-full bg-terracotta text-gold-foreground uppercase tracking-[0.22em] text-[11px] font-semibold px-8 py-3.5 hover:bg-terracotta/90 transition-colors shadow-md"
+                    >
+                      <span>{cta.cta_label}</span>
+                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </button>
+                  }
+                />
+              </div>
+            </div>
           </div>
 
+          {/* Right Column: Numbered Pillars */}
           <div className="divide-y divide-foreground/15 border-t border-foreground/15">
             {pillars.map((p) => (
               <div key={p.num} className="grid gap-4 py-6 sm:grid-cols-[70px_1fr] sm:py-7">
                 <span className="font-serif text-3xl sm:text-4xl text-gold font-light">{p.num}</span>
                 <div>
-                  <h3 className="mb-2 text-[12px] uppercase tracking-[0.25em] font-semibold text-foreground">
-                    {p.title}
-                  </h3>
+                  <h3 className="mb-2 text-[12px] uppercase tracking-[0.25em] font-semibold text-foreground">{p.title}</h3>
                   <p className="max-w-2xl leading-relaxed text-foreground/70 text-sm sm:text-base">{p.body}</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FinalHeroCta({ content }: { content?: any }) {
-  const base = { ...PAGE_DEFAULTS.home_final_cta, ...(content ?? {}) };
-  const c = usePreviewMerge("home_final_cta", base);
-
-  return (
-    <section
-      aria-labelledby="final-cta-heading"
-      className="bg-cream py-20 md:py-28 text-center border-t border-border/40"
-    >
-      <div className="max-w-3xl mx-auto px-6 space-y-6">
-        <p className="text-[11px] tracking-[0.35em] uppercase text-terracotta font-semibold">{c.eyebrow}</p>
-        <h2
-          id="final-cta-heading"
-          className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.05]"
-        >
-          {c.title_line1}
-          <br />
-          <span className="text-gold italic">{c.title_line2}</span>
-        </h2>
-        <p className="text-foreground/75 text-base sm:text-lg leading-relaxed max-w-xl mx-auto pt-2">{c.body}</p>
-        <div className="pt-4">
-          <EnquireDialog
-            sourceUrl="/"
-            autosaveKey="enquire:home-final-cta"
-            trigger={
-              <button
-                type="button"
-                className="group inline-flex items-center gap-3 rounded-full bg-terracotta text-gold-foreground uppercase tracking-[0.22em] text-[12px] font-semibold px-9 py-4 hover:bg-terracotta/90 transition-colors shadow-lg"
-              >
-                <span>{c.cta_label}</span>
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </button>
-            }
-          />
         </div>
       </div>
     </section>
@@ -198,8 +190,8 @@ function Index() {
       {/* 4. Signature Adventures */}
       <HomeAdventures content={home_adventures} />
 
-      {/* 5. Why Baobab */}
-      <WhyBaobab content={home_why_baobab} />
+      {/* 5. Why Baobab (With Integrated CTA) */}
+      <WhyBaobab content={home_why_baobab} ctaContent={home_final_cta} />
 
       {/* 6. Meet Your Journey Designers (Michael & Samra) */}
       <FoundersStrip content={home_founders} />
@@ -216,13 +208,10 @@ function Index() {
       {/* 10. How It Works */}
       <HowItWorks content={home_how_it_works} />
 
-      {/* 11. Final High-Conversion CTA */}
-      <FinalHeroCta content={home_final_cta} />
-
-      {/* 12. Instagram */}
+      {/* 11. Instagram */}
       <InstagramStrip content={home_instagram} />
 
-      {/* 13. Footer */}
+      {/* 12. Footer */}
       <Footer content={footer} />
     </main>
   );
