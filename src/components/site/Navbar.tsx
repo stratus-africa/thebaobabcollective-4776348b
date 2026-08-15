@@ -8,6 +8,11 @@ import { useMenuConfig } from "@/hooks/useMenuConfig";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
+function resolveNavTo(to: string): string {
+  if (!to || to === "/" || to === "/home" || to === "home") return "/";
+  return to;
+}
+
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -53,7 +58,7 @@ export function Navbar() {
   }, [open]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    supabase.auth.signOut();
     navigate({ to: "/" });
   };
 
@@ -109,8 +114,8 @@ export function Navbar() {
                 ) : (
                   <Link
                     key={`${item.to}-${i}`}
-                    to={item.to as any}
-                    activeOptions={{ exact: item.to === "/" }}
+                    to={resolveNavTo(item.to) as any}
+                    activeOptions={{ exact: resolveNavTo(item.to) === "/" }}
                     className={`${linkBase} ${linkColor}`}
                     activeProps={{
                       className: `${linkBase} ${overlay ? "text-cream" : "text-foreground"} after:w-full`,
@@ -153,7 +158,7 @@ export function Navbar() {
                         {moreItems.map((m, i) => (
                           <Link
                             key={`${m.to}-${i}`}
-                            to={m.to as any}
+                            to={resolveNavTo(m.to) as any}
                             role="menuitem"
                             onClick={() => setMoreOpen(false)}
                             className="block px-5 py-2 text-[14px] tracking-[0.2em] uppercase font-semibold text-foreground/80 hover:text-foreground hover:bg-cream focus:outline-none focus-visible:bg-cream focus-visible:text-foreground"
@@ -242,7 +247,7 @@ export function Navbar() {
                 return (
                   <div key={`${item.to}-${i}`}>
                     <Link
-                      to={item.to as any}
+                      to={resolveNavTo(item.to) as any}
                       onClick={() => setOpen(false)}
                       className="text-[14px] tracking-[0.2em] uppercase text-foreground/80 hover:text-foreground py-1 block rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
                     >
@@ -253,7 +258,7 @@ export function Navbar() {
                         {children.map((c) => (
                           <Link
                             key={c.to}
-                            to={c.to as any}
+                            to={resolveNavTo(c.to) as any}
                             onClick={() => setOpen(false)}
                             className="text-[13px] tracking-[0.2em] uppercase text-foreground/60 hover:text-foreground py-1 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
                           >
@@ -343,7 +348,7 @@ function PrimaryWithSubmenu({
       }}
     >
       <Link
-        to={item.to as any}
+        to={resolveNavTo(item.to) as any}
         aria-haspopup="menu"
         aria-expanded={open}
         className={`text-[15px] tracking-[0.22em] uppercase font-semibold inline-flex items-center gap-1 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 ${
@@ -359,7 +364,7 @@ function PrimaryWithSubmenu({
             {kids.map((c) => (
               <Link
                 key={c.to}
-                to={c.to as any}
+                to={resolveNavTo(c.to) as any}
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className="block px-5 py-2 text-[14px] tracking-[0.2em] uppercase font-semibold text-foreground/80 hover:text-foreground hover:bg-cream focus:outline-none focus-visible:bg-cream focus-visible:text-foreground"
