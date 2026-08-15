@@ -32,19 +32,21 @@ export const MENU_DEFAULTS: MenuConfig = {
   topBarEnabled: true,
   transparentOverHero: false,
   primary: [
+    { label: "Journeys", to: "/adventures" },
     { label: "Destinations", to: "/destinations" },
-    { label: "Adventures", to: "/adventures" },
     { label: "Lodges", to: "/lodges" },
-    { label: "About", to: "/about" },
+    { label: "Why Baobab", to: "/about" },
     { label: "Journal", to: "/journal" },
   ],
   more: [
+    { label: "About The Collective", to: "/about" },
     { label: "Testimonials", to: "/testimonials" },
     { label: "FAQ", to: "/faq" },
+    { label: "Contact", to: "/contact" },
   ],
-  ctaLabel: "Plan With Us",
+  ctaLabel: "Plan Your Journey",
   ctaTo: "",
-  footerTagline: "Curated Safari Experiences",
+  footerTagline: "Kenya, Curated Personally",
   footerColumns: [
     {
       heading: "Quick Links",
