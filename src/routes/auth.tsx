@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
-import { usePreviewMerge } from "@/lib/preview-overrides";
 
 const search = z.object({ redirect: fallback(z.string(), "/admin").default("/admin") });
 
@@ -24,7 +23,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { redirect: redirectTo } = Route.useSearch();
   const navigate = useNavigate();
-  const c = usePreviewMerge("auth_page", PAGE_DEFAULTS.auth_page);
+  const c = PAGE_DEFAULTS.auth_page;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,9 +73,7 @@ function AuthPage() {
       <main className="flex-1 flex items-center justify-center px-6 py-20 bg-cream">
         <div className="w-full max-w-md bg-background border border-border p-10">
           <h1 className="font-serif text-3xl text-center mb-2">{c.title}</h1>
-          <p className="text-center text-sm text-muted-foreground mb-8">
-            {c.subtitle}
-          </p>
+          <p className="text-center text-sm text-muted-foreground mb-8">{c.subtitle}</p>
 
           <form onSubmit={signIn} className="space-y-4">
             <div>
@@ -85,7 +82,13 @@ function AuthPage() {
             </div>
             <div>
               <Label htmlFor="password">{c.password_label}</Label>
-              <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "…" : c.submit_label}
