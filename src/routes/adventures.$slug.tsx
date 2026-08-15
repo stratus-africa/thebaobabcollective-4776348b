@@ -143,11 +143,7 @@ function AdventureDetail() {
   const diffMeta = getHumanDifficulty(a.difficulty);
 
   const included = (
-    Array.isArray(a.included)
-      ? a.included
-      : typeof a.included === "string"
-        ? (a.included as string).split("\n")
-        : []
+    Array.isArray(a.included) ? a.included : typeof a.included === "string" ? (a.included as string).split("\n") : []
   )
     .map((s) => s.trim())
     .filter(Boolean);
@@ -167,8 +163,7 @@ function AdventureDetail() {
     if (a.destinations && a.destinations.length > 0) {
       return a.destinations.some(
         (target) =>
-          d.name.toLowerCase().includes(target.toLowerCase()) ||
-          d.slug.toLowerCase().includes(target.toLowerCase())
+          d.name.toLowerCase().includes(target.toLowerCase()) || d.slug.toLowerCase().includes(target.toLowerCase()),
       );
     }
     return a.region && d.region.toLowerCase().includes(a.region.toLowerCase());
@@ -201,12 +196,7 @@ function AdventureDetail() {
       <main>
         {/* Editorial Hero */}
         <section className="relative h-[78vh] min-h-[540px] flex items-end">
-          <img
-            src={a.image}
-            alt={a.imageAlt || a.name}
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: `${a.focalX ?? 50}% ${a.focalY ?? 50}%` }}
-          />
+          <img src={a.image} alt={a.imageAlt || a.name} className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-forest/95 via-black/45 to-black/20" />
 
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-16 text-cream w-full">
@@ -217,9 +207,7 @@ function AdventureDetail() {
               ← Back to All Signature Adventures
             </Link>
 
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl leading-[1.05] mb-4 max-w-4xl">
-              {a.name}
-            </h1>
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl leading-[1.05] mb-4 max-w-4xl">{a.name}</h1>
 
             {a.shortDescription && (
               <p className="text-lg md:text-xl text-cream/90 max-w-2xl leading-relaxed mb-6 font-sans">
@@ -283,29 +271,41 @@ function AdventureDetail() {
             <p className="text-[10px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-4">AT A GLANCE</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-sm">
               <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">Duration</span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Duration
+                </span>
                 <span className="font-serif text-lg text-foreground">{a.nights || "Bespoke"}</span>
               </div>
               <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">Region</span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Region
+                </span>
                 <span className="font-serif text-lg text-foreground">{a.region || "Kenya"}</span>
               </div>
               <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">Destinations</span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Destinations
+                </span>
                 <span className="font-serif text-lg text-foreground">
                   {a.destinations && a.destinations.length > 0 ? a.destinations.join(" · ") : a.region}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">Terrain</span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Terrain
+                </span>
                 <span className="font-serif text-lg text-foreground">{a.terrain || "Savannah & Bush"}</span>
               </div>
               <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">Pacing / Difficulty</span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Pacing / Difficulty
+                </span>
                 <span className="font-serif text-lg text-foreground">{diffMeta.label}</span>
               </div>
               <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">Travel Style</span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Travel Style
+                </span>
                 <span className="font-serif text-lg text-foreground">
                   {a.travelStyles && a.travelStyles.length > 0 ? a.travelStyles.join(" · ") : "Private Safari"}
                 </span>
@@ -323,12 +323,8 @@ function AdventureDetail() {
                 <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-3">
                   WHY YOU'LL LOVE IT
                 </p>
-                <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">
-                  {a.name} Overview
-                </h2>
-                <p className="text-foreground/80 text-lg sm:text-xl leading-relaxed font-sans">
-                  {a.description}
-                </p>
+                <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">{a.name} Overview</h2>
+                <p className="text-foreground/80 text-lg sm:text-xl leading-relaxed font-sans">{a.description}</p>
               </div>
 
               {/* The Baobab Pick Note */}
@@ -344,7 +340,10 @@ function AdventureDetail() {
                   <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">Adventure Highlights</h2>
                   <ul className="grid sm:grid-cols-2 gap-4">
                     {a.highlights.map((h) => (
-                      <li key={h} className="flex gap-3.5 text-foreground/85 bg-cream/70 rounded-xl p-5 border border-border/70">
+                      <li
+                        key={h}
+                        className="flex gap-3.5 text-foreground/85 bg-cream/70 rounded-xl p-5 border border-border/70"
+                      >
                         <Check className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                         <span className="text-sm sm:text-base leading-snug font-medium">{h}</span>
                       </li>
@@ -379,7 +378,8 @@ function AdventureDetail() {
                         <div>
                           <h3 className="font-serif text-xl sm:text-2xl text-foreground mb-1.5">{h}</h3>
                           <p className="text-foreground/70 text-sm leading-relaxed">
-                            Days of immersive guiding, intimate camps and conservation-led encounters crafted around this chapter of your journey.
+                            Days of immersive guiding, intimate camps and conservation-led encounters crafted around
+                            this chapter of your journey.
                           </p>
                         </div>
                       </div>
@@ -400,7 +400,10 @@ function AdventureDetail() {
                   <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">WHERE YOU'LL STAY</h2>
                   <div className="grid sm:grid-cols-2 gap-6">
                     {relatedLodges.map((lodge) => (
-                      <div key={lodge.id} className="border border-border bg-cream/40 rounded-xl overflow-hidden p-5 flex flex-col justify-between">
+                      <div
+                        key={lodge.id}
+                        className="border border-border bg-cream/40 rounded-xl overflow-hidden p-5 flex flex-col justify-between"
+                      >
                         <div>
                           {lodge.hero_image && (
                             <img
@@ -476,7 +479,8 @@ function AdventureDetail() {
                 </div>
                 <h3 className="font-serif text-2xl md:text-3xl text-foreground">Conservation & Local Stewardship</h3>
                 <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
-                  By embarking on this journey, you directly support local conservancies, anti-poaching initiatives, and indigenous guides who steward Kenya's wildest landscapes.
+                  By embarking on this journey, you directly support local conservancies, anti-poaching initiatives, and
+                  indigenous guides who steward Kenya's wildest landscapes.
                 </p>
               </div>
 
@@ -484,9 +488,7 @@ function AdventureDetail() {
               {(relatedDestinations.length > 0 || fallbackDestinations.length > 0) && (
                 <div>
                   <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">DESTINATIONS</p>
-                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">
-                    THIS JOURNEY TAKES YOU TO
-                  </h2>
+                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">THIS JOURNEY TAKES YOU TO</h2>
                   <div className="grid sm:grid-cols-2 gap-6">
                     {(relatedDestinations.length > 0 ? relatedDestinations : fallbackDestinations).map((dest: any) => (
                       <Link
@@ -528,9 +530,7 @@ function AdventureDetail() {
                 <p className="text-[10px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-2">
                   BESPOKE KENYA ADVENTURE
                 </p>
-                <p className="font-serif text-3xl sm:text-4xl text-foreground mb-2">
-                  Price on Request
-                </p>
+                <p className="font-serif text-3xl sm:text-4xl text-foreground mb-2">Price on Request</p>
                 <p className="text-xs text-foreground/70 mb-8 leading-relaxed">
                   {a.nights ? `${a.nights} · ` : ""}Tailored to your travel dates, party size & camp preferences.
                 </p>
@@ -604,7 +604,8 @@ function AdventureDetail() {
               CAN'T FIND EXACTLY WHAT YOU'RE LOOKING FOR?
             </h2>
             <p className="text-foreground/75 max-w-xl mx-auto text-base sm:text-lg leading-relaxed">
-              Our Adventures are starting points. We can reshape the journey around your dates, interests, pace and budget.
+              Our Adventures are starting points. We can reshape the journey around your dates, interests, pace and
+              budget.
             </p>
             <div className="pt-3">
               <EnquireDialog
@@ -628,9 +629,7 @@ function AdventureDetail() {
         {/* FINAL CTA SECTION */}
         <section className="bg-forest text-forest-foreground py-24 text-center border-t border-border/40">
           <div className="max-w-3xl mx-auto px-6 space-y-6">
-            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold">
-              MAKE THIS JOURNEY YOURS.
-            </p>
+            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold">MAKE THIS JOURNEY YOURS.</p>
             <h2 className="font-serif text-4xl md:text-5xl text-cream">
               Tell us what you're dreaming of and we'll shape this adventure around you.
             </h2>
