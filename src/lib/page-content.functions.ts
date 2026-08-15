@@ -53,17 +53,32 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 export const getPageContent = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => GetSchema.parse(d))
   .handler(async ({ data }) => {
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-    );
-    const { data: row } = await supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", `page_${data.key}`)
-      .maybeSingle();
-    return (row?.value as Record<string, any> | null) ?? null;
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: row, error } = await supabaseAdmin
+        .from("site_settings")
+        .select("value")
+        .eq("key", `page_${data.key}`)
+        .maybeSingle();
+      if (error) {
+        console.error(`[getPageContent] error fetching page_${data.key}:`, error);
+        return null;
+      }
+      return (row?.value as Record<string, any> | null) ?? null;
+    } catch {
+      // Fallback to public client if service role key is not configured
+      const supabase = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_PUBLISHABLE_KEY!,
+        { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+      );
+      const { data: row } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", `page_${data.key}`)
+        .maybeSingle();
+      return (row?.value as Record<string, any> | null) ?? null;
+    }
   });
 
 export const savePageContent = createServerFn({ method: "POST" })
@@ -80,4 +95,3 @@ export const savePageContent = createServerFn({ method: "POST" })
   });
 
 export type { PageKey };
- 
