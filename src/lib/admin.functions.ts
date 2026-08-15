@@ -52,7 +52,6 @@ export const adminList = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ListSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const orderCol = SORTABLE[data.table].includes(data.orderBy) ? data.orderBy : "sort_order";
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
@@ -60,7 +59,7 @@ export const adminList = createServerFn({ method: "POST" })
       data: rows,
       error,
       count,
-    } = await supabaseAdmin
+    } = await context.supabase
       .from(data.table)
       .select("*", { count: "exact" })
       .order(orderCol, { ascending: data.orderDir === "asc", nullsFirst: false })
@@ -80,7 +79,6 @@ export const adminUploadImage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UploadImageSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const cleanName = data.filename
       .toLowerCase()
@@ -95,7 +93,7 @@ export const adminUploadImage = createServerFn({ method: "POST" })
     // 8 MB hard limit (Worker memory)
     if (bytes.length > 8 * 1024 * 1024) throw new Error("Image exceeds 8MB limit");
 
-    const { error: upErr } = await supabaseAdmin.storage
+    const { error: upErr } = await context.supabase.storage
       .from("journal-images")
       .upload(path, bytes, { contentType: data.contentType, upsert: false });
     if (upErr) throw new Error(upErr.message);
@@ -126,8 +124,7 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
       if (m) path = m[1];
     }
     if (!path || path.includes("..")) return { ok: false as const };
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.storage.from("journal-images").remove([path]);
+    const { error } = await context.supabase.storage.from("journal-images").remove([path]);
     if (error) return { ok: false as const, error: error.message };
     return { ok: true as const };
   });
@@ -145,8 +142,7 @@ export const adminListMedia = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ListMediaSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const bucket = supabaseAdmin.storage.from("journal-images");
+    const bucket = context.supabase.storage.from("journal-images");
 
     async function listPrefix(prefix: string) {
       const { data: files } = await bucket.list(prefix, {
@@ -185,11 +181,10 @@ export const adminUpsert = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UpsertSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const row = { ...data.row };
     // remove auto fields when blank id
     if (!row.id) delete row.id;
-    const { data: saved, error } = await supabaseAdmin.from(data.table).upsert(row).select().single();
+    const { data: saved, error } = await context.supabase.from(data.table).upsert(row).select().single();
     if (error) throw new Error(error.message);
     return saved;
   });
@@ -199,8 +194,7 @@ export const adminDelete = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => DeleteSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from(data.table).delete().eq("id", data.id);
+    const { error } = await context.supabase.from(data.table).delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -212,8 +206,7 @@ export const adminGet = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => GetSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin.from(data.table).select("*").eq("id", data.id).maybeSingle();
+    const { data: row, error } = await context.supabase.from(data.table).select("*").eq("id", data.id).maybeSingle();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -223,8 +216,7 @@ export const adminListBookings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin.from("bookings").select("*").order("created_at", { ascending: false });
+    const { data } = await context.supabase.from("bookings").select("*").order("created_at", { ascending: false });
     return data ?? [];
   });
 
@@ -239,9 +231,8 @@ export const adminUpdateBooking = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => BookingUpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { id, ...patch } = data;
-    const { error } = await supabaseAdmin.from("bookings").update(patch).eq("id", id);
+    const { error } = await context.supabase.from("bookings").update(patch).eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -258,8 +249,7 @@ export const adminListEnquiries = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => EnquiryListSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let q = supabaseAdmin.from("enquiries").select("*").order("created_at", { ascending: false }).limit(data.limit);
+    let q = context.supabase.from("enquiries").select("*").order("created_at", { ascending: false }).limit(data.limit);
     if (data.status !== "all") q = q.eq("status", data.status);
     if (data.search) {
       const s = `%${data.search}%`;
@@ -273,7 +263,7 @@ export const adminListEnquiries = createServerFn({ method: "POST" })
       .filter((m): m is string => Boolean(m));
     const emailMap: Record<string, { status: string; error_message: string | null; created_at: string }> = {};
     if (messageIds.length) {
-      const { data: logs } = await supabaseAdmin
+      const { data: logs } = await context.supabase
         .from("email_send_log")
         .select("message_id, status, error_message, created_at")
         .in("message_id", messageIds)
@@ -305,13 +295,12 @@ export const adminUpdateEnquiry = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => EnquiryUpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch = {
       status: data.status,
       handled_at: data.status === "handled" ? new Date().toISOString() : null,
       handled_by: data.status === "handled" ? context.userId : null,
     };
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("enquiries")
       .update(patch as any)
       .eq("id", data.id);
@@ -324,8 +313,7 @@ export const adminListPrivateTravel = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
+    const { data } = await context.supabase
       .from("private_travel_requests")
       .select("*")
       .order("created_at", { ascending: false });
@@ -337,8 +325,7 @@ export const adminListSubscribers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
+    const { data } = await context.supabase
       .from("newsletter_subscribers")
       .select("*")
       .order("created_at", { ascending: false });
@@ -350,70 +337,249 @@ export const adminDashboard = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [b, e, p, n, pending, visitors, lodges, destinations, recentB, recentE, recentP] = await Promise.all([
-      supabaseAdmin.from("bookings").select("*", { count: "exact", head: true }),
-      supabaseAdmin.from("enquiries").select("*", { count: "exact", head: true }),
-      supabaseAdmin.from("private_travel_requests").select("*", { count: "exact", head: true }),
-      supabaseAdmin.from("newsletter_subscribers").select("*", { count: "exact", head: true }),
-      supabaseAdmin.from("bookings").select("*", { count: "exact", head: true }).eq("status", "pending"),
-      supabaseAdmin
+    const db = context.supabase;
+    const [
+      b,
+      e,
+      p,
+      n,
+      pending,
+      visitors,
+      lodgesTotal,
+      lodgesActive,
+      destinationsTotal,
+      destinationsActive,
+      adventuresTotal,
+      adventuresActive,
+      journalTotal,
+      journalDrafts,
+      journalScheduled,
+      testimonialsTotal,
+      faqsTotal,
+      unhandledEnquiries,
+      recentB,
+      recentE,
+      recentP,
+      recentJ,
+      recentA,
+      recentD,
+      recentS,
+      adventuresMissingImage,
+    ] = await Promise.all([
+      db.from("bookings").select("*", { count: "exact", head: true }),
+      db.from("enquiries").select("*", { count: "exact", head: true }),
+      db.from("private_travel_requests").select("*", { count: "exact", head: true }),
+      db.from("newsletter_subscribers").select("*", { count: "exact", head: true }),
+      db.from("bookings").select("*", { count: "exact", head: true }).eq("status", "pending"),
+      db
         .from("visitor_counter" as any)
         .select("total_count")
         .limit(1)
         .maybeSingle(),
-      supabaseAdmin.from("lodges").select("*", { count: "exact", head: true }).eq("published", true),
-      supabaseAdmin.from("destinations").select("*", { count: "exact", head: true }).eq("published", true),
-      supabaseAdmin
+      db.from("lodges").select("*", { count: "exact", head: true }),
+      db.from("lodges").select("*", { count: "exact", head: true }).eq("published", true),
+      db.from("destinations").select("*", { count: "exact", head: true }),
+      db.from("destinations").select("*", { count: "exact", head: true }).eq("published", true),
+      db.from("adventures").select("*", { count: "exact", head: true }),
+      db.from("adventures").select("*", { count: "exact", head: true }).eq("published", true),
+      db.from("journal_articles").select("*", { count: "exact", head: true }),
+      db.from("journal_articles").select("*", { count: "exact", head: true }).eq("published", false),
+      db
+        .from("journal_articles")
+        .select("*", { count: "exact", head: true })
+        .eq("published", false)
+        .not("scheduled_at", "is", null),
+      db.from("testimonials").select("*", { count: "exact", head: true }),
+      db.from("faqs").select("*", { count: "exact", head: true }),
+      db.from("enquiries").select("*", { count: "exact", head: true }).eq("status", "new"),
+      db
         .from("bookings")
         .select("id, itinerary_name, guest_name, status, created_at")
         .order("created_at", { ascending: false })
-        .limit(4),
-      supabaseAdmin
-        .from("enquiries")
-        .select("id, name, subject, created_at")
-        .order("created_at", { ascending: false })
-        .limit(4),
-      supabaseAdmin
+        .limit(3),
+      db.from("enquiries").select("id, name, subject, created_at").order("created_at", { ascending: false }).limit(3),
+      db
         .from("private_travel_requests")
-        .select("id, name, created_at")
+        .select("id, full_name, created_at")
         .order("created_at", { ascending: false })
         .limit(2),
+      db
+        .from("journal_articles")
+        .select("id, title, published, updated_at, created_at")
+        .order("updated_at", { ascending: false })
+        .limit(3),
+      db
+        .from("adventures")
+        .select("id, name, published, updated_at, created_at")
+        .order("updated_at", { ascending: false })
+        .limit(3),
+      db
+        .from("destinations")
+        .select("id, name, published, updated_at, created_at")
+        .order("updated_at", { ascending: false })
+        .limit(3),
+      db
+        .from("newsletter_subscribers")
+        .select("id, email, created_at")
+        .order("created_at", { ascending: false })
+        .limit(2),
+      db.from("adventures").select("id, name").or("image.is.null,image.eq.''").limit(5),
     ]);
+
     const visitor_count = (visitors.data as any)?.total_count ?? 0;
 
-    type Activity = { kind: "booking" | "enquiry" | "private"; title: string; subtitle: string; at: string };
+    type Activity = {
+      kind: "booking" | "enquiry" | "private" | "journal" | "adventure" | "destination" | "subscriber";
+      title: string;
+      subtitle: string;
+      at: string;
+      to?: string;
+    };
+
     const activity: Activity[] = [
       ...(recentB.data ?? []).map((r: any) => ({
         kind: "booking" as const,
         title: `Booking: ${r.itinerary_name}`,
         subtitle: `${r.guest_name} • ${r.status}`,
         at: r.created_at as string,
+        to: "/admin",
       })),
       ...(recentE.data ?? []).map((r: any) => ({
         kind: "enquiry" as const,
-        title: `Enquiry: ${r.subject ?? "General"}`,
+        title: `Enquiry: ${r.subject || "General"}`,
         subtitle: r.name as string,
         at: r.created_at as string,
+        to: "/admin/enquiries",
       })),
       ...(recentP.data ?? []).map((r: any) => ({
         kind: "private" as const,
         title: "Private travel request",
-        subtitle: r.name as string,
+        subtitle: r.full_name as string,
         at: r.created_at as string,
+        to: "/admin/private-travel",
+      })),
+      ...(recentJ.data ?? []).map((r: any) => ({
+        kind: "journal" as const,
+        title: `Article ${r.published ? "published" : "updated"}: ${r.title}`,
+        subtitle: r.published ? "Published story" : "Draft article",
+        at: (r.updated_at || r.created_at) as string,
+        to: "/admin/journal",
+      })),
+      ...(recentA.data ?? []).map((r: any) => ({
+        kind: "adventure" as const,
+        title: `Adventure updated: ${r.name}`,
+        subtitle: r.published ? "Live signature journey" : "Draft journey",
+        at: (r.updated_at || r.created_at) as string,
+        to: "/admin/adventures",
+      })),
+      ...(recentD.data ?? []).map((r: any) => ({
+        kind: "destination" as const,
+        title: `Destination updated: ${r.name}`,
+        subtitle: r.published ? "Active guide" : "Draft guide",
+        at: (r.updated_at || r.created_at) as string,
+        to: "/admin/content/destinations",
+      })),
+      ...(recentS.data ?? []).map((r: any) => ({
+        kind: "subscriber" as const,
+        title: "New newsletter subscriber",
+        subtitle: r.email as string,
+        at: r.created_at as string,
+        to: "/admin/subscribers",
       })),
     ]
       .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-      .slice(0, 6);
+      .slice(0, 8);
+
+    const totalAdv = adventuresTotal.count ?? 0;
+    const activeAdv = adventuresActive.count ?? 0;
+    const unpubAdv = Math.max(0, totalAdv - activeAdv);
+    const unhandledEnq = unhandledEnquiries.count ?? 0;
+    const draftsJ = journalDrafts.count ?? 0;
+    const schedJ = journalScheduled.count ?? 0;
+    const missingImgAdv = (adventuresMissingImage.data ?? []).length;
+
+    type AttentionItem = {
+      id: string;
+      label: string;
+      count?: number;
+      tone: "amber" | "rose" | "blue";
+      to: string;
+      actionText: string;
+    };
+
+    const needsAttention: AttentionItem[] = [];
+    if (unhandledEnq > 0) {
+      needsAttention.push({
+        id: "unhandled-enquiries",
+        label: `${unhandledEnq} unanswered ${unhandledEnq === 1 ? "enquiry" : "enquiries"} awaiting response`,
+        count: unhandledEnq,
+        tone: "rose",
+        to: "/admin/enquiries",
+        actionText: "Review",
+      });
+    }
+    if (draftsJ > 0) {
+      needsAttention.push({
+        id: "draft-articles",
+        label: `${draftsJ} draft journal ${draftsJ === 1 ? "article" : "articles"} ready for review`,
+        count: draftsJ,
+        tone: "amber",
+        to: "/admin/journal",
+        actionText: "Open Journal",
+      });
+    }
+    if (schedJ > 0) {
+      needsAttention.push({
+        id: "scheduled-articles",
+        label: `${schedJ} article${schedJ === 1 ? "" : "s"} scheduled for future publication`,
+        count: schedJ,
+        tone: "blue",
+        to: "/admin/journal",
+        actionText: "View Schedule",
+      });
+    }
+    if (unpubAdv > 0) {
+      needsAttention.push({
+        id: "unpub-adventures",
+        label: `${unpubAdv} unpublished ${unpubAdv === 1 ? "adventure" : "adventures"}`,
+        count: unpubAdv,
+        tone: "amber",
+        to: "/admin/adventures",
+        actionText: "Manage",
+      });
+    }
+    if (missingImgAdv > 0) {
+      needsAttention.push({
+        id: "missing-images",
+        label: `${missingImgAdv} adventure${missingImgAdv === 1 ? "" : "s"} missing a hero image`,
+        count: missingImgAdv,
+        tone: "amber",
+        to: "/admin/adventures",
+        actionText: "Update Images",
+      });
+    }
+
     return {
       bookings: b.count ?? 0,
       enquiries: e.count ?? 0,
+      unhandled_enquiries: unhandledEnq,
       private_travel: p.count ?? 0,
       subscribers: n.count ?? 0,
       pending_bookings: pending.count ?? 0,
       visitor_count,
-      active_lodges: lodges.count ?? 0,
-      active_destinations: destinations.count ?? 0,
+      total_adventures: totalAdv,
+      active_adventures: activeAdv,
+      unpublished_adventures: unpubAdv,
+      total_destinations: destinationsTotal.count ?? 0,
+      active_destinations: destinationsActive.count ?? 0,
+      total_lodges: lodgesTotal.count ?? 0,
+      active_lodges: lodgesActive.count ?? 0,
+      total_journal: journalTotal.count ?? 0,
+      draft_articles: draftsJ,
+      scheduled_articles: schedJ,
+      total_testimonials: testimonialsTotal.count ?? 0,
+      total_faqs: faqsTotal.count ?? 0,
       activity,
+      needsAttention,
     };
   });
