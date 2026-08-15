@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      adventures: {
+        Row: {
+          created_at: string
+          deposit_usd: number
+          description: string
+          difficulty: string | null
+          gallery: string[]
+          highlights: string[]
+          id: string
+          image: string
+          name: string
+          nights: string | null
+          price_from_usd: number | null
+          published: boolean
+          region: string | null
+          slug: string
+          sort_order: number
+          tagline: string | null
+          terrain: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deposit_usd?: number
+          description: string
+          difficulty?: string | null
+          gallery?: string[]
+          highlights?: string[]
+          id?: string
+          image: string
+          name: string
+          nights?: string | null
+          price_from_usd?: number | null
+          published?: boolean
+          region?: string | null
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+          terrain?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deposit_usd?: number
+          description?: string
+          difficulty?: string | null
+          gallery?: string[]
+          highlights?: string[]
+          id?: string
+          image?: string
+          name?: string
+          nights?: string | null
+          price_from_usd?: number | null
+          published?: boolean
+          region?: string | null
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+          terrain?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       adventures_page_blocks: {
         Row: {
           created_at: string
