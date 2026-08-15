@@ -50,11 +50,22 @@ function publicClient() {
 }
 
 export const getSiteSettings = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = publicClient();
-  const { data } = await supabase
-    .from("site_settings")
-    .select("key,value")
-    .in("key", ["contact", "branding", "currency"]);
+  let data: any[] | null = null;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const res = await supabaseAdmin
+      .from("site_settings")
+      .select("key,value")
+      .in("key", ["contact", "branding", "currency"]);
+    data = res.data;
+  } catch {
+    const supabase = publicClient();
+    const res = await supabase
+      .from("site_settings")
+      .select("key,value")
+      .in("key", ["contact", "branding", "currency"]);
+    data = res.data;
+  }
   const map = new Map<string, any>((data ?? []).map((r: any) => [r.key, r.value]));
   return {
     contact: (map.get("contact") ?? {}) as ContactSettings,
