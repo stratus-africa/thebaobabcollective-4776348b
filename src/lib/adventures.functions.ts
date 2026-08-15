@@ -8,8 +8,6 @@ export type AdventuresHero = {
   subhead: string;
   image: string;
   imageAlt: string;
-  focalX?: number;
-  focalY?: number;
 };
 
 export type AdventuresCta = {
@@ -27,8 +25,6 @@ export type AdventuresSignature = {
   difficulty: "Easy" | "Moderate" | "Active" | "Challenging" | string;
   image: string;
   imageAlt?: string;
-  focalX?: number;
-  focalY?: number;
   description: string;
   shortDescription?: string;
   highlights: string[];
@@ -106,8 +102,6 @@ export function normalizeAdventureSignatures(
       difficulty: item.difficulty ?? "Moderate",
       image: item.image ?? "",
       imageAlt: item.imageAlt ?? "",
-      focalX: typeof item.focalX === "number" ? item.focalX : 50,
-      focalY: typeof item.focalY === "number" ? item.focalY : 50,
       description: item.description ?? "",
       shortDescription: item.shortDescription ?? "",
       highlights: Array.isArray(item.highlights) ? item.highlights : [],
@@ -174,8 +168,6 @@ const SavePayload = z.object({
     subhead: z.string(),
     image: z.string().default(""),
     imageAlt: z.string().default(""),
-    focalX: z.number().min(0).max(100).optional().default(50),
-    focalY: z.number().min(0).max(100).optional().default(50),
   }),
 
   cta: z.object({
@@ -194,8 +186,6 @@ const SavePayload = z.object({
       difficulty: z.string(),
       image: z.string(),
       imageAlt: z.string().optional().default(""),
-      focalX: z.number().min(0).max(100).optional().default(50),
-      focalY: z.number().min(0).max(100).optional().default(50),
       description: z.string(),
       shortDescription: z.string().optional().default(""),
       highlights: z.array(z.string()),
@@ -250,7 +240,10 @@ export const saveAdventuresPage = createServerFn({ method: "POST" })
       signatures: normalizeAdventureSignatures(data.signatures),
     };
 
-    const { data: existing } = await context.supabase
+    const database = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? (await import("@/integrations/supabase/client.server")).supabaseAdmin
+      : context.supabase;
+    const { data: existing } = await database
       .from("adventures_page_blocks" as any)
       .select("id")
       .limit(1)
@@ -261,13 +254,13 @@ export const saveAdventuresPage = createServerFn({ method: "POST" })
       singleton: true,
     } as any;
     if ((existing as any)?.id) {
-      const { error } = await context.supabase
+      const { error } = await database
         .from("adventures_page_blocks" as any)
         .update(payload)
         .eq("id", (existing as any).id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await context.supabase.from("adventures_page_blocks" as any).insert(payload);
+      const { error } = await database.from("adventures_page_blocks" as any).insert(payload);
       if (error) throw new Error(error.message);
     }
     return { ok: true as const };
