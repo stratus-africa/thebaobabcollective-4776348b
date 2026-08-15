@@ -48,7 +48,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 import {
@@ -682,508 +681,514 @@ function AdminAdventuresDashboard() {
         </div>
       </div>
 
-      {/* ── 3. ADVENTURE CARDS GRID / LIST ─────────────────────────────────────── */}
-      {filteredAndSortedSignatures.length === 0 ? (
-        // ── 12. EMPTY STATE
-        <div className="rounded-xl border border-dashed border-border bg-background p-12 md:p-16 text-center space-y-4 max-w-xl mx-auto shadow-sm">
-          <div className="h-14 w-14 rounded-full bg-gold/10 text-gold flex items-center justify-center mx-auto">
-            <Compass className="w-7 h-7" />
-          </div>
-          {totalCount === 0 ? (
-            <>
-              <h2 className="font-serif text-2xl text-foreground">Your adventure collection is empty</h2>
-              <p className="text-sm text-foreground/65 max-w-md mx-auto leading-relaxed">
-                Create your first signature adventure and start building your collection.
-              </p>
-              <div className="pt-2">
-                <Button
-                  onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } })}
-                  className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
-                >
-                  <Plus className="w-4 h-4 mr-1.5" /> Create your first adventure
-                </Button>
+      <div className="grid gap-6 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-9">
+          {/* ── 3. ADVENTURE CARDS GRID / LIST ─────────────────────────────────────── */}
+          {filteredAndSortedSignatures.length === 0 ? (
+            // ── 12. EMPTY STATE
+            <div className="rounded-xl border border-dashed border-border bg-background p-12 md:p-16 text-center space-y-4 max-w-xl mx-auto shadow-sm">
+              <div className="h-14 w-14 rounded-full bg-gold/10 text-gold flex items-center justify-center mx-auto">
+                <Compass className="w-7 h-7" />
               </div>
-            </>
+              {totalCount === 0 ? (
+                <>
+                  <h2 className="font-serif text-2xl text-foreground">Your adventure collection is empty</h2>
+                  <p className="text-sm text-foreground/65 max-w-md mx-auto leading-relaxed">
+                    Create your first signature adventure and start building your collection.
+                  </p>
+                  <div className="pt-2">
+                    <Button
+                      onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } })}
+                      className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
+                    >
+                      <Plus className="w-4 h-4 mr-1.5" /> Create your first adventure
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="font-serif text-2xl text-foreground">No matching adventures found</h2>
+                  <p className="text-sm text-foreground/65 max-w-md mx-auto leading-relaxed">
+                    We couldn't find any adventures matching your current search terms or filter criteria.
+                  </p>
+                  <div className="pt-2">
+                    <Button variant="outline" onClick={clearAllFilters}>
+                      <RotateCcw className="w-4 h-4 mr-1.5" /> Clear Filters
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
           ) : (
-            <>
-              <h2 className="font-serif text-2xl text-foreground">No matching adventures found</h2>
-              <p className="text-sm text-foreground/65 max-w-md mx-auto leading-relaxed">
-                We couldn't find any adventures matching your current search terms or filter criteria.
-              </p>
-              <div className="pt-2">
-                <Button variant="outline" onClick={clearAllFilters}>
-                  <RotateCcw className="w-4 h-4 mr-1.5" /> Clear Filters
-                </Button>
-              </div>
-            </>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-2">
+              {filteredAndSortedSignatures.map(({ sig: item, originalIndex: idx }) => {
+                const completeness = calculateCompleteness(item);
+                const isDraggable = sortBy === "order" && !hasActiveFilters;
+                const isFirst = idx === 0;
+                const isLast = idx === draft.signatures.length - 1;
+                const status = item.status ?? "published";
+                const missingImage = !item.image?.trim();
+                const missingAlt = Boolean(item.image?.trim() && !item.imageAlt?.trim());
+
+                return (
+                  <article
+                    key={`${item.slug}-${idx}`}
+                    draggable={isDraggable}
+                    onDragStart={() => isDraggable && setDragIdx(idx)}
+                    onDragOver={(e) => {
+                      if (isDraggable) e.preventDefault();
+                    }}
+                    onDrop={() => {
+                      if (isDraggable && dragIdx !== null) {
+                        moveTo(dragIdx, idx);
+                        setDragIdx(null);
+                      }
+                    }}
+                    className={`group relative rounded-xl border bg-background overflow-hidden flex flex-col transition-all duration-200 hover:shadow-md ${
+                      dragIdx === idx ? "opacity-40 border-gold border-dashed" : "border-border"
+                    }`}
+                  >
+                    {/* ── Card Image & Header Badges ── */}
+                    <div className="relative aspect-[16/10] bg-cream overflow-hidden">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.imageAlt || item.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-foreground/35 bg-cream/70">
+                          <ImageIcon className="w-12 h-12 mb-2 stroke-1" />
+                          <span className="text-xs font-medium uppercase tracking-wider">No image set</span>
+                        </div>
+                      )}
+
+                      {/* Gradient shadow overlay for legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none" />
+
+                      {/* Top-Left: Display order index & Drag Handle */}
+                      <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 z-10">
+                        <span className="bg-black/70 backdrop-blur text-cream px-2.5 py-1 rounded-md text-[11px] font-mono font-medium shadow-sm">
+                          #{idx + 1}
+                        </span>
+                        {isDraggable && (
+                          <span
+                            className="cursor-grab active:cursor-grabbing bg-black/70 backdrop-blur text-cream p-1.5 rounded-md hover:bg-black/90 transition-colors shadow-sm"
+                            title="Drag card to reorder display position"
+                          >
+                            <GripVertical className="w-3.5 h-3.5" />
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Top-Right: Status badge, Featured star, and Quick Menu */}
+                      <div className="absolute top-3.5 right-3.5 flex items-center gap-2 z-10">
+                        {/* Featured star toggle */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleFeatured(item.slug)}
+                          title={
+                            item.featured
+                              ? "Featured Adventure (Click to unfeature)"
+                              : "Click to feature this adventure"
+                          }
+                          className={`p-1.5 rounded-md backdrop-blur transition-all shadow-sm ${
+                            item.featured
+                              ? "bg-gold text-gold-foreground hover:bg-gold/90 ring-1 ring-gold"
+                              : "bg-black/60 text-white/70 hover:text-white hover:bg-black/80"
+                          }`}
+                        >
+                          <Star className={`w-3.5 h-3.5 ${item.featured ? "fill-current" : ""}`} />
+                        </button>
+
+                        {/* Status badge */}
+                        <span
+                          className={`px-2.5 py-1 rounded-md text-[10px] tracking-[0.18em] uppercase font-semibold backdrop-blur shadow-sm ${
+                            status === "published"
+                              ? "bg-forest text-forest-foreground"
+                              : status === "draft"
+                                ? "bg-amber-600 text-white"
+                                : "bg-slate-700 text-white"
+                          }`}
+                        >
+                          {status}
+                        </span>
+
+                        {/* Three-Dot Actions Dropdown */}
+                        <AdventureCardDropdown
+                          adventure={item}
+                          onEdit={() => navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } })}
+                          onDuplicate={() => handleDuplicate(item.slug)}
+                          onToggleFeatured={() => handleToggleFeatured(item.slug)}
+                          onChangeStatus={(s) => handleChangeStatus(item.slug, s)}
+                          onMoveUp={() => moveTo(idx, idx - 1)}
+                          onMoveDown={() => moveTo(idx, idx + 1)}
+                          canMoveUp={!isFirst}
+                          canMoveDown={!isLast}
+                          onDelete={() => setDeleteTarget(item)}
+                        />
+                      </div>
+
+                      {/* Bottom Image Warnings */}
+                      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-1.5 z-10">
+                        {missingImage && (
+                          <span className="inline-flex items-center gap-1 bg-rose-900/90 text-rose-100 backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-rose-400/30">
+                            <AlertTriangle className="w-3 h-3 text-rose-300" /> Missing image
+                          </span>
+                        )}
+                        {missingAlt && (
+                          <span className="inline-flex items-center gap-1 bg-amber-900/90 text-amber-100 backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-amber-400/30">
+                            <AlertTriangle className="w-3 h-3 text-amber-300" /> Alt text missing
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* ── Card Body & Metadata ── */}
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        {/* Title */}
+                        <h3 className="font-serif text-xl md:text-2xl text-foreground leading-snug group-hover:text-gold transition-colors">
+                          <Link to="/admin/adventures/$slug" params={{ slug: item.slug }}>
+                            {item.name || "Untitled Adventure"}
+                          </Link>
+                        </h3>
+
+                        {/* Metadata line: Region · Nights · Difficulty · Terrain */}
+                        <p className="text-xs text-foreground/65 mt-1.5 flex flex-wrap items-center gap-1.5">
+                          <span className="font-medium text-foreground/80">{item.region || "Kenya"}</span>
+                          {item.nights && (
+                            <>
+                              <span>·</span>
+                              <span>{item.nights}</span>
+                            </>
+                          )}
+                          {item.difficulty && (
+                            <>
+                              <span>·</span>
+                              <span className="text-gold font-medium">{item.difficulty}</span>
+                            </>
+                          )}
+                          {item.terrain && (
+                            <>
+                              <span>·</span>
+                              <span className="truncate max-w-[150px]">{item.terrain}</span>
+                            </>
+                          )}
+                        </p>
+
+                        {/* Emotional tagline or short description */}
+                        {(item.shortDescription || item.description) && (
+                          <p className="text-xs text-foreground/75 mt-2.5 line-clamp-2 leading-relaxed font-sans">
+                            {item.shortDescription || item.description}
+                          </p>
+                        )}
+
+                        {/* Badges / Experience & Travel Styles */}
+                        {((item.experienceTypes && item.experienceTypes.length > 0) ||
+                          (item.travelStyles && item.travelStyles.length > 0)) && (
+                          <div className="flex flex-wrap gap-1 mt-3">
+                            {[...(item.experienceTypes || []), ...(item.travelStyles || [])].slice(0, 3).map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-[10px] tracking-[0.15em] uppercase text-foreground/65 bg-cream px-2 py-0.5 rounded border border-border/60"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ── Content Completeness Bar ── */}
+                      <div className="pt-3 border-t border-border/60 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-foreground/60 uppercase tracking-wider font-medium">
+                            Content completeness
+                          </span>
+                          <span
+                            className={`font-semibold font-mono ${
+                              completeness.percent >= 90
+                                ? "text-forest"
+                                : completeness.percent >= 60
+                                  ? "text-gold"
+                                  : "text-amber-700"
+                            }`}
+                          >
+                            {completeness.percent}%
+                          </span>
+                        </div>
+
+                        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              completeness.percent >= 90
+                                ? "bg-forest"
+                                : completeness.percent >= 60
+                                  ? "bg-gold"
+                                  : "bg-amber-600"
+                            }`}
+                            style={{ width: `${completeness.percent}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* ── Card Footer Actions ── */}
+                      <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 text-xs border-border hover:bg-cream"
+                            onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } })}
+                          >
+                            <Edit className="w-3.5 h-3.5 mr-1 text-gold" /> Edit
+                          </Button>
+                        </div>
+
+                        {/* Up / Down reordering controls for accessibility */}
+                        <div className="flex items-center gap-0.5">
+                          <button
+                            type="button"
+                            onClick={() => moveTo(idx, idx - 1)}
+                            disabled={isFirst}
+                            className="text-foreground/45 hover:text-foreground p-1.5 rounded hover:bg-cream disabled:opacity-20 disabled:hover:bg-transparent"
+                            aria-label="Move up"
+                            title="Move up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveTo(idx, idx + 1)}
+                            disabled={isLast}
+                            className="text-foreground/45 hover:text-foreground p-1.5 rounded hover:bg-cream disabled:opacity-20 disabled:hover:bg-transparent"
+                            aria-label="Move down"
+                            title="Move down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           )}
         </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-2">
-          {filteredAndSortedSignatures.map(({ sig: item, originalIndex: idx }) => {
-            const completeness = calculateCompleteness(item);
-            const isDraggable = sortBy === "order" && !hasActiveFilters;
-            const isFirst = idx === 0;
-            const isLast = idx === draft.signatures.length - 1;
-            const status = item.status ?? "published";
-            const missingImage = !item.image?.trim();
-            const missingAlt = Boolean(item.image?.trim() && !item.imageAlt?.trim());
 
-            return (
-              <article
-                key={`${item.slug}-${idx}`}
-                draggable={isDraggable}
-                onDragStart={() => isDraggable && setDragIdx(idx)}
-                onDragOver={(e) => {
-                  if (isDraggable) e.preventDefault();
-                }}
-                onDrop={() => {
-                  if (isDraggable && dragIdx !== null) {
-                    moveTo(dragIdx, idx);
-                    setDragIdx(null);
-                  }
-                }}
-                className={`group relative rounded-xl border bg-background overflow-hidden flex flex-col transition-all duration-200 hover:shadow-md ${
-                  dragIdx === idx ? "opacity-40 border-gold border-dashed" : "border-border"
-                }`}
-              >
-                {/* ── Card Image & Header Badges ── */}
-                <div className="relative aspect-[16/10] bg-cream overflow-hidden">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.imageAlt || item.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      style={{ objectPosition: `${item.focalX ?? 50}% ${item.focalY ?? 50}%` }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-foreground/35 bg-cream/70">
-                      <ImageIcon className="w-12 h-12 mb-2 stroke-1" />
-                      <span className="text-xs font-medium uppercase tracking-wider">No image set</span>
-                    </div>
-                  )}
-
-                  {/* Gradient shadow overlay for legibility */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none" />
-
-                  {/* Top-Left: Display order index & Drag Handle */}
-                  <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 z-10">
-                    <span className="bg-black/70 backdrop-blur text-cream px-2.5 py-1 rounded-md text-[11px] font-mono font-medium shadow-sm">
-                      #{idx + 1}
-                    </span>
-                    {isDraggable && (
-                      <span
-                        className="cursor-grab active:cursor-grabbing bg-black/70 backdrop-blur text-cream p-1.5 rounded-md hover:bg-black/90 transition-colors shadow-sm"
-                        title="Drag card to reorder display position"
-                      >
-                        <GripVertical className="w-3.5 h-3.5" />
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Top-Right: Status badge, Featured star, and Quick Menu */}
-                  <div className="absolute top-3.5 right-3.5 flex items-center gap-2 z-10">
-                    {/* Featured star toggle */}
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFeatured(item.slug)}
-                      title={
-                        item.featured ? "Featured Adventure (Click to unfeature)" : "Click to feature this adventure"
-                      }
-                      className={`p-1.5 rounded-md backdrop-blur transition-all shadow-sm ${
-                        item.featured
-                          ? "bg-gold text-gold-foreground hover:bg-gold/90 ring-1 ring-gold"
-                          : "bg-black/60 text-white/70 hover:text-white hover:bg-black/80"
-                      }`}
-                    >
-                      <Star className={`w-3.5 h-3.5 ${item.featured ? "fill-current" : ""}`} />
-                    </button>
-
-                    {/* Status badge */}
-                    <span
-                      className={`px-2.5 py-1 rounded-md text-[10px] tracking-[0.18em] uppercase font-semibold backdrop-blur shadow-sm ${
-                        status === "published"
-                          ? "bg-forest text-forest-foreground"
-                          : status === "draft"
-                            ? "bg-amber-600 text-white"
-                            : "bg-slate-700 text-white"
-                      }`}
-                    >
-                      {status}
-                    </span>
-
-                    {/* Three-Dot Actions Dropdown */}
-                    <AdventureCardDropdown
-                      adventure={item}
-                      onEdit={() => navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } })}
-                      onDuplicate={() => handleDuplicate(item.slug)}
-                      onToggleFeatured={() => handleToggleFeatured(item.slug)}
-                      onChangeStatus={(s) => handleChangeStatus(item.slug, s)}
-                      onMoveUp={() => moveTo(idx, idx - 1)}
-                      onMoveDown={() => moveTo(idx, idx + 1)}
-                      canMoveUp={!isFirst}
-                      canMoveDown={!isLast}
-                      onDelete={() => setDeleteTarget(item)}
-                    />
-                  </div>
-
-                  {/* Bottom Image Warnings */}
-                  <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-1.5 z-10">
-                    {missingImage && (
-                      <span className="inline-flex items-center gap-1 bg-rose-900/90 text-rose-100 backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-rose-400/30">
-                        <AlertTriangle className="w-3 h-3 text-rose-300" /> Missing image
-                      </span>
-                    )}
-                    {missingAlt && (
-                      <span className="inline-flex items-center gap-1 bg-amber-900/90 text-amber-100 backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-amber-400/30">
-                        <AlertTriangle className="w-3 h-3 text-amber-300" /> Alt text missing
-                      </span>
-                    )}
-                  </div>
+        {/* ── 10. PAGE SETTINGS (Collapsible below adventure management) ───────── */}
+        <aside className="min-w-0 xl:col-span-3">
+          <section className="rounded-xl border border-border bg-background overflow-hidden shadow-sm xl:sticky xl:top-6">
+            <header className="px-6 py-5 border-b border-border bg-cream/50 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-gold">CONFIGURATION</span>
                 </div>
+                <h2 className="font-serif text-2xl text-foreground leading-tight mt-0.5">Page Settings</h2>
+                <p className="text-xs text-foreground/60 mt-0.5">
+                  Customize the hero media, header text, and closing call-to-action for the public /adventures page.
+                </p>
+              </div>
 
-                {/* ── Card Body & Metadata ── */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div>
-                    {/* Title */}
-                    <h3 className="font-serif text-xl md:text-2xl text-foreground leading-snug group-hover:text-gold transition-colors">
-                      <Link to="/admin/adventures/$slug" params={{ slug: item.slug }}>
-                        {item.name || "Untitled Adventure"}
-                      </Link>
-                    </h3>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const anyClosed = !heroOpen || !ctaOpen;
+                    setHeroOpen(anyClosed);
+                    setCtaOpen(anyClosed);
+                  }}
+                  className="text-xs"
+                >
+                  {!heroOpen || !ctaOpen ? "Expand All" : "Collapse All"}
+                </Button>
+                {hasUnsavedChanges && (
+                  <Button
+                    size="sm"
+                    onClick={saveAll}
+                    disabled={saving}
+                    className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm text-xs"
+                  >
+                    {saving ? (
+                      <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                    ) : (
+                      <Save className="w-3.5 h-3.5 mr-1" />
+                    )}
+                    Save Page Settings
+                  </Button>
+                )}
+              </div>
+            </header>
 
-                    {/* Metadata line: Region · Nights · Difficulty · Terrain */}
-                    <p className="text-xs text-foreground/65 mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span className="font-medium text-foreground/80">{item.region || "Kenya"}</span>
-                      {item.nights && (
-                        <>
-                          <span>·</span>
-                          <span>{item.nights}</span>
-                        </>
-                      )}
-                      {item.difficulty && (
-                        <>
-                          <span>·</span>
-                          <span className="text-gold font-medium">{item.difficulty}</span>
-                        </>
-                      )}
-                      {item.terrain && (
-                        <>
-                          <span>·</span>
-                          <span className="truncate max-w-[150px]">{item.terrain}</span>
-                        </>
-                      )}
-                    </p>
-
-                    {/* Emotional tagline or short description */}
-                    {(item.shortDescription || item.description) && (
-                      <p className="text-xs text-foreground/75 mt-2.5 line-clamp-2 leading-relaxed font-sans">
-                        {item.shortDescription || item.description}
+            <div className="divide-y divide-border">
+              {/* Hero Settings Accordion */}
+              <div className="bg-background">
+                <button
+                  type="button"
+                  onClick={() => setHeroOpen((o) => !o)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-cream/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded bg-gold/10 text-gold flex items-center justify-center shrink-0">
+                      <ImageIcon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-lg text-foreground leading-none">Hero Section & Copy</h3>
+                      <p className="text-xs text-foreground/55 mt-1">
+                        Background banner and main headline shown at the top of /adventures.
                       </p>
-                    )}
+                    </div>
+                  </div>
+                  <span className="text-foreground/50">
+                    {heroOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </span>
+                </button>
 
-                    {/* Badges / Experience & Travel Styles */}
-                    {((item.experienceTypes && item.experienceTypes.length > 0) ||
-                      (item.travelStyles && item.travelStyles.length > 0)) && (
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {[...(item.experienceTypes || []), ...(item.travelStyles || [])].slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-[10px] tracking-[0.15em] uppercase text-foreground/65 bg-cream px-2 py-0.5 rounded border border-border/60"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                {heroOpen && (
+                  <div className="p-6 border-t border-border/50 bg-cream/10 space-y-6">
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div>
+                        <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                          Hero background image
+                        </Label>
+                        <ManagedImageUpload
+                          value={draft.hero.image}
+                          onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
+                          recommendedRatio="16:9 or wider"
+                          altText={draft.hero.imageAlt}
+                        />
                       </div>
-                    )}
-                  </div>
 
-                  {/* ── Content Completeness Bar ── */}
-                  <div className="pt-3 border-t border-border/60 space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-foreground/60 uppercase tracking-wider font-medium">
-                        Content completeness
-                      </span>
-                      <span
-                        className={`font-semibold font-mono ${
-                          completeness.percent >= 90
-                            ? "text-forest"
-                            : completeness.percent >= 60
-                              ? "text-gold"
-                              : "text-amber-700"
-                        }`}
-                      >
-                        {completeness.percent}%
-                      </span>
-                    </div>
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                            Hero image alt text
+                          </Label>
+                          <Input
+                            value={draft.hero.imageAlt ?? ""}
+                            placeholder="Describe the hero image for screen readers…"
+                            onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
+                          />
+                        </div>
 
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          completeness.percent >= 90
-                            ? "bg-forest"
-                            : completeness.percent >= 60
-                              ? "bg-gold"
-                              : "bg-amber-600"
-                        }`}
-                        style={{ width: `${completeness.percent}%` }}
-                      />
-                    </div>
-                  </div>
+                        <div>
+                          <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                            Eyebrow
+                          </Label>
+                          <Input
+                            value={draft.hero.eyebrow}
+                            onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
+                            placeholder="e.g. Adventures"
+                          />
+                        </div>
 
-                  {/* ── Card Footer Actions ── */}
-                  <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 px-3 text-xs border-border hover:bg-cream"
-                        onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } })}
-                      >
-                        <Edit className="w-3.5 h-3.5 mr-1 text-gold" /> Edit
-                      </Button>
-                    </div>
+                        <div>
+                          <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                            Headline
+                          </Label>
+                          <Textarea
+                            rows={2}
+                            value={draft.hero.headline}
+                            onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
+                            placeholder="e.g. EXPERIENCE KENYA BEYOND THE ORDINARY."
+                          />
+                        </div>
 
-                    {/* Up / Down reordering controls for accessibility */}
-                    <div className="flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => moveTo(idx, idx - 1)}
-                        disabled={isFirst}
-                        className="text-foreground/45 hover:text-foreground p-1.5 rounded hover:bg-cream disabled:opacity-20 disabled:hover:bg-transparent"
-                        aria-label="Move up"
-                        title="Move up"
-                      >
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveTo(idx, idx + 1)}
-                        disabled={isLast}
-                        className="text-foreground/45 hover:text-foreground p-1.5 rounded hover:bg-cream disabled:opacity-20 disabled:hover:bg-transparent"
-                        aria-label="Move down"
-                        title="Move down"
-                      >
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
+                        <div>
+                          <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                            Subhead
+                          </Label>
+                          <Textarea
+                            rows={3}
+                            value={draft.hero.subhead}
+                            onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
+                            placeholder="Journeys designed around your pace, your curiosity…"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+                )}
+              </div>
 
-      {/* ── 10. PAGE SETTINGS (Collapsible below adventure management) ───────── */}
-      <section className="mt-12 rounded-xl border border-border bg-background overflow-hidden shadow-sm">
-        <header className="px-6 py-5 border-b border-border bg-cream/50 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-gold">CONFIGURATION</span>
+              {/* Closing CTA Settings Accordion */}
+              <div className="bg-background">
+                <button
+                  type="button"
+                  onClick={() => setCtaOpen((o) => !o)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-cream/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded bg-gold/10 text-gold flex items-center justify-center shrink-0">
+                      <Megaphone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-lg text-foreground leading-none">Closing Call-To-Action (CTA)</h3>
+                      <p className="text-xs text-foreground/55 mt-1">
+                        The final invitation and contact button at the bottom of the /adventures page.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-foreground/50">
+                    {ctaOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </span>
+                </button>
+
+                {ctaOpen && (
+                  <div className="p-6 border-t border-border/50 bg-cream/10">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                          Eyebrow
+                        </Label>
+                        <Input
+                          value={draft.cta.eyebrow}
+                          onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                          Button label
+                        </Label>
+                        <Input
+                          value={draft.cta.buttonLabel}
+                          onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                          Headline
+                        </Label>
+                        <Input
+                          value={draft.cta.headline}
+                          onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                          Body Copy
+                        </Label>
+                        <Textarea
+                          rows={3}
+                          value={draft.cta.body}
+                          onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-            <h2 className="font-serif text-2xl text-foreground leading-tight mt-0.5">Page Settings</h2>
-            <p className="text-xs text-foreground/60 mt-0.5">
-              Customize the hero media, header text, and closing call-to-action for the public /adventures page.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const anyClosed = !heroOpen || !ctaOpen;
-                setHeroOpen(anyClosed);
-                setCtaOpen(anyClosed);
-              }}
-              className="text-xs"
-            >
-              {!heroOpen || !ctaOpen ? "Expand All" : "Collapse All"}
-            </Button>
-            {hasUnsavedChanges && (
-              <Button
-                size="sm"
-                onClick={saveAll}
-                disabled={saving}
-                className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm text-xs"
-              >
-                {saving ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1" />}
-                Save Page Settings
-              </Button>
-            )}
-          </div>
-        </header>
-
-        <div className="divide-y divide-border">
-          {/* Hero Settings Accordion */}
-          <div className="bg-background">
-            <button
-              type="button"
-              onClick={() => setHeroOpen((o) => !o)}
-              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-cream/30 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded bg-gold/10 text-gold flex items-center justify-center shrink-0">
-                  <ImageIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-lg text-foreground leading-none">Hero Section & Copy</h3>
-                  <p className="text-xs text-foreground/55 mt-1">
-                    Background banner, focal point, and main headline shown at the top of /adventures.
-                  </p>
-                </div>
-              </div>
-              <span className="text-foreground/50">
-                {heroOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </span>
-            </button>
-
-            {heroOpen && (
-              <div className="p-6 border-t border-border/50 bg-cream/10 space-y-6">
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div>
-                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                      Hero background image
-                    </Label>
-                    <ManagedImageUpload
-                      value={draft.hero.image}
-                      onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
-                      recommendedRatio="16:9 or wider"
-                      altText={draft.hero.imageAlt}
-                      focalX={draft.hero.focalX ?? 50}
-                      focalY={draft.hero.focalY ?? 50}
-                      onFocalChange={(focalX, focalY) =>
-                        setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                        Hero image alt text
-                      </Label>
-                      <Input
-                        value={draft.hero.imageAlt ?? ""}
-                        placeholder="Describe the hero image for screen readers…"
-                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                        Eyebrow
-                      </Label>
-                      <Input
-                        value={draft.hero.eyebrow}
-                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
-                        placeholder="e.g. Adventures"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                        Headline
-                      </Label>
-                      <Textarea
-                        rows={2}
-                        value={draft.hero.headline}
-                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
-                        placeholder="e.g. EXPERIENCE KENYA BEYOND THE ORDINARY."
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                        Subhead
-                      </Label>
-                      <Textarea
-                        rows={3}
-                        value={draft.hero.subhead}
-                        onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
-                        placeholder="Journeys designed around your pace, your curiosity…"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Closing CTA Settings Accordion */}
-          <div className="bg-background">
-            <button
-              type="button"
-              onClick={() => setCtaOpen((o) => !o)}
-              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-cream/30 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded bg-gold/10 text-gold flex items-center justify-center shrink-0">
-                  <Megaphone className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-lg text-foreground leading-none">Closing Call-To-Action (CTA)</h3>
-                  <p className="text-xs text-foreground/55 mt-1">
-                    The final invitation and contact button at the bottom of the /adventures page.
-                  </p>
-                </div>
-              </div>
-              <span className="text-foreground/50">
-                {ctaOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </span>
-            </button>
-
-            {ctaOpen && (
-              <div className="p-6 border-t border-border/50 bg-cream/10">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                      Eyebrow
-                    </Label>
-                    <Input
-                      value={draft.cta.eyebrow}
-                      onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                      Button label
-                    </Label>
-                    <Input
-                      value={draft.cta.buttonLabel}
-                      onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                      Headline
-                    </Label>
-                    <Input
-                      value={draft.cta.headline}
-                      onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                      Body Copy
-                    </Label>
-                    <Textarea
-                      rows={3}
-                      value={draft.cta.body}
-                      onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+          </section>
+        </aside>
+      </div>
 
       {/* ── 11. STICKY SAVE FOOTER ────────────────────────────────────────────── */}
       {hasUnsavedChanges && (
@@ -1365,17 +1370,11 @@ function ManagedImageUpload({
   onChange,
   recommendedRatio,
   altText,
-  focalX = 50,
-  focalY = 50,
-  onFocalChange,
 }: {
   value: string;
   onChange: (url: string) => void;
   recommendedRatio: string;
   altText?: string;
-  focalX?: number;
-  focalY?: number;
-  onFocalChange?: (x: number, y: number) => void;
 }) {
   const upload = useServerFn(adminUploadImage);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -1513,14 +1512,6 @@ function ManagedImageUpload({
         className="text-xs"
       />
 
-      {value && (
-        <div className="space-y-2 pt-1">
-          <p className="text-[11px] font-medium text-foreground/60 tracking-[0.15em] uppercase">Focal point</p>
-          <FocalSlider label="Horizontal" value={focalX} onChange={(next) => onFocalChange?.(next, focalY)} />
-          <FocalSlider label="Vertical" value={focalY} onChange={(next) => onFocalChange?.(focalX, next)} />
-        </div>
-      )}
-
       <MediaLibraryPicker
         open={libraryOpen}
         onOpenChange={setLibraryOpen}
@@ -1531,20 +1522,6 @@ function ManagedImageUpload({
           onChange(url);
         }}
       />
-    </div>
-  );
-}
-
-// ─── FocalSlider ──────────────────────────────────────────────────────────────
-
-function FocalSlider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-xs text-foreground/75">{label}</p>
-        <span className="text-[11px] tabular-nums text-foreground/50">{Math.round(value)}%</span>
-      </div>
-      <Slider value={[value]} min={0} max={100} step={1} onValueChange={([next]) => onChange(next ?? value)} />
     </div>
   );
 }
