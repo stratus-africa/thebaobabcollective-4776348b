@@ -86,12 +86,13 @@ export function FindYourJourney({ content }: { content?: FindJourneyContent | nu
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
           </p>
-          <h2 id="find-journey-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
+          <h2
+            id="find-journey-heading"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+          >
             {c.title}
           </h2>
-          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">
-            {c.body}
-          </p>
+          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">{c.body}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -133,14 +134,11 @@ export function FindYourJourney({ content }: { content?: FindJourneyContent | nu
                   <p className="text-[10px] tracking-[0.3em] uppercase text-gold/90 font-medium mb-1.5">
                     {style.tagline}
                   </p>
-                  <h3 className="font-serif text-2xl sm:text-3xl text-cream mb-2 leading-tight">
-                    {style.title}
-                  </h3>
-                  <p className="text-sm text-cream/80 leading-relaxed mb-4 line-clamp-2">
-                    {style.description}
-                  </p>
+                  <h3 className="font-serif text-2xl sm:text-3xl text-cream mb-2 leading-tight">{style.title}</h3>
+                  <p className="text-sm text-cream/80 leading-relaxed mb-4 line-clamp-2">{style.description}</p>
                   <span className="inline-flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase font-semibold text-gold group-hover:text-cream transition-colors">
-                    Explore Experiences <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                    Explore Experiences{" "}
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>
