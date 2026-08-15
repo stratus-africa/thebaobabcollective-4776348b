@@ -1,12 +1,14 @@
 import { Shield, Users, TreeDeciduous, HeartHandshake } from "lucide-react";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { usePreviewMerge } from "@/lib/preview-overrides";
 
 type ImpactContent = Partial<typeof PAGE_DEFAULTS.home_impact>;
 
 const PILLAR_ICONS = [Shield, Users, TreeDeciduous];
 
 export function JourneyImpact({ content }: { content?: ImpactContent | null } = {}) {
-  const c = { ...PAGE_DEFAULTS.home_impact, ...(content ?? {}) };
+  const base = { ...PAGE_DEFAULTS.home_impact, ...(content ?? {}) };
+  const c = usePreviewMerge("home_impact", base);
 
   const pillars = [
     { icon: PILLAR_ICONS[0], title: c.pillar_1_title, subtitle: c.pillar_1_subtitle, description: c.pillar_1_body },
@@ -21,13 +23,12 @@ export function JourneyImpact({ content }: { content?: ImpactContent | null } = 
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
             <HeartHandshake className="w-3.5 h-3.5" /> {c.eyebrow}
           </p>
-          <h2
-            id="impact-heading"
-            className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
-          >
+          <h2 id="impact-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
             {c.title}
           </h2>
-          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">{c.body}</p>
+          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">
+            {c.body}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -45,8 +46,12 @@ export function JourneyImpact({ content }: { content?: ImpactContent | null } = 
                   <p className="text-[10px] tracking-[0.25em] uppercase text-terracotta font-semibold mb-1.5">
                     {pillar.subtitle}
                   </p>
-                  <h3 className="font-serif text-2xl text-foreground mb-3 leading-snug">{pillar.title}</h3>
-                  <p className="text-foreground/70 text-sm leading-relaxed">{pillar.description}</p>
+                  <h3 className="font-serif text-2xl text-foreground mb-3 leading-snug">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-foreground/70 text-sm leading-relaxed">
+                    {pillar.description}
+                  </p>
                 </div>
               </div>
             );
