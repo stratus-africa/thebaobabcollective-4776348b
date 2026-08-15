@@ -29,10 +29,10 @@ import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 
 const searchSchema = z.object({
-  q: z.string().default(""),
-  region: z.string().default(""),
-  terrain: z.string().default(""),
-  difficulty: z.string().default(""),
+  q: z.string().optional(),
+  region: z.string().optional(),
+  terrain: z.string().optional(),
+  difficulty: z.string().optional(),
 });
 
 export const Route = createFileRoute("/adventures/")({
@@ -270,11 +270,19 @@ function SignaturesSection({
 
   const setParam = (k: "q" | "region" | "terrain" | "difficulty", v: string) =>
     navigate({
-      search: (prev: z.infer<typeof searchSchema>) => ({ ...prev, [k]: v }),
+      search: (prev: z.infer<typeof searchSchema>) => {
+        const next: any = { ...prev, [k]: v || undefined };
+        Object.keys(next).forEach((key) => {
+          if (!next[key]) {
+            delete next[key];
+          }
+        });
+        return next;
+      },
       replace: true,
     });
 
-  const clearAll = () => navigate({ search: { q: "", region: "", terrain: "", difficulty: "" }, replace: true });
+  const clearAll = () => navigate({ search: {}, replace: true });
 
   return (
     <section id="signature" className="py-24 md:py-32 scroll-mt-20">
