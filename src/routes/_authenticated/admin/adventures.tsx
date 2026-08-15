@@ -36,6 +36,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 function slugify(s: string) {
   return s
@@ -313,6 +321,164 @@ function humanSize(bytes: number) {
   return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
+function NewAdventureModal({
+  open,
+  onOpenChange,
+  onSave,
+  saving,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (sig: Omit<AdventuresSignature, "slug">) => void;
+  saving: boolean;
+}) {
+  const blank: Omit<AdventuresSignature, "slug"> = {
+    name: "",
+    region: "",
+    terrain: "",
+    nights: "",
+    difficulty: "Moderate",
+    image: "",
+    imageAlt: "",
+    focalX: 50,
+    focalY: 50,
+    description: "",
+    highlights: [],
+    included: [],
+    notIncluded: [],
+  };
+  const [form, setForm] = useState<Omit<AdventuresSignature, "slug">>(blank);
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (open) setForm(blank);
+  }, [open]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    onSave(form);
+  }
+
+  function field<K extends keyof Omit<AdventuresSignature, "slug">>(key: K, val: Omit<AdventuresSignature, "slug">[K]) {
+    setForm((prev) => ({ ...prev, [key]: val }));
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl w-[96vw] max-h-[92vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl">New Adventure</DialogTitle>
+          <DialogDescription>Create a new signature adventure to showcase on your platform.</DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          <div className="bg-cream/40 border border-border p-5 space-y-4">
+            {/* Name */}
+            <div>
+              <Label className="mb-1.5 block">
+                Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                value={form.name}
+                placeholder="e.g. Okavango on Foot"
+                onChange={(e) => field("name", e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            {/* Region + Terrain */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label className="mb-1.5 block">Region</Label>
+                <Input
+                  value={form.region}
+                  placeholder="e.g. Botswana"
+                  onChange={(e) => field("region", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="mb-1.5 block">Terrain</Label>
+                <Input
+                  value={form.terrain}
+                  placeholder="e.g. Delta & Waterways"
+                  onChange={(e) => field("terrain", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Nights + Difficulty */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label className="mb-1.5 block">Nights</Label>
+                <Input
+                  value={form.nights}
+                  placeholder="e.g. 8 nights"
+                  onChange={(e) => field("nights", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="mb-1.5 block">Difficulty</Label>
+                <Input
+                  value={form.difficulty}
+                  placeholder="e.g. Moderate"
+                  onChange={(e) => field("difficulty", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div>
+              <Label className="mb-1.5 block">Description</Label>
+              <Textarea
+                rows={4}
+                value={form.description}
+                placeholder="Describe this adventure…"
+                onChange={(e) => field("description", e.target.value)}
+              />
+            </div>
+
+            {/* Highlights */}
+            <div>
+              <Label className="mb-1.5 block">Highlights (one per line)</Label>
+              <Textarea
+                rows={3}
+                value={Array.isArray(form.highlights) ? form.highlights.join("\n") : form.highlights}
+                placeholder="Walking in the Okavango Delta\nNight drives with expert guides"
+                onChange={(e) =>
+                  field(
+                    "highlights",
+                    e.target.value.split("\n").map((s) => s.trimEnd()),
+                  )
+                }
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Create Adventure"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function SignatureItineraries({
   draft,
   setDraft,
@@ -324,6 +490,8 @@ function SignatureItineraries({
   const navigate = useNavigate();
   const persistFn = useServerFn(saveAdventuresPage);
   const [openingSlug, setOpeningSlug] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [addSaving, setAddSaving] = useState(false);
 
   const moveTo = (from: number, to: number) => {
     if (from === to || to < 0 || to >= draft.signatures.length) return;
@@ -337,181 +505,189 @@ function SignatureItineraries({
     setDraft({ ...draft, signatures: draft.signatures.filter((_, i) => i !== idx) });
   };
 
-  const addNew = () => {
-    setDraft({
-      ...draft,
-      signatures: [
-        ...draft.signatures,
-        {
-          slug: `new-${Date.now().toString(36)}`,
-          name: "",
-          region: "",
-          terrain: "",
-          nights: "",
-          difficulty: "Moderate",
-          image: "",
-          imageAlt: "",
-          focalX: 50,
-          focalY: 50,
-          description: "",
-          highlights: [],
-          included: [],
-          notIncluded: [],
-        },
-      ],
-    });
+  const handleAddSave = async (formData: Omit<AdventuresSignature, "slug">) => {
+    // Build a unique slug from the name
+    const base = slugify(formData.name || "adventure") || `new-${Date.now().toString(36)}`;
+    const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
+    let slug = base;
+    let n = 2;
+    while (existingSlugs.has(slug)) slug = `${base}-${n++}`;
+
+    // Normalise highlights: filter blank trailing lines
+    const highlights = Array.isArray(formData.highlights)
+      ? formData.highlights.map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    const newSig: AdventuresSignature = { ...formData, slug, highlights };
+    const updatedSignatures = [...draft.signatures, newSig];
+    const updatedDraft = { ...draft, signatures: updatedSignatures };
+
+    setAddSaving(true);
+    try {
+      await persistFn({ data: { hero: updatedDraft.hero, cta: updatedDraft.cta, signatures: updatedSignatures } });
+      setDraft(updatedDraft);
+      setAddOpen(false);
+      toast.success(`"${formData.name}" added — click Edit to fill in the full details.`);
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not save adventure");
+    } finally {
+      setAddSaving(false);
+    }
   };
 
   return (
-    <section
-      id="signatures"
-      className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm"
-    >
-      <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
-        <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
-            <MapIcon className="w-4 h-4" />
+    <>
+      <NewAdventureModal open={addOpen} onOpenChange={setAddOpen} onSave={handleAddSave} saving={addSaving} />
+      <section
+        id="signatures"
+        className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm"
+      >
+        <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
+              <MapIcon className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="font-serif text-xl leading-tight">
+                Signature itineraries
+                <span className="ml-2 text-xs text-foreground/50 font-sans">({draft.signatures.length})</span>
+              </h2>
+              <p className="text-xs text-foreground/55 mt-0.5">
+                Featured adventures, in their display order. Click the edit icon to modify individual adventures.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-serif text-xl leading-tight">
-              Signature itineraries
-              <span className="ml-2 text-xs text-foreground/50 font-sans">({draft.signatures.length})</span>
-            </h2>
-            <p className="text-xs text-foreground/55 mt-0.5">
-              Featured adventures, in their display order. Click the edit icon to modify individual adventures.
-            </p>
-          </div>
-        </div>
-        <Button
-          onClick={addNew}
-          size="sm"
-          variant="outline"
-          className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
-        >
-          <Plus className="w-3.5 h-3.5 mr-1" /> Add
-        </Button>
-      </header>
+          <Button
+            onClick={() => setAddOpen(true)}
+            size="sm"
+            variant="outline"
+            className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" /> Add Adventure
+          </Button>
+        </header>
 
-      <div className="p-6">
-        {draft.signatures.length === 0 ? (
-          <div className="border border-dashed border-border bg-background p-16 text-center text-foreground/60">
-            No items yet. Click <span className="font-medium">Add</span> to create one.
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {draft.signatures.map((item, idx) => (
-              <article
-                key={`${item.slug}-${idx}`}
-                draggable
-                onDragStart={() => setDragIdx(idx)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => {
-                  if (dragIdx !== null) moveTo(dragIdx, idx);
-                  setDragIdx(null);
-                }}
-                className="group border border-border bg-background overflow-hidden flex flex-col transition-shadow hover:shadow-lg"
-              >
-                <div className="relative aspect-[16/10] bg-cream overflow-hidden">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.imageAlt || item.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-foreground/30">
-                      <ImageIcon className="w-10 h-10" />
-                    </div>
-                  )}
-                  <span className="absolute top-3 left-3 bg-background/90 px-2 py-0.5 text-[10px] tracking-[0.2em] uppercase text-foreground/60">
-                    #{idx + 1}
-                  </span>
-                  <span
-                    className="absolute top-3 right-3 cursor-grab bg-background/90 p-1.5 text-foreground/50"
-                    title="Drag to reorder"
-                  >
-                    <GripVertical className="w-4 h-4" />
-                  </span>
-                </div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <h3 className="font-serif text-lg leading-tight">{item.name || "New itinerary"}</h3>
-                  <p className="text-sm text-foreground/60 mt-1 truncate">
-                    {[item.region, item.nights, item.difficulty].filter(Boolean).join(" · ") || "No details yet"}
-                  </p>
-                  <div className="mt-4 pt-3 border-t border-border flex flex-wrap items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      aria-label={`Edit ${item.name || "adventure"}`}
-                      onClick={async () => {
-                        let targetSlug = item.slug;
-                        let signatures = draft.signatures;
-                        if (!targetSlug) {
-                          const base = item.name ? slugify(item.name) : "";
-                          let unique = base || `new-${Date.now().toString(36)}`;
-                          const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
-                          let n = 2;
-                          const root = unique;
-                          while (existingSlugs.has(unique)) unique = `${root}-${n++}`;
-                          targetSlug = unique;
-                          signatures = draft.signatures.slice();
-                          signatures[idx] = { ...item, slug: targetSlug };
-                          setDraft({ ...draft, signatures });
-                        }
-                        try {
-                          setOpeningSlug(targetSlug);
-                          await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
-                        } catch (err: any) {
-                          toast.error(err?.message ?? "Could not open adventure");
-                          setOpeningSlug(null);
-                          return;
-                        }
-                        setOpeningSlug(null);
-                        navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
-                      }}
+        <div className="p-6">
+          {draft.signatures.length === 0 ? (
+            <div className="border border-dashed border-border bg-background p-16 text-center text-foreground/60">
+              No items yet. Click <span className="font-medium">Add</span> to create one.
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {draft.signatures.map((item, idx) => (
+                <article
+                  key={`${item.slug}-${idx}`}
+                  draggable
+                  onDragStart={() => setDragIdx(idx)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => {
+                    if (dragIdx !== null) moveTo(dragIdx, idx);
+                    setDragIdx(null);
+                  }}
+                  className="group border border-border bg-background overflow-hidden flex flex-col transition-shadow hover:shadow-lg"
+                >
+                  <div className="relative aspect-[16/10] bg-cream overflow-hidden">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.imageAlt || item.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-foreground/30">
+                        <ImageIcon className="w-10 h-10" />
+                      </div>
+                    )}
+                    <span className="absolute top-3 left-3 bg-background/90 px-2 py-0.5 text-[10px] tracking-[0.2em] uppercase text-foreground/60">
+                      #{idx + 1}
+                    </span>
+                    <span
+                      className="absolute top-3 right-3 cursor-grab bg-background/90 p-1.5 text-foreground/50"
+                      title="Drag to reorder"
                     >
-                      {openingSlug && openingSlug === item.slug ? (
-                        <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                      ) : (
-                        <Edit className="w-3.5 h-3.5 mr-1" />
-                      )}
-                      Edit
-                    </Button>
-                    <button
-                      type="button"
-                      onClick={() => moveTo(idx, idx - 1)}
-                      disabled={idx === 0}
-                      className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                      aria-label="Move up"
-                    >
-                      <ArrowUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveTo(idx, idx + 1)}
-                      disabled={idx === draft.signatures.length - 1}
-                      className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                      aria-label="Move down"
-                    >
-                      <ArrowDown className="w-4 h-4" />
-                    </button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="ml-auto text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
-                      onClick={() => removeAt(idx)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                    </Button>
+                      <GripVertical className="w-4 h-4" />
+                    </span>
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+                  <div className="p-4 flex-1 flex flex-col">
+                    <h3 className="font-serif text-lg leading-tight">{item.name || "New itinerary"}</h3>
+                    <p className="text-sm text-foreground/60 mt-1 truncate">
+                      {[item.region, item.nights, item.difficulty].filter(Boolean).join(" · ") || "No details yet"}
+                    </p>
+                    <div className="mt-4 pt-3 border-t border-border flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        aria-label={`Edit ${item.name || "adventure"}`}
+                        onClick={async () => {
+                          let targetSlug = item.slug;
+                          let signatures = draft.signatures;
+                          if (!targetSlug) {
+                            const base = item.name ? slugify(item.name) : "";
+                            let unique = base || `new-${Date.now().toString(36)}`;
+                            const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
+                            let n = 2;
+                            const root = unique;
+                            while (existingSlugs.has(unique)) unique = `${root}-${n++}`;
+                            targetSlug = unique;
+                            signatures = draft.signatures.slice();
+                            signatures[idx] = { ...item, slug: targetSlug };
+                            setDraft({ ...draft, signatures });
+                          }
+                          try {
+                            setOpeningSlug(targetSlug);
+                            await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
+                          } catch (err: any) {
+                            toast.error(err?.message ?? "Could not open adventure");
+                            setOpeningSlug(null);
+                            return;
+                          }
+                          setOpeningSlug(null);
+                          navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
+                        }}
+                      >
+                        {openingSlug && openingSlug === item.slug ? (
+                          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                        ) : (
+                          <Edit className="w-3.5 h-3.5 mr-1" />
+                        )}
+                        Edit
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => moveTo(idx, idx - 1)}
+                        disabled={idx === 0}
+                        className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                        aria-label="Move up"
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveTo(idx, idx + 1)}
+                        disabled={idx === draft.signatures.length - 1}
+                        className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                        aria-label="Move down"
+                      >
+                        <ArrowDown className="w-4 h-4" />
+                      </button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-auto text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
+                        onClick={() => removeAt(idx)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                      </Button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </>
   );
 }
 
