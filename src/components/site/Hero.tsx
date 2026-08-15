@@ -22,14 +22,6 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
   const menu = useMenuConfig();
   const overlay = !!menu.transparentOverHero;
 
-  // Focal point (0–100). Clamp and pass to object-position.
-  const clamp = (n: unknown) => {
-    const v = Number(n);
-    if (!Number.isFinite(v)) return 50;
-    return Math.max(0, Math.min(100, v));
-  };
-  const focalX = clamp(c.hero_focal_x ?? 50);
-  const focalY = clamp(c.hero_focal_y ?? 50);
   const bgSize: "cover" | "contain" = c.hero_bg_size === "contain" ? "contain" : "cover";
 
   const fetchAdventures = useServerFn(getAdventuresPage);
@@ -66,7 +58,6 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
             className="absolute inset-0 h-full w-full"
             style={{
               objectFit: bgSize,
-              objectPosition: `${focalX}% ${focalY}%`,
             }}
           />
         )}
@@ -176,7 +167,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
                   src={heroSrc}
                   alt="Baobab safari hero"
                   className="w-full h-full max-h-[600px] rounded-[18px] md:rounded-[24px] shadow-2xl"
-                  style={{ objectFit: "cover", objectPosition: `${focalX}% ${focalY}%` }}
+                  style={{ objectFit: "cover" }}
                 />
               </div>
               {c.hero_proof_text && (
