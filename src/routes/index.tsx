@@ -7,10 +7,12 @@ import { Hero } from "@/components/site/Hero";
 import { FoundersStrip } from "@/components/site/FoundersStrip";
 import { TrustStrip } from "@/components/site/TrustStrip";
 import { FindYourJourney } from "@/components/site/FindYourJourney";
+import { WhyBaobab } from "@/components/site/WhyBaobab";
 import { JourneyImpact } from "@/components/site/JourneyImpact";
 import { HowItWorks } from "@/components/site/HowItWorks";
 import { InstagramStrip } from "@/components/site/Instagram";
 import { TestimonialsStrip } from "@/components/site/TestimonialsStrip";
+import { FinalCta } from "@/components/site/FinalCta";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
@@ -66,6 +68,12 @@ function HomePage() {
     staleTime: 60_000,
   });
 
+  const { data: whyBaobabData } = useQuery({
+    queryKey: ["page-content", "home_why_baobab"],
+    queryFn: () => pageContentFn({ data: { key: "home_why_baobab" } }),
+    staleTime: 60_000,
+  });
+
   const { data: impactData } = useQuery({
     queryKey: ["page-content", "home_impact"],
     queryFn: () => pageContentFn({ data: { key: "home_impact" } }),
@@ -81,6 +89,12 @@ function HomePage() {
   const { data: instagramData } = useQuery({
     queryKey: ["page-content", "home_instagram"],
     queryFn: () => pageContentFn({ data: { key: "home_instagram" } }),
+    staleTime: 60_000,
+  });
+
+  const { data: finalCtaData } = useQuery({
+    queryKey: ["page-content", "home_final_cta"],
+    queryFn: () => pageContentFn({ data: { key: "home_final_cta" } }),
     staleTime: 60_000,
   });
 
@@ -100,17 +114,23 @@ function HomePage() {
         {/* 04. Find Your Journey */}
         <FindYourJourney content={findJourneyData} />
 
-        {/* 05. Why Baobab — Testimonials as social proof */}
+        {/* 05. Why Baobab */}
+        <WhyBaobab content={whyBaobabData} />
+
+        {/* 06. Testimonials — social proof */}
         <TestimonialsStrip />
 
-        {/* 06. Journey Impact */}
+        {/* 07. Journey Impact */}
         <JourneyImpact content={impactData} />
 
-        {/* 07. How It Works */}
+        {/* 08. How It Works */}
         <HowItWorks content={howItWorksData} />
 
-        {/* 08. Instagram */}
+        {/* 09. Instagram */}
         <InstagramStrip content={instagramData} />
+
+        {/* 10. Final CTA */}
+        <FinalCta content={finalCtaData} />
       </main>
       <Footer />
     </div>
