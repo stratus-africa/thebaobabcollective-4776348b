@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminList, adminUpsert, adminDelete } from "@/lib/admin.functions";
@@ -341,6 +341,7 @@ export const Route = createFileRoute("/_authenticated/admin/content/$table")({
 
 function ContentAdmin() {
   const { table } = Route.useParams();
+  const navigate = useNavigate();
   const list = useServerFn(adminList);
   const upsert = useServerFn(adminUpsert);
   const del = useServerFn(adminDelete);
@@ -607,7 +608,17 @@ function ContentAdmin() {
                     </p>
                   )}
                   <div className="mt-4 pt-3 border-t border-border flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => startEdit(row)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (table === "destinations") {
+                          navigate({ to: "/admin/destinations/$id", params: { id: row.id } });
+                        } else {
+                          startEdit(row);
+                        }
+                      }}
+                    >
                       <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
                     </Button>
                     {href ? (

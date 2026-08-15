@@ -42,6 +42,7 @@ import { Route as AuthenticatedAdminSubscribersRouteImport } from './routes/_aut
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedAdminAdventuresSlugRouteImport } from './routes/_authenticated/admin/adventures.$slug'
 import { Route as AuthenticatedAdminContentTableRouteImport } from './routes/_authenticated/admin/content.$table'
+import { Route as AuthenticatedAdminDestinationsIdRouteImport } from './routes/_authenticated/admin/destinations.$id'
 import { Route as AuthenticatedAdminPagesHubSectionRouteImport } from './routes/_authenticated/admin/pages-hub.$section'
 import { Route as AuthenticatedAdminPagesPageRouteImport } from './routes/_authenticated/admin/pages.$page'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
@@ -224,6 +225,12 @@ const AuthenticatedAdminContentTableRoute =
     path: '/content/$table',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminDestinationsIdRoute =
+  AuthenticatedAdminDestinationsIdRouteImport.update({
+    id: '/destinations/$id',
+    path: '/destinations/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminPagesHubSectionRoute =
   AuthenticatedAdminPagesHubSectionRouteImport.update({
     id: '/pages-hub/$section',
@@ -309,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/admin/destinations/$id': typeof AuthenticatedAdminDestinationsIdRoute
   '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
@@ -350,6 +358,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/admin/destinations/$id': typeof AuthenticatedAdminDestinationsIdRoute
   '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
@@ -395,6 +404,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/_authenticated/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/_authenticated/admin/destinations/$id': typeof AuthenticatedAdminDestinationsIdRoute
   '/_authenticated/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/_authenticated/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
@@ -440,6 +450,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/adventures/$slug'
     | '/admin/content/$table'
+    | '/admin/destinations/$id'
     | '/admin/pages-hub/$section'
     | '/admin/pages/$page'
     | '/api/public/media/$'
@@ -481,6 +492,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/adventures/$slug'
     | '/admin/content/$table'
+    | '/admin/destinations/$id'
     | '/admin/pages-hub/$section'
     | '/admin/pages/$page'
     | '/api/public/media/$'
@@ -525,6 +537,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/adventures/$slug'
     | '/_authenticated/admin/content/$table'
+    | '/_authenticated/admin/destinations/$id'
     | '/_authenticated/admin/pages-hub/$section'
     | '/_authenticated/admin/pages/$page'
     | '/api/public/media/$'
@@ -798,6 +811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContentTableRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/destinations/$id': {
+      id: '/_authenticated/admin/destinations/$id'
+      path: '/destinations/$id'
+      fullPath: '/admin/destinations/$id'
+      preLoaderRoute: typeof AuthenticatedAdminDestinationsIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/pages-hub/$section': {
       id: '/_authenticated/admin/pages-hub/$section'
       path: '/pages-hub/$section'
@@ -889,6 +909,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminSubscribersRoute: typeof AuthenticatedAdminSubscribersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminContentTableRoute: typeof AuthenticatedAdminContentTableRoute
+  AuthenticatedAdminDestinationsIdRoute: typeof AuthenticatedAdminDestinationsIdRoute
   AuthenticatedAdminPagesHubSectionRoute: typeof AuthenticatedAdminPagesHubSectionRoute
   AuthenticatedAdminPagesPageRoute: typeof AuthenticatedAdminPagesPageRoute
 }
@@ -905,6 +926,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminSubscribersRoute: AuthenticatedAdminSubscribersRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminContentTableRoute: AuthenticatedAdminContentTableRoute,
+    AuthenticatedAdminDestinationsIdRoute:
+      AuthenticatedAdminDestinationsIdRoute,
     AuthenticatedAdminPagesHubSectionRoute:
       AuthenticatedAdminPagesHubSectionRoute,
     AuthenticatedAdminPagesPageRoute: AuthenticatedAdminPagesPageRoute,
