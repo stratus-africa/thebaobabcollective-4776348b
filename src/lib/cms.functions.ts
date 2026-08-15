@@ -1,22 +1,24 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 
-// Public CMS reads - use admin client to bypass auth requirement
-// but filter to published only.
+// Public CMS reads use the publishable key and the public read policies.
+// This keeps public content independent of a service-role secret.
+function publicClient() {
+  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+}
 
 export const getJourneyCategories = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: cats, error } = await supabaseAdmin
+  const supabase = publicClient();
+  const { data: cats, error } = await supabase
     .from("journey_categories")
     .select("*")
     .eq("published", true)
     .order("sort_order");
   if (error) throw new Error(error.message);
 
-  const { data: its } = await supabaseAdmin
-    .from("itineraries")
-    .select("*")
-    .eq("published", true)
-    .order("sort_order");
+  const { data: its } = await supabase.from("itineraries").select("*").eq("published", true).order("sort_order");
 
   return (cats ?? []).map((c) => ({
     ...c,
@@ -27,15 +29,15 @@ export const getJourneyCategories = createServerFn({ method: "GET" }).handler(as
 export const getJourneyBySlug = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: cat } = await supabaseAdmin
+    const supabase = publicClient();
+    const { data: cat } = await supabase
       .from("journey_categories")
       .select("*")
       .eq("slug", data.slug)
       .eq("published", true)
       .maybeSingle();
     if (!cat) return null;
-    const { data: its } = await supabaseAdmin
+    const { data: its } = await supabase
       .from("itineraries")
       .select("*")
       .eq("category_id", cat.id)
@@ -45,9 +47,9 @@ export const getJourneyBySlug = createServerFn({ method: "GET" })
   });
 
 export const getArticles = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const supabase = publicClient();
   const nowIso = new Date().toISOString();
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("journal_articles")
     .select("*")
     .or(`published.eq.true,scheduled_at.lte.${nowIso}`)
@@ -60,9 +62,9 @@ export const getArticles = createServerFn({ method: "GET" }).handler(async () =>
 export const getArticleBySlug = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const supabase = publicClient();
     const nowIso = new Date().toISOString();
-    const { data: article } = await supabaseAdmin
+    const { data: article } = await supabase
       .from("journal_articles")
       .select("*")
       .eq("slug", data.slug)
@@ -72,12 +74,8 @@ export const getArticleBySlug = createServerFn({ method: "GET" })
   });
 
 export const getLodges = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("lodges")
-    .select("*")
-    .eq("published", true)
-    .order("sort_order");
+  const supabase = publicClient();
+  const { data, error } = await supabase.from("lodges").select("*").eq("published", true).order("sort_order");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
@@ -85,8 +83,8 @@ export const getLodges = createServerFn({ method: "GET" }).handler(async () => {
 export const getLodgeBySlug = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: lodge } = await supabaseAdmin
+    const supabase = publicClient();
+    const { data: lodge } = await supabase
       .from("lodges")
       .select("*")
       .eq("slug", data.slug)
@@ -96,30 +94,22 @@ export const getLodgeBySlug = createServerFn({ method: "GET" })
   });
 
 export const getDestinations = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("destinations")
-    .select("*")
-    .eq("published", true)
-    .order("sort_order");
+  const supabase = publicClient();
+  const { data, error } = await supabase.from("destinations").select("*").eq("published", true).order("sort_order");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
 
 export const getTestimonials = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("testimonials")
-    .select("*")
-    .eq("published", true)
-    .order("sort_order");
+  const supabase = publicClient();
+  const { data, error } = await supabase.from("testimonials").select("*").eq("published", true).order("sort_order");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
 
 export const getFaqs = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  const supabase = publicClient();
+  const { data, error } = await supabase
     .from("faqs")
     .select("*")
     .eq("published", true)
@@ -132,8 +122,8 @@ export const getFaqs = createServerFn({ method: "GET" }).handler(async () => {
 export const getItineraryBySlug = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: it } = await supabaseAdmin
+    const supabase = publicClient();
+    const { data: it } = await supabase
       .from("itineraries")
       .select("*, category:journey_categories(*)")
       .eq("slug", data.slug)
@@ -145,8 +135,8 @@ export const getItineraryBySlug = createServerFn({ method: "GET" })
 export const getDestinationBySlug = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: dest } = await supabaseAdmin
+    const supabase = publicClient();
+    const { data: dest } = await supabase
       .from("destinations")
       .select("*")
       .eq("slug", data.slug)
