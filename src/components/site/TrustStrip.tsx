@@ -1,27 +1,18 @@
 import { Compass, ShieldCheck, HeartHandshake, Headphones } from "lucide-react";
+import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 
-export function TrustStrip() {
+type TrustContent = Partial<typeof PAGE_DEFAULTS.home_trust>;
+
+const ICONS = [Compass, HeartHandshake, ShieldCheck, Headphones];
+
+export function TrustStrip({ content }: { content?: TrustContent | null } = {}) {
+  const c = { ...PAGE_DEFAULTS.home_trust, ...(content ?? {}) };
+
   const items = [
-    {
-      icon: Compass,
-      title: "Kenya Specialists",
-      subtitle: "Born from a deep, lifelong connection",
-    },
-    {
-      icon: HeartHandshake,
-      title: "Tailor-Made Journeys",
-      subtitle: "Designed around you — no catalog packages",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Personally Curated",
-      subtitle: "Every camp, lodge & guide walked & vetted",
-    },
-    {
-      icon: Headphones,
-      title: "24/7 On-Ground Support",
-      subtitle: "Seamless care from landing to departure",
-    },
+    { icon: ICONS[0], title: c.item_1_title, subtitle: c.item_1_subtitle },
+    { icon: ICONS[1], title: c.item_2_title, subtitle: c.item_2_subtitle },
+    { icon: ICONS[2], title: c.item_3_title, subtitle: c.item_3_subtitle },
+    { icon: ICONS[3], title: c.item_4_title, subtitle: c.item_4_subtitle },
   ];
 
   return (
@@ -36,15 +27,16 @@ export function TrustStrip() {
                 className="flex items-start sm:items-center gap-3.5 sm:gap-4 group transition-transform duration-300 hover:translate-y-[-2px]"
               >
                 <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-forest/8 text-forest grid place-items-center shrink-0 border border-forest/10 group-hover:bg-forest group-hover:text-forest-foreground transition-colors duration-300">
-                  <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-gold group-hover:text-gold transition-colors" strokeWidth={1.5} />
+                  <Icon
+                    className="h-4 w-4 sm:h-5 sm:w-5 text-gold group-hover:text-gold transition-colors"
+                    strokeWidth={1.5}
+                  />
                 </div>
                 <div>
                   <h3 className="font-serif text-base sm:text-lg text-foreground font-medium leading-snug">
                     {item.title}
                   </h3>
-                  <p className="text-[11px] sm:text-xs text-foreground/65 leading-normal mt-0.5">
-                    {item.subtitle}
-                  </p>
+                  <p className="text-[11px] sm:text-xs text-foreground/65 leading-normal mt-0.5">{item.subtitle}</p>
                 </div>
               </div>
             );
