@@ -32,20 +32,25 @@ import heroBaobab from "@/assets/hero-baobab.jpg";
 import g1Img from "@/assets/gallery-1.jpg";
 import g4Img from "@/assets/gallery-4.jpg";
 import elephantImg from "@/assets/elephant.jpg";
-import { adventuresDefaults, getAdventuresPage, type AdventuresPage, type AdventuresSignature } from "@/lib/adventures.functions";
+import {
+  adventuresDefaults,
+  getAdventuresPage,
+  type AdventuresPage,
+  type AdventuresSignature,
+} from "@/lib/adventures.functions";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { DESTINATION_COMBINATIONS } from "@/lib/destinations.data";
 
 const searchSchema = z.object({
-  q: z.string().default(""),
-  region: z.string().default(""),
-  terrain: z.string().default(""),
-  difficulty: z.string().default(""),
-  duration: z.string().default(""),
-  experience: z.string().default(""),
-  travelStyle: z.string().default(""),
+  q: z.string().optional(),
+  region: z.string().optional(),
+  terrain: z.string().optional(),
+  difficulty: z.string().optional(),
+  duration: z.string().optional(),
+  experience: z.string().optional(),
+  travelStyle: z.string().optional(),
 });
 
 export const Route = createFileRoute("/")({
@@ -61,7 +66,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Kenya Safari Adventures — The Baobab Collective" },
       {
         property: "og:description",
-        content: "Bespoke wild adventures across Kenya — walking safaris, private conservancies, deltas and coastal escapes.",
+        content:
+          "Bespoke wild adventures across Kenya — walking safaris, private conservancies, deltas and coastal escapes.",
       },
       { property: "og:image", content: heroBaobab },
       { property: "og:url", content: "/adventures" },
@@ -104,7 +110,12 @@ const EXPERIENCE_CATEGORIES = [
   { name: "Wildlife", icon: Sparkles, image: elephantImg, desc: "Big cats, migration herds & private conservancies" },
   { name: "Walking", icon: Footprints, image: g1Img, desc: "Track wildlife on foot with veteran indigenous guides" },
   { name: "Wilderness", icon: Compass, image: heroBaobab, desc: "Remote, uncrowded landscapes under vast skies" },
-  { name: "Safari + Beach", icon: Palmtree, image: g4Img, desc: "Savannah game drives paired with turquoise coastlines" },
+  {
+    name: "Safari + Beach",
+    icon: Palmtree,
+    image: g4Img,
+    desc: "Savannah game drives paired with turquoise coastlines",
+  },
   { name: "Romance", icon: Heart, image: heroBaobab, desc: "Intimate starry camps and quiet, private moments" },
   { name: "Family", icon: Users, image: elephantImg, desc: "Multi-generational safaris crafted for all ages" },
   { name: "Photography", icon: Camera, image: g1Img, desc: "Golden hour positioning and expert photographic leads" },
@@ -167,7 +178,9 @@ function AdventuresPage() {
   );
 }
 
-{/* ─── 01. HERO SECTION ────────────────────────────────────────────────────────── */}
+{
+  /* ─── 01. HERO SECTION ────────────────────────────────────────────────────────── */
+}
 
 function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
   const heroSrc = hero.image || heroBaobab;
@@ -218,7 +231,9 @@ function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
   );
 }
 
-{/* ─── 02. A DAY IN THE FIELD ─────────────────────────────────────────────────── */}
+{
+  /* ─── 02. A DAY IN THE FIELD ─────────────────────────────────────────────────── */
+}
 
 function DayInTheFieldSection() {
   const timeline = [
@@ -259,11 +274,10 @@ function DayInTheFieldSection() {
           <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-3">
             A DAY IN THE FIELD
           </p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
-            The rhythm of a Baobab safari.
-          </h2>
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">The rhythm of a Baobab safari.</h2>
           <p className="text-foreground/75 text-lg mt-4 leading-relaxed">
-            We don't rush between sightings. Every day is unhurried, shaped around natural light, wildlife movements, and moments of quiet wonder.
+            We don't rush between sightings. Every day is unhurried, shaped around natural light, wildlife movements,
+            and moments of quiet wonder.
           </p>
         </div>
 
@@ -295,7 +309,9 @@ function DayInTheFieldSection() {
   );
 }
 
-{/* ─── 03. ADVENTURE FINDER ────────────────────────────────────────────────────── */}
+{
+  /* ─── 03. ADVENTURE FINDER ────────────────────────────────────────────────────── */
+}
 
 function AdventureFinderSection({ signatures }: { signatures: AdventuresSignature[] }) {
   const search = Route.useSearch();
@@ -326,14 +342,22 @@ function AdventureFinderSection({ signatures }: { signatures: AdventuresSignatur
 
   const setParam = (key: keyof z.infer<typeof searchSchema>, val: string) => {
     navigate({
-      search: (prev) => ({ ...prev, [key]: val }),
+      search: (prev) => {
+        const next: any = { ...prev, [key]: val || undefined };
+        Object.keys(next).forEach((k) => {
+          if (!next[k]) {
+            delete next[k];
+          }
+        });
+        return next;
+      },
       replace: true,
     });
   };
 
   const clearAll = () => {
     navigate({
-      search: { q: "", region: "", terrain: "", difficulty: "", duration: "", experience: "", travelStyle: "" },
+      search: {},
       replace: true,
     });
   };
@@ -488,7 +512,9 @@ function AdventureFinderSection({ signatures }: { signatures: AdventuresSignatur
   );
 }
 
-{/* ─── 04. JOURNEYS WE'D TAKE OURSELVES ───────────────────────────────────────── */}
+{
+  /* ─── 04. JOURNEYS WE'D TAKE OURSELVES ───────────────────────────────────────── */
+}
 
 function SignatureSection({
   signatures,
@@ -509,9 +535,7 @@ function SignatureSection({
           <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-3">
             SIGNATURE SELECTION
           </p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
-            JOURNEYS WE'D TAKE OURSELVES.
-          </h2>
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">JOURNEYS WE'D TAKE OURSELVES.</h2>
           <p className="text-foreground/75 text-lg mt-4 leading-relaxed">
             Curated safari itineraries designed from personal field experience across Kenya's wild frontiers.
           </p>
@@ -527,7 +551,9 @@ function SignatureSection({
   );
 }
 
-{/* ─── 05. EXPLORE BY EXPERIENCE ──────────────────────────────────────────────── */}
+{
+  /* ─── 05. EXPLORE BY EXPERIENCE ──────────────────────────────────────────────── */
+}
 
 function ExploreByExperienceSection() {
   const navigate = useNavigate({ from: Route.fullPath });
@@ -586,7 +612,9 @@ function ExploreByExperienceSection() {
   );
 }
 
-{/* ─── 06. FEATURED JOURNEY SPOTLIGHT ──────────────────────────────────────────── */}
+{
+  /* ─── 06. FEATURED JOURNEY SPOTLIGHT ──────────────────────────────────────────── */
+}
 
 function FeaturedJourneySpotlight({ signatures }: { signatures: AdventuresSignature[] }) {
   const spotlight = useMemo(() => {
@@ -659,7 +687,9 @@ function FeaturedJourneySpotlight({ signatures }: { signatures: AdventuresSignat
   );
 }
 
-{/* ─── 07. MAIN ADVENTURE CATALOGUE ───────────────────────────────────────────── */}
+{
+  /* ─── 07. MAIN ADVENTURE CATALOGUE ───────────────────────────────────────────── */
+}
 
 function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[] }) {
   const search = Route.useSearch();
@@ -703,7 +733,8 @@ function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[
       }
 
       if (q) {
-        const haystack = `${s.name} ${s.region} ${s.description} ${s.shortDescription || ""} ${(s.highlights || []).join(" ")} ${(s.destinations || []).join(" ")}`.toLowerCase();
+        const haystack =
+          `${s.name} ${s.region} ${s.description} ${s.shortDescription || ""} ${(s.highlights || []).join(" ")} ${(s.destinations || []).join(" ")}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
 
@@ -756,11 +787,10 @@ function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[
         {/* Empty Search State */}
         {sorted.length === 0 ? (
           <div className="text-center py-24 px-6 border border-dashed border-border/80 rounded-2xl bg-cream/30 max-w-3xl mx-auto">
-            <p className="font-serif text-3xl text-foreground mb-4">
-              WE HAVEN'T FOUND A PERFECT MATCH — YET.
-            </p>
+            <p className="font-serif text-3xl text-foreground mb-4">WE HAVEN'T FOUND A PERFECT MATCH — YET.</p>
             <p className="text-foreground/75 text-base max-w-xl mx-auto mb-8 leading-relaxed">
-              Every Baobab journey can be shaped around your dates, interests and pace. Tell us what you're dreaming of and we'll craft it for you.
+              Every Baobab journey can be shaped around your dates, interests and pace. Tell us what you're dreaming of
+              and we'll craft it for you.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <button
@@ -797,7 +827,9 @@ function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[
   );
 }
 
-{/* ─── 08. JOURNEY COMBINATIONS ────────────────────────────────────────────────── */}
+{
+  /* ─── 08. JOURNEY COMBINATIONS ────────────────────────────────────────────────── */
+}
 
 function JourneyCombinationsSection() {
   return (
@@ -849,16 +881,16 @@ function JourneyCombinationsSection() {
   );
 }
 
-{/* ─── 09. BESPOKE CONVERSION BANNER ───────────────────────────────────────────── */}
+{
+  /* ─── 09. BESPOKE CONVERSION BANNER ───────────────────────────────────────────── */
+}
 
 function BespokeConversionBanner() {
   return (
     <section className="py-20 bg-background border-t border-border/40 text-center">
       <div className="max-w-4xl mx-auto px-6 space-y-6">
         <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold">CUSTOM JOURNEY DESIGN</p>
-        <h2 className="font-serif text-4xl md:text-5xl text-foreground">
-          CAN'T FIND EXACTLY WHAT YOU'RE LOOKING FOR?
-        </h2>
+        <h2 className="font-serif text-4xl md:text-5xl text-foreground">CAN'T FIND EXACTLY WHAT YOU'RE LOOKING FOR?</h2>
         <p className="text-foreground/75 text-lg leading-relaxed max-w-2xl mx-auto">
           Our Adventures are starting points. We can reshape the journey around your dates, interests, pace and budget.
         </p>
@@ -882,7 +914,9 @@ function BespokeConversionBanner() {
   );
 }
 
-{/* ─── 10. FINAL CTA ───────────────────────────────────────────────────────────── */}
+{
+  /* ─── 10. FINAL CTA ───────────────────────────────────────────────────────────── */
+}
 
 function FinalCtaSection({ cta }: { cta: AdventuresPage["cta"] }) {
   return (
@@ -898,7 +932,8 @@ function FinalCtaSection({ cta }: { cta: AdventuresPage["cta"] }) {
           {cta.headline || "Ready to experience Kenya differently?"}
         </h2>
         <p className="text-forest-foreground/85 text-lg leading-relaxed max-w-xl mx-auto font-sans">
-          {cta.body || "Tell us where you want to go, what you want to experience and how you like to travel. We'll take it from there."}
+          {cta.body ||
+            "Tell us where you want to go, what you want to experience and how you like to travel. We'll take it from there."}
         </p>
         <div className="pt-4 flex flex-wrap justify-center gap-4">
           <EnquireDialog

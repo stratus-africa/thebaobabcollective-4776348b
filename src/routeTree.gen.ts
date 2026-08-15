@@ -16,6 +16,7 @@ import { Route as AdventuresRouteImport } from './routes/adventures'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as PrivateTravelRouteImport } from './routes/private-travel'
 import { Route as TestimonialsRouteImport } from './routes/testimonials'
@@ -85,6 +86,11 @@ const ContactRoute = ContactRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JournalRoute = JournalRouteImport.update({
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/home': typeof HomeRoute
   '/journal': typeof JournalRouteWithChildren
   '/private-travel': typeof PrivateTravelRoute
   '/testimonials': typeof TestimonialsRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/home': typeof HomeRoute
   '/journal': typeof JournalRouteWithChildren
   '/private-travel': typeof PrivateTravelRoute
   '/testimonials': typeof TestimonialsRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/home': typeof HomeRoute
   '/journal': typeof JournalRouteWithChildren
   '/private-travel': typeof PrivateTravelRoute
   '/testimonials': typeof TestimonialsRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/faq'
+    | '/home'
     | '/journal'
     | '/private-travel'
     | '/testimonials'
@@ -467,6 +477,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/faq'
+    | '/home'
     | '/journal'
     | '/private-travel'
     | '/testimonials'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/faq'
+    | '/home'
     | '/journal'
     | '/private-travel'
     | '/testimonials'
@@ -557,6 +569,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
+  HomeRoute: typeof HomeRoute
   JournalRoute: typeof JournalRouteWithChildren
   PrivateTravelRoute: typeof PrivateTravelRoute
   TestimonialsRoute: typeof TestimonialsRoute
@@ -627,6 +640,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/journal': {
@@ -982,6 +1002,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
+  HomeRoute: HomeRoute,
   JournalRoute: JournalRouteWithChildren,
   PrivateTravelRoute: PrivateTravelRoute,
   TestimonialsRoute: TestimonialsRoute,
