@@ -121,13 +121,23 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
             </p>
 
             <div className="mt-7 md:mt-9 flex flex-wrap items-center gap-3 md:gap-4">
+              <Link
+                to="/adventures"
+                className="group inline-flex items-center gap-3 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:bg-gold/90 transition-colors shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
+              >
+                {c.hero_cta_secondary}
+                <ArrowRight
+                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
               <EnquireDialog
                 sourceUrl="/"
                 autosaveKey="enquire-home-hero"
                 trigger={
                   <button
                     type="button"
-                    className="group inline-flex items-center gap-3 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:bg-gold/90 transition-colors shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
+                    className="group inline-flex items-center gap-3 rounded-full border border-cream/60 text-cream uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:border-gold hover:text-gold transition-colors backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
                   >
                     {c.hero_cta_primary}
                     <ArrowRight
@@ -137,16 +147,6 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
                   </button>
                 }
               />
-              <Link
-                to="/adventures"
-                className="group inline-flex items-center gap-3 rounded-full border border-cream/60 text-cream uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:border-gold hover:text-gold transition-colors backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
-              >
-                {c.hero_cta_secondary}
-                <ArrowRight
-                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                  aria-hidden="true"
-                />
-              </Link>
             </div>
 
             {!hideSearch && (
