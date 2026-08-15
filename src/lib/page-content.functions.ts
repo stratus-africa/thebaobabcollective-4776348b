@@ -53,19 +53,30 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 export const getPageContent = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => GetSchema.parse(d))
   .handler(async ({ data }) => {
-    const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-    });
-    const { data: row, error } = await supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", `page_${data.key}`)
-      .maybeSingle();
-    if (error) {
-      console.error(`[getPageContent] error fetching page_${data.key}:`, error);
-      return null;
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: row, error } = await supabaseAdmin
+        .from("site_settings")
+        .select("value")
+        .eq("key", `page_${data.key}`)
+        .maybeSingle();
+      if (error) {
+        console.error(`[getPageContent] error fetching page_${data.key}:`, error);
+        return null;
+      }
+      return (row?.value as Record<string, any> | null) ?? null;
+    } catch {
+      // Fallback to public client if service role key is not configured
+      const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+        auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+      });
+      const { data: row } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", `page_${data.key}`)
+        .maybeSingle();
+      return (row?.value as Record<string, any> | null) ?? null;
     }
-    return (row?.value as Record<string, any> | null) ?? null;
   });
 
 export const savePageContent = createServerFn({ method: "POST" })
@@ -73,7 +84,10 @@ export const savePageContent = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SaveSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const database = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? (await import("@/integrations/supabase/client.server")).supabaseAdmin
+      : context.supabase;
+    const { error } = await database
       .from("site_settings")
       .upsert({ key: `page_${data.key}`, value: data.value, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
