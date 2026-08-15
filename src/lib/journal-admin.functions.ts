@@ -33,8 +33,7 @@ export const adminListArticles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("journal_articles")
       .select("*")
       .order("published_at", { ascending: false, nullsFirst: true })
@@ -48,7 +47,6 @@ export const adminUpsertArticle = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ArticleSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const row: any = { ...data };
     if (!row.id) delete row.id;
 
@@ -71,11 +69,7 @@ export const adminUpsertArticle = createServerFn({ method: "POST" })
       }
     }
 
-    const { data: saved, error } = await supabaseAdmin
-      .from("journal_articles")
-      .upsert(row)
-      .select()
-      .single();
+    const { data: saved, error } = await context.supabase.from("journal_articles").upsert(row).select().single();
     if (error) throw new Error(error.message);
     return saved;
   });
@@ -85,11 +79,7 @@ export const adminDeleteArticle = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("journal_articles")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("journal_articles").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -105,9 +95,11 @@ export const adminUploadJournalImage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UploadSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const cleanName = data.filename.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "");
+    const cleanName = data.filename
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, "-")
+      .replace(/^-|-$/g, "");
     const path = `${Date.now()}-${cleanName}`;
 
     // Decode base64 → Uint8Array (Worker-compatible)
@@ -115,7 +107,7 @@ export const adminUploadJournalImage = createServerFn({ method: "POST" })
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-    const { error: upErr } = await supabaseAdmin.storage
+    const { error: upErr } = await context.supabase.storage
       .from("journal-images")
       .upload(path, bytes, { contentType: data.contentType, upsert: false });
     if (upErr) throw new Error(upErr.message);
