@@ -1,9 +1,25 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, CircleAlert, FolderOpen, Loader2, Save, Upload, X, Image as ImageIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Compass,
+  ExternalLink,
+  Eye,
+  FolderOpen,
+  Globe,
+  Image as ImageIcon,
+  Loader2,
+  MapPin,
+  Save,
+  Trash2,
+  Upload,
+  X,
+  Mountain,
+} from "lucide-react";
 import {
   getAdventuresPage,
   saveAdventuresPage,
@@ -17,7 +33,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const DIFFICULTIES = ["Easy", "Moderate", "Active", "Challenging"];
 
@@ -29,6 +56,12 @@ function slugify(s: string) {
     .replace(/^-|-$/g, "");
 }
 
+function humanSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
 export const Route = createFileRoute("/_authenticated/admin/adventures/$slug")({
   component: AdminAdventureEdit,
 });
@@ -38,6 +71,7 @@ function AdminAdventureEdit() {
   const navigate = useNavigate();
   const fetchFn = useServerFn(getAdventuresPage);
   const saveFn = useServerFn(saveAdventuresPage);
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["admin-adventures-page"],
     queryFn: () => fetchFn(),
@@ -45,16 +79,31 @@ function AdminAdventureEdit() {
 
   const [draft, setDraft] = useState<AdventuresPage>(adventuresDefaults);
   const [saving, setSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (data) setDraft(data);
   }, [data]);
 
-  const adventure = draft.signatures.find((s) => s.slug === slug);
+  const adventureIdx = draft.signatures.findIndex((s) => s.slug === slug);
+  const adventure = adventureIdx >= 0 ? draft.signatures[adventureIdx] : null;
 
-  async function save(e: React.FormEvent) {
+  function updateAdventure(patch: Partial<AdventuresSignature>) {
+    if (adventureIdx < 0 || !adventure) return;
+    const updated = { ...adventure, ...patch };
+    const copy = draft.signatures.slice();
+    copy[adventureIdx] = updated;
+    setDraft((prev) => ({ ...prev, signatures: copy }));
+  }
+
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!adventure) return;
+    if (!adventure.name.trim()) {
+      toast.error("Adventure name is required.");
+      return;
+    }
     setSaving(true);
     try {
       await saveFn({
@@ -64,328 +113,452 @@ function AdminAdventureEdit() {
           signatures: draft.signatures,
         },
       });
-      toast.success("Adventure saved");
+      toast.success(`"${adventure.name}" updated successfully.`);
       await refetch();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not save");
+      // If the slug changed, navigate to the updated route
+      if (adventure.slug !== slug) {
+        navigate({
+          to: "/admin/adventures/$slug",
+          params: { slug: adventure.slug },
+          replace: true,
+        });
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not save adventure");
     } finally {
       setSaving(false);
     }
   }
 
+  async function handleDelete() {
+    if (!adventure) return;
+    setDeleting(true);
+    try {
+      const remaining = draft.signatures.filter((s) => s.slug !== slug);
+      await saveFn({
+        data: {
+          hero: draft.hero,
+          cta: draft.cta,
+          signatures: remaining,
+        },
+      });
+      toast.success(`"${adventure.name}" deleted.`);
+      navigate({ to: "/admin/adventures" });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not delete adventure");
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  }
+
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-foreground/60">
-        <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+      <div className="flex items-center justify-center gap-2 py-20 text-foreground/60">
+        <Loader2 className="w-5 h-5 animate-spin text-gold" /> Loading adventure…
       </div>
     );
   }
 
   if (!adventure) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 max-w-2xl mx-auto py-12">
         <Button variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to adventures
         </Button>
-        <div className="rounded-lg border border-border bg-background p-6">
-          <p className="text-foreground/60">Adventure not found</p>
+        <div className="rounded-lg border border-border bg-background p-8 text-center space-y-3">
+          <h2 className="font-serif text-2xl">Adventure not found</h2>
+          <p className="text-sm text-foreground/60">
+            No adventure found with slug <code className="text-xs">{slug}</code>.
+          </p>
         </div>
       </div>
     );
   }
 
+  const liveHref = adventure.slug ? `/adventures/${adventure.slug}` : null;
+
   return (
-    <form onSubmit={save} className="w-full max-w-none space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Manage Adventures</p>
-          <h1 className="font-serif text-3xl text-foreground">Edit adventure</h1>
-          <p className="text-sm text-foreground/60 mt-1">{adventure.name || "Untitled adventure"}</p>
+    <form onSubmit={handleSave} className="space-y-6 pb-12">
+      {/* ── Top Bar Header ───────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
+        <div className="space-y-1">
+          <Link
+            to="/admin/adventures"
+            className="inline-flex items-center gap-1.5 text-xs text-foreground/60 hover:text-gold transition-colors font-medium mb-1"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to adventures
+          </Link>
+          <div className="flex items-center gap-3">
+            <h1 className="font-serif text-3xl text-foreground">Edit Adventure</h1>
+            <Badge className="bg-forest text-forest-foreground">Signature Adventure</Badge>
+          </div>
+          {adventure.slug && (
+            <div className="flex items-center gap-2 text-xs text-foreground/60 pt-1">
+              <span className="font-medium text-foreground/75">Permalink:</span>
+              <code className="bg-cream px-1.5 py-0.5 rounded text-foreground/80 font-mono text-[11px]">
+                /adventures/{adventure.slug}
+              </code>
+              {liveHref && (
+                <a
+                  href={liveHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-gold hover:underline ml-1"
+                >
+                  <Eye className="w-3.5 h-3.5" /> View Page
+                </a>
+              )}
+            </div>
+          )}
         </div>
-        <div className="flex gap-2">
+
+        <div className="flex items-center gap-2">
           <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
-            Back to adventures
+            Cancel
           </Button>
-          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
-            {saving ? "Saving…" : "Save adventure"}
+          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-1.5" /> Save Changes
+              </>
+            )}
           </Button>
         </div>
-      </header>
+      </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-        <section className="space-y-5 rounded-lg border border-border bg-background p-5 sm:p-6 shadow-sm">
-          <div>
-            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-              Adventure name
-            </Label>
-            <Input
-              value={adventure.name}
-              onChange={(e) => {
-                const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                if (idx >= 0) {
-                  const copy = draft.signatures.slice();
-                  copy[idx] = { ...adventure, name: e.target.value, slug: adventure.slug || slugify(e.target.value) };
-                  setDraft({ ...draft, signatures: copy });
-                }
-              }}
-              placeholder="e.g. Okavango Reverie"
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
+      {/* ── WordPress-Style Two-Column Layout ────────────────────────── */}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+        {/* ── Main Content Area (Left) ───────────────────────────────── */}
+        <div className="space-y-6 min-w-0">
+          {/* Adventure Title / Name */}
+          <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
             <div>
-              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Slug</Label>
-              <Input
-                value={adventure.slug}
-                onChange={(e) => {
-                  const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                  if (idx >= 0) {
-                    const copy = draft.signatures.slice();
-                    copy[idx] = { ...adventure, slug: e.target.value };
-                    setDraft({ ...draft, signatures: copy });
-                  }
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Region</Label>
-              <Input
-                value={adventure.region}
-                onChange={(e) => {
-                  const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                  if (idx >= 0) {
-                    const copy = draft.signatures.slice();
-                    copy[idx] = { ...adventure, region: e.target.value };
-                    setDraft({ ...draft, signatures: copy });
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Terrain</Label>
-              <Input
-                value={adventure.terrain}
-                onChange={(e) => {
-                  const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                  if (idx >= 0) {
-                    const copy = draft.signatures.slice();
-                    copy[idx] = { ...adventure, terrain: e.target.value };
-                    setDraft({ ...draft, signatures: copy });
-                  }
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Nights</Label>
-              <Input
-                value={adventure.nights}
-                onChange={(e) => {
-                  const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                  if (idx >= 0) {
-                    const copy = draft.signatures.slice();
-                    copy[idx] = { ...adventure, nights: e.target.value };
-                    setDraft({ ...draft, signatures: copy });
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                Difficulty
+              <Label className="mb-2 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+                Adventure Name <span className="text-destructive">*</span>
               </Label>
-              <select
-                value={adventure.difficulty}
+              <Input
+                value={adventure.name}
                 onChange={(e) => {
-                  const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                  if (idx >= 0) {
-                    const copy = draft.signatures.slice();
-                    copy[idx] = { ...adventure, difficulty: e.target.value };
-                    setDraft({ ...draft, signatures: copy });
-                  }
+                  const newName = e.target.value;
+                  updateAdventure({
+                    name: newName,
+                    slug: adventure.slug === slugify(adventure.name) ? slugify(newName) : adventure.slug,
+                  });
                 }}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              >
-                {DIFFICULTIES.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+                placeholder="e.g. Okavango on Foot"
+                className="font-serif text-xl md:text-2xl h-12"
+              />
             </div>
           </div>
 
-          <div>
-            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-              Description
-            </Label>
-            <Textarea
-              rows={4}
-              value={adventure.description}
-              onChange={(e) => {
-                const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                if (idx >= 0) {
-                  const copy = draft.signatures.slice();
-                  copy[idx] = { ...adventure, description: e.target.value };
-                  setDraft({ ...draft, signatures: copy });
-                }
-              }}
-              placeholder="Describe this adventure…"
-            />
-          </div>
-
-          <div>
-            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-              Highlights (one per line)
-            </Label>
-            <Textarea
-              rows={4}
-              value={(adventure.highlights ?? []).join("\n")}
-              onChange={(e) => {
-                const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                if (idx >= 0) {
-                  const copy = draft.signatures.slice();
-                  copy[idx] = {
-                    ...adventure,
-                    highlights: e.target.value
-                      .split("\n")
-                      .map((x) => x.trim())
-                      .filter(Boolean),
-                  };
-                  setDraft({ ...draft, signatures: copy });
-                }
-              }}
-              placeholder="One highlight per line…"
-            />
-            {(adventure.highlights ?? []).length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(adventure.highlights ?? []).map((highlight, index) => (
-                  <button
-                    key={`${highlight}-${index}`}
-                    type="button"
-                    onClick={() => {
-                      const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                      if (idx >= 0) {
-                        const copy = draft.signatures.slice();
-                        copy[idx] = {
-                          ...adventure,
-                          highlights: adventure.highlights.filter((_, itemIndex) => itemIndex !== index),
-                        };
-                        setDraft({ ...draft, signatures: copy });
-                      }
-                    }}
-                    className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-foreground/70 hover:border-destructive hover:text-destructive"
-                    title="Remove highlight"
-                  >
-                    {highlight} ×
-                  </button>
-                ))}
+          {/* Adventure Information */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center gap-2.5">
+              <Compass className="w-4 h-4 text-gold" />
+              <h2 className="font-serif text-lg leading-none">Adventure Information</h2>
+            </header>
+            <div className="p-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Region
+                  </Label>
+                  <Input
+                    value={adventure.region}
+                    onChange={(e) => updateAdventure({ region: e.target.value })}
+                    placeholder="e.g. Botswana"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Terrain
+                  </Label>
+                  <Input
+                    value={adventure.terrain}
+                    onChange={(e) => updateAdventure({ terrain: e.target.value })}
+                    placeholder="e.g. Delta & Waterways"
+                  />
+                </div>
               </div>
-            )}
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                Included (one per line)
-              </Label>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Nights / Duration
+                  </Label>
+                  <Input
+                    value={adventure.nights}
+                    onChange={(e) => updateAdventure({ nights: e.target.value })}
+                    placeholder="e.g. 8 nights"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Difficulty
+                  </Label>
+                  <select
+                    value={adventure.difficulty}
+                    onChange={(e) => updateAdventure({ difficulty: e.target.value })}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gold"
+                  >
+                    {DIFFICULTIES.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Description & Story */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center justify-between">
+              <h2 className="font-serif text-lg leading-none">Description & Overview</h2>
+            </header>
+            <div className="p-6">
               <Textarea
-                rows={4}
-                value={(adventure.included ?? []).join("\n")}
-                onChange={(e) => {
-                  const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                  if (idx >= 0) {
-                    const copy = draft.signatures.slice();
-                    copy[idx] = {
-                      ...adventure,
-                      included: e.target.value
-                        .split("\n")
-                        .map((item) => item.trim())
-                        .filter(Boolean),
-                    };
-                    setDraft({ ...draft, signatures: copy });
-                  }
-                }}
+                rows={5}
+                value={adventure.description}
+                onChange={(e) => updateAdventure({ description: e.target.value })}
+                placeholder="Describe this adventure, the journey flow, what guests will encounter…"
+                className="leading-relaxed"
               />
             </div>
-            <div>
-              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                Not included (one per line)
-              </Label>
+          </section>
+
+          {/* Highlights */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50">
+              <h2 className="font-serif text-lg leading-none">Highlights</h2>
+              <p className="text-xs text-foreground/55 mt-1">Enter each key highlight on a new line.</p>
+            </header>
+            <div className="p-6 space-y-4">
               <Textarea
                 rows={4}
-                value={(adventure.notIncluded ?? []).join("\n")}
-                onChange={(e) => {
-                  const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                  if (idx >= 0) {
-                    const copy = draft.signatures.slice();
-                    copy[idx] = {
-                      ...adventure,
-                      notIncluded: e.target.value
-                        .split("\n")
-                        .map((item) => item.trim())
-                        .filter(Boolean),
-                    };
-                    setDraft({ ...draft, signatures: copy });
-                  }
-                }}
+                value={(adventure.highlights ?? []).join("\n")}
+                onChange={(e) =>
+                  updateAdventure({
+                    highlights: e.target.value.split("\n").map((s) => s.trimEnd()),
+                  })
+                }
+                placeholder="Walking safaris in the Okavango Delta&#10;Night game drives with expert trackers&#10;Private mokoro expeditions"
               />
+
+              {(adventure.highlights ?? []).filter(Boolean).length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {(adventure.highlights ?? []).filter(Boolean).map((highlight, idx) => (
+                    <button
+                      key={`${highlight}-${idx}`}
+                      type="button"
+                      onClick={() =>
+                        updateAdventure({
+                          highlights: (adventure.highlights ?? []).filter((_, i) => i !== idx),
+                        })
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-cream/40 px-3 py-1 text-xs text-foreground/75 hover:border-destructive hover:text-destructive transition-colors"
+                      title="Click to remove"
+                    >
+                      <span>{highlight}</span>
+                      <span className="opacity-60">×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Planning: Included & Not Included */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50">
+              <h2 className="font-serif text-lg leading-none">Planning: Included & Not Included</h2>
+              <p className="text-xs text-foreground/55 mt-1">List inclusions and exclusions (one item per line).</p>
+            </header>
+            <div className="p-6 grid gap-6 sm:grid-cols-2">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Included (one per line)
+                </Label>
+                <Textarea
+                  rows={5}
+                  value={(adventure.included ?? []).join("\n")}
+                  onChange={(e) =>
+                    updateAdventure({
+                      included: e.target.value.split("\n").map((s) => s.trimEnd()),
+                    })
+                  }
+                  placeholder="All meals & drinks&#10;Park fees&#10;Expert guide&#10;Internal charter flights"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Not Included (one per line)
+                </Label>
+                <Textarea
+                  rows={5}
+                  value={(adventure.notIncluded ?? []).join("\n")}
+                  onChange={(e) =>
+                    updateAdventure({
+                      notIncluded: e.target.value.split("\n").map((s) => s.trimEnd()),
+                    })
+                  }
+                  placeholder="International flights&#10;Travel insurance&#10;Premium cellar wines&#10;Gratuities"
+                />
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* ── Sidebar Area (Right) ───────────────────────────────────── */}
+        <aside className="space-y-6 min-w-0">
+          {/* Publish / Status Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
+              <h3 className="font-serif text-base">Publish</h3>
+              <Badge className="bg-forest text-forest-foreground">Active</Badge>
+            </header>
+            <div className="p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground/60 uppercase tracking-wider">Type</span>
+                <span className="text-xs font-medium">Signature Itinerary</span>
+              </div>
+
+              <div className="pt-3 border-t border-border flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-1.5" /> Save Changes
+                    </>
+                  )}
+                </Button>
+
+                <div className="flex items-center justify-between pt-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive px-2"
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
+                  </Button>
+
+                  {liveHref && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="text-xs text-foreground/60 hover:text-foreground px-2"
+                    >
+                      <a href={liveHref} target="_blank" rel="noreferrer">
+                        <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </section>
 
-        <aside className="space-y-5">
-          <div className="rounded-lg border border-border bg-background p-5 shadow-sm">
-            <Label className="mb-3 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Hero Image</Label>
-            <ManagedImageUpload
-              value={adventure.image}
-              onChange={(url) => {
-                const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                if (idx >= 0) {
-                  const copy = draft.signatures.slice();
-                  copy[idx] = { ...adventure, image: url };
-                  setDraft({ ...draft, signatures: copy });
-                }
-              }}
-              recommendedRatio="4:3 card, 16:9 hero"
-              altText={adventure.imageAlt}
-              focalX={adventure.focalX ?? 50}
-              focalY={adventure.focalY ?? 50}
-              onFocalChange={(focalX, focalY) => {
-                const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                if (idx >= 0) {
-                  const copy = draft.signatures.slice();
-                  copy[idx] = { ...adventure, focalX, focalY };
-                  setDraft({ ...draft, signatures: copy });
-                }
-              }}
-            />
+          {/* Hero Image Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Hero Image</h3>
+            </header>
+            <div className="p-5 space-y-4">
+              <ManagedImageUpload
+                value={adventure.image}
+                onChange={(url) => updateAdventure({ image: url })}
+                recommendedRatio="4:3 card · 16:9 hero"
+                altText={adventure.imageAlt}
+                focalX={adventure.focalX ?? 50}
+                focalY={adventure.focalY ?? 50}
+                onFocalChange={(focalX, focalY) => updateAdventure({ focalX, focalY })}
+              />
+
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Image alt text
+                </Label>
+                <Input
+                  value={adventure.imageAlt ?? ""}
+                  placeholder="Describe the hero image…"
+                  onChange={(e) => updateAdventure({ imageAlt: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-background p-5 shadow-sm">
-            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-              Image alt text
-            </Label>
-            <Input
-              value={adventure.imageAlt ?? ""}
-              onChange={(e) => {
-                const idx = draft.signatures.findIndex((s) => s.slug === slug);
-                if (idx >= 0) {
-                  const copy = draft.signatures.slice();
-                  copy[idx] = { ...adventure, imageAlt: e.target.value };
-                  setDraft({ ...draft, signatures: copy });
-                }
-              }}
-              placeholder="Describe the hero image…"
-            />
+          {/* Permalink & Slug Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Permalink & Slug</h3>
+            </header>
+            <div className="p-5 space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  URL Slug
+                </Label>
+                <Input
+                  value={adventure.slug}
+                  onChange={(e) => updateAdventure({ slug: slugify(e.target.value) })}
+                  placeholder="e.g. okavango-on-foot"
+                  className="text-xs font-mono"
+                />
+                <p className="text-[11px] text-foreground/50 mt-1">
+                  Defines the URL at <code className="text-[10px]">/adventures/{adventure.slug || "slug"}</code>
+                </p>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
+
+      {/* Delete Confirmation Alert Dialog */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete adventure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're about to permanently remove{" "}
+              <span className="font-semibold text-foreground">"{adventure.name || "this adventure"}"</span>. This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Deleting…
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   );
 }
@@ -413,7 +586,6 @@ function ManagedImageUpload({
   const [drag, setDrag] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(null);
-  const objectPosition = `${focalX}% ${focalY}%`;
   const altComplete = Boolean(altText?.trim());
 
   async function pick(file: File | undefined) {
@@ -459,6 +631,17 @@ function ManagedImageUpload({
         onChange={(e) => pick(e.target.files?.[0])}
       />
 
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] text-foreground/55">Recommended: {recommendedRatio}</p>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${
+            altComplete ? "bg-forest/10 text-forest" : "bg-terracotta/10 text-terracotta"
+          }`}
+        >
+          {altComplete ? "Alt text ✓" : "Alt text needed"}
+        </span>
+      </div>
+
       {value ? (
         <div className="border border-border bg-background">
           <div className="bg-muted">
@@ -484,6 +667,9 @@ function ManagedImageUpload({
             >
               <X className="w-3.5 h-3.5 mr-1" /> Remove
             </Button>
+            <span className="ml-auto max-w-[55%] truncate text-[11px] text-foreground/50" title={value}>
+              {fileMeta ? `${fileMeta.name} – ${humanSize(fileMeta.size)}` : value.split("/").pop()}
+            </span>
           </div>
         </div>
       ) : (
@@ -510,7 +696,7 @@ function ManagedImageUpload({
           </div>
           <div>
             <p className="text-xs font-medium">Drop or click to upload</p>
-            <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF - up to 8MB</p>
+            <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF – up to 8MB</p>
           </div>
         </button>
       )}
@@ -525,13 +711,13 @@ function ManagedImageUpload({
           setFileMeta(null);
           onChange(e.target.value);
         }}
-        placeholder="...or paste URL"
+        placeholder="…or paste image URL"
         className="text-xs"
       />
 
       {value && (
-        <div className="space-y-2">
-          <div className="text-xs font-medium text-foreground/75">Focal point</div>
+        <div className="space-y-2 pt-1">
+          <p className="text-[11px] font-medium text-foreground/60 tracking-[0.15em] uppercase">Focal point</p>
           <FocalSlider label="Horizontal" value={focalX} onChange={(next) => onFocalChange?.(next, focalY)} />
           <FocalSlider label="Vertical" value={focalY} onChange={(next) => onFocalChange?.(focalX, next)} />
         </div>
@@ -561,10 +747,4 @@ function FocalSlider({ label, value, onChange }: { label: string; value: number;
       <Slider value={[value]} min={0} max={100} step={1} onValueChange={([next]) => onChange(next ?? value)} />
     </div>
   );
-}
-
-function humanSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
