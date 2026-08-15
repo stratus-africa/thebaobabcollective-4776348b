@@ -58,7 +58,12 @@ export const Route = createFileRoute("/destinations/$slug")({
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
-        { "@type": "ListItem", position: 2, name: "Destinations", item: "https://thebaobabcollective.co.uk/destinations" },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Destinations",
+          item: "https://thebaobabcollective.co.uk/destinations",
+        },
         { "@type": "ListItem", position: 3, name: d?.name ?? params.slug, item: url },
       ],
     };
@@ -88,7 +93,9 @@ export const Route = createFileRoute("/destinations/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-4xl mb-4">Destination not found</h1>
-        <Link to="/destinations" className="text-gold underline">Back to all destinations</Link>
+        <Link to="/destinations" className="text-gold underline">
+          Back to all destinations
+        </Link>
       </main>
       <Footer />
     </div>
@@ -124,17 +131,10 @@ function DestinationPage() {
   return (
     <div className="bg-background min-h-screen">
       <Navbar />
-      <Breadcrumbs
-        items={[
-          { label: "Destinations", to: "/destinations" },
-          { label: d.name },
-        ]}
-      />
+      <Breadcrumbs items={[{ label: "Destinations", to: "/destinations" }, { label: d.name }]} />
       <main>
         <section className="relative h-[60vh] min-h-[420px] flex items-end">
-          {d.image && (
-            <img src={d.image} alt={d.name} className="absolute inset-0 w-full h-full object-cover" />
-          )}
+          {d.image && <img src={d.image} alt={d.name} className="absolute inset-0 w-full h-full object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-10 pb-14 text-background w-full flex flex-wrap items-end justify-between gap-6">
             <div>
@@ -157,14 +157,14 @@ function DestinationPage() {
         </section>
 
         <section className="py-20 md:py-24 bg-cream">
-          <div className="max-w-5xl mx-auto px-6 lg:px-10 grid md:grid-cols-3 gap-10">
-            <div className="md:col-span-2">
+          <div className="max-w-[1920px] mx-auto px-6 lg:px-10 grid md:grid-cols-12 gap-10 lg:gap-16">
+            <div className="md:col-span-9">
               <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-5">Overview</p>
               <p className="font-serif text-2xl md:text-3xl text-foreground leading-relaxed whitespace-pre-line">
                 {d.description}
               </p>
             </div>
-            <aside className="md:border-l md:border-border/60 md:pl-10 space-y-6 text-sm">
+            <aside className="md:col-span-3 md:border-l md:border-border/60 md:pl-10 space-y-6 text-sm">
               <div>
                 <p className="text-[11px] tracking-[0.25em] uppercase text-foreground/60 mb-2">Country</p>
                 <p className="text-foreground/90">{d.country}</p>
@@ -187,7 +187,7 @@ function DestinationPage() {
 
         {d.featured_trips?.length ? (
           <section className="py-16 md:py-20">
-            <div className="max-w-5xl mx-auto px-6 lg:px-10">
+            <div className="max-w-[1920px] mx-auto px-6 lg:px-10">
               <h2 className="font-serif text-3xl text-foreground mb-3 text-center">Activities & Experiences</h2>
               <p className="text-center text-foreground/60 text-sm mb-8">A taste of what awaits in {d.name}</p>
               <div className="flex flex-wrap justify-center gap-3">
@@ -233,8 +233,6 @@ function DestinationPage() {
           </section>
         )}
 
-
-
         <section className="bg-forest text-forest-foreground py-20 text-center">
           <div className="max-w-2xl mx-auto px-6">
             <h2 className="font-serif text-4xl mb-5">Plan your journey to {d.name}</h2>
@@ -271,12 +269,7 @@ function DestinationPage() {
               <h2 className="font-serif text-3xl text-foreground mb-10 text-center">Other Destinations</h2>
               <div className="grid md:grid-cols-3 gap-8">
                 {others.map((o: any) => (
-                  <Link
-                    key={o.slug}
-                    to="/destinations/$slug"
-                    params={{ slug: o.slug }}
-                    className="group block"
-                  >
+                  <Link key={o.slug} to="/destinations/$slug" params={{ slug: o.slug }} className="group block">
                     <div className="overflow-hidden aspect-[4/3] mb-4">
                       <img
                         src={o.image}
@@ -288,7 +281,9 @@ function DestinationPage() {
                     <h3 className="font-serif text-2xl text-foreground mb-1 group-hover:text-gold transition-colors">
                       {o.name}
                     </h3>
-                    <p className="text-sm text-foreground/70">{o.country} · {o.region}</p>
+                    <p className="text-sm text-foreground/70">
+                      {o.country} · {o.region}
+                    </p>
                   </Link>
                 ))}
               </div>
