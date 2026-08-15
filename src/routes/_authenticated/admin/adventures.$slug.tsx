@@ -605,19 +605,6 @@ function AdminAdventureEdit() {
                     >
                       <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
                     </Button>
-
-                    {liveHref && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="text-xs text-foreground/60 hover:text-foreground px-2"
-                      >
-                        <a href={liveHref} target="_blank" rel="noreferrer">
-                          <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
-                        </a>
-                      </Button>
-                    )}
                   </div>
                 )}
               </div>
