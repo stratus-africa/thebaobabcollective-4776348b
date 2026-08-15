@@ -56,7 +56,11 @@ export const adminList = createServerFn({ method: "POST" })
     const orderCol = SORTABLE[data.table].includes(data.orderBy) ? data.orderBy : "sort_order";
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: rows, error, count } = await supabaseAdmin
+    const {
+      data: rows,
+      error,
+      count,
+    } = await supabaseAdmin
       .from(data.table)
       .select("*", { count: "exact" })
       .order(orderCol, { ascending: data.orderDir === "asc", nullsFirst: false })
@@ -78,7 +82,10 @@ export const adminUploadImage = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const cleanName = data.filename.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "");
+    const cleanName = data.filename
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, "-")
+      .replace(/^-|-$/g, "");
     const path = `cms/${Date.now()}-${cleanName}`;
 
     const binary = atob(data.base64);
@@ -101,10 +108,12 @@ export const adminUploadImage = createServerFn({ method: "POST" })
 // Delete a previously-uploaded media file so the storage stays in sync with
 // the CMS. Accepts either the stored proxy URL (`/api/public/media/<path>`)
 // or the raw bucket path (`cms/<name>` or `<name>` for legacy journal uploads).
-const DeleteMediaSchema = z.object({
-  url: z.string().min(1).optional(),
-  path: z.string().min(1).optional(),
-}).refine((d) => Boolean(d.url || d.path), { message: "url or path required" });
+const DeleteMediaSchema = z
+  .object({
+    url: z.string().min(1).optional(),
+    path: z.string().min(1).optional(),
+  })
+  .refine((d) => Boolean(d.url || d.path), { message: "url or path required" });
 
 export const adminDeleteMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -180,11 +189,7 @@ export const adminUpsert = createServerFn({ method: "POST" })
     const row = { ...data.row };
     // remove auto fields when blank id
     if (!row.id) delete row.id;
-    const { data: saved, error } = await supabaseAdmin
-      .from(data.table)
-      .upsert(row)
-      .select()
-      .single();
+    const { data: saved, error } = await supabaseAdmin.from(data.table).upsert(row).select().single();
     if (error) throw new Error(error.message);
     return saved;
   });
@@ -200,16 +205,26 @@ export const adminDelete = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const GetSchema = z.object({ table: z.enum(TABLES), id: z.string().uuid() });
+
+export const adminGet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => GetSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin.from(data.table).select("*").eq("id", data.id).maybeSingle();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
 // ---- Bookings ----
 export const adminListBookings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("bookings")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data } = await supabaseAdmin.from("bookings").select("*").order("created_at", { ascending: false });
     return data ?? [];
   });
 
@@ -244,11 +259,7 @@ export const adminListEnquiries = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let q = supabaseAdmin
-      .from("enquiries")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(data.limit);
+    let q = supabaseAdmin.from("enquiries").select("*").order("created_at", { ascending: false }).limit(data.limit);
     if (data.status !== "all") q = q.eq("status", data.status);
     if (data.search) {
       const s = `%${data.search}%`;
@@ -280,7 +291,7 @@ export const adminListEnquiries = createServerFn({ method: "POST" })
     }
     return (rows ?? []).map((r: any) => ({
       ...r,
-      email_status: r.message_id ? emailMap[r.message_id] ?? null : null,
+      email_status: r.message_id ? (emailMap[r.message_id] ?? null) : null,
     }));
   });
 
@@ -300,12 +311,13 @@ export const adminUpdateEnquiry = createServerFn({ method: "POST" })
       handled_at: data.status === "handled" ? new Date().toISOString() : null,
       handled_by: data.status === "handled" ? context.userId : null,
     };
-    const { error } = await supabaseAdmin.from("enquiries").update(patch as any).eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("enquiries")
+      .update(patch as any)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-
-
 
 // ---- Private Travel ----
 export const adminListPrivateTravel = createServerFn({ method: "GET" })
@@ -345,12 +357,28 @@ export const adminDashboard = createServerFn({ method: "GET" })
       supabaseAdmin.from("private_travel_requests").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("newsletter_subscribers").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("bookings").select("*", { count: "exact", head: true }).eq("status", "pending"),
-      supabaseAdmin.from("visitor_counter" as any).select("total_count").limit(1).maybeSingle(),
+      supabaseAdmin
+        .from("visitor_counter" as any)
+        .select("total_count")
+        .limit(1)
+        .maybeSingle(),
       supabaseAdmin.from("lodges").select("*", { count: "exact", head: true }).eq("published", true),
       supabaseAdmin.from("destinations").select("*", { count: "exact", head: true }).eq("published", true),
-      supabaseAdmin.from("bookings").select("id, itinerary_name, guest_name, status, created_at").order("created_at", { ascending: false }).limit(4),
-      supabaseAdmin.from("enquiries").select("id, name, subject, created_at").order("created_at", { ascending: false }).limit(4),
-      supabaseAdmin.from("private_travel_requests").select("id, name, created_at").order("created_at", { ascending: false }).limit(2),
+      supabaseAdmin
+        .from("bookings")
+        .select("id, itinerary_name, guest_name, status, created_at")
+        .order("created_at", { ascending: false })
+        .limit(4),
+      supabaseAdmin
+        .from("enquiries")
+        .select("id, name, subject, created_at")
+        .order("created_at", { ascending: false })
+        .limit(4),
+      supabaseAdmin
+        .from("private_travel_requests")
+        .select("id, name, created_at")
+        .order("created_at", { ascending: false })
+        .limit(2),
     ]);
     const visitor_count = (visitors.data as any)?.total_count ?? 0;
 
@@ -388,5 +416,4 @@ export const adminDashboard = createServerFn({ method: "GET" })
       active_destinations: destinations.count ?? 0,
       activity,
     };
-
   });
