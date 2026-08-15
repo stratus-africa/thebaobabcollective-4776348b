@@ -45,9 +45,7 @@ interface AdventureCardProps {
 export function AdventureCard({ adventure, className = "", featured = false }: AdventureCardProps) {
   const diffMeta = getHumanDifficulty(adventure.difficulty);
   const displayDestinations =
-    adventure.destinations && adventure.destinations.length > 0
-      ? adventure.destinations.join(" · ")
-      : adventure.region;
+    adventure.destinations && adventure.destinations.length > 0 ? adventure.destinations.join(" · ") : adventure.region;
 
   const displayDescription =
     adventure.shortDescription || adventure.description || "A thoughtfully curated Kenya journey.";
@@ -63,7 +61,6 @@ export function AdventureCard({ adventure, className = "", featured = false }: A
           alt={`${adventure.name} — ${adventure.region}`}
           loading="lazy"
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          style={{ objectPosition: `${adventure.focalX ?? 50}% ${adventure.focalY ?? 50}%` }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
@@ -73,7 +70,9 @@ export function AdventureCard({ adventure, className = "", featured = false }: A
             <MapPin className="w-3 h-3 text-gold" />
             {adventure.region}
           </span>
-          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-semibold uppercase border backdrop-blur shadow-sm ${diffMeta.tone}`}>
+          <span
+            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-semibold uppercase border backdrop-blur shadow-sm ${diffMeta.tone}`}
+          >
             <Sparkles className="w-2.5 h-2.5" />
             {diffMeta.label}
           </span>
@@ -116,16 +115,14 @@ export function AdventureCard({ adventure, className = "", featured = false }: A
           {((adventure.experienceTypes && adventure.experienceTypes.length > 0) ||
             (adventure.travelStyles && adventure.travelStyles.length > 0)) && (
             <div className="flex flex-wrap gap-1.5 mb-6">
-              {[...(adventure.experienceTypes || []), ...(adventure.travelStyles || [])]
-                .slice(0, 4)
-                .map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-block text-[10px] tracking-[0.15em] uppercase text-foreground/70 bg-cream border border-border/60 px-2.5 py-1 rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
+              {[...(adventure.experienceTypes || []), ...(adventure.travelStyles || [])].slice(0, 4).map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-block text-[10px] tracking-[0.15em] uppercase text-foreground/70 bg-cream border border-border/60 px-2.5 py-1 rounded"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           )}
         </div>
