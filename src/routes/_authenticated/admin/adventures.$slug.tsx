@@ -1,24 +1,24 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  ArrowDown,
-  ArrowUp,
+  ArrowLeft,
+  Calendar,
+  Compass,
+  ExternalLink,
+  Eye,
   FolderOpen,
-  GripVertical,
+  Globe,
+  Image as ImageIcon,
   Loader2,
-  Plus,
-  Trash2,
+  MapPin,
   Save,
+  Trash2,
   Upload,
   X,
-  Sparkles,
-  Megaphone,
-  Map as MapIcon,
-  Image as ImageIcon,
-  Edit,
+  Mountain,
 } from "lucide-react";
 import {
   getAdventuresPage,
@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 import {
   AlertDialog,
@@ -45,13 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const DIFFICULTIES = ["Easy", "Moderate", "Active", "Challenging"];
-
-const LABEL_CLASS = "mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60";
-
-// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function slugify(s: string) {
   return s
@@ -63,312 +58,536 @@ function slugify(s: string) {
 
 function humanSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
-  const units = ["KB", "MB", "GB"];
-  let value = bytes / 1024;
-  let unitIndex = 0;
-  while (value >= 1024 && unitIndex < units.length - 1) {
-    value /= 1024;
-    unitIndex += 1;
-  }
-  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function buildUniqueSlug(name: string, existingSlugs: Set<string>): string {
-  const base = slugify(name || "adventure") || `new-${Date.now().toString(36)}`;
-  if (!existingSlugs.has(base)) return base;
-  let n = 2;
-  let candidate = `${base}-${n}`;
-  while (existingSlugs.has(candidate)) candidate = `${base}-${++n}`;
-  return candidate;
-}
-
-// ─── Route ────────────────────────────────────────────────────────────────────
-
-export const Route = createFileRoute("/_authenticated/admin/adventures")({
-  component: AdminAdventures,
+export const Route = createFileRoute("/_authenticated/admin/adventures/$slug")({
+  component: AdminAdventureEdit,
 });
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-function AdminAdventures() {
+function AdminAdventureEdit() {
+  const { slug } = Route.useParams();
+  const isNew = slug === "new";
+  const navigate = useNavigate();
   const fetchFn = useServerFn(getAdventuresPage);
   const saveFn = useServerFn(saveAdventuresPage);
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["admin-adventures-page"],
     queryFn: () => fetchFn(),
   });
 
   const [draft, setDraft] = useState<AdventuresPage>(adventuresDefaults);
+  const [newForm, setNewForm] = useState<AdventuresSignature>({
+    slug: "",
+    name: "",
+    region: "",
+    terrain: "",
+    nights: "",
+    difficulty: "Moderate",
+    image: "",
+    imageAlt: "",
+    focalX: 50,
+    focalY: 50,
+    description: "",
+    highlights: [],
+    included: [],
+    notIncluded: [],
+  });
   const [saving, setSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (data) setDraft(data);
   }, [data]);
 
-  async function save() {
+  const adventureIdx = isNew ? -1 : draft.signatures.findIndex((s) => s.slug === slug);
+  const adventure = isNew ? newForm : adventureIdx >= 0 ? draft.signatures[adventureIdx] : null;
+
+  function updateAdventure(patch: Partial<AdventuresSignature>) {
+    if (isNew) {
+      setNewForm((prev) => ({ ...prev, ...patch }));
+    } else if (adventureIdx >= 0) {
+      const updated = { ...draft.signatures[adventureIdx], ...patch };
+      const copy = draft.signatures.slice();
+      copy[adventureIdx] = updated;
+      setDraft((prev) => ({ ...prev, signatures: copy }));
+    }
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!adventure) return;
+    if (!adventure.name.trim()) {
+      toast.error("Adventure name is required.");
+      return;
+    }
     setSaving(true);
     try {
+      let updatedSignatures = [...draft.signatures];
+      if (isNew) {
+        const finalSlug = slugify(adventure.name);
+        updatedSignatures.push({ ...adventure, slug: finalSlug });
+      } else {
+        updatedSignatures[adventureIdx] = adventure;
+      }
+
       await saveFn({
         data: {
           hero: draft.hero,
           cta: draft.cta,
-          signatures: draft.signatures,
+          signatures: updatedSignatures,
         },
       });
-      toast.success("Adventures page saved");
+      toast.success(`"${adventure.name}" ${isNew ? "created" : "updated"} successfully.`);
       await refetch();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not save");
+
+      if (isNew) {
+        navigate({
+          to: "/admin/adventures/$slug",
+          params: { slug: slugify(adventure.name) },
+          replace: true,
+        });
+      } else if (adventure.slug !== slug) {
+        navigate({
+          to: "/admin/adventures/$slug",
+          params: { slug: adventure.slug },
+          replace: true,
+        });
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not save adventure");
     } finally {
       setSaving(false);
     }
   }
 
-  if (isLoading) {
+  async function handleDelete() {
+    if (!adventure || isNew) return;
+    setDeleting(true);
+    try {
+      const remaining = draft.signatures.filter((s) => s.slug !== slug);
+      await saveFn({
+        data: {
+          hero: draft.hero,
+          cta: draft.cta,
+          signatures: remaining,
+        },
+      });
+      toast.success(`"${adventure.name}" deleted.`);
+      navigate({ to: "/admin/adventures" });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not delete adventure");
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  }
+
+  if (!isNew && isLoading) {
     return (
-      <div className="flex items-center gap-2 text-foreground/60">
-        <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+      <div className="flex items-center justify-center gap-2 py-20 text-foreground/60">
+        <Loader2 className="w-5 h-5 animate-spin text-gold" /> Loading adventure…
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
-        <div>
-          <p className="text-[10px] tracking-[0.28em] uppercase text-gold">Page Editor</p>
-          <h1 className="font-serif text-3xl text-foreground">Adventures page</h1>
-          <p className="text-sm text-foreground/60 mt-1">
-            Edit the live content for <code className="text-xs px-1 py-0.5 bg-cream rounded">/adventures</code>.
+  if (!isNew && !adventure) {
+    return (
+      <div className="space-y-4 max-w-2xl mx-auto py-12">
+        <Button variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to adventures
+        </Button>
+        <div className="rounded-lg border border-border bg-background p-8 text-center space-y-3">
+          <h2 className="font-serif text-2xl">Adventure not found</h2>
+          <p className="text-sm text-foreground/60">
+            No adventure found with slug <code className="text-xs">{slug}</code>.
           </p>
         </div>
-        <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
-          {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-          Save changes
-        </Button>
       </div>
+    );
+  }
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-        <div className="grid gap-6 min-w-0">
-          <SignatureItineraries draft={draft} setDraft={setDraft} refetch={refetch} />
+  const liveHref = !isNew && adventure && adventure.slug ? `/adventures/${adventure.slug}` : null;
+  // Non-null alias — at this point adventure is guaranteed to be non-null for isNew (newForm) and for existing (found above)
+  const adv = adventure!;
+
+  return (
+    <form onSubmit={handleSave} className="space-y-6 pb-12">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
+        <div className="space-y-1">
+          <Link
+            to="/admin/adventures"
+            className="inline-flex items-center gap-1.5 text-xs text-foreground/60 hover:text-gold transition-colors font-medium mb-1"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to adventures
+          </Link>
+          <div className="flex items-center gap-3">
+            <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Adventure" : "Edit Adventure"}</h1>
+            {!isNew && <Badge className="bg-forest text-forest-foreground">Signature Adventure</Badge>}
+          </div>
+          {!isNew && adventure && adventure.slug && (
+            <div className="flex items-center gap-2 text-xs text-foreground/60 pt-1">
+              <span className="font-medium text-foreground/75">Permalink:</span>
+              <code className="bg-cream px-1.5 py-0.5 rounded text-foreground/80 font-mono text-[11px]">
+                /adventures/{adventure.slug}
+              </code>
+              {liveHref && (
+                <a
+                  href={liveHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-gold hover:underline ml-1"
+                >
+                  <Eye className="w-3.5 h-3.5" /> View Page
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
-        <aside className="min-w-0">
-          <div className="sticky top-24 space-y-4">
-            <Card
-              id="cta"
-              title="Closing CTA"
-              icon={Megaphone}
-              description="The final invitation at the bottom of the page."
-            >
-              <Field label="Eyebrow">
-                <Input
-                  value={draft.cta.eyebrow}
-                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
-                />
-              </Field>
-              <Field label="Headline">
-                <Input
-                  value={draft.cta.headline}
-                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
-                />
-              </Field>
-              <Field label="Body">
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Adventure" : "Save Changes"}
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* ── WordPress-Style Two-Column Layout (9/12 and 3/12) ────────── */}
+      <div className="grid gap-6 xl:grid-cols-12">
+        {/* ── Main Content Area (Left: 9/12) ─────────────────────────── */}
+        <div className="space-y-6 min-w-0 xl:col-span-9">
+          {/* Adventure Title / Name */}
+          <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
+            <div>
+              <Label className="mb-2 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+                Adventure Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                value={adv.name}
+                onChange={(e) => {
+                  const newName = e.target.value;
+                  updateAdventure({
+                    name: newName,
+                    slug: adv.slug === slugify(adv.name) ? slugify(newName) : adv.slug,
+                  });
+                }}
+                placeholder="e.g. Okavango on Foot"
+                className="font-serif text-xl md:text-2xl h-12"
+              />
+            </div>
+          </div>
+
+          {/* Adventure Information */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center gap-2.5">
+              <Compass className="w-4 h-4 text-gold" />
+              <h2 className="font-serif text-lg leading-none">Adventure Information</h2>
+            </header>
+            <div className="p-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Region
+                  </Label>
+                  <Input
+                    value={adv.region}
+                    onChange={(e) => updateAdventure({ region: e.target.value })}
+                    placeholder="e.g. Botswana"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Terrain
+                  </Label>
+                  <Input
+                    value={adv.terrain}
+                    onChange={(e) => updateAdventure({ terrain: e.target.value })}
+                    placeholder="e.g. Delta & Waterways"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Nights / Duration
+                  </Label>
+                  <Input
+                    value={adv.nights}
+                    onChange={(e) => updateAdventure({ nights: e.target.value })}
+                    placeholder="e.g. 8 nights"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Difficulty
+                  </Label>
+                  <select
+                    value={adv.difficulty}
+                    onChange={(e) => updateAdventure({ difficulty: e.target.value })}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gold"
+                  >
+                    {DIFFICULTIES.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Description & Story */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center justify-between">
+              <h2 className="font-serif text-lg leading-none">Description & Overview</h2>
+            </header>
+            <div className="p-6">
+              <Textarea
+                rows={5}
+                value={adv.description}
+                onChange={(e) => updateAdventure({ description: e.target.value })}
+                placeholder="Describe this adventure, the journey flow, what guests will encounter…"
+                className="leading-relaxed"
+              />
+            </div>
+          </section>
+
+          {/* Highlights */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50">
+              <h2 className="font-serif text-lg leading-none">Highlights</h2>
+              <p className="text-xs text-foreground/55 mt-1">Enter each key highlight on a new line.</p>
+            </header>
+            <div className="p-6 space-y-4">
+              <Textarea
+                rows={4}
+                value={(adv.highlights ?? []).join("\n")}
+                onChange={(e) =>
+                  updateAdventure({
+                    highlights: e.target.value.split("\n").map((s) => s.trimEnd()),
+                  })
+                }
+                placeholder="Walking safaris in the Okavango Delta&#10;Night game drives with expert trackers&#10;Private mokoro expeditions"
+              />
+
+              {(adv.highlights ?? []).filter(Boolean).length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {(adv.highlights ?? []).filter(Boolean).map((highlight, idx) => (
+                    <button
+                      key={`${highlight}-${idx}`}
+                      type="button"
+                      onClick={() =>
+                        updateAdventure({
+                          highlights: (adv.highlights ?? []).filter((_, i) => i !== idx),
+                        })
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-cream/40 px-3 py-1 text-xs text-foreground/75 hover:border-destructive hover:text-destructive transition-colors"
+                      title="Click to remove"
+                    >
+                      <span>{highlight}</span>
+                      <span className="opacity-60">×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Planning: Included & Not Included */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50">
+              <h2 className="font-serif text-lg leading-none">Planning: Included & Not Included</h2>
+              <p className="text-xs text-foreground/55 mt-1">List inclusions and exclusions (one item per line).</p>
+            </header>
+            <div className="p-6 grid gap-6 sm:grid-cols-2">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Included (one per line)
+                </Label>
                 <Textarea
-                  rows={3}
-                  value={draft.cta.body}
-                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
+                  rows={5}
+                  value={(adv.included ?? []).join("\n")}
+                  onChange={(e) =>
+                    updateAdventure({
+                      included: e.target.value.split("\n").map((s) => s.trimEnd()),
+                    })
+                  }
+                  placeholder="All meals & drinks&#10;Park fees&#10;Expert guide&#10;Internal charter flights"
                 />
-              </Field>
-              <Field label="Button label">
-                <Input
-                  value={draft.cta.buttonLabel}
-                  onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
-                />
-              </Field>
-            </Card>
-            <Card id="hero" title="Hero image" icon={ImageIcon} description="Image and accessibility settings.">
-              <Field label="Hero background image">
-                <ManagedImageUpload
-                  value={draft.hero.image}
-                  onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
-                  recommendedRatio="16:9 or wider"
-                  altText={draft.hero.imageAlt}
-                  focalX={draft.hero.focalX ?? 50}
-                  focalY={draft.hero.focalY ?? 50}
-                  onFocalChange={(focalX, focalY) => setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })}
-                />
-              </Field>
-              <Field label="Hero image alt text">
-                <Input
-                  value={draft.hero.imageAlt ?? ""}
-                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
-                />
-              </Field>
-            </Card>
-            <Card title="Hero copy" icon={Sparkles} description="Words shown over the hero image.">
-              <Field label="Eyebrow">
-                <Input
-                  value={draft.hero.eyebrow}
-                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })}
-                />
-              </Field>
-              <Field label="Headline">
+              </div>
+
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Not Included (one per line)
+                </Label>
                 <Textarea
-                  rows={2}
-                  value={draft.hero.headline}
-                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, headline: e.target.value } })}
+                  rows={5}
+                  value={(adv.notIncluded ?? []).join("\n")}
+                  onChange={(e) =>
+                    updateAdventure({
+                      notIncluded: e.target.value.split("\n").map((s) => s.trimEnd()),
+                    })
+                  }
+                  placeholder="International flights&#10;Travel insurance&#10;Premium cellar wines&#10;Gratuities"
                 />
-              </Field>
-              <Field label="Subhead">
-                <Textarea
-                  rows={3}
-                  value={draft.hero.subhead}
-                  onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subhead: e.target.value } })}
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* ── Sidebar Area (Right: 3/12) ──────────────────────────── */}
+        <aside className="space-y-6 min-w-0 xl:col-span-3">
+          {/* Publish / Status Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
+              <h3 className="font-serif text-base">Publish</h3>
+              <Badge className="bg-forest text-forest-foreground">Active</Badge>
+            </header>
+            <div className="p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground/60 uppercase tracking-wider">Type</span>
+                <span className="text-xs font-medium">Signature Itinerary</span>
+              </div>
+
+              <div className="pt-3 border-t border-border flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Adventure" : "Save Changes"}
+                    </>
+                  )}
+                </Button>
+
+                {!isNew && (
+                  <div className="flex items-center justify-between pt-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive px-2"
+                      onClick={() => setDeleteOpen(true)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
+                    </Button>
+
+                    {liveHref && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-xs text-foreground/60 hover:text-foreground px-2"
+                      >
+                        <a href={liveHref} target="_blank" rel="noreferrer">
+                          <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Image Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Hero Image</h3>
+            </header>
+            <div className="p-5 space-y-4">
+              <ManagedImageUpload
+                value={adv.image}
+                onChange={(url) => updateAdventure({ image: url })}
+                recommendedRatio="4:3 card · 16:9 hero"
+                altText={adv.imageAlt}
+                focalX={adv.focalX ?? 50}
+                focalY={adv.focalY ?? 50}
+                onFocalChange={(focalX, focalY) => updateAdventure({ focalX, focalY })}
+              />
+
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Image alt text
+                </Label>
+                <Input
+                  value={adv.imageAlt ?? ""}
+                  placeholder="Describe the hero image…"
+                  onChange={(e) => updateAdventure({ imageAlt: e.target.value })}
                 />
-              </Field>
-            </Card>
-            <SignatureOrder signatures={draft.signatures} />
+              </div>
+            </div>
+          </div>
+
+          {/* Permalink & Slug Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Permalink & Slug</h3>
+            </header>
+            <div className="p-5 space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  URL Slug
+                </Label>
+                <Input
+                  value={adv.slug}
+                  onChange={(e) => updateAdventure({ slug: slugify(e.target.value) })}
+                  placeholder="e.g. okavango-on-foot"
+                  className="text-xs font-mono"
+                />
+                <p className="text-[11px] text-foreground/50 mt-1">
+                  Defines the URL at <code className="text-[10px]">/adventures/{adv.slug || "slug"}</code>
+                </p>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
 
-      {/* Sticky save footer */}
-      <div className="sticky bottom-0 mt-10 -mx-4 md:-mx-8 lg:-mx-10 px-4 md:px-8 lg:px-10 py-4 bg-background/95 backdrop-blur border-t border-border flex justify-end shadow-[0_-10px_30px_rgba(0,0,0,0.04)]">
-        <Button onClick={save} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
-          {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-          Save changes
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Card / Field layout helpers ──────────────────────────────────────────────
-
-function Card({
-  id,
-  title,
-  icon: Icon,
-  description,
-  children,
-}: {
-  id?: string;
-  title: string;
-  icon: any;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section id={id} className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm">
-      <header className="flex items-start gap-3 px-6 py-4 border-b border-border bg-cream/50">
-        <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4" />
-        </div>
-        <div>
-          <h2 className="font-serif text-xl leading-tight">{title}</h2>
-          {description && <p className="text-xs text-foreground/55 mt-0.5">{description}</p>}
-        </div>
-      </header>
-      <div className="p-6 space-y-4">{children}</div>
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">{label}</Label>
-      {children}
-    </div>
-  );
-}
-
-// ─── Signature itineraries list ────────────────────────────────────────────────
-
-function SignatureItineraries({
-  draft,
-  setDraft,
-  refetch,
-}: {
-  draft: AdventuresPage;
-  setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
-  refetch: () => Promise<any>;
-}) {
-  const navigate = useNavigate();
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const persistFn = useServerFn(saveAdventuresPage);
-
-  // Delete state
-  const [deleteTarget, setDeleteTarget] = useState<AdventuresSignature | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  // ── drag-to-reorder ──────────────────────────────────────────────────────
-  const moveTo = (from: number, to: number) => {
-    if (from === to || to < 0 || to >= draft.signatures.length) return;
-    const copy = draft.signatures.slice();
-    const [moved] = copy.splice(from, 1);
-    copy.splice(to, 0, moved);
-    setDraft({ ...draft, signatures: copy });
-  };
-
-  // ── open modals / navigation ──────────────────────────────────────
-  const openCreate = () => {
-    navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } });
-  };
-
-  const openEdit = (item: AdventuresSignature) => {
-    navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } });
-  };
-
-  // ── persist helpers ──────────────────────────────────────────────────────
-  async function persistSignatures(signatures: AdventuresSignature[], successMsg: string) {
-    await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
-    setDraft({ ...draft, signatures });
-    await refetch();
-    toast.success(successMsg);
-  }
-
-  // ── delete ───────────────────────────────────────────────────────────────
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    try {
-      const updatedSignatures = draft.signatures.filter((s) => s.slug !== deleteTarget.slug);
-      await persistSignatures(updatedSignatures, `"${deleteTarget.name}" deleted.`);
-      setDeleteTarget(null);
-    } catch (err: any) {
-      toast.error(err?.message ?? "Could not delete adventure");
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  return (
-    <>
-      {/* Delete confirmation */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+      {/* Delete Confirmation Alert Dialog */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete adventure?</AlertDialogTitle>
             <AlertDialogDescription>
               You're about to permanently remove{" "}
-              <span className="font-medium text-foreground">{deleteTarget?.name || "this adventure"}</span>. This cannot
-              be undone.
+              <span className="font-semibold text-foreground">"{adv.name || "this adventure"}"</span>. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDelete}
               disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  Deleting…
+                  <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Deleting…
                 </>
               ) : (
                 "Delete"
@@ -377,159 +596,9 @@ function SignatureItineraries({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Section card */}
-      <section
-        id="signatures"
-        className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm"
-      >
-        <header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border bg-cream/50">
-          <div className="flex items-start gap-3">
-            <div className="h-9 w-9 rounded-md bg-gold/10 text-gold flex items-center justify-center shrink-0">
-              <MapIcon className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="font-serif text-xl leading-tight">
-                Signature itineraries
-                <span className="ml-2 text-xs text-foreground/50 font-sans">({draft.signatures.length})</span>
-              </h2>
-              <p className="text-xs text-foreground/55 mt-0.5">
-                Featured adventures in their display order. Drag to reorder.
-              </p>
-            </div>
-          </div>
-          <Button
-            onClick={openCreate}
-            size="sm"
-            variant="outline"
-            className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Add Adventure
-          </Button>
-        </header>
-
-        <div className="p-6">
-          {draft.signatures.length === 0 ? (
-            <div className="border border-dashed border-border bg-background p-16 text-center text-foreground/60">
-              No adventures yet. Click <span className="font-medium">Add Adventure</span> to create one.
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {draft.signatures.map((item, idx) => (
-                <article
-                  key={`${item.slug}-${idx}`}
-                  draggable
-                  onDragStart={() => setDragIdx(idx)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => {
-                    if (dragIdx !== null) moveTo(dragIdx, idx);
-                    setDragIdx(null);
-                  }}
-                  className="group border border-border bg-background overflow-hidden flex flex-col transition-shadow hover:shadow-lg"
-                >
-                  <div className="relative aspect-[16/10] bg-cream overflow-hidden">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.imageAlt || item.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-foreground/30">
-                        <ImageIcon className="w-10 h-10" />
-                      </div>
-                    )}
-                    <span className="absolute top-3 left-3 bg-background/90 px-2 py-0.5 text-[10px] tracking-[0.2em] uppercase text-foreground/60">
-                      #{idx + 1}
-                    </span>
-                    <span
-                      className="absolute top-3 right-3 cursor-grab bg-background/90 p-1.5 text-foreground/50"
-                      title="Drag to reorder"
-                    >
-                      <GripVertical className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col">
-                    <h3 className="font-serif text-lg leading-tight">{item.name || "New itinerary"}</h3>
-                    <p className="text-sm text-foreground/60 mt-1 truncate">
-                      {[item.region, item.nights, item.difficulty].filter(Boolean).join(" · ") || "No details yet"}
-                    </p>
-                    <div className="mt-4 pt-3 border-t border-border flex flex-wrap items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        aria-label={`Edit ${item.name || "adventure"}`}
-                        onClick={() => openEdit(item)}
-                      >
-                        <Edit className="w-3.5 h-3.5 mr-1" /> Edit
-                      </Button>
-                      <button
-                        type="button"
-                        onClick={() => moveTo(idx, idx - 1)}
-                        disabled={idx === 0}
-                        className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                        aria-label="Move up"
-                      >
-                        <ArrowUp className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveTo(idx, idx + 1)}
-                        disabled={idx === draft.signatures.length - 1}
-                        className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                        aria-label="Move down"
-                      >
-                        <ArrowDown className="w-4 h-4" />
-                      </button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="ml-auto text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
-                        onClick={() => setDeleteTarget(item)}
-                      >
-                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                      </Button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </>
+    </form>
   );
 }
-
-// ─── SignatureOrder sidebar ────────────────────────────────────────────────────
-
-function SignatureOrder({ signatures }: { signatures: AdventuresSignature[] }) {
-  return (
-    <section className="border border-border bg-background shadow-sm">
-      <header className="border-b border-border bg-cream/50 px-4 py-3">
-        <h2 className="font-serif text-xl">Signature order</h2>
-        <p className="mt-0.5 text-xs text-foreground/55">Use the controls in the main list to reorder.</p>
-      </header>
-      <ol className="divide-y divide-border">
-        {signatures.map((item, index) => (
-          <li key={`${item.slug}-${index}`} className="flex items-center gap-3 px-4 py-3">
-            <span className="w-5 text-xs text-foreground/45">{index + 1}</span>
-            <span className="h-9 w-12 overflow-hidden bg-muted">
-              {item.image && <img src={item.image} alt="" className="h-full w-full object-cover" />}
-            </span>
-            <span className="min-w-0 flex-1 truncate text-sm">{item.name || "New itinerary"}</span>
-          </li>
-        ))}
-        {signatures.length === 0 && (
-          <li className="px-4 py-5 text-sm text-foreground/55">No signature itineraries yet.</li>
-        )}
-      </ol>
-    </section>
-  );
-}
-
-// ─── ManagedImageUpload ────────────────────────────────────────────────────────
 
 function ManagedImageUpload({
   value,
@@ -599,7 +668,6 @@ function ManagedImageUpload({
         onChange={(e) => pick(e.target.files?.[0])}
       />
 
-      {/* Requirements bar */}
       <div className="flex items-center justify-between gap-2">
         <p className="text-[11px] text-foreground/55">Recommended: {recommendedRatio}</p>
         <span
@@ -656,22 +724,22 @@ function ManagedImageUpload({
             pick(e.dataTransfer.files?.[0]);
           }}
           disabled={busy}
-          className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed px-6 py-10 text-center transition-colors ${
+          className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed px-4 py-8 text-center transition-colors ${
             drag ? "border-gold bg-gold/5" : "border-border bg-muted/30 hover:border-gold hover:bg-gold/5"
           }`}
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground/70">
-            {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-foreground/70">
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           </div>
           <div>
-            <p className="text-sm font-medium">Drop an image here or click to upload</p>
+            <p className="text-xs font-medium">Drop or click to upload</p>
             <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF – up to 8MB</p>
           </div>
         </button>
       )}
 
       <Button type="button" variant="outline" size="sm" onClick={() => setLibraryOpen(true)} className="w-full">
-        <FolderOpen className="w-3.5 h-3.5 mr-1" /> Choose from media library
+        <FolderOpen className="w-3.5 h-3.5 mr-1" /> Choose from library
       </Button>
 
       <Input
@@ -680,7 +748,7 @@ function ManagedImageUpload({
           setFileMeta(null);
           onChange(e.target.value);
         }}
-        placeholder="…or paste an image URL"
+        placeholder="…or paste image URL"
         className="text-xs"
       />
 
@@ -705,8 +773,6 @@ function ManagedImageUpload({
     </div>
   );
 }
-
-// ─── FocalSlider ──────────────────────────────────────────────────────────────
 
 function FocalSlider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
   return (
