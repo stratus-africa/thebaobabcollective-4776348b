@@ -84,7 +84,7 @@ function AdminAdventureEdit() {
   if (!adventure) {
     return (
       <div className="space-y-4">
-        <Button variant="outline" onClick={() => navigate({ to: "/admin/content/itineraries" })}>
+        <Button variant="outline" onClick={() => navigate({ to: "/admin/content/$table", params: { table: "itineraries" } })}>
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to adventures
         </Button>
         <div className="rounded-lg border border-border bg-background p-6">
@@ -102,7 +102,7 @@ function AdminAdventureEdit() {
           <h1 className="font-serif text-3xl">Edit adventure</h1>
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/content/itineraries" })}>
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/content/$table", params: { table: "itineraries" } })}>
             Back to adventures
           </Button>
           <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
