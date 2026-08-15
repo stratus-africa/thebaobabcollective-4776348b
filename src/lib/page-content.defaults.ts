@@ -10,8 +10,6 @@ export const PAGE_DEFAULTS = {
     hero_image_url: "",
     hero_image_as_background: true,
     hero_hide_search: true,
-    hero_focal_x: 50, // 0 = left, 100 = right
-    hero_focal_y: 50, // 0 = top,  100 = bottom
     hero_bg_size: "cover" as "cover" | "contain",
   },
   about: {
@@ -113,16 +111,20 @@ export const PAGE_DEFAULTS = {
     body: "We operate as your personal Kenya travel designer and advisor — bringing deep local context, unhurried pacing, and genuine care to every moment of your adventure.",
     pillar_1_num: "01",
     pillar_1_title: "Kenya is Home",
-    pillar_1_body: "We're not simply selling Kenya from a desk abroad. We know its rhythms, seasons, guides, and secret corners personally.",
+    pillar_1_body:
+      "We're not simply selling Kenya from a desk abroad. We know its rhythms, seasons, guides, and secret corners personally.",
     pillar_2_num: "02",
     pillar_2_title: "Personally Curated",
-    pillar_2_body: "Every journey is designed from scratch around you, your travelling party and your pace — never selected from a rigid catalogue.",
+    pillar_2_body:
+      "Every journey is designed from scratch around you, your travelling party and your pace — never selected from a rigid catalogue.",
     pillar_3_num: "03",
     pillar_3_title: "Trusted Local Relationships",
-    pillar_3_body: "Decades of friendship with conservationists, master trackers and private camp owners unlock encounters ordinary tourists never see.",
+    pillar_3_body:
+      "Decades of friendship with conservationists, master trackers and private camp owners unlock encounters ordinary tourists never see.",
     pillar_4_num: "04",
     pillar_4_title: "Travel With Purpose",
-    pillar_4_body: "Your journey directly contributes to wildlife conservation, anti-poaching, and empowering local community custodians.",
+    pillar_4_body:
+      "Your journey directly contributes to wildlife conservation, anti-poaching, and empowering local community custodians.",
   },
   home_founders: {
     eyebrow: "Direct Personal Connection",
@@ -132,19 +134,21 @@ export const PAGE_DEFAULTS = {
     founder_1_name: "Michael D'Souza",
     founder_1_role: "Co-Founder & Expedition Lead",
     founder_1_tag: "Lifelong Kenya Resident",
-    founder_1_quote: "Kenya has been home for most of my life. I created Baobab to share the wild, intimate places and the people I know and respect most.",
+    founder_1_quote:
+      "Kenya has been home for most of my life. I created Baobab to share the wild, intimate places and the people I know and respect most.",
     founder_1_image: "",
     founder_2_name: "Samra D'Souza",
     founder_2_role: "Co-Founder & Experience Curator",
     founder_2_tag: "Journey Architect",
-    founder_2_quote: "We believe luxury is not about excess, but about intimacy, soul, and time well-spent in places that truly leave a lasting mark.",
+    founder_2_quote:
+      "We believe luxury is not about excess, but about intimacy, soul, and time well-spent in places that truly leave a lasting mark.",
     founder_2_image: "",
   },
   home_lodges: {
-    eyebrow: "Places we love",
-    title: "PARTNER LODGES",
+    eyebrow: "Places We Love",
+    title: "Where You'll Stay",
     body: "Every camp and lodge has been walked, slept in, and chosen for soul as much as setting.",
-    cta_label: "Discover lodges",
+    cta_label: "Explore All Lodges",
   },
   home_impact: {
     eyebrow: "Responsible Tourism",
@@ -152,13 +156,16 @@ export const PAGE_DEFAULTS = {
     body: "We believe travel in Kenya should give back as much as it gives. When designed with intention, a safari is one of the most powerful catalysts for conservation and community resilience on earth.",
     pillar_1_subtitle: "Securing wilderness corridors",
     pillar_1_title: "Wild Habitat & Conservation",
-    pillar_1_body: "Every safari directly funds conservancy lease fees, ranger patrols, and wildlife protection in critical biodiversity areas across Kenya.",
+    pillar_1_body:
+      "Every safari directly funds conservancy lease fees, ranger patrols, and wildlife protection in critical biodiversity areas across Kenya.",
     pillar_2_subtitle: "Equitable local benefit",
     pillar_2_title: "Community Partnerships",
-    pillar_2_body: "We prioritize locally-owned camps, indigenous guides, and community projects ensuring travel revenue stays directly in the hands of traditional custodians.",
+    pillar_2_body:
+      "We prioritize locally-owned camps, indigenous guides, and community projects ensuring travel revenue stays directly in the hands of traditional custodians.",
     pillar_3_subtitle: "Slow, respectful exploration",
     pillar_3_title: "Ethical, Low-Impact Footprint",
-    pillar_3_body: "Small private parties, solar-powered eco-camps, and strict non-invasive wildlife protocols ensure Africa remains wild for generations to come.",
+    pillar_3_body:
+      "Small private parties, solar-powered eco-camps, and strict non-invasive wildlife protocols ensure Africa remains wild for generations to come.",
   },
   home_how_it_works: {
     eyebrow: "Seamless Planning",
@@ -167,16 +174,20 @@ export const PAGE_DEFAULTS = {
     cta_label: "Start Planning My Journey",
     step_1_num: "01",
     step_1_title: "Tell Us What You're Dreaming Of",
-    step_1_body: "A quick conversation about your dates, travelling party, travel style, and the sights and wildlife you long to see.",
+    step_1_body:
+      "A quick conversation about your dates, travelling party, travel style, and the sights and wildlife you long to see.",
     step_2_num: "02",
     step_2_title: "We Design Your Journey",
-    step_2_body: "We create a thoughtful, completely personalised itinerary based on our firsthand knowledge and local relationships.",
+    step_2_body:
+      "We create a thoughtful, completely personalised itinerary based on our firsthand knowledge and local relationships.",
     step_3_num: "03",
     step_3_title: "Refine The Details",
-    step_3_body: "Together, we talk through camps, pacing, private guides, unique encounters, and make adjustments until it feels perfect.",
+    step_3_body:
+      "Together, we talk through camps, pacing, private guides, unique encounters, and make adjustments until it feels perfect.",
     step_4_num: "04",
     step_4_title: "Experience Kenya",
-    step_4_body: "From the moment you step off the plane in Nairobi, our on-ground team takes care of every single detail.",
+    step_4_body:
+      "From the moment you step off the plane in Nairobi, our on-ground team takes care of every single detail.",
   },
   home_final_cta: {
     eyebrow: "Begin Your Journey",
