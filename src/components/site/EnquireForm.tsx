@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, CheckCircle2, ArrowRight, Save, X } from "lucide-react";
+import { Loader2, CheckCircle2, ArrowRight, Save, X, Calendar, Users, Sparkles, MapPin, Compass } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,8 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { submitEnquiry } from "@/lib/submissions.functions";
 import { useFormAutosave } from "@/hooks/use-form-autosave";
-
-
 
 export type EnquireFormProps = {
   defaultSubject?: string;
@@ -33,6 +31,11 @@ type Draft = {
   name: string;
   email: string;
   phone: string;
+  travel_dates: string;
+  adults: number;
+  children: number;
+  trip_type: string;
+  budget: string;
   message: string;
   subscribe: boolean;
 };
@@ -41,24 +44,52 @@ const EMPTY_DRAFT: Draft = {
   name: "",
   email: "",
   phone: "",
+  travel_dates: "",
+  adults: 2,
+  children: 0,
+  trip_type: "",
+  budget: "",
   message: "",
   subscribe: true,
 };
 
+const TRIP_TYPES = [
+  "Safari & Wildlife",
+  "Beach & Safari",
+  "Honeymoon",
+  "Family Adventure",
+  "Photography Safari",
+  "Culture & Connection",
+  "The Great Migration",
+  "Bespoke / Custom",
+];
+
+const BUDGET_RANGES = [
+  "Under $5,000 pp",
+  "$5,000 - $10,000 pp",
+  "$10,000 - $15,000 pp",
+  "$15,000+ pp",
+  "Flexible / Custom",
+];
+
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateField(name: keyof Draft, value: string): string | undefined {
+function validateField(name: keyof Draft, value: any): string | undefined {
   switch (name) {
     case "name":
-      return value.trim().length === 0 ? "Please tell us your name." : undefined;
+      return typeof value === "string" && value.trim().length === 0 ? "Please tell us your name." : undefined;
     case "email":
-      if (value.trim().length === 0) return "Email is required.";
+      if (!value || typeof value !== "string" || value.trim().length === 0) return "Email is required.";
       if (!emailRe.test(value.trim())) return "Enter a valid email address.";
       return undefined;
     case "phone":
-      return value.trim().length < 5 ? "Phone number is required so we can reach you." : undefined;
+      return !value || typeof value !== "string" || value.trim().length < 5
+        ? "Phone number is required so our team can reach you."
+        : undefined;
     case "message":
-      return value.trim().length < 5 ? "Share a sentence about your trip so we can help." : undefined;
+      return !value || typeof value !== "string" || value.trim().length < 5
+        ? "Tell us a few words about your travel dreams."
+        : undefined;
     default:
       return undefined;
   }
@@ -80,7 +111,6 @@ export function EnquireForm({
   const [honeypot, setHoneypot] = useState("");
   const mountedAt = useRef<number>(Date.now());
 
-
   const storageKey = useMemo(() => {
     if (autosaveKey === null) return null;
     if (autosaveKey) return autosaveKey;
@@ -92,11 +122,11 @@ export function EnquireForm({
     enabled: storageKey !== null,
   });
 
-  // Single source of truth: a state-backed draft initialised from autosave on mount
   const [values, setValues] = useState<Draft>({
     ...EMPTY_DRAFT,
+    travel_dates: context?.dates ?? "",
     message: context?.title
-      ? `I'd love to learn more about ${context.kind ? `the ${context.kind.toLowerCase()} ` : ""}${context.title}. Please share availability and how we could shape a trip around it.`
+      ? `I would love to learn more about planning a journey for ${context.kind ? `${context.kind.toLowerCase()} ` : ""}"${context.title}". Please share availability, recommended rhythm and how we can shape this around our preferences.`
       : "",
   });
   const hydratedRef = useRef(false);
@@ -109,23 +139,18 @@ export function EnquireForm({
     }
   }, [autosave.draft]);
 
-  // Autosave on every change (debounced inside the hook)
   useEffect(() => {
     if (storageKey === null) return;
     if (submitted) return;
     autosave.save(values);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values, storageKey, submitted]);
+  }, [values, storageKey, submitted, autosave]);
 
   function setField<K extends keyof Draft>(k: K, v: Draft[K]) {
     setValues((prev) => ({ ...prev, [k]: v }));
   }
 
-
-
-
   function blurValidate(name: keyof Draft) {
-    const v = String(values[name] ?? "");
+    const v = values[name];
     const err = validateField(name, v);
     setErrors((prev) => ({ ...prev, [name]: err }));
   }
@@ -133,19 +158,20 @@ export function EnquireForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (honeypot.trim() !== "") {
-      // Silent bot rejection — show success to avoid signaling
       setSubmitted(true);
       return;
     }
-    if (Date.now() - mountedAt.current < 2000) {
+    if (Date.now() - mountedAt.current < 1500) {
       setErrors({ form: "Please take a moment to review your details before submitting." });
       return;
     }
+
     const next: typeof errors = {};
     (["name", "email", "phone", "message"] as const).forEach((f) => {
-      const err = validateField(f, String(values[f] ?? ""));
+      const err = validateField(f, values[f]);
       if (err) next[f] = err;
     });
+
     if (Object.keys(next).length) {
       setErrors(next);
       const first = Object.keys(next)[0];
@@ -153,6 +179,7 @@ export function EnquireForm({
       el?.focus();
       return;
     }
+
     setErrors({});
     setLoading(true);
     try {
@@ -163,16 +190,20 @@ export function EnquireForm({
           email: values.email.trim(),
           phone: values.phone.trim(),
           destination: defaultDestination || context?.title || "",
-          subject: defaultSubject ?? "",
-          travel_dates: context?.dates ?? "",
+          subject: defaultSubject ?? "Website Enquiry",
+          travel_dates: values.travel_dates.trim() || (context?.dates ?? ""),
+          adults: Number(values.adults) || 2,
+          children: Number(values.children) || 0,
+          trip_type: values.trip_type || undefined,
+          budget: values.budget || undefined,
           subscribe_newsletter: values.subscribe,
           source_url: sourceUrl ?? (typeof window !== "undefined" ? window.location.href : ""),
-          message: values.message,
+          message: values.message.trim(),
         },
       });
       autosave.clear();
       setSubmitted(true);
-      toast.success("Enquiry sent — we'll be in touch within 24 hours.");
+      toast.success("Enquiry sent — Michael & Samra will be in touch within 24 hours.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       setErrors({ form: msg });
@@ -191,19 +222,20 @@ export function EnquireForm({
   if (submitted) {
     return (
       <div
-        className={`bg-background border border-border p-8 sm:p-10 text-center ${className ?? ""}`}
+        className={`bg-background border border-border p-8 sm:p-12 text-center rounded-xl ${className ?? ""}`}
         role="status"
         aria-live="polite"
       >
-        <CheckCircle2 className="w-14 h-14 text-gold mx-auto mb-6" strokeWidth={1.2} aria-hidden="true" />
-        <h3 className="font-serif text-3xl text-foreground mb-3">Thank you</h3>
-        <p className="text-foreground/75 max-w-sm mx-auto mb-8">
-          Your enquiry has been received. One of our journey designers will be in touch within 24 hours.
+        <CheckCircle2 className="w-16 h-16 text-gold mx-auto mb-6" strokeWidth={1.2} aria-hidden="true" />
+        <h3 className="font-serif text-3xl sm:text-4xl text-foreground mb-3">Thank You</h3>
+        <p className="text-foreground/80 max-w-md mx-auto mb-8 text-base leading-relaxed">
+          Your enquiry has been received. Michael, Samra or one of our dedicated journey designers will review your
+          preferences and reach out within 24 hours.
         </p>
         <button
           type="button"
           onClick={startAnother}
-          className="inline-flex items-center gap-2 border border-gold text-gold uppercase tracking-[0.25em] text-[11px] px-6 py-3 hover:bg-gold hover:text-gold-foreground transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-gold text-gold uppercase tracking-[0.22em] text-[11px] font-semibold px-8 py-3.5 hover:bg-gold hover:text-gold-foreground transition-colors"
         >
           Send another enquiry
         </button>
@@ -216,9 +248,9 @@ export function EnquireForm({
       onSubmit={onSubmit}
       noValidate
       aria-busy={loading}
-      className={`bg-background border border-border p-6 md:p-8 space-y-6 ${className ?? ""}`}
+      className={`bg-background border border-border p-6 md:p-10 rounded-xl space-y-8 ${className ?? ""}`}
     >
-      {/* Honeypot — bots fill this; humans never see it */}
+      {/* Honeypot */}
       <div
         aria-hidden="true"
         style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}
@@ -234,29 +266,32 @@ export function EnquireForm({
           onChange={(e) => setHoneypot(e.target.value)}
         />
       </div>
+
       {defaultSubject && (
-        <p className="text-[11px] tracking-[0.25em] uppercase text-terracotta">Enquiry — {defaultSubject}</p>
+        <div className="flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-gold font-semibold">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Tailored Journey Request — {defaultSubject}</span>
+        </div>
       )}
 
       {context && (
-        <div className="flex items-center gap-4 border border-gold/30 bg-gold/5 p-3 sm:p-4 rounded-sm">
+        <div className="flex items-center gap-4 border border-gold/30 bg-gold/5 p-4 rounded-xl">
           {context.image && (
             <img
               src={context.image}
               alt=""
-              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-sm border border-border shrink-0"
+              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-border shrink-0"
             />
           )}
           <div className="min-w-0 flex-1">
             {context.kind && (
-              <p className="text-[10px] tracking-[0.25em] uppercase text-gold mb-1">
-                Enquiring about · {context.kind}
+              <p className="text-[10px] tracking-[0.25em] uppercase text-gold font-semibold mb-1">
+                Selected {context.kind}
               </p>
             )}
-            <p className="font-serif text-lg text-foreground leading-tight truncate">{context.title}</p>
-            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/65">
-              {context.dates && <span>Travel: {context.dates}</span>}
-              {context.slug && <span className="font-mono">/{context.slug}</span>}
+            <p className="font-serif text-xl text-foreground leading-tight truncate">{context.title}</p>
+            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/70">
+              {context.dates && <span>Dates: {context.dates}</span>}
             </div>
           </div>
         </div>
@@ -265,12 +300,12 @@ export function EnquireForm({
       {autosave.showRestoredNotice && (
         <div
           role="status"
-          className="flex items-start gap-3 border border-gold/40 bg-gold/5 px-4 py-3 text-xs text-foreground/80"
+          className="flex items-start gap-3 border border-gold/40 bg-gold/5 px-4 py-3 rounded-lg text-xs text-foreground/80"
         >
           <Save className="w-4 h-4 text-gold mt-0.5 shrink-0" aria-hidden="true" />
           <div className="flex-1">
-            <p className="text-foreground">Draft restored</p>
-            <p className="text-foreground/60">We saved what you had typed earlier. Pick up where you left off.</p>
+            <p className="text-foreground font-medium">Draft restored</p>
+            <p className="text-foreground/60">We restored what you typed earlier.</p>
           </div>
           <button
             type="button"
@@ -286,9 +321,12 @@ export function EnquireForm({
         </div>
       )}
 
-      <fieldset className="space-y-5">
-        <legend className="font-serif text-xl text-foreground mb-2">About you</legend>
-        <div className="grid md:grid-cols-2 gap-4">
+      {/* 1. Traveller Contact Info */}
+      <fieldset className="space-y-4">
+        <legend className="font-serif text-2xl text-foreground mb-3 flex items-center gap-2">
+          <span>01</span> <span className="text-foreground/40">—</span> <span>Your Details</span>
+        </legend>
+        <div className="grid md:grid-cols-3 gap-4">
           <Field
             label="Full name"
             name="name"
@@ -297,6 +335,7 @@ export function EnquireForm({
             onChange={(v) => setField("name", v)}
             onBlur={() => blurValidate("name")}
             error={errors.name}
+            placeholder="e.g. Sarah Jenkins"
           />
           <Field
             label="Email address"
@@ -307,9 +346,10 @@ export function EnquireForm({
             onChange={(v) => setField("email", v)}
             onBlur={() => blurValidate("email")}
             error={errors.email}
+            placeholder="sarah@example.com"
           />
           <Field
-            label="Phone number"
+            label="Phone / WhatsApp"
             name="phone"
             type="tel"
             required
@@ -317,25 +357,138 @@ export function EnquireForm({
             onChange={(v) => setField("phone", v)}
             onBlur={() => blurValidate("phone")}
             error={errors.phone}
-            placeholder="+27 00 000 0000"
+            placeholder="+44 7700 900077"
           />
         </div>
       </fieldset>
 
+      {/* 2. Journey Shape & Timing */}
+      <fieldset className="space-y-4 pt-4 border-t border-border/50">
+        <legend className="font-serif text-2xl text-foreground mb-3 flex items-center gap-2">
+          <span>02</span> <span className="text-foreground/40">—</span> <span>Journey Preferences</span>
+        </legend>
 
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <Label
+              htmlFor="travel_dates"
+              className="text-xs uppercase tracking-wider text-foreground/70 font-semibold mb-1.5 block"
+            >
+              Estimated Travel Dates
+            </Label>
+            <Input
+              id="travel_dates"
+              name="travel_dates"
+              placeholder="e.g. July 2026 / Approx 10 days"
+              value={values.travel_dates}
+              onChange={(e) => setField("travel_dates", e.target.value)}
+              className="mt-1"
+            />
+          </div>
 
+          <div>
+            <Label
+              htmlFor="trip_type"
+              className="text-xs uppercase tracking-wider text-foreground/70 font-semibold mb-1.5 block"
+            >
+              Journey Type
+            </Label>
+            <select
+              id="trip_type"
+              name="trip_type"
+              value={values.trip_type}
+              onChange={(e) => setField("trip_type", e.target.value)}
+              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold"
+            >
+              <option value="">Select a travel style…</option>
+              {TRIP_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div>
-        <Label htmlFor="message" className="text-sm text-foreground">
-          Tell us about your dream journey <span className="text-terracotta">*</span>
+          <div>
+            <Label
+              htmlFor="budget"
+              className="text-xs uppercase tracking-wider text-foreground/70 font-semibold mb-1.5 block"
+            >
+              Approximate Budget
+            </Label>
+            <select
+              id="budget"
+              name="budget"
+              value={values.budget}
+              onChange={(e) => setField("budget", e.target.value)}
+              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold"
+            >
+              <option value="">Select budget range…</option>
+              {BUDGET_RANGES.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 pt-2">
+          <div>
+            <Label
+              htmlFor="adults"
+              className="text-xs uppercase tracking-wider text-foreground/70 font-semibold mb-1.5 block"
+            >
+              Adults
+            </Label>
+            <Input
+              id="adults"
+              name="adults"
+              type="number"
+              min={1}
+              max={30}
+              value={values.adults}
+              onChange={(e) => setField("adults", parseInt(e.target.value) || 1)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label
+              htmlFor="children"
+              className="text-xs uppercase tracking-wider text-foreground/70 font-semibold mb-1.5 block"
+            >
+              Children
+            </Label>
+            <Input
+              id="children"
+              name="children"
+              type="number"
+              min={0}
+              max={20}
+              value={values.children}
+              onChange={(e) => setField("children", parseInt(e.target.value) || 0)}
+              className="mt-1"
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      {/* 3. Dream Vision */}
+      <div className="pt-4 border-t border-border/50 space-y-2">
+        <Label htmlFor="message" className="font-serif text-2xl text-foreground mb-2 block">
+          03 — Tell Us About Your Dream Journey <span className="text-terracotta">*</span>
         </Label>
+        <p className="text-xs text-foreground/60 mb-2">
+          Share any must-see wildlife, special occasions (honeymoon, anniversary, milestone birthday), preferred pace,
+          or dietary preferences.
+        </p>
         <Textarea
           id="message"
           name="message"
           required
           rows={5}
           className="mt-2"
-          placeholder="Special occasions, must-sees, mobility considerations, dietary needs…"
+          placeholder="e.g. We are looking for an intimate, off-the-beaten-track Kenya safari with sunrise walks in the Mara and three nights relaxing on the coast…"
           value={values.message}
           onChange={(e) => setField("message", e.target.value)}
           onBlur={() => blurValidate("message")}
@@ -349,39 +502,45 @@ export function EnquireForm({
         )}
       </div>
 
-      <label className="flex items-start gap-3 text-sm text-foreground/75">
+      <label className="flex items-start gap-3 text-sm text-foreground/75 cursor-pointer pt-2">
         <Checkbox
           checked={values.subscribe}
           onCheckedChange={(v) => setField("subscribe", v === true)}
           className="mt-0.5"
         />
-        <span>Send me occasional journey ideas and field notes from the Collective.</span>
+        <span>Receive occasional thoughtful journey ideas and conservation notes from The Baobab Collective.</span>
       </label>
 
       {errors.form && (
-        <p role="alert" className="text-sm text-destructive border border-destructive/40 bg-destructive/5 px-4 py-3">
+        <p
+          role="alert"
+          className="text-sm text-destructive border border-destructive/40 bg-destructive/5 px-4 py-3 rounded-lg"
+        >
           {errors.form}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full inline-flex items-center justify-center gap-2 bg-terracotta text-gold-foreground uppercase tracking-[0.25em] text-[12px] py-4 hover:bg-terracotta/90 transition-colors disabled:opacity-60"
-      >
-        {loading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Sending…
-          </>
-        ) : (
-          <>
-            Send Enquiry <ArrowRight className="w-3 h-3" aria-hidden="true" />
-          </>
-        )}
-      </button>
+      <div className="pt-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[12px] font-semibold py-4 hover:bg-gold/90 transition-colors shadow-md disabled:opacity-60"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Sending Your Journey Request…
+            </>
+          ) : (
+            <>
+              <span>Send Journey Request</span> <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </>
+          )}
+        </button>
+      </div>
+
       <p className="text-[11px] text-foreground/50 text-center">
-        We respond within 24 hours, Monday to Saturday. Your details are kept private.
-        {storageKey !== null && " Draft autosaves as you type."}
+        We respond within 24 hours, Monday to Saturday. Your details are kept strictly confidential.
+        {storageKey !== null && " Draft automatically saves as you type."}
       </p>
     </form>
   );
@@ -397,9 +556,6 @@ function Field({
   value,
   onChange,
   onBlur,
-  min,
-  as,
-  options,
 }: {
   label: string;
   name: string;
@@ -410,48 +566,31 @@ function Field({
   value: string;
   onChange: (v: string) => void;
   onBlur?: () => void;
-  min?: number;
-  as?: "select";
-  options?: string[];
 }) {
   const errorId = error ? `${name}-error` : undefined;
   return (
     <div>
-      <Label htmlFor={name} className="text-xs text-foreground/70">
-        {label} {required && <span className="text-terracotta" aria-hidden="true">*</span>}
+      <Label htmlFor={name} className="text-xs uppercase tracking-wider text-foreground/70 font-semibold mb-1.5 block">
+        {label}{" "}
+        {required && (
+          <span className="text-terracotta" aria-hidden="true">
+            *
+          </span>
+        )}
       </Label>
-      {as === "select" ? (
-        <select
-          id={name}
-          name={name}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onBlur}
-          aria-invalid={!!error}
-          aria-describedby={errorId}
-          className="mt-2 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold"
-        >
-          <option value="">Select…</option>
-          {options?.map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
-      ) : (
-        <Input
-          id={name}
-          name={name}
-          type={type}
-          required={required}
-          placeholder={placeholder ?? label}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onBlur}
-          min={min}
-          aria-invalid={!!error}
-          aria-describedby={errorId}
-          className="mt-2"
-        />
-      )}
+      <Input
+        id={name}
+        name={name}
+        type={type}
+        required={required}
+        placeholder={placeholder ?? label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        aria-invalid={!!error}
+        aria-describedby={errorId}
+        className="mt-1"
+      />
       {error && (
         <p id={errorId} role="alert" className="mt-1 text-xs text-destructive">
           {error}
