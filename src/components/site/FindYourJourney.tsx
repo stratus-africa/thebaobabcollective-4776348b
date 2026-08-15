@@ -6,6 +6,9 @@ import g1Img from "@/assets/gallery-1.jpg";
 import g2Img from "@/assets/gallery-2.jpg";
 import g3Img from "@/assets/gallery-3.jpg";
 import g4Img from "@/assets/gallery-4.jpg";
+import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+
+type FindJourneyContent = Partial<typeof PAGE_DEFAULTS.home_find_journey>;
 
 export type JourneyTypeCard = {
   title: string;
@@ -64,20 +67,23 @@ const JOURNEY_STYLES: JourneyTypeCard[] = [
   },
 ];
 
-export function FindYourJourney() {
+export function FindYourJourney({ content }: { content?: FindJourneyContent | null } = {}) {
+  const c = { ...PAGE_DEFAULTS.home_find_journey, ...(content ?? {}) };
+
   return (
     <section aria-labelledby="find-journey-heading" className="bg-background py-16 md:py-24">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="max-w-3xl mb-12 md:mb-16">
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5" /> Find Your Journey
+            <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
           </p>
-          <h2 id="find-journey-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
-            What kind of journey are you dreaming of?
+          <h2
+            id="find-journey-heading"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+          >
+            {c.title}
           </h2>
-          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">
-            Whether you are drawn to the pulse of the Great Migration, secluded romantic sanctuaries, or coastal dhow sailing, we curate every detail around your vision.
-          </p>
+          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">{c.body}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -115,14 +121,11 @@ export function FindYourJourney() {
                 <p className="text-[10px] tracking-[0.3em] uppercase text-gold/90 font-medium mb-1.5">
                   {style.tagline}
                 </p>
-                <h3 className="font-serif text-2xl sm:text-3xl text-cream mb-2 leading-tight">
-                  {style.title}
-                </h3>
-                <p className="text-sm text-cream/80 leading-relaxed mb-4 line-clamp-2">
-                  {style.description}
-                </p>
+                <h3 className="font-serif text-2xl sm:text-3xl text-cream mb-2 leading-tight">{style.title}</h3>
+                <p className="text-sm text-cream/80 leading-relaxed mb-4 line-clamp-2">{style.description}</p>
                 <span className="inline-flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase font-semibold text-gold group-hover:text-cream transition-colors">
-                  Explore Experiences <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  Explore Experiences{" "}
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </div>
             </Link>
