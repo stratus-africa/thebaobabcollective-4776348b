@@ -3,11 +3,13 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import g1 from "@/assets/gallery-1.jpg";
 import g4 from "@/assets/gallery-4.jpg";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { usePreviewMerge } from "@/lib/preview-overrides";
 
 type FoundersContent = Partial<typeof PAGE_DEFAULTS.home_founders>;
 
 export function FoundersStrip({ content }: { content?: FoundersContent | null } = {}) {
-  const c = { ...PAGE_DEFAULTS.home_founders, ...(content ?? {}) };
+  const base = { ...PAGE_DEFAULTS.home_founders, ...(content ?? {}) };
+  const c = usePreviewMerge("home_founders", base);
 
   const founders = [
     {
