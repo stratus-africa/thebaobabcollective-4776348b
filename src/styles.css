@@ -125,8 +125,20 @@
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5 { font-family: var(--font-serif); font-weight: 400; letter-spacing: 0.01em; }
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    /* Slightly smaller root scale so rem-based type reads less oversized. */
+    font-size: 93.75%; /* 15px */
+  }
 }
+
+/* Rich-text font-size classes (set from the editor's size picker) */
+.rt-size-xs { font-size: 0.8em; }
+.rt-size-sm { font-size: 0.9em; }
+.rt-size-md { font-size: 1em; }
+.rt-size-lg { font-size: 1.2em; }
+.rt-size-xl { font-size: 1.45em; }
+.rt-size-2xl { font-size: 1.75em; }
 
 @layer utilities {
   .tracking-luxury { letter-spacing: 0.25em; }
