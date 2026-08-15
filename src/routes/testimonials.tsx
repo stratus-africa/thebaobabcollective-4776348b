@@ -7,7 +7,6 @@ import { InstagramTimeline } from "@/components/site/InstagramTimeline";
 import { getTestimonials } from "@/lib/cms.functions";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
-import { usePreviewMerge } from "@/lib/preview-overrides";
 import { Star, Quote } from "lucide-react";
 import g1 from "@/assets/gallery-1.jpg";
 import g2 from "@/assets/gallery-2.jpg";
@@ -45,7 +44,7 @@ function TestimonialsPage() {
   const { data: items } = useSuspenseQuery(q);
   const { page, ig } = Route.useLoaderData();
   const base = { ...PAGE_DEFAULTS.testimonials_page, ...(page ?? {}) };
-  const c: any = usePreviewMerge("testimonials_page", base);
+  const c: any = base;
   const fallbackPhotos = defaultIgImgs.map((src) => ({ src, caption: "" }));
 
   return (
@@ -72,8 +71,12 @@ function TestimonialsPage() {
                   <p className="font-serif text-lg leading-relaxed text-foreground mb-5 flex-1">"{t.quote}"</p>
                   <div>
                     <p className="text-sm font-medium text-foreground">{t.name}</p>
-                    {t.location && <p className="text-[11px] tracking-[0.15em] uppercase text-foreground/60">{t.location}</p>}
-                    {t.trip_taken && <p className="text-[11px] tracking-[0.15em] uppercase text-gold mt-2">{t.trip_taken}</p>}
+                    {t.location && (
+                      <p className="text-[11px] tracking-[0.15em] uppercase text-foreground/60">{t.location}</p>
+                    )}
+                    {t.trip_taken && (
+                      <p className="text-[11px] tracking-[0.15em] uppercase text-gold mt-2">{t.trip_taken}</p>
+                    )}
                   </div>
                 </article>
               ))}
