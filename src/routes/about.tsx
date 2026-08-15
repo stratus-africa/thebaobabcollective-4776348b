@@ -4,7 +4,6 @@ import { Footer } from "@/components/site/Footer";
 import { About } from "@/components/site/About";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
-import { usePreviewMerge } from "@/lib/preview-overrides";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { RichText } from "@/components/site/RichText";
@@ -39,10 +38,10 @@ export const Route = createFileRoute("/about")({
 });
 
 function MissionSection({ content }: { content: Partial<typeof PAGE_DEFAULTS.about_mission> | null }) {
-  const c = usePreviewMerge("about_mission", {
+  const c = {
     ...PAGE_DEFAULTS.about_mission,
     ...(content ?? {}),
-  });
+  };
   return (
     <section className="bg-background py-20">
       <div className="max-w-[1920px] mx-auto px-6 lg:px-10 max-w-3xl text-center">
@@ -55,10 +54,10 @@ function MissionSection({ content }: { content: Partial<typeof PAGE_DEFAULTS.abo
 }
 
 function ValuesSection({ content }: { content: Partial<typeof PAGE_DEFAULTS.about_values> | null }) {
-  const c = usePreviewMerge("about_values", {
+  const c = {
     ...PAGE_DEFAULTS.about_values,
     ...(content ?? {}),
-  });
+  };
   const items = [
     { title: c.value_1_title, body: c.value_1_body },
     { title: c.value_2_title, body: c.value_2_body },
@@ -175,7 +174,7 @@ function FounderCard({ founder, active, onToggle }: { founder: Founder; active: 
 }
 
 function TeamSection({ content }: { content: Partial<typeof PAGE_DEFAULTS.about_team> | null }) {
-  const c = usePreviewMerge("about_team", { ...PAGE_DEFAULTS.about_team, ...(content ?? {}) });
+  const c = { ...PAGE_DEFAULTS.about_team, ...(content ?? {}) };
   const [activeFounder, setActiveFounder] = useState<number | null>(null);
   const members: Founder[] = [
     {
