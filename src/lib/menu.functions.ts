@@ -32,6 +32,7 @@ export const MENU_DEFAULTS: MenuConfig = {
   topBarEnabled: true,
   transparentOverHero: false,
   primary: [
+    { label: "Home", to: "/" },
     { label: "Journeys", to: "/adventures" },
     { label: "Destinations", to: "/destinations" },
     { label: "Lodges", to: "/lodges" },
