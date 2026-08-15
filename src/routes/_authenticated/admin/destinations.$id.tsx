@@ -81,6 +81,7 @@ const BLANK_DESTINATION: DestinationRecord = {
 
 function AdminDestinationEdit() {
   const { id } = Route.useParams();
+  const isNew = id === "new";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const getFn = useServerFn(adminGet);
@@ -100,9 +101,11 @@ function AdminDestinationEdit() {
   } = useQuery({
     queryKey: ["admin-destination", id],
     queryFn: async () => {
+      if (isNew) return null;
       const res = await getFn({ data: { table: "destinations", id } });
       return res as unknown as DestinationRecord | null;
     },
+    enabled: !isNew,
   });
 
   useEffect(() => {
@@ -136,7 +139,12 @@ function AdminDestinationEdit() {
       queryClient.invalidateQueries({ queryKey: ["admin-list"] });
       queryClient.invalidateQueries({ queryKey: ["destinations"] });
       queryClient.invalidateQueries({ queryKey: ["destination", form.slug] });
-      await refetch();
+      if (isNew && saved?.id) {
+        // Navigate to the newly created record's edit page
+        navigate({ to: "/admin/destinations/$id", params: { id: saved.id }, replace: true });
+      } else {
+        await refetch();
+      }
     },
     onError: (e: any) => toast.error(e?.message ?? "Could not save destination"),
   });
@@ -173,7 +181,7 @@ function AdminDestinationEdit() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading && !isNew) {
     return (
       <div className="flex items-center gap-2 py-20 justify-center text-foreground/60">
         <Loader2 className="w-5 h-5 animate-spin text-gold" /> Loading destination details…
@@ -181,7 +189,7 @@ function AdminDestinationEdit() {
     );
   }
 
-  if (isError || !destination) {
+  if (!isNew && (isError || !destination)) {
     return (
       <div className="space-y-4 max-w-2xl mx-auto py-12">
         <Button
@@ -215,15 +223,17 @@ function AdminDestinationEdit() {
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Destinations
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="font-serif text-3xl text-foreground">Edit Destination</h1>
-            <Badge
-              variant={form.published ? "default" : "secondary"}
-              className={form.published ? "bg-forest text-forest-foreground" : ""}
-            >
-              {form.published ? "Active" : "Draft"}
-            </Badge>
+            <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Destination" : "Edit Destination"}</h1>
+            {!isNew && (
+              <Badge
+                variant={form.published ? "default" : "secondary"}
+                className={form.published ? "bg-forest text-forest-foreground" : ""}
+              >
+                {form.published ? "Active" : "Draft"}
+              </Badge>
+            )}
           </div>
-          {form.slug && (
+          {!isNew && form.slug && (
             <div className="flex items-center gap-2 text-xs text-foreground/60 pt-1">
               <span className="font-medium text-foreground/75">Permalink:</span>
               <code className="bg-cream px-1.5 py-0.5 rounded text-foreground/80 font-mono text-[11px]">
@@ -262,17 +272,17 @@ function AdminDestinationEdit() {
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 mr-1.5" /> Update Destination
+                <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Destination" : "Update Destination"}
               </>
             )}
           </Button>
         </div>
       </div>
 
-      {/* ── WordPress-Style Two-Column Layout ────────────────────────── */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-        {/* ── Main Content Area (Left) ───────────────────────────────── */}
-        <div className="space-y-6 min-w-0">
+      {/* ── WordPress-Style Two-Column Layout (9/12 and 3/12) ────────── */}
+      <div className="grid gap-6 xl:grid-cols-12">
+        {/* ── Main Content Area (Left: 9/12) ─────────────────────────── */}
+        <div className="space-y-6 min-w-0 xl:col-span-9">
           {/* Destination Title / Name */}
           <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
             <div>
@@ -406,8 +416,8 @@ function AdminDestinationEdit() {
           </section>
         </div>
 
-        {/* ── Sidebar Area (Right) ───────────────────────────────────── */}
-        <aside className="space-y-6 min-w-0">
+        {/* ── Sidebar Area (Right: 3/12) ──────────────────────────── */}
+        <aside className="space-y-6 min-w-0 xl:col-span-3">
           {/* Publish / Status Box */}
           <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
             <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
@@ -460,35 +470,37 @@ function AdminDestinationEdit() {
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4 mr-1.5" /> Update Destination
+                      <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Destination" : "Update Destination"}
                     </>
                   )}
                 </Button>
 
-                <div className="flex items-center justify-between pt-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive px-2"
-                    onClick={() => setDeleteOpen(true)}
-                  >
-                    <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
-                  </Button>
-
-                  {liveHref && (
+                {!isNew && (
+                  <div className="flex items-center justify-between pt-1">
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
-                      asChild
-                      className="text-xs text-foreground/60 hover:text-foreground px-2"
+                      className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive px-2"
+                      onClick={() => setDeleteOpen(true)}
                     >
-                      <a href={liveHref} target="_blank" rel="noreferrer">
-                        <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
-                      </a>
+                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
                     </Button>
-                  )}
-                </div>
+
+                    {liveHref && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-xs text-foreground/60 hover:text-foreground px-2"
+                      >
+                        <a href={liveHref} target="_blank" rel="noreferrer">
+                          <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
