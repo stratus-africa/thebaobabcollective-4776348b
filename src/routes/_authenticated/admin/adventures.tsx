@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -304,10 +304,11 @@ function SignatureItineraries({
   setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
   refetch: () => Promise<any>;
 }) {
+  const navigate = useNavigate();
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const persistFn = useServerFn(saveAdventuresPage);
 
-  // Modal state
+  // Modal state (for New Adventure)
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalInitial, setModalInitial] = useState<AdventuresSignature | null>(null);
@@ -326,7 +327,7 @@ function SignatureItineraries({
     setDraft({ ...draft, signatures: copy });
   };
 
-  // ── open modals ──────────────────────────────────────────────────────────
+  // ── open modals / navigation ─────────────────────────────────────────────
   const openCreate = () => {
     setModalMode("create");
     setModalInitial(null);
@@ -334,9 +335,7 @@ function SignatureItineraries({
   };
 
   const openEdit = (item: AdventuresSignature) => {
-    setModalMode("edit");
-    setModalInitial(item);
-    setModalOpen(true);
+    navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } });
   };
 
   // ── persist helpers ──────────────────────────────────────────────────────
