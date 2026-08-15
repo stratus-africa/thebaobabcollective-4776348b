@@ -21,9 +21,11 @@ const DESTINATION_MAP_POSITIONS: Record<string, { left: number; top: number }> =
   "tsavo": { left: 57.5, top: 78.5 },
   "lake-nakuru-naivasha": { left: 31.5, top: 56.5 },
   "mount-kenya": { left: 46.5, top: 51.5 },
-  "lamu-archipelago": { left: 82.5, top: 72.5 },
-  "watamu": { left: 77.0, top: 81.0 },
-  "diani-beach": { left: 76.5, top: 89.0 },
+  // Coastal destinations — pinned to the visible Indian Ocean coast strip
+  "lamu-archipelago": { left: 78.0, top: 57.5 },
+  "malindi": { left: 76.5, top: 66.5 },
+  "watamu": { left: 75.5, top: 70.0 },
+  "diani-beach": { left: 73.5, top: 83.5 },
 };
 
 /**
@@ -34,9 +36,11 @@ const DESTINATION_LABEL_OFFSETS: Record<string, string> = {
   "mount-kenya": "translate-x-3 -translate-y-1/2",
   "samburu": "-translate-x-1/2 -translate-y-[200%]",
   "lake-nakuru-naivasha": "-translate-x-[105%] translate-y-1",
-  "diani-beach": "-translate-x-1/2 translate-y-3",
-  "watamu": "translate-x-3 translate-y-0",
-  "lamu-archipelago": "translate-x-3 -translate-y-1/2",
+  // Coastal — labels offset to the LEFT so they don't overflow the right edge
+  "lamu-archipelago": "-translate-x-[105%] -translate-y-1/2",
+  "malindi": "-translate-x-[105%] -translate-y-1/2",
+  "watamu": "-translate-x-[105%] -translate-y-1/2",
+  "diani-beach": "-translate-x-[105%] -translate-y-1/2",
   "tsavo": "translate-x-3 translate-y-0",
   "amboseli": "-translate-x-1/2 translate-y-3",
   "maasai-mara": "-translate-x-1/2 translate-y-3",
@@ -155,15 +159,15 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
 
         {/* Map Layout Grid: Left Interactive Reference Image Map, Right Active Destination Spotlight */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* ── Left Map Canvas (7 Cols on desktop) ── */}
-          <div className="lg:col-span-7 bg-forest-foreground/5 rounded-2xl border border-border/20 p-4 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl">
-            {/* Reference Map Container with Proportional Aspect Ratio */}
-            <div className="relative w-full aspect-[1/1.18] max-h-[620px] mx-auto rounded-xl overflow-hidden bg-forest/40 border border-border/20 shadow-inner">
-              {/* Reference Map Image Layer */}
+          {/* ── Left Map Canvas (5 Cols on desktop) ── */}
+          <div className="lg:col-span-5 bg-forest-foreground/5 rounded-2xl border border-border/20 p-2 sm:p-3 relative flex flex-col justify-between overflow-hidden shadow-2xl">
+            {/* Reference Map Container — fills column without side gaps */}
+            <div className="relative w-full overflow-hidden rounded-xl" style={{ aspectRatio: '1 / 1.18' }}>
+              {/* Reference Map Image Layer — object-cover fills without side whitespace */}
               <img
                 src="/maps/kenya-destinations-map.gif"
                 alt="Map of Kenya showing major destinations and geographic regions"
-                className="w-full h-full object-contain select-none"
+                className="absolute inset-0 w-full h-full object-cover select-none rounded-xl"
                 onError={(e) => {
                   // Fallback if public path is served differently in dev preview
                   const target = e.currentTarget as HTMLImageElement;
@@ -229,7 +233,7 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
             </div>
 
             {/* Bottom Map Helper Text */}
-            <div className="pt-4 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-forest-foreground/70 gap-2">
+            <div className="pt-3 mt-2 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-forest-foreground/70 gap-2">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-gold inline-block" /> Hover or tap any pin to explore a destination
               </span>
@@ -237,8 +241,8 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
             </div>
           </div>
 
-          {/* ── Right Active Destination Spotlight (5 Cols on desktop) ── */}
-          <div className="lg:col-span-5 flex flex-col">
+          {/* ── Right Active Destination Spotlight (7 Cols on desktop) ── */}
+          <div className="lg:col-span-7 flex flex-col">
             {activeDestination ? (
               <div className="bg-background text-foreground rounded-2xl overflow-hidden border border-border flex flex-col h-full shadow-2xl transition-all duration-500">
                 {/* Image Showcase */}
