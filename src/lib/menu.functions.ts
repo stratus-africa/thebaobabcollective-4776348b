@@ -98,10 +98,18 @@ const MenuSchema = z.object({
 });
 
 export const getMenuConfig = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-  });
-  const { data: row } = await supabase.from("site_settings").select("value").eq("key", "menu_config").maybeSingle();
+  let row: { value: any } | null = null;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const res = await supabaseAdmin.from("site_settings").select("value").eq("key", "menu_config").maybeSingle();
+    row = res.data;
+  } catch {
+    const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    });
+    const res = await supabase.from("site_settings").select("value").eq("key", "menu_config").maybeSingle();
+    row = res.data;
+  }
   if (!row?.value) return MENU_DEFAULTS;
   return { ...MENU_DEFAULTS, ...(row.value as Partial<MenuConfig>) } satisfies MenuConfig;
 });
