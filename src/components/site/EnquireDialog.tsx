@@ -73,7 +73,11 @@ export function EnquireDialog({
     const current = window.location.hash;
     if (open && current !== target) {
       lastSyncedHash.current = target;
-      window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}${target}`);
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `${window.location.pathname}${window.location.search}${target}`,
+      );
     } else if (!open && current === target) {
       lastSyncedHash.current = "";
       window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}`);
@@ -91,12 +95,10 @@ export function EnquireDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
         aria-describedby="enquire-dialog-desc"
-        className="p-0 gap-0 max-w-2xl w-[calc(100vw-1.5rem)] sm:w-full max-h-[92vh] overflow-hidden flex flex-col"
+        className="p-0 gap-0 max-w-3xl w-[calc(100vw-1.5rem)] sm:w-full max-h-[92vh] overflow-hidden flex flex-col"
       >
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border text-left">
-          <DialogTitle className="font-serif text-2xl md:text-3xl text-foreground">
-            {title}
-          </DialogTitle>
+          <DialogTitle className="font-serif text-2xl md:text-3xl text-foreground">{title}</DialogTitle>
           <DialogDescription id="enquire-dialog-desc" className="text-sm text-foreground/70">
             {desc}
           </DialogDescription>
