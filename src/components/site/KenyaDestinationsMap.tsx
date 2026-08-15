@@ -3,47 +3,74 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Calendar, ArrowRight, Compass, Sparkles, Navigation } from "lucide-react";
 import type { DestinationMetadata } from "@/lib/destinations.data";
 import { KENYA_REGIONS } from "@/lib/destinations.data";
+import kenyaMapAsset from "@/assets/kenya-destinations-map.jpg";
 
 interface KenyaDestinationsMapProps {
   destinations: DestinationMetadata[];
 }
 
 /**
- * Calibrated geographic projection for Kenya:
- * Bounding Box:
- *   Min Lat: -4.8° S (Vanga / Tanzania Coast border)
- *   Max Lat: 5.2° N (Ilemi Triangle / Ethiopia border)
- *   Min Lng: 33.7° E (Lake Victoria / Uganda border)
- *   Max Lng: 42.0° E (Mandera / Somalia border)
- * SVG ViewBox: 0 0 720 780
+ * Calibrated Percentage Coordinates for the reference Kenya Map (Kenya-Map1.gif)
+ * Positions are normalized (% left, % top) calibrated against the reference map image.
  */
-function getGeoCoordinates(lat: number, lng: number): { x: number; y: number } {
+const DESTINATION_MAP_POSITIONS: Record<string, { left: number; top: number }> = {
+  "maasai-mara": { left: 24.5, top: 64.0 },
+  "amboseli": { left: 47.0, top: 76.5 },
+  "samburu": { left: 47.5, top: 42.5 },
+  "laikipia": { left: 41.5, top: 48.0 },
+  "tsavo": { left: 57.5, top: 78.5 },
+  "lake-nakuru-naivasha": { left: 31.5, top: 56.5 },
+  "mount-kenya": { left: 46.5, top: 51.5 },
+  "lamu-archipelago": { left: 82.5, top: 72.5 },
+  "watamu": { left: 77.0, top: 81.0 },
+  "diani-beach": { left: 76.5, top: 89.0 },
+};
+
+/**
+ * Custom Label Offsets to prevent collision with map printed text and neighboring pins.
+ */
+const DESTINATION_LABEL_OFFSETS: Record<string, string> = {
+  "laikipia": "-translate-x-[105%] -translate-y-1/2",
+  "mount-kenya": "translate-x-3 -translate-y-1/2",
+  "samburu": "-translate-x-1/2 -translate-y-[200%]",
+  "lake-nakuru-naivasha": "-translate-x-[105%] translate-y-1",
+  "diani-beach": "-translate-x-1/2 translate-y-3",
+  "watamu": "translate-x-3 translate-y-0",
+  "lamu-archipelago": "translate-x-3 -translate-y-1/2",
+  "tsavo": "translate-x-3 translate-y-0",
+  "amboseli": "-translate-x-1/2 translate-y-3",
+  "maasai-mara": "-translate-x-1/2 translate-y-3",
+};
+
+/**
+ * Calculates percentage pin position on the reference map:
+ * Uses pre-calibrated positions first, falling back to calibrated lat/lng box.
+ */
+function getMapPosition(d: DestinationMetadata): { left: number; top: number } {
+  // 1. Direct slug match
+  if (DESTINATION_MAP_POSITIONS[d.slug]) {
+    return DESTINATION_MAP_POSITIONS[d.slug];
+  }
+
+  // 2. Loose key match
+  const key = Object.keys(DESTINATION_MAP_POSITIONS).find(
+    (k) => d.slug.includes(k) || k.includes(d.slug) || d.name.toLowerCase().includes(k)
+  );
+  if (key && DESTINATION_MAP_POSITIONS[key]) {
+    return DESTINATION_MAP_POSITIONS[key];
+  }
+
+  // 3. Fallback Lat/Lng Box mapping calibrated to the reference GIF boundaries
+  // Reference GIF Lat: -4.8° S to +5.0° N, Lng: 33.8° E to 42.0° E
   const minLat = -4.8;
-  const maxLat = 5.2;
-  const minLng = 33.7;
+  const maxLat = 5.0;
+  const minLng = 33.8;
   const maxLng = 42.0;
 
-  const leftPad = 40;
-  const rightPad = 40;
-  const topPad = 40;
-  const bottomPad = 50;
+  const left = Math.max(8, Math.min(92, 5 + ((d.longitude - minLng) / (maxLng - minLng)) * 88));
+  const top = Math.max(8, Math.min(92, 5 + ((maxLat - d.latitude) / (maxLat - minLat)) * 88));
 
-  const width = 720 - leftPad - rightPad; // 640px
-  const height = 780 - topPad - bottomPad; // 690px
-
-  const x = leftPad + ((lng - minLng) / (maxLng - minLng)) * width;
-  const y = topPad + ((maxLat - lat) / (maxLat - minLat)) * height;
-
-  return { x, y };
-}
-
-// Convert x/y to percentage for CSS absolute pin positioning
-function getGeoPercentages(lat: number, lng: number): { leftPercent: number; topPercent: number } {
-  const { x, y } = getGeoCoordinates(lat, lng);
-  return {
-    leftPercent: (x / 720) * 100,
-    topPercent: (y / 780) * 100,
-  };
+  return { left, top };
 }
 
 export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps) {
@@ -63,9 +90,6 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
     );
   }, [destinations, activeSlug, filteredDestinations]);
 
-  // Equator line Y position (lat: 0.0)
-  const equatorY = getGeoCoordinates(0.0, 36.0).y;
-
   return (
     <section aria-labelledby="map-heading" className="bg-forest text-forest-foreground py-20 md:py-28 relative overflow-hidden">
       {/* Subtle Background Pattern */}
@@ -82,13 +106,13 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
           <div className="max-w-2xl">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-              <Navigation className="w-3.5 h-3.5" /> Interactive Map of Kenya
+              <Navigation className="w-3.5 h-3.5" /> Explore Kenya Geographically
             </p>
             <h2 id="map-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
               Where in Kenya will your story begin?
             </h2>
             <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">
-              Explore Kenya's accurate geographical regions — from the arid northern frontier down through the Great Rift Valley, iconic savannahs, and Swahili coast.
+              Explore Kenya's extraordinary regions — from the northern frontier down through the Great Rift Valley, iconic savannahs, and Swahili coast.
             </p>
           </div>
 
@@ -129,218 +153,87 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
           </div>
         </div>
 
-        {/* Map Layout Grid: Left Interactive SVG Map, Right Active Destination Spotlight */}
+        {/* Map Layout Grid: Left Interactive Reference Image Map, Right Active Destination Spotlight */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* ── Left Map Canvas (7 Cols on desktop) ── */}
-          <div className="lg:col-span-7 bg-forest-foreground/5 rounded-2xl border border-border/20 p-4 sm:p-6 relative min-h-[520px] sm:min-h-[620px] flex flex-col justify-between overflow-hidden shadow-2xl">
-            {/* SVG Visual Map Container */}
-            <div className="relative w-full h-[460px] sm:h-[560px] my-auto">
-              <svg
-                viewBox="0 0 720 780"
-                className="w-full h-full drop-shadow-xl"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  {/* Subtle Map Gradient */}
-                  <linearGradient id="kenyaLandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
-                    <stop offset="50%" stopColor="rgba(255,255,255,0.04)" />
-                    <stop offset="100%" stopColor="rgba(212,175,55,0.06)" />
-                  </linearGradient>
+          <div className="lg:col-span-7 bg-forest-foreground/5 rounded-2xl border border-border/20 p-4 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl">
+            {/* Reference Map Container with Proportional Aspect Ratio */}
+            <div className="relative w-full aspect-[1/1.18] max-h-[620px] mx-auto rounded-xl overflow-hidden bg-forest/40 border border-border/20 shadow-inner">
+              {/* Reference Map Image Layer */}
+              <img
+                src="/maps/kenya-destinations-map.gif"
+                alt="Map of Kenya showing major destinations and geographic regions"
+                className="w-full h-full object-contain select-none"
+                onError={(e) => {
+                  // Fallback if public path is served differently in dev preview
+                  const target = e.currentTarget as HTMLImageElement;
+                  if (target.src !== kenyaMapAsset) {
+                    target.src = kenyaMapAsset;
+                  }
+                }}
+              />
 
-                  <linearGradient id="regionHighlightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(212,175,55,0.3)" />
-                    <stop offset="100%" stopColor="rgba(212,175,55,0.1)" />
-                  </linearGradient>
+              {/* Overlay Glass Vignette */}
+              <div className="absolute inset-0 pointer-events-none rounded-xl ring-1 ring-white/10" />
 
-                  <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                  </pattern>
-                </defs>
+              {/* ── INTERACTIVE DESTINATION PINS OVERLAY ── */}
+              <div className="absolute inset-0">
+                {destinations.map((d) => {
+                  const pos = getMapPosition(d);
+                  const isActive = activeDestination?.slug === d.slug;
+                  const isRegionMatch = selectedRegion === "All" || d.region === selectedRegion;
+                  const labelOffsetClass = DESTINATION_LABEL_OFFSETS[d.slug] || "-translate-x-1/2 translate-y-3";
 
-                {/* Grid backdrop inside Map Area */}
-                <rect width="720" height="780" fill="url(#gridPattern)" />
-
-                {/* ── ACCURATE KENYA GEOGRAPHIC BOUNDARY PATH ── */}
-                <path
-                  d="M 159,81 
-                     C 220,95 320,135 439,159 
-                     L 649,130 
-                     L 579,210 
-                     L 576,383 
-                     L 627,526 
-                     C 610,545 585,558 577,570 
-                     C 555,595 532,600 521,611 
-                     C 515,628 512,638 511,647 
-                     C 505,658 501,662 499,667 
-                     C 492,682 488,688 485,696 
-                     C 475,720 460,735 452,741 
-                     L 337,650 
-                     L 270,590 
-                     L 215,551 
-                     L 137,540 
-                     L 71,482 
-                     C 65,430 68,400 69,376 
-                     C 85,350 95,340 103,329 
-                     C 120,300 135,290 148,278 
-                     C 110,200 95,150 88,111 
-                     Z"
-                  fill="url(#kenyaLandGrad)"
-                  stroke="rgba(212, 175, 55, 0.45)"
-                  strokeWidth="2.5"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  className="transition-all duration-700 hover:stroke-gold"
-                />
-
-                {/* ── REGIONAL SHADING OVERLAYS ── */}
-                {/* 1. Northern Kenya Region Shading */}
-                <path
-                  d="M 159,81 L 439,159 L 649,130 L 579,210 L 576,383 L 340,360 L 148,278 Z"
-                  fill={selectedRegion === "Northern Kenya" ? "url(#regionHighlightGrad)" : "none"}
-                  stroke={selectedRegion === "Northern Kenya" ? "var(--color-gold)" : "none"}
-                  strokeWidth="2"
-                  className="transition-all duration-500 pointer-events-none"
-                />
-
-                {/* 2. Rift Valley & Central Kenya Region Shading */}
-                <path
-                  d="M 148,278 L 340,360 L 320,530 L 137,540 L 69,376 L 103,329 Z"
-                  fill={selectedRegion === "Rift Valley & Central Kenya" ? "url(#regionHighlightGrad)" : "none"}
-                  stroke={selectedRegion === "Rift Valley & Central Kenya" ? "var(--color-gold)" : "none"}
-                  strokeWidth="2"
-                  className="transition-all duration-500 pointer-events-none"
-                />
-
-                {/* 3. Southern Kenya Region Shading */}
-                <path
-                  d="M 137,540 L 320,530 L 485,600 L 452,741 L 337,650 L 270,590 L 215,551 Z"
-                  fill={selectedRegion === "Southern Kenya" ? "url(#regionHighlightGrad)" : "none"}
-                  stroke={selectedRegion === "Southern Kenya" ? "var(--color-gold)" : "none"}
-                  strokeWidth="2"
-                  className="transition-all duration-500 pointer-events-none"
-                />
-
-                {/* 4. Indian Ocean Coast Region Shading */}
-                <path
-                  d="M 576,383 L 627,526 L 577,570 L 521,611 L 511,647 L 485,696 L 452,741 L 440,620 Z"
-                  fill={selectedRegion === "Indian Ocean Coast" ? "url(#regionHighlightGrad)" : "none"}
-                  stroke={selectedRegion === "Indian Ocean Coast" ? "var(--color-gold)" : "none"}
-                  strokeWidth="2"
-                  className="transition-all duration-500 pointer-events-none"
-                />
-
-                {/* ── ACCURATE WATER BODIES & GEOGRAPHIC LANDMARKS ── */}
-
-                {/* Lake Victoria (South-West Gulf) */}
-                <path
-                  d="M 71,482 C 60,450 62,420 69,376 C 50,400 40,440 52,470 Z"
-                  className="fill-cyan-500/25 stroke-cyan-400/50 stroke-1.5"
-                />
-                <text x="50" y="445" className="fill-cyan-200/75 text-[10px] tracking-widest uppercase font-mono font-semibold">
-                  Lake Victoria
-                </text>
-
-                {/* Lake Turkana (North Slender Lake) */}
-                <path
-                  d="M 211,96 C 220,140 230,190 256,246 C 238,235 225,180 205,110 Z"
-                  className="fill-cyan-500/30 stroke-cyan-300/60 stroke-1.5"
-                />
-                <text x="238" y="165" className="fill-cyan-200/80 text-[10px] tracking-wider uppercase font-mono font-semibold">
-                  Lake Turkana
-                </text>
-
-                {/* Indian Ocean Label */}
-                <path d="M 540,660 C 580,680 630,710 670,730" stroke="rgba(212,175,55,0.2)" strokeDasharray="3 3" />
-                <text x="560" y="705" className="fill-gold/60 text-[12px] tracking-[0.35em] uppercase font-serif font-medium">
-                  Indian Ocean
-                </text>
-
-                {/* Equator Line */}
-                <line x1="50" y1={equatorY} x2="670" y2={equatorY} stroke="rgba(212,175,55,0.25)" strokeDasharray="4 6" />
-                <text x="60" y={equatorY - 6} className="fill-gold/60 text-[9.5px] tracking-widest font-mono uppercase font-semibold">
-                  Equator 0° 00'
-                </text>
-
-                {/* Mount Kenya Elevation Marker */}
-                <g transform="translate(309, 420)">
-                  <path d="M 0 -8 L 7 5 L -7 5 Z" className="fill-terracotta stroke-cream stroke-1" />
-                  <circle cx="0" cy="0" r="1.5" className="fill-cream" />
-                  <text x="12" y="4" className="fill-cream/85 text-[10px] font-serif tracking-wide font-medium">
-                    Mt. Kenya (5,199m)
-                  </text>
-                </g>
-
-                {/* Neighboring Country Labels for Context */}
-                <text x="110" y="70" className="fill-forest-foreground/30 text-[10px] tracking-widest uppercase font-mono">
-                  Ethiopia
-                </text>
-                <text x="610" y="300" className="fill-forest-foreground/30 text-[10px] tracking-widest uppercase font-mono">
-                  Somalia
-                </text>
-                <text x="210" y="690" className="fill-forest-foreground/30 text-[10px] tracking-widest uppercase font-mono">
-                  Tanzania
-                </text>
-                <text x="50" y="240" className="fill-forest-foreground/30 text-[10px] tracking-widest uppercase font-mono">
-                  Uganda
-                </text>
-              </svg>
-
-              {/* ── ACCURATE GEOGRAPHIC PINS OVERLAY ── */}
-              {destinations.map((d) => {
-                const pos = getGeoPercentages(d.latitude, d.longitude);
-                const isActive = activeDestination?.slug === d.slug;
-                const isRegionMatch = selectedRegion === "All" || d.region === selectedRegion;
-
-                return (
-                  <button
-                    key={d.slug}
-                    type="button"
-                    onClick={() => setActiveSlug(d.slug)}
-                    onMouseEnter={() => setActiveSlug(d.slug)}
-                    style={{ left: `${pos.leftPercent}%`, top: `${pos.topPercent}%` }}
-                    aria-label={`Select ${d.name}`}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 group focus:outline-none transition-all duration-300 z-20 ${
-                      isRegionMatch ? "opacity-100 scale-100" : "opacity-35 scale-75 pointer-events-none"
-                    }`}
-                  >
-                    {/* Pulsing ring on active */}
-                    {isActive && (
-                      <span className="absolute -inset-3 rounded-full bg-gold/40 animate-ping pointer-events-none" />
-                    )}
-
-                    <div
-                      className={`relative flex items-center justify-center rounded-full transition-all shadow-lg ${
-                        isActive
-                          ? "w-8 h-8 bg-gold text-gold-foreground ring-4 ring-forest ring-offset-2 ring-offset-forest"
-                          : "w-6 h-6 bg-cream text-forest hover:scale-125 hover:bg-gold hover:text-gold-foreground"
+                  return (
+                    <button
+                      key={d.slug}
+                      type="button"
+                      onClick={() => setActiveSlug(d.slug)}
+                      onMouseEnter={() => setActiveSlug(d.slug)}
+                      style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
+                      aria-label={`Select ${d.name}`}
+                      className={`absolute -translate-x-1/2 -translate-y-1/2 group focus:outline-none transition-all duration-300 z-20 ${
+                        isRegionMatch ? "opacity-100 scale-100" : "opacity-35 scale-75 pointer-events-none"
                       }`}
                     >
-                      <MapPin className={`${isActive ? "w-4 h-4" : "w-3 h-3"}`} />
-                    </div>
+                      {/* Pulsing ring on active pin */}
+                      {isActive && (
+                        <span className="absolute -inset-3 rounded-full bg-gold/40 animate-ping pointer-events-none" />
+                      )}
 
-                    {/* Pin Label Badge */}
-                    <div
-                      className={`absolute top-full left-1/2 -translate-x-1/2 mt-1.5 whitespace-nowrap px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider transition-all pointer-events-none shadow-md ${
-                        isActive
-                          ? "bg-gold text-gold-foreground scale-105"
-                          : "bg-forest/90 text-cream/90 group-hover:bg-cream group-hover:text-forest"
-                      }`}
-                    >
-                      {d.name}
-                    </div>
-                  </button>
-                );
-              })}
+                      {/* Pin Circle Icon */}
+                      <div
+                        className={`relative flex items-center justify-center rounded-full transition-all shadow-lg ${
+                          isActive
+                            ? "w-8 h-8 bg-gold text-gold-foreground ring-4 ring-forest ring-offset-2 ring-offset-forest"
+                            : "w-6 h-6 bg-cream text-forest hover:scale-125 hover:bg-gold hover:text-gold-foreground"
+                        }`}
+                      >
+                        <MapPin className={`${isActive ? "w-4 h-4" : "w-3 h-3"}`} />
+                      </div>
+
+                      {/* Destination Label Badge */}
+                      <div
+                        className={`absolute top-full left-1/2 ${labelOffsetClass} whitespace-nowrap px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider transition-all pointer-events-none shadow-md ${
+                          isActive
+                            ? "bg-gold text-gold-foreground scale-105 z-30"
+                            : "bg-forest/90 text-cream/90 group-hover:bg-cream group-hover:text-forest"
+                        }`}
+                      >
+                        {d.name}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Bottom Map Helper Text */}
-            <div className="pt-4 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-forest-foreground/70">
+            <div className="pt-4 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-forest-foreground/70 gap-2">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-gold inline-block" /> Hover or tap any pin to inspect region
+                <span className="w-2 h-2 rounded-full bg-gold inline-block" /> Hover or tap any pin to explore a destination
               </span>
-              <span className="font-mono text-[11px]">Accurate Kenya Projection • 10 Protected Destinations</span>
+              <span className="font-mono text-[11px]">Kenya destinations • Geographic reference map</span>
             </div>
           </div>
 
