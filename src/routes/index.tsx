@@ -48,7 +48,7 @@ const searchSchema = z.object({
   travelStyle: z.string().default(""),
 });
 
-export const Route = createFileRoute("/adventures/")({
+export const Route = createFileRoute("/")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
