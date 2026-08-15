@@ -14,7 +14,6 @@ import { InstagramStrip } from "@/components/site/Instagram";
 import { TestimonialsStrip } from "@/components/site/TestimonialsStrip";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
-import { usePreviewMerge } from "@/lib/preview-overrides";
 import heroBaobab from "@/assets/hero-baobab.jpg";
 
 export const Route = createFileRoute("/")({
@@ -47,7 +46,7 @@ function HomePage() {
     queryFn: () => pageContentFn({ data: { key: "home" } }),
     staleTime: 60_000,
   });
-  const heroContent = usePreviewMerge("home", { ...PAGE_DEFAULTS.home, ...(heroData ?? {}) });
+  const heroContent = { ...PAGE_DEFAULTS.home, ...(heroData ?? {}) };
 
   const { data: foundersData } = useQuery({
     queryKey: ["page-content", "home_founders"],
