@@ -68,9 +68,9 @@ function WhyBaobab() {
     ["05", "Thoughtful travel", "Designed with people, wildlife and place in mind."],
   ];
   return (
-    <section className="bg-background py-14 md:py-20">
-      <div className="mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10">
-        <div className="grid gap-8 border-t border-foreground/15 pt-7 lg:grid-cols-[0.75fr_1.25fr] lg:gap-14">
+    <section className="bg-background py-14 md:py-20 lg:py-24">
+      <div className="mx-auto max-w-[1920px] px-6 sm:px-8 lg:px-12 xl:px-16">
+        <div className="grid gap-8 border-t border-foreground/15 pt-7 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16 xl:gap-20">
           <div>
             <p className="mb-5 text-[11px] uppercase tracking-[0.35em] text-gold">Why Baobab?</p>
             <h2 className="font-serif text-4xl leading-[1.05] text-foreground md:text-6xl">
