@@ -6,14 +6,12 @@ import { useServerFn } from "@tanstack/react-start";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { installPreviewListener } from "@/lib/preview-overrides";
-import { PAGE_DEFAULTS, mergePageContent } from "@/lib/page-content.defaults";
-import { usePreviewMerge } from "@/lib/preview-overrides";
+import { mergePageContent } from "@/lib/page-content.defaults";
 import { recordVisit } from "@/lib/analytics.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
-  const c = usePreviewMerge("not_found", mergePageContent("not_found", null));
+  const c = mergePageContent("not_found", null);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -139,8 +137,6 @@ function RootComponent() {
   const record = useServerFn(recordVisit);
 
   useEffect(() => {
-    installPreviewListener();
-
     // Record one visit per browser session for public visitors only.
     if (typeof sessionStorage !== "undefined" && !sessionStorage.getItem("visitor_recorded")) {
       void (async () => {
