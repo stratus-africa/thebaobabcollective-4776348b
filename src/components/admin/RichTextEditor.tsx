@@ -100,6 +100,38 @@ export function RichTextEditor({
     emit();
   }
 
+  /** Wrap the current selection (or whole block) in a font-size class. */
+  function applySize(size: string) {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) {
+      // No selection: apply to the whole editor content as the base size.
+      if (!ref.current) return;
+      ref.current.querySelectorAll("[class*='rt-size-']").forEach((el) => {
+        el.className = el.className.replace(/rt-size-\S+/g, "").trim();
+        if (!el.className) el.removeAttribute("class");
+      });
+      if (size !== "md") {
+        ref.current.innerHTML = `<span class="rt-size-${size}">${ref.current.innerHTML}</span>`;
+      }
+      emit();
+      return;
+    }
+    const frag = range.cloneContents();
+    const holder = document.createElement("div");
+    holder.appendChild(frag);
+    holder.querySelectorAll("[class*='rt-size-']").forEach((el) => {
+      el.className = el.className.replace(/rt-size-\S+/g, "").trim();
+      if (!el.className) el.removeAttribute("class");
+    });
+    const html =
+      size === "md" ? holder.innerHTML : `<span class="rt-size-${size}">${holder.innerHTML}</span>`;
+    document.execCommand("insertHTML", false, html);
+    emit();
+  }
+
   function insertLink() {
     setInsertingLink(true);
     try {
@@ -221,6 +253,28 @@ export function RichTextEditor({
         <ToolbarBtn onClick={() => exec("formatBlock", "<h2>")} title="Heading" ariaLabel="Heading level 2" disabled={busy}><Heading2 className="w-3.5 h-3.5" /></ToolbarBtn>
         <ToolbarBtn onClick={() => exec("insertUnorderedList")} title="Bullet list" ariaLabel="Bullet list" disabled={busy}><List className="w-3.5 h-3.5" /></ToolbarBtn>
         <ToolbarBtn onClick={() => exec("insertOrderedList")} title="Numbered list" ariaLabel="Numbered list" disabled={busy}><ListOrdered className="w-3.5 h-3.5" /></ToolbarBtn>
+        <label className="sr-only" htmlFor="rt-size">Font size</label>
+        <select
+          id="rt-size"
+          defaultValue=""
+          onChange={(e) => {
+            const v = e.target.value;
+            e.currentTarget.value = "";
+            if (v) applySize(v);
+          }}
+          disabled={busy}
+          title="Font size"
+          aria-label="Font size"
+          className="h-7 rounded border border-border bg-background px-1.5 text-[11px] text-foreground/80 focus-visible:outline-2 focus-visible:outline-gold"
+        >
+          <option value="">Size</option>
+          <option value="xs">Extra small</option>
+          <option value="sm">Small</option>
+          <option value="md">Normal</option>
+          <option value="lg">Large</option>
+          <option value="xl">Extra large</option>
+          <option value="2xl">Huge</option>
+        </select>
         <ToolbarBtn onClick={insertLink} title="Insert link" ariaLabel="Insert link" disabled={busy}>
           {insertingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LinkIcon className="w-3.5 h-3.5" />}
         </ToolbarBtn>

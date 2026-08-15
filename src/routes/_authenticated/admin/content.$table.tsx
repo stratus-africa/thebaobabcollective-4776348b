@@ -653,7 +653,7 @@ function ContentAdmin() {
 
       {/* Create / Edit dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-5xl w-[95vw] max-h-[92vh] overflow-y-auto">
+        <DialogContent className="max-w-[1400px] w-[96vw] max-h-[92vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-2xl">
               {editing?.id ? `Edit ${singular}` : `New ${singular}`}

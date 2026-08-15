@@ -84,7 +84,7 @@ function AdminAdventureEdit() {
   if (!adventure) {
     return (
       <div className="space-y-4">
-        <Button variant="outline" onClick={() => navigate({ to: "/admin/content/$table", params: { table: "itineraries" } })}>
+        <Button variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to adventures
         </Button>
         <div className="rounded-lg border border-border bg-background p-6">
@@ -95,14 +95,15 @@ function AdminAdventureEdit() {
   }
 
   return (
-    <form onSubmit={save} className="mx-auto max-w-7xl space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
+    <form onSubmit={save} className="w-full max-w-none space-y-6">
+      <header className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Adventure editor</p>
-          <h1 className="font-serif text-3xl">Edit adventure</h1>
+          <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Manage Adventures</p>
+          <h1 className="font-serif text-3xl text-foreground">Edit adventure</h1>
+          <p className="text-sm text-foreground/60 mt-1">{adventure.name || "Untitled adventure"}</p>
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/content/$table", params: { table: "itineraries" } })}>
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
             Back to adventures
           </Button>
           <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
@@ -112,7 +113,7 @@ function AdminAdventureEdit() {
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-        <section className="space-y-5 border border-border bg-background p-5 sm:p-6">
+        <section className="space-y-5 rounded-lg border border-border bg-background p-5 sm:p-6 shadow-sm">
           <div>
             <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
               Adventure name
@@ -339,7 +340,7 @@ function AdminAdventureEdit() {
         </section>
 
         <aside className="space-y-5">
-          <div className="border border-border bg-background p-5">
+          <div className="rounded-lg border border-border bg-background p-5 shadow-sm">
             <Label className="mb-3 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Hero Image</Label>
             <ManagedImageUpload
               value={adventure.image}
@@ -366,7 +367,7 @@ function AdminAdventureEdit() {
             />
           </div>
 
-          <div className="border border-border bg-background p-5">
+          <div className="rounded-lg border border-border bg-background p-5 shadow-sm">
             <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
               Image alt text
             </Label>
