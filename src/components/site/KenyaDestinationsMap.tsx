@@ -22,10 +22,10 @@ const DESTINATION_MAP_POSITIONS: Record<string, { left: number; top: number }> =
   "lake-nakuru-naivasha": { left: 31.5, top: 56.5 },
   "mount-kenya": { left: 46.5, top: 51.5 },
   // Coastal destinations — pinned to the visible Indian Ocean coast strip
-  "lamu-archipelago": { left: 78.0, top: 57.5 },
-  "malindi": { left: 76.5, top: 66.5 },
-  "watamu": { left: 75.5, top: 70.0 },
-  "diani-beach": { left: 73.5, top: 83.5 },
+  "lamu-archipelago": { left: 84.5, top: 55.0 },
+  "malindi": { left: 84.0, top: 65.5 },
+  "watamu": { left: 83.5, top: 68.5 },
+  "diani-beach": { left: 82.5, top: 80.5 },
 };
 
 /**
