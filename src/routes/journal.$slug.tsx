@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { articles as staticArticles, getArticle as getStaticArticle } from "@/lib/content";
 import { getArticleBySlug, getArticles } from "@/lib/cms.functions";
 
@@ -139,6 +140,32 @@ function ArticlePage() {
             </div>
           </div>
         </article>
+
+        {/* Article Conversion CTA */}
+        <section className="bg-forest text-forest-foreground py-18 md:py-24 text-center">
+          <div className="max-w-2xl mx-auto px-6 space-y-4">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold">Inspired by Kenya?</p>
+            <h2 className="font-serif text-3xl sm:text-4xl text-cream">Let's create your journey.</h2>
+            <p className="text-forest-foreground/80 text-sm sm:text-base leading-relaxed">
+              Every safari we design is completely bespoke — crafted around your timing, interests and travel style.
+            </p>
+            <div className="pt-3">
+              <EnquireDialog
+                defaultSubject={`Journal: ${article.title}`}
+                sourceUrl={`/journal/${article.slug}`}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.22em] text-[11px] font-semibold px-8 py-3.5 hover:bg-gold/90 transition-colors shadow-md"
+                  >
+                    <span>Start Planning</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                }
+              />
+            </div>
+          </div>
+        </section>
 
         {related.length > 0 && (
           <section aria-labelledby="related" className="bg-cream py-20">
