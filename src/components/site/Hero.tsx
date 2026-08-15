@@ -138,7 +138,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
                 }
               />
               <Link
-                to="/destinations"
+                to="/adventures"
                 className="group inline-flex items-center gap-3 rounded-full border border-cream/60 text-cream uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:border-gold hover:text-gold transition-colors backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
               >
                 {c.hero_cta_secondary}
