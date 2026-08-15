@@ -91,9 +91,18 @@ function AdminDestinationEdit() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data: destination, isLoading, isError, error, refetch } = useQuery({
+  const {
+    data: destination,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["admin-destination", id],
-    queryFn: () => getFn({ data: { table: "destinations", id } }),
+    queryFn: async () => {
+      const res = await getFn({ data: { table: "destinations", id } });
+      return res as unknown as DestinationRecord | null;
+    },
   });
 
   useEffect(() => {
@@ -207,7 +216,10 @@ function AdminDestinationEdit() {
           </Link>
           <div className="flex items-center gap-3">
             <h1 className="font-serif text-3xl text-foreground">Edit Destination</h1>
-            <Badge variant={form.published ? "default" : "secondary"} className={form.published ? "bg-forest text-forest-foreground" : ""}>
+            <Badge
+              variant={form.published ? "default" : "secondary"}
+              className={form.published ? "bg-forest text-forest-foreground" : ""}
+            >
               {form.published ? "Active" : "Draft"}
             </Badge>
           </div>
@@ -400,7 +412,10 @@ function AdminDestinationEdit() {
           <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
             <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
               <h3 className="font-serif text-base">Publish</h3>
-              <Badge variant={form.published ? "default" : "secondary"} className={form.published ? "bg-forest text-forest-foreground" : ""}>
+              <Badge
+                variant={form.published ? "default" : "secondary"}
+                className={form.published ? "bg-forest text-forest-foreground" : ""}
+              >
                 {form.published ? "Published" : "Draft"}
               </Badge>
             </header>
@@ -408,11 +423,7 @@ function AdminDestinationEdit() {
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground/60 uppercase tracking-wider">Status</span>
                 <label className="flex items-center gap-2 text-sm cursor-pointer font-medium">
-                  <Checkbox
-                    checked={form.published}
-                    onCheckedChange={(v) => patch("published", !!v)}
-                    id="published"
-                  />
+                  <Checkbox checked={form.published} onCheckedChange={(v) => patch("published", !!v)} id="published" />
                   <span>Active / Published</span>
                 </label>
               </div>
@@ -433,9 +444,7 @@ function AdminDestinationEdit() {
               {form.created_at && (
                 <div className="pt-2 border-t border-border/60 text-[11px] text-foreground/50 space-y-1">
                   <div>Created: {new Date(form.created_at).toLocaleDateString()}</div>
-                  {form.updated_at && (
-                    <div>Updated: {new Date(form.updated_at).toLocaleDateString()}</div>
-                  )}
+                  {form.updated_at && <div>Updated: {new Date(form.updated_at).toLocaleDateString()}</div>}
                 </div>
               )}
 
@@ -468,7 +477,12 @@ function AdminDestinationEdit() {
                   </Button>
 
                   {liveHref && (
-                    <Button variant="ghost" size="sm" asChild className="text-xs text-foreground/60 hover:text-foreground px-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="text-xs text-foreground/60 hover:text-foreground px-2"
+                    >
                       <a href={liveHref} target="_blank" rel="noreferrer">
                         <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
                       </a>
@@ -527,7 +541,8 @@ function AdminDestinationEdit() {
             <AlertDialogTitle>Delete destination?</AlertDialogTitle>
             <AlertDialogDescription>
               You're about to permanently delete{" "}
-              <span className="font-semibold text-foreground">"{form.name || "this destination"}"</span>. This action cannot be undone and will remove it from the live site.
+              <span className="font-semibold text-foreground">"{form.name || "this destination"}"</span>. This action
+              cannot be undone and will remove it from the live site.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
