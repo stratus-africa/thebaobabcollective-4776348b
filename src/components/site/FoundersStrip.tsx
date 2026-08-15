@@ -1,25 +1,28 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles, Heart } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import g1 from "@/assets/gallery-1.jpg";
 import g4 from "@/assets/gallery-4.jpg";
+import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 
-export function FoundersStrip() {
+type FoundersContent = Partial<typeof PAGE_DEFAULTS.home_founders>;
+
+export function FoundersStrip({ content }: { content?: FoundersContent | null } = {}) {
+  const c = { ...PAGE_DEFAULTS.home_founders, ...(content ?? {}) };
+
   const founders = [
     {
-      name: "Michael D'Souza",
-      role: "Co-Founder & Expedition Lead",
-      image: g1,
-      quote:
-        "Kenya has been home for most of my life. I created Baobab to share the wild, intimate places and the people I know and respect most.",
-      tag: "Lifelong Kenya Resident",
+      name: c.founder_1_name,
+      role: c.founder_1_role,
+      image: c.founder_1_image || g1,
+      quote: c.founder_1_quote,
+      tag: c.founder_1_tag,
     },
     {
-      name: "Samra D'Souza",
-      role: "Co-Founder & Experience Curator",
-      image: g4,
-      quote:
-        "We believe luxury is not about excess, but about intimacy, soul, and time well-spent in places that truly leave a lasting mark.",
-      tag: "Journey Architect",
+      name: c.founder_2_name,
+      role: c.founder_2_role,
+      image: c.founder_2_image || g4,
+      quote: c.founder_2_quote,
+      tag: c.founder_2_tag,
     },
   ];
 
@@ -30,20 +33,20 @@ export function FoundersStrip() {
           {/* Left Column — Narrative */}
           <div className="space-y-6">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5" /> Direct Personal Connection
+              <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
             </p>
             <h2 id="founders-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
-              Meet Your Journey Designers
+              {c.title}
             </h2>
             <p className="text-foreground/80 text-base sm:text-lg leading-relaxed">
-              When you plan with The Baobab Collective, you do not speak to a call center or browse a mass catalog. You design your safari directly with people who have lived the land, walked every camp, and built decades of trusted relationships in Kenya.
+              {c.body}
             </p>
             <div className="pt-2">
               <Link
                 to="/about"
                 className="group inline-flex items-center gap-3 rounded-full bg-forest text-forest-foreground uppercase tracking-[0.22em] text-[11px] font-semibold px-8 py-4 hover:bg-forest/90 transition-colors shadow-md"
               >
-                <span>Meet the Collective</span>
+                <span>{c.cta_label}</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </div>
