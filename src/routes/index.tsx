@@ -6,13 +6,12 @@ import { Footer } from "@/components/site/Footer";
 import { Hero } from "@/components/site/Hero";
 import { FoundersStrip } from "@/components/site/FoundersStrip";
 import { TrustStrip } from "@/components/site/TrustStrip";
-import { FindYourJourney } from "@/components/site/FindYourJourney";
 import { WhyBaobab } from "@/components/site/WhyBaobab";
+import { FindYourJourney } from "@/components/site/FindYourJourney";
 import { JourneyImpact } from "@/components/site/JourneyImpact";
 import { HowItWorks } from "@/components/site/HowItWorks";
 import { InstagramStrip } from "@/components/site/Instagram";
 import { TestimonialsStrip } from "@/components/site/TestimonialsStrip";
-import { FinalCta } from "@/components/site/FinalCta";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
@@ -62,15 +61,21 @@ function HomePage() {
     staleTime: 60_000,
   });
 
-  const { data: findJourneyData } = useQuery({
-    queryKey: ["page-content", "home_find_journey"],
-    queryFn: () => pageContentFn({ data: { key: "home_find_journey" } }),
-    staleTime: 60_000,
-  });
-
   const { data: whyBaobabData } = useQuery({
     queryKey: ["page-content", "home_why_baobab"],
     queryFn: () => pageContentFn({ data: { key: "home_why_baobab" } }),
+    staleTime: 60_000,
+  });
+
+  const { data: finalCtaData } = useQuery({
+    queryKey: ["page-content", "home_final_cta"],
+    queryFn: () => pageContentFn({ data: { key: "home_final_cta" } }),
+    staleTime: 60_000,
+  });
+
+  const { data: findJourneyData } = useQuery({
+    queryKey: ["page-content", "home_find_journey"],
+    queryFn: () => pageContentFn({ data: { key: "home_find_journey" } }),
     staleTime: 60_000,
   });
 
@@ -92,12 +97,6 @@ function HomePage() {
     staleTime: 60_000,
   });
 
-  const { data: finalCtaData } = useQuery({
-    queryKey: ["page-content", "home_final_cta"],
-    queryFn: () => pageContentFn({ data: { key: "home_final_cta" } }),
-    staleTime: 60_000,
-  });
-
   return (
     <div className="bg-background min-h-screen">
       <Navbar />
@@ -108,16 +107,16 @@ function HomePage() {
         {/* 02. Trust Strip */}
         <TrustStrip content={trustData} />
 
-        {/* 03. Founders */}
+        {/* 03. Why Baobab */}
+        <WhyBaobab content={whyBaobabData} finalCtaContent={finalCtaData} />
+
+        {/* 04. Founders */}
         <FoundersStrip content={foundersData} />
 
-        {/* 04. Find Your Journey */}
+        {/* 05. Find Your Journey */}
         <FindYourJourney content={findJourneyData} />
 
-        {/* 05. Why Baobab */}
-        <WhyBaobab content={whyBaobabData} />
-
-        {/* 06. Testimonials — social proof */}
+        {/* 06. Guest Stories */}
         <TestimonialsStrip />
 
         {/* 07. Journey Impact */}
@@ -128,9 +127,6 @@ function HomePage() {
 
         {/* 09. Instagram */}
         <InstagramStrip content={instagramData} />
-
-        {/* 10. Final CTA */}
-        <FinalCta content={finalCtaData} />
       </main>
       <Footer />
     </div>
