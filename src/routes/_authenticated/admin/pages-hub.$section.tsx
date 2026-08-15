@@ -1,9 +1,20 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  LayoutDashboard, Compass, MapPin, Building, BookOpen, Globe,
-  Bell, Users as UsersIcon, Sparkles, Megaphone, Home as HomeIcon,
-  Map, Hotel, FileText,
+  LayoutDashboard,
+  Compass,
+  MapPin,
+  Building,
+  BookOpen,
+  Globe,
+  Bell,
+  Users as UsersIcon,
+  Sparkles,
+  Megaphone,
+  Home as HomeIcon,
+  Map,
+  Hotel,
+  FileText,
 } from "lucide-react";
 import { PageEditor } from "./pages.$page";
 import type { PageKey } from "@/lib/page-content.defaults";
@@ -18,19 +29,122 @@ const SECTIONS: Record<string, HubSection> = {
     description: "Every section of the homepage, grouped into tabs.",
     tabs: [
       {
-        value: "hero", label: "Home Hero", icon: LayoutDashboard,
+        value: "hero",
+        label: "Hero",
+        icon: LayoutDashboard,
         editors: [
-          { pageKey: "home",    label: "Home — Hero",           icon: HomeIcon,  description: "Main homepage hero content." },
-          { pageKey: "top_bar", label: "Top Announcement Bar",  icon: Megaphone, description: "Sitewide announcement strip above the navbar." },
+          { pageKey: "home", label: "Home — Hero", icon: HomeIcon, description: "Main homepage hero content." },
+          {
+            pageKey: "top_bar",
+            label: "Top Announcement Bar",
+            icon: Megaphone,
+            description: "Sitewide announcement strip above the navbar.",
+          },
         ],
       },
       {
-        value: "journal", label: "Journal", icon: BookOpen,
-        editors: [{ pageKey: "home_journal", label: "Home — Journal Strip", icon: BookOpen, description: "Journal preview strip on the homepage." }],
+        value: "trust",
+        label: "Trust Strip",
+        icon: Sparkles,
+        editors: [
+          {
+            pageKey: "home_trust",
+            label: "Trust Strip",
+            icon: Sparkles,
+            description: "Four expertise/trust items below the hero.",
+          },
+        ],
       },
       {
-        value: "instagram", label: "Instagram", icon: Globe,
-        editors: [{ pageKey: "home_instagram", label: "Home — Instagram Strip", icon: Globe, description: "Instagram feed strip on the homepage." }],
+        value: "find_journey",
+        label: "Find Journey",
+        icon: Compass,
+        editors: [
+          {
+            pageKey: "home_find_journey",
+            label: "Find Your Journey",
+            icon: Compass,
+            description: "Journey-type card grid section.",
+          },
+        ],
+      },
+      {
+        value: "why",
+        label: "Why Baobab",
+        icon: Sparkles,
+        editors: [
+          {
+            pageKey: "home_why_baobab",
+            label: "Why Baobab — Pillars",
+            icon: Sparkles,
+            description: "Numbered pillars explaining why Baobab Collective.",
+          },
+        ],
+      },
+      {
+        value: "founders",
+        label: "Founders",
+        icon: UsersIcon,
+        editors: [
+          {
+            pageKey: "home_founders",
+            label: "Meet the Founders",
+            icon: UsersIcon,
+            description: "Founder profile cards and narrative copy.",
+          },
+        ],
+      },
+      {
+        value: "impact",
+        label: "Journey Impact",
+        icon: Globe,
+        editors: [
+          {
+            pageKey: "home_impact",
+            label: "Journey Impact",
+            icon: Globe,
+            description: "Responsible tourism / conservation pillars.",
+          },
+        ],
+      },
+      {
+        value: "how",
+        label: "How It Works",
+        icon: Bell,
+        editors: [
+          {
+            pageKey: "home_how_it_works",
+            label: "How It Works — Steps",
+            icon: Bell,
+            description: "Four-step planning process section.",
+          },
+        ],
+      },
+      {
+        value: "final_cta",
+        label: "Final CTA",
+        icon: Megaphone,
+        editors: [
+          {
+            pageKey: "home_final_cta",
+            label: "Final CTA Block",
+            icon: Megaphone,
+            description: "'Your Kenya is waiting' closing CTA.",
+          },
+        ],
+      },
+      {
+        value: "instagram",
+        label: "Instagram",
+        icon: Globe,
+        editors: [
+          {
+            pageKey: "home_instagram",
+            label: "Home — Instagram Strip",
+            icon: Globe,
+            description: "Instagram feed strip on the homepage.",
+          },
+        ],
       },
     ],
   },
@@ -38,11 +152,61 @@ const SECTIONS: Record<string, HubSection> = {
     title: "About Page",
     description: "Sections of the /about page.",
     tabs: [
-      { value: "hero",    label: "About Hero", icon: Sparkles,  editors: [{ pageKey: "about",         label: "About — Hero / Block", icon: Sparkles,  description: "Top hero block on the About page." }] },
-      { value: "mission", label: "Mission",    icon: BookOpen,  editors: [{ pageKey: "about_mission", label: "About — Mission",      icon: BookOpen,  description: "Mission section content." }] },
-      { value: "values",  label: "Values",     icon: Bell,      editors: [{ pageKey: "about_values",  label: "About — Values",       icon: Bell,      description: "Core values section." }] },
-      { value: "team",    label: "Team",       icon: UsersIcon, editors: [{ pageKey: "about_team",    label: "About — Team",         icon: UsersIcon, description: "Team members section." }] },
-      { value: "destinations", label: "Destinations", icon: MapPin, editors: [{ pageKey: "home_destinations", label: "Home — Destinations Strip", icon: Map, description: "Destinations preview strip on the homepage." }] },
+      {
+        value: "hero",
+        label: "About Hero",
+        icon: Sparkles,
+        editors: [
+          {
+            pageKey: "about",
+            label: "About — Hero / Block",
+            icon: Sparkles,
+            description: "Top hero block on the About page.",
+          },
+        ],
+      },
+      {
+        value: "mission",
+        label: "Mission",
+        icon: BookOpen,
+        editors: [
+          {
+            pageKey: "about_mission",
+            label: "About — Mission",
+            icon: BookOpen,
+            description: "Mission section content.",
+          },
+        ],
+      },
+      {
+        value: "values",
+        label: "Values",
+        icon: Bell,
+        editors: [
+          { pageKey: "about_values", label: "About — Values", icon: Bell, description: "Core values section." },
+        ],
+      },
+      {
+        value: "team",
+        label: "Team",
+        icon: UsersIcon,
+        editors: [
+          { pageKey: "about_team", label: "About — Team", icon: UsersIcon, description: "Team members section." },
+        ],
+      },
+      {
+        value: "destinations",
+        label: "Destinations",
+        icon: MapPin,
+        editors: [
+          {
+            pageKey: "home_destinations",
+            label: "Home — Destinations Strip",
+            icon: Map,
+            description: "Destinations preview strip on the homepage.",
+          },
+        ],
+      },
     ],
   },
   adventures: {
@@ -50,19 +214,48 @@ const SECTIONS: Record<string, HubSection> = {
     description: "Adventures section pages and homepage content.",
     tabs: [
       {
-        value: "adventures", label: "Adventures", icon: Compass,
+        value: "adventures",
+        label: "Adventures",
+        icon: Compass,
         editors: [
-          { pageKey: "home_adventures",   label: "Home — Adventures Strip",     icon: HomeIcon, description: "Adventures preview strip on the homepage." },
-          { pageKey: "adventures_index",  label: "Adventures Landing",          icon: Compass,  description: "The /adventures listing page." },
-          { pageKey: "detail_journey",    label: "Adventures Detail Template",  icon: FileText, description: "Template used for each adventure detail page." },
+          {
+            pageKey: "home_adventures",
+            label: "Home — Adventures Strip",
+            icon: HomeIcon,
+            description: "Adventures preview strip on the homepage.",
+          },
+          {
+            pageKey: "adventures_index",
+            label: "Adventures Landing",
+            icon: Compass,
+            description: "The /adventures listing page.",
+          },
+          {
+            pageKey: "detail_journey",
+            label: "Adventures Detail Template",
+            icon: FileText,
+            description: "Template used for each adventure detail page.",
+          },
         ],
       },
       {
-        value: "lodges", label: "Lodges", icon: Building,
+        value: "lodges",
+        label: "Lodges",
+        icon: Building,
         editors: [
-          { pageKey: "home_lodges",  label: "Home — Lodges Strip",   icon: HomeIcon,  description: "Lodges preview strip on the homepage." },
-          { pageKey: "lodges_index", label: "Lodges Landing",        icon: Hotel,     description: "The /lodges listing page." },
-          { pageKey: "detail_lodge", label: "Lodge Detail Template", icon: FileText,  description: "Template used for each lodge detail page." },
+          {
+            pageKey: "home_lodges",
+            label: "Home — Lodges Strip",
+            icon: HomeIcon,
+            description: "Lodges preview strip on the homepage.",
+          },
+          { pageKey: "lodges_index", label: "Lodges Landing", icon: Hotel, description: "The /lodges listing page." },
+          {
+            pageKey: "detail_lodge",
+            label: "Lodge Detail Template",
+            icon: FileText,
+            description: "Template used for each lodge detail page.",
+          },
         ],
       },
     ],
@@ -72,11 +265,28 @@ const SECTIONS: Record<string, HubSection> = {
     description: "Destinations section pages and related content.",
     tabs: [
       {
-        value: "adventures", label: "Adventures", icon: Compass,
+        value: "adventures",
+        label: "Adventures",
+        icon: Compass,
         editors: [
-          { pageKey: "home_adventures",   label: "Home — Adventures Strip",     icon: HomeIcon, description: "Adventures preview strip on the homepage." },
-          { pageKey: "adventures_index",  label: "Adventures Landing",          icon: Compass,  description: "The /adventures listing page." },
-          { pageKey: "detail_journey",    label: "Adventures Detail Template",  icon: FileText, description: "Template used for each adventure detail page." },
+          {
+            pageKey: "home_adventures",
+            label: "Home — Adventures Strip",
+            icon: HomeIcon,
+            description: "Adventures preview strip on the homepage.",
+          },
+          {
+            pageKey: "adventures_index",
+            label: "Adventures Landing",
+            icon: Compass,
+            description: "The /adventures listing page.",
+          },
+          {
+            pageKey: "detail_journey",
+            label: "Adventures Detail Template",
+            icon: FileText,
+            description: "Template used for each adventure detail page.",
+          },
         ],
       },
     ],
@@ -103,7 +313,10 @@ function PagesHub() {
       </header>
 
       <Tabs defaultValue={cfg.tabs[0]?.value} orientation="vertical" className="flex flex-col md:flex-row gap-8">
-        <TabsList aria-label={`${cfg.title} sections`} className="h-auto md:w-56 shrink-0 flex md:flex-col bg-transparent p-0 gap-1 justify-start">
+        <TabsList
+          aria-label={`${cfg.title} sections`}
+          className="h-auto md:w-56 shrink-0 flex md:flex-col bg-transparent p-0 gap-1 justify-start"
+        >
           {cfg.tabs.map((t) => {
             const Icon = t.icon;
             return (
@@ -123,7 +336,10 @@ function PagesHub() {
             <TabsContent key={t.value} value={t.value} className="mt-0">
               {t.editors.length > 1 ? (
                 <Tabs defaultValue={t.editors[0].pageKey} className="flex flex-col gap-6">
-                  <TabsList aria-label={`${t.label} — editors`} className="h-auto w-full flex flex-col bg-transparent p-0 gap-2">
+                  <TabsList
+                    aria-label={`${t.label} — editors`}
+                    className="h-auto w-full flex flex-col bg-transparent p-0 gap-2"
+                  >
                     {t.editors.map((ed) => {
                       const EdIcon = ed.icon;
                       return (
