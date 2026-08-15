@@ -99,7 +99,7 @@ function AdminAdventureEdit() {
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
         <div>
           <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Adventure editor</p>
-          <h1 className="font-serif text-3xl">{adventure.id ? "Edit adventure" : "New adventure"}</h1>
+          <h1 className="font-serif text-3xl">Edit adventure</h1>
         </div>
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/content/itineraries" })}>
