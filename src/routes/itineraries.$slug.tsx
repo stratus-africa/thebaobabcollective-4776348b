@@ -1,13 +1,14 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
-import { ArrowRight, Check, Calendar, MapPin, Users, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Calendar, MapPin, Users, Sparkles, X } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 
 import { ShareButtons } from "@/components/site/ShareButtons";
 import { getItineraryBySlug } from "@/lib/cms.functions";
+import { getAdventuresPage } from "@/lib/adventures.functions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const itinerarySearchSchema = z.object({
@@ -17,9 +18,15 @@ const itinerarySearchSchema = z.object({
 export const Route = createFileRoute("/itineraries/$slug")({
   validateSearch: zodValidator(itinerarySearchSchema),
   loader: async ({ params }) => {
-    const itinerary = await getItineraryBySlug({ data: { slug: params.slug } });
+    const [itinerary, adventuresPage] = await Promise.all([
+      getItineraryBySlug({ data: { slug: params.slug } }),
+      getAdventuresPage().catch(() => null),
+    ]);
     if (!itinerary) throw notFound();
-    return { itinerary };
+    const matchingAdventure = (adventuresPage?.signatures ?? []).find(
+      (s) => s.slug === params.slug || s.name.toLowerCase() === itinerary.name.toLowerCase(),
+    );
+    return { itinerary, matchingAdventure };
   },
   head: ({ loaderData }) => {
     const it = loaderData?.itinerary;
@@ -74,11 +81,33 @@ export const Route = createFileRoute("/itineraries/$slug")({
 });
 
 function ItineraryPage() {
-  const { itinerary } = Route.useLoaderData();
+  const { itinerary, matchingAdventure } = Route.useLoaderData();
   const { formatPrice } = useSiteSettings();
   const { itinerary: prefillFromQuery } = Route.useSearch();
   const cat = (itinerary as any).category;
   const enquiryName = prefillFromQuery || itinerary.name;
+
+  const rawIncluded = matchingAdventure?.included ?? (itinerary as any).included ?? [];
+  const included = (
+    Array.isArray(rawIncluded)
+      ? rawIncluded
+      : typeof rawIncluded === "string"
+        ? (rawIncluded as string).split("\n")
+        : []
+  )
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+
+  const rawNotIncluded = matchingAdventure?.notIncluded ?? (itinerary as any).notIncluded ?? [];
+  const notIncluded = (
+    Array.isArray(rawNotIncluded)
+      ? rawNotIncluded
+      : typeof rawNotIncluded === "string"
+        ? (rawNotIncluded as string).split("\n")
+        : []
+  )
+    .map((s: string) => s.trim())
+    .filter(Boolean);
 
   return (
     <div className="bg-background min-h-screen">
@@ -158,23 +187,33 @@ function ItineraryPage() {
                 </div>
               </div>
 
-              <div className="bg-forest text-forest-foreground p-8 md:p-10">
-                <h2 className="font-serif text-2xl mb-5">What's Included</h2>
-                <ul className="grid sm:grid-cols-2 gap-3 text-sm text-forest-foreground/90">
-                  {[
-                    "All accommodation in hand-picked lodges & camps",
-                    "Private expert guide throughout",
-                    "All meals, drinks & park fees",
-                    "Internal light-aircraft transfers",
-                    "24/7 on-trip concierge",
-                    "Conservation contribution",
-                  ].map((x) => (
-                    <li key={x} className="flex gap-2">
-                      <Check className="w-4 h-4 text-gold mt-0.5 shrink-0" /> {x}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {included.length > 0 && (
+                <div className="bg-forest text-forest-foreground p-8 md:p-10">
+                  <h2 className="font-serif text-2xl mb-5">What's Included</h2>
+                  <ul className="grid sm:grid-cols-2 gap-3 text-sm text-forest-foreground/90">
+                    {included.map((x: string, idx: number) => (
+                      <li key={`${x}-${idx}`} className="flex gap-2">
+                        <Check className="w-4 h-4 text-gold mt-0.5 shrink-0" />
+                        <span>{x}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {notIncluded.length > 0 && (
+                <div className="border border-border bg-cream/60 p-8 md:p-10">
+                  <h2 className="font-serif text-2xl text-foreground mb-5">What's Not Included</h2>
+                  <ul className="grid sm:grid-cols-2 gap-3 text-sm text-foreground/80">
+                    {notIncluded.map((x: string, idx: number) => (
+                      <li key={`${x}-${idx}`} className="flex gap-2">
+                        <X className="w-4 h-4 text-terracotta mt-0.5 shrink-0" />
+                        <span>{x}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Sidebar */}
