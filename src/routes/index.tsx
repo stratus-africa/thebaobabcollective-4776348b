@@ -17,7 +17,7 @@ import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 
-export const Route = createFileRoute("/")(({
+export const Route = createFileRoute("/")({
   loader: async () => {
     const [
       home,
@@ -72,12 +72,13 @@ export const Route = createFileRoute("/")(({
       { property: "og:title", content: "The Baobab Collective — Kenya, Curated Personally" },
       {
         property: "og:description",
-        content: "Private Kenya safaris and bespoke African journeys shaped with care, context and genuine local knowledge.",
+        content:
+          "Private Kenya safaris and bespoke African journeys shaped with care, context and genuine local knowledge.",
       },
     ],
   }),
   component: Index,
-} as any));
+} as any);
 
 function WhyBaobab({ content }: { content?: any }) {
   const base = { ...PAGE_DEFAULTS.home_why_baobab, ...(content ?? {}) };
@@ -98,12 +99,13 @@ function WhyBaobab({ content }: { content?: any }) {
             <p className="text-[11px] uppercase tracking-[0.35em] text-gold font-semibold flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
             </p>
-            <h2 id="why-baobab-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground">
+            <h2
+              id="why-baobab-heading"
+              className="font-serif text-4xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground"
+            >
               {c.title}
             </h2>
-            <p className="text-foreground/75 text-base sm:text-lg leading-relaxed pt-2">
-              {c.body}
-            </p>
+            <p className="text-foreground/75 text-base sm:text-lg leading-relaxed pt-2">{c.body}</p>
           </div>
 
           <div className="divide-y divide-foreground/15 border-t border-foreground/15">
@@ -111,7 +113,9 @@ function WhyBaobab({ content }: { content?: any }) {
               <div key={p.num} className="grid gap-4 py-6 sm:grid-cols-[70px_1fr] sm:py-7">
                 <span className="font-serif text-3xl sm:text-4xl text-gold font-light">{p.num}</span>
                 <div>
-                  <h3 className="mb-2 text-[12px] uppercase tracking-[0.25em] font-semibold text-foreground">{p.title}</h3>
+                  <h3 className="mb-2 text-[12px] uppercase tracking-[0.25em] font-semibold text-foreground">
+                    {p.title}
+                  </h3>
                   <p className="max-w-2xl leading-relaxed text-foreground/70 text-sm sm:text-base">{p.body}</p>
                 </div>
               </div>
@@ -128,19 +132,21 @@ function FinalHeroCta({ content }: { content?: any }) {
   const c = usePreviewMerge("home_final_cta", base);
 
   return (
-    <section aria-labelledby="final-cta-heading" className="bg-cream py-20 md:py-28 text-center border-t border-border/40">
+    <section
+      aria-labelledby="final-cta-heading"
+      className="bg-cream py-20 md:py-28 text-center border-t border-border/40"
+    >
       <div className="max-w-3xl mx-auto px-6 space-y-6">
-        <p className="text-[11px] tracking-[0.35em] uppercase text-terracotta font-semibold">
-          {c.eyebrow}
-        </p>
-        <h2 id="final-cta-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.05]">
+        <p className="text-[11px] tracking-[0.35em] uppercase text-terracotta font-semibold">{c.eyebrow}</p>
+        <h2
+          id="final-cta-heading"
+          className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.05]"
+        >
           {c.title_line1}
           <br />
           <span className="text-gold italic">{c.title_line2}</span>
         </h2>
-        <p className="text-foreground/75 text-base sm:text-lg leading-relaxed max-w-xl mx-auto pt-2">
-          {c.body}
-        </p>
+        <p className="text-foreground/75 text-base sm:text-lg leading-relaxed max-w-xl mx-auto pt-2">{c.body}</p>
         <div className="pt-4">
           <EnquireDialog
             sourceUrl="/"
