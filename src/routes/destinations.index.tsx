@@ -8,7 +8,6 @@ import { getDestinations } from "@/lib/cms.functions";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin } from "lucide-react";
 
-
 const q = queryOptions({ queryKey: ["destinations"], queryFn: () => getDestinations() });
 
 export const Route = createFileRoute("/destinations/")({
@@ -54,7 +53,7 @@ function DestinationsPage() {
         </section>
 
         <section className="py-12 border-b border-border/40">
-          <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row gap-4 items-stretch">
+          <div className="max-w-[1920px] mx-auto px-6 lg:px-10 flex flex-col md:flex-row gap-4 items-stretch">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -103,15 +102,24 @@ function DestinationsPage() {
                     <div className="flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-gold mb-2">
                       <MapPin className="w-3 h-3" /> {d.country} · {d.region}
                     </div>
-                    <h2 className="font-serif text-2xl text-foreground mb-2 group-hover:text-gold transition-colors">{d.name}</h2>
+                    <h2 className="font-serif text-2xl text-foreground mb-2 group-hover:text-gold transition-colors">
+                      {d.name}
+                    </h2>
                     <p className="text-foreground/70 text-sm leading-relaxed mb-4 line-clamp-3">{d.description}</p>
                     {d.best_season && (
-                      <p className="text-[11px] tracking-[0.15em] uppercase text-foreground/60 mb-3">Best: {d.best_season}</p>
+                      <p className="text-[11px] tracking-[0.15em] uppercase text-foreground/60 mb-3">
+                        Best: {d.best_season}
+                      </p>
                     )}
                     {d.featured_trips?.length ? (
                       <div className="flex flex-wrap gap-2">
                         {d.featured_trips.slice(0, 3).map((t) => (
-                          <span key={t} className="text-[10px] tracking-wider uppercase border border-border px-2 py-1 text-foreground/60">{t}</span>
+                          <span
+                            key={t}
+                            className="text-[10px] tracking-wider uppercase border border-border px-2 py-1 text-foreground/60"
+                          >
+                            {t}
+                          </span>
                         ))}
                       </div>
                     ) : null}
@@ -136,7 +144,10 @@ function DestinationsPage() {
           <div className="max-w-2xl mx-auto px-6">
             <h2 className="font-serif text-3xl mb-4">Not sure where to begin?</h2>
             <p className="mb-6 text-forest-foreground/80">Let us match you to the region that suits your dream trip.</p>
-            <Link to="/private-travel" className="inline-flex items-center bg-gold text-gold-foreground uppercase tracking-[0.25em] text-[12px] px-8 py-3.5 hover:bg-gold/90">
+            <Link
+              to="/private-travel"
+              className="inline-flex items-center bg-gold text-gold-foreground uppercase tracking-[0.25em] text-[12px] px-8 py-3.5 hover:bg-gold/90"
+            >
               Plan a private journey
             </Link>
           </div>
