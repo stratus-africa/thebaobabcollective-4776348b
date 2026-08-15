@@ -8,7 +8,8 @@
     font-style: normal;
     font-weight: 300 700;
     font-display: swap;
-    src: url("https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjorFV5BQ.woff2") format("woff2");
+    src: url("https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjorFV5BQ.woff2")
+      format("woff2");
   }
   @font-face {
     font-family: "Inter";
@@ -68,7 +69,6 @@
   --color-admin-panel-border: var(--admin-panel-border);
 }
 
-
 :root {
   --radius: 0.25rem;
   /* Cream ivory */
@@ -114,17 +114,29 @@
   --admin-panel-border: oklch(0.87 0.012 80);
 }
 
-.dark { color-scheme: dark; }
+.dark {
+  color-scheme: dark;
+}
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, h5 { font-family: var(--font-serif); font-weight: 400; letter-spacing: 0.01em; }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
   html {
     scroll-behavior: smooth;
     /* Slightly smaller root scale so rem-based type reads less oversized. */
@@ -133,20 +145,60 @@
 }
 
 /* Rich-text font-size classes (set from the editor's size picker) */
-.rt-size-xs { font-size: 0.8em; }
-.rt-size-sm { font-size: 0.9em; }
-.rt-size-md { font-size: 1em; }
-.rt-size-lg { font-size: 1.2em; }
-.rt-size-xl { font-size: 1.45em; }
-.rt-size-2xl { font-size: 1.75em; }
+.rt-size-xs {
+  font-size: 0.8em;
+}
+.rt-size-sm {
+  font-size: 0.9em;
+}
+.rt-size-md {
+  font-size: 1em;
+}
+.rt-size-lg {
+  font-size: 1.2em;
+}
+.rt-size-xl {
+  font-size: 1.45em;
+}
+.rt-size-2xl {
+  font-size: 1.75em;
+}
 
 @layer utilities {
-  .tracking-luxury { letter-spacing: 0.25em; }
+  .tracking-luxury {
+    letter-spacing: 0.25em;
+  }
   .animate-fade-up {
     animation: fade-up 0.8s ease-out both;
   }
+  .glass-forest {
+    background: color-mix(in oklch, var(--forest) 85%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .glass-cream {
+    background: color-mix(in oklch, var(--cream) 88%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .shadow-luxury {
+    box-shadow:
+      0 16px 36px -8px rgba(35, 45, 30, 0.1),
+      0 4px 12px -2px rgba(35, 45, 30, 0.05);
+  }
+  .shadow-luxury-hover {
+    box-shadow:
+      0 24px 48px -12px rgba(35, 45, 30, 0.18),
+      0 8px 24px -4px rgba(35, 45, 30, 0.08);
+  }
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
