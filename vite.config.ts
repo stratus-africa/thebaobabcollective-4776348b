@@ -24,10 +24,6 @@ export default defineConfig({
         "entities/lib/decode.js": path.resolve(process.cwd(), "node_modules/entities/lib/decode.js"),
         "entities/lib/encode.js": path.resolve(process.cwd(), "node_modules/entities/lib/encode.js"),
         entities: path.resolve(process.cwd(), "node_modules/entities"),
-        "@tanstack/query-core": path.resolve(
-          process.cwd(),
-          "node_modules/.pnpm/@tanstack+react-query@5.101.4_react@19.2.8/node_modules/@tanstack/query-core",
-        ),
       },
     },
   },
