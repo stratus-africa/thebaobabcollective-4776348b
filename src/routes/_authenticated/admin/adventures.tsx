@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -6,8 +6,6 @@ import { toast } from "sonner";
 import {
   ArrowDown,
   ArrowUp,
-  CheckCircle2,
-  CircleAlert,
   FolderOpen,
   GripVertical,
   Loader2,
@@ -44,6 +42,24 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const DIFFICULTIES = ["Easy", "Moderate", "Active", "Challenging"];
+
+const LABEL_CLASS = "mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60";
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function slugify(s: string) {
   return s
@@ -53,9 +69,34 @@ function slugify(s: string) {
     .replace(/^-|-$/g, "");
 }
 
+function humanSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function buildUniqueSlug(name: string, existingSlugs: Set<string>): string {
+  const base = slugify(name || "adventure") || `new-${Date.now().toString(36)}`;
+  if (!existingSlugs.has(base)) return base;
+  let n = 2;
+  let candidate = `${base}-${n}`;
+  while (existingSlugs.has(candidate)) candidate = `${base}-${++n}`;
+  return candidate;
+}
+
+// ─── Route ────────────────────────────────────────────────────────────────────
+
 export const Route = createFileRoute("/_authenticated/admin/adventures")({
   component: AdminAdventures,
 });
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 function AdminAdventures() {
   const fetchFn = useServerFn(getAdventuresPage);
@@ -118,63 +159,7 @@ function AdminAdventures() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
         <div className="grid gap-6 min-w-0">
-          <SignatureItineraries draft={draft} setDraft={setDraft} />
-          {/*
-          <Card id="hero" title="Hero image" icon={ImageIcon} description="Image, crop and accessibility settings.">
-          <Field label="Hero background image">
-            <ManagedImageUpload
-              value={draft.hero.image}
-              onChange={(url) => setDraft({ ...draft, hero: { ...draft.hero, image: url } })}
-              recommendedRatio="16:9 or wider"
-              altText={draft.hero.imageAlt}
-              focalX={draft.hero.focalX ?? 50}
-              focalY={draft.hero.focalY ?? 50}
-              onFocalChange={(focalX, focalY) => setDraft({ ...draft, hero: { ...draft.hero, focalX, focalY } })}
-            />
-          </Field>
-          <Field label="Hero image — alt text (for accessibility & SEO)">
-            <Input
-              value={draft.hero.imageAlt ?? ""}
-              placeholder="Describe the hero image"
-              onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, imageAlt: e.target.value } })}
-            />
-          </Field>
-        </Card>*/}
-
-          {/*<Card
-          id="cta"
-          title="Closing CTA"
-          icon={Megaphone}
-          description="The final invitation at the bottom of the page."
-        >
-          <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Eyebrow">
-              <Input
-                value={draft.cta.eyebrow}
-                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, eyebrow: e.target.value } })}
-              />
-            </Field>
-            <Field label="Button label">
-              <Input
-                value={draft.cta.buttonLabel}
-                onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, buttonLabel: e.target.value } })}
-              />
-            </Field>
-          </div>
-          <Field label="Headline">
-            <Input
-              value={draft.cta.headline}
-              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, headline: e.target.value } })}
-            />
-          </Field>
-          <Field label="Body">
-            <Textarea
-              rows={3}
-              value={draft.cta.body}
-              onChange={(e) => setDraft({ ...draft, cta: { ...draft.cta, body: e.target.value } })}
-            />
-          </Field>
-        </Card>*/}
+          <SignatureItineraries draft={draft} setDraft={setDraft} refetch={refetch} />
         </div>
 
         <aside className="min-w-0">
@@ -268,6 +253,8 @@ function AdminAdventures() {
   );
 }
 
+// ─── Card / Field layout helpers ──────────────────────────────────────────────
+
 function Card({
   id,
   title,
@@ -306,193 +293,31 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function humanSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-
-  const units = ["KB", "MB", "GB"];
-  let value = bytes / 1024;
-  let unitIndex = 0;
-
-  while (value >= 1024 && unitIndex < units.length - 1) {
-    value /= 1024;
-    unitIndex += 1;
-  }
-
-  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
-}
-
-function NewAdventureModal({
-  open,
-  onOpenChange,
-  onSave,
-  saving,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (sig: Omit<AdventuresSignature, "slug">) => void;
-  saving: boolean;
-}) {
-  const blank: Omit<AdventuresSignature, "slug"> = {
-    name: "",
-    region: "",
-    terrain: "",
-    nights: "",
-    difficulty: "Moderate",
-    image: "",
-    imageAlt: "",
-    focalX: 50,
-    focalY: 50,
-    description: "",
-    highlights: [],
-    included: [],
-    notIncluded: [],
-  };
-  const [form, setForm] = useState<Omit<AdventuresSignature, "slug">>(blank);
-
-  // Reset form when modal opens
-  useEffect(() => {
-    if (open) setForm(blank);
-  }, [open]);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!form.name.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-    onSave(form);
-  }
-
-  function field<K extends keyof Omit<AdventuresSignature, "slug">>(key: K, val: Omit<AdventuresSignature, "slug">[K]) {
-    setForm((prev) => ({ ...prev, [key]: val }));
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-[96vw] max-h-[92vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">New Adventure</DialogTitle>
-          <DialogDescription>Create a new signature adventure to showcase on your platform.</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
-          <div className="bg-cream/40 border border-border p-5 space-y-4">
-            {/* Name */}
-            <div>
-              <Label className="mb-1.5 block">
-                Name <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                value={form.name}
-                placeholder="e.g. Okavango on Foot"
-                onChange={(e) => field("name", e.target.value)}
-                autoFocus
-              />
-            </div>
-
-            {/* Region + Terrain */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label className="mb-1.5 block">Region</Label>
-                <Input
-                  value={form.region}
-                  placeholder="e.g. Botswana"
-                  onChange={(e) => field("region", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label className="mb-1.5 block">Terrain</Label>
-                <Input
-                  value={form.terrain}
-                  placeholder="e.g. Delta & Waterways"
-                  onChange={(e) => field("terrain", e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Nights + Difficulty */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label className="mb-1.5 block">Nights</Label>
-                <Input
-                  value={form.nights}
-                  placeholder="e.g. 8 nights"
-                  onChange={(e) => field("nights", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label className="mb-1.5 block">Difficulty</Label>
-                <Input
-                  value={form.difficulty}
-                  placeholder="e.g. Moderate"
-                  onChange={(e) => field("difficulty", e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <Label className="mb-1.5 block">Description</Label>
-              <Textarea
-                rows={4}
-                value={form.description}
-                placeholder="Describe this adventure…"
-                onChange={(e) => field("description", e.target.value)}
-              />
-            </div>
-
-            {/* Highlights */}
-            <div>
-              <Label className="mb-1.5 block">Highlights (one per line)</Label>
-              <Textarea
-                rows={3}
-                value={Array.isArray(form.highlights) ? form.highlights.join("\n") : form.highlights}
-                placeholder="Walking in the Okavango Delta\nNight drives with expert guides"
-                onChange={(e) =>
-                  field(
-                    "highlights",
-                    e.target.value.split("\n").map((s) => s.trimEnd()),
-                  )
-                }
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  Saving…
-                </>
-              ) : (
-                "Create Adventure"
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
+// ─── Signature itineraries list ────────────────────────────────────────────────
 
 function SignatureItineraries({
   draft,
   setDraft,
+  refetch,
 }: {
   draft: AdventuresPage;
   setDraft: React.Dispatch<React.SetStateAction<AdventuresPage>>;
+  refetch: () => Promise<any>;
 }) {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const navigate = useNavigate();
   const persistFn = useServerFn(saveAdventuresPage);
-  const [openingSlug, setOpeningSlug] = useState<string | null>(null);
-  const [addOpen, setAddOpen] = useState(false);
-  const [addSaving, setAddSaving] = useState(false);
 
+  // Modal state
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalInitial, setModalInitial] = useState<AdventuresSignature | null>(null);
+  const [modalSaving, setModalSaving] = useState(false);
+
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState<AdventuresSignature | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // ── drag-to-reorder ──────────────────────────────────────────────────────
   const moveTo = (from: number, to: number) => {
     if (from === to || to < 0 || to >= draft.signatures.length) return;
     const copy = draft.signatures.slice();
@@ -501,43 +326,112 @@ function SignatureItineraries({
     setDraft({ ...draft, signatures: copy });
   };
 
-  const removeAt = (idx: number) => {
-    setDraft({ ...draft, signatures: draft.signatures.filter((_, i) => i !== idx) });
+  // ── open modals ──────────────────────────────────────────────────────────
+  const openCreate = () => {
+    setModalMode("create");
+    setModalInitial(null);
+    setModalOpen(true);
   };
 
-  const handleAddSave = async (formData: Omit<AdventuresSignature, "slug">) => {
-    // Build a unique slug from the name
-    const base = slugify(formData.name || "adventure") || `new-${Date.now().toString(36)}`;
-    const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
-    let slug = base;
-    let n = 2;
-    while (existingSlugs.has(slug)) slug = `${base}-${n++}`;
+  const openEdit = (item: AdventuresSignature) => {
+    setModalMode("edit");
+    setModalInitial(item);
+    setModalOpen(true);
+  };
 
-    // Normalise highlights: filter blank trailing lines
-    const highlights = Array.isArray(formData.highlights)
-      ? formData.highlights.map((s) => s.trim()).filter(Boolean)
-      : [];
+  // ── persist helpers ──────────────────────────────────────────────────────
+  async function persistSignatures(signatures: AdventuresSignature[], successMsg: string) {
+    await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
+    setDraft({ ...draft, signatures });
+    await refetch();
+    toast.success(successMsg);
+  }
 
-    const newSig: AdventuresSignature = { ...formData, slug, highlights };
-    const updatedSignatures = [...draft.signatures, newSig];
-    const updatedDraft = { ...draft, signatures: updatedSignatures };
-
-    setAddSaving(true);
+  // ── save from modal ──────────────────────────────────────────────────────
+  const handleModalSave = async (formData: AdventuresSignature) => {
+    setModalSaving(true);
     try {
-      await persistFn({ data: { hero: updatedDraft.hero, cta: updatedDraft.cta, signatures: updatedSignatures } });
-      setDraft(updatedDraft);
-      setAddOpen(false);
-      toast.success(`"${formData.name}" added — click Edit to fill in the full details.`);
+      let updatedSignatures: AdventuresSignature[];
+
+      if (modalMode === "create") {
+        // Generate a unique slug
+        const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
+        const slug = buildUniqueSlug(formData.name, existingSlugs);
+        updatedSignatures = [...draft.signatures, { ...formData, slug }];
+        await persistSignatures(updatedSignatures, `"${formData.name}" added successfully.`);
+      } else {
+        // Update in place — keep the original slug
+        updatedSignatures = draft.signatures.map((s) => (s.slug === formData.slug ? { ...formData } : s));
+        await persistSignatures(updatedSignatures, `"${formData.name}" updated successfully.`);
+      }
+
+      setModalOpen(false);
     } catch (err: any) {
       toast.error(err?.message ?? "Could not save adventure");
     } finally {
-      setAddSaving(false);
+      setModalSaving(false);
+    }
+  };
+
+  // ── delete ───────────────────────────────────────────────────────────────
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const updatedSignatures = draft.signatures.filter((s) => s.slug !== deleteTarget.slug);
+      await persistSignatures(updatedSignatures, `"${deleteTarget.name}" deleted.`);
+      setDeleteTarget(null);
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not delete adventure");
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
     <>
-      <NewAdventureModal open={addOpen} onOpenChange={setAddOpen} onSave={handleAddSave} saving={addSaving} />
+      {/* New / Edit modal */}
+      <AdventureModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        mode={modalMode}
+        initial={modalInitial}
+        saving={modalSaving}
+        onSave={handleModalSave}
+      />
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete adventure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're about to permanently remove{" "}
+              <span className="font-medium text-foreground">{deleteTarget?.name || "this adventure"}</span>. This cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Section card */}
       <section
         id="signatures"
         className="bg-background border border-border rounded-lg overflow-hidden scroll-mt-32 shadow-sm"
@@ -553,12 +447,12 @@ function SignatureItineraries({
                 <span className="ml-2 text-xs text-foreground/50 font-sans">({draft.signatures.length})</span>
               </h2>
               <p className="text-xs text-foreground/55 mt-0.5">
-                Featured adventures, in their display order. Click the edit icon to modify individual adventures.
+                Featured adventures in their display order. Drag to reorder.
               </p>
             </div>
           </div>
           <Button
-            onClick={() => setAddOpen(true)}
+            onClick={openCreate}
             size="sm"
             variant="outline"
             className="border-gold text-gold hover:bg-gold hover:text-gold-foreground"
@@ -570,7 +464,7 @@ function SignatureItineraries({
         <div className="p-6">
           {draft.signatures.length === 0 ? (
             <div className="border border-dashed border-border bg-background p-16 text-center text-foreground/60">
-              No items yet. Click <span className="font-medium">Add</span> to create one.
+              No adventures yet. Click <span className="font-medium">Add Adventure</span> to create one.
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -619,39 +513,9 @@ function SignatureItineraries({
                         variant="outline"
                         size="sm"
                         aria-label={`Edit ${item.name || "adventure"}`}
-                        onClick={async () => {
-                          let targetSlug = item.slug;
-                          let signatures = draft.signatures;
-                          if (!targetSlug) {
-                            const base = item.name ? slugify(item.name) : "";
-                            let unique = base || `new-${Date.now().toString(36)}`;
-                            const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
-                            let n = 2;
-                            const root = unique;
-                            while (existingSlugs.has(unique)) unique = `${root}-${n++}`;
-                            targetSlug = unique;
-                            signatures = draft.signatures.slice();
-                            signatures[idx] = { ...item, slug: targetSlug };
-                            setDraft({ ...draft, signatures });
-                          }
-                          try {
-                            setOpeningSlug(targetSlug);
-                            await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
-                          } catch (err: any) {
-                            toast.error(err?.message ?? "Could not open adventure");
-                            setOpeningSlug(null);
-                            return;
-                          }
-                          setOpeningSlug(null);
-                          navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
-                        }}
+                        onClick={() => openEdit(item)}
                       >
-                        {openingSlug && openingSlug === item.slug ? (
-                          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                        ) : (
-                          <Edit className="w-3.5 h-3.5 mr-1" />
-                        )}
-                        Edit
+                        <Edit className="w-3.5 h-3.5 mr-1" /> Edit
                       </Button>
                       <button
                         type="button"
@@ -675,7 +539,7 @@ function SignatureItineraries({
                         variant="outline"
                         size="sm"
                         className="ml-auto text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
-                        onClick={() => removeAt(idx)}
+                        onClick={() => setDeleteTarget(item)}
                       >
                         <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
                       </Button>
@@ -690,6 +554,8 @@ function SignatureItineraries({
     </>
   );
 }
+
+// ─── SignatureOrder sidebar ────────────────────────────────────────────────────
 
 function SignatureOrder({ signatures }: { signatures: AdventuresSignature[] }) {
   return (
@@ -716,6 +582,297 @@ function SignatureOrder({ signatures }: { signatures: AdventuresSignature[] }) {
   );
 }
 
+// ─── Adventure Modal (Create + Edit) ─────────────────────────────────────────
+
+const BLANK_SIG: AdventuresSignature = {
+  slug: "",
+  name: "",
+  region: "",
+  terrain: "",
+  nights: "",
+  difficulty: "Moderate",
+  image: "",
+  imageAlt: "",
+  focalX: 50,
+  focalY: 50,
+  description: "",
+  highlights: [],
+  included: [],
+  notIncluded: [],
+};
+
+function AdventureModal({
+  open,
+  onOpenChange,
+  mode,
+  initial,
+  saving,
+  onSave,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mode: "create" | "edit";
+  initial: AdventuresSignature | null;
+  saving: boolean;
+  onSave: (data: AdventuresSignature) => void;
+}) {
+  const [form, setForm] = useState<AdventuresSignature>(BLANK_SIG);
+
+  // Reset / populate form when modal opens
+  useEffect(() => {
+    if (!open) return;
+    setForm(
+      mode === "edit" && initial
+        ? {
+            ...BLANK_SIG,
+            ...initial,
+            highlights: Array.isArray(initial.highlights) ? initial.highlights : [],
+            included: Array.isArray(initial.included) ? initial.included : [],
+            notIncluded: Array.isArray(initial.notIncluded) ? initial.notIncluded : [],
+          }
+        : { ...BLANK_SIG },
+    );
+  }, [open, mode, initial]);
+
+  function patch<K extends keyof AdventuresSignature>(key: K, val: AdventuresSignature[K]) {
+    setForm((prev) => ({ ...prev, [key]: val }));
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) {
+      toast.error("Adventure name is required.");
+      return;
+    }
+    onSave(form);
+  }
+
+  const isEdit = mode === "edit";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl w-[96vw] max-h-[92vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl">{isEdit ? "Edit Adventure" : "New Adventure"}</DialogTitle>
+          <DialogDescription>
+            {isEdit
+              ? "Update the details for this adventure."
+              : "Create a new signature adventure to showcase on your platform."}
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+          {/* ── Adventure Information ─────────────────────────────────── */}
+          <FormSection title="Adventure Information">
+            {/* Name */}
+            <div>
+              <Label className={LABEL_CLASS}>
+                Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                value={form.name}
+                placeholder="e.g. Okavango on Foot"
+                onChange={(e) => patch("name", e.target.value)}
+                autoFocus={!isEdit}
+              />
+            </div>
+
+            {/* Region + Terrain */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label className={LABEL_CLASS}>Region</Label>
+                <Input
+                  value={form.region}
+                  placeholder="e.g. Botswana"
+                  onChange={(e) => patch("region", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className={LABEL_CLASS}>Terrain</Label>
+                <Input
+                  value={form.terrain}
+                  placeholder="e.g. Delta & Waterways"
+                  onChange={(e) => patch("terrain", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Nights + Difficulty */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label className={LABEL_CLASS}>Nights</Label>
+                <Input
+                  value={form.nights}
+                  placeholder="e.g. 8 nights"
+                  onChange={(e) => patch("nights", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className={LABEL_CLASS}>Difficulty</Label>
+                <select
+                  value={form.difficulty}
+                  onChange={(e) => patch("difficulty", e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                >
+                  {DIFFICULTIES.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </FormSection>
+
+          {/* ── Content ───────────────────────────────────────────────── */}
+          <FormSection title="Content">
+            {/* Description */}
+            <div>
+              <Label className={LABEL_CLASS}>Description</Label>
+              <Textarea
+                rows={4}
+                value={form.description}
+                placeholder="Describe this adventure…"
+                onChange={(e) => patch("description", e.target.value)}
+              />
+            </div>
+
+            {/* Highlights */}
+            <div>
+              <Label className={LABEL_CLASS}>Highlights (one per line)</Label>
+              <Textarea
+                rows={4}
+                value={form.highlights.join("\n")}
+                placeholder="Walking in the Okavango Delta&#10;Night drives with expert guides"
+                onChange={(e) =>
+                  patch(
+                    "highlights",
+                    e.target.value.split("\n").map((s) => s.trimEnd()),
+                  )
+                }
+              />
+              {form.highlights.filter(Boolean).length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {form.highlights.filter(Boolean).map((h, i) => (
+                    <button
+                      key={`${h}-${i}`}
+                      type="button"
+                      onClick={() =>
+                        patch(
+                          "highlights",
+                          form.highlights.filter((_, idx) => idx !== i),
+                        )
+                      }
+                      className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-foreground/70 hover:border-destructive hover:text-destructive"
+                      title="Remove highlight"
+                    >
+                      {h} ×
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </FormSection>
+
+          {/* ── Planning ──────────────────────────────────────────────── */}
+          <FormSection title="Planning">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label className={LABEL_CLASS}>Included (one per line)</Label>
+                <Textarea
+                  rows={4}
+                  value={form.included.join("\n")}
+                  placeholder="All meals&#10;Park fees&#10;Expert guide"
+                  onChange={(e) =>
+                    patch(
+                      "included",
+                      e.target.value.split("\n").map((s) => s.trimEnd()),
+                    )
+                  }
+                />
+              </div>
+              <div>
+                <Label className={LABEL_CLASS}>Not Included (one per line)</Label>
+                <Textarea
+                  rows={4}
+                  value={form.notIncluded.join("\n")}
+                  placeholder="International flights&#10;Travel insurance"
+                  onChange={(e) =>
+                    patch(
+                      "notIncluded",
+                      e.target.value.split("\n").map((s) => s.trimEnd()),
+                    )
+                  }
+                />
+              </div>
+            </div>
+          </FormSection>
+
+          {/* ── Media ─────────────────────────────────────────────────── */}
+          <FormSection title="Media">
+            <div>
+              <Label className={LABEL_CLASS}>Hero Image</Label>
+              <ManagedImageUpload
+                value={form.image}
+                onChange={(url) => patch("image", url)}
+                recommendedRatio="4:3 card · 16:9 hero"
+                altText={form.imageAlt}
+                focalX={form.focalX ?? 50}
+                focalY={form.focalY ?? 50}
+                onFocalChange={(focalX, focalY) => {
+                  setForm((prev) => ({ ...prev, focalX, focalY }));
+                }}
+              />
+            </div>
+            <div>
+              <Label className={LABEL_CLASS}>Image alt text</Label>
+              <Input
+                value={form.imageAlt ?? ""}
+                placeholder="Describe the hero image…"
+                onChange={(e) => patch("imageAlt", e.target.value)}
+              />
+            </div>
+          </FormSection>
+
+          <DialogFooter className="gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90">
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  Saving…
+                </>
+              ) : isEdit ? (
+                "Save Changes"
+              ) : (
+                "Create Adventure"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── FormSection ──────────────────────────────────────────────────────────────
+
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <h3 className="text-[11px] tracking-[0.22em] uppercase text-foreground/50 font-medium">{title}</h3>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ─── ManagedImageUpload ────────────────────────────────────────────────────────
+
 function ManagedImageUpload({
   value,
   onChange,
@@ -739,8 +896,6 @@ function ManagedImageUpload({
   const [drag, setDrag] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(null);
-  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
-  const objectPosition = `${focalX}% ${focalY}%`;
   const altComplete = Boolean(altText?.trim());
 
   async function pick(file: File | undefined) {
@@ -777,7 +932,7 @@ function ManagedImageUpload({
   }
 
   return (
-    <div className="grid gap-3 border border-border bg-background p-3 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
+    <div className="space-y-3">
       <input
         ref={fileRef}
         type="file"
@@ -786,35 +941,22 @@ function ManagedImageUpload({
         onChange={(e) => pick(e.target.files?.[0])}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3 lg:col-span-2">
-        <div>
-          <p className="text-xs font-medium text-foreground">Image requirements</p>
-          <p className="text-[11px] text-foreground/55">Recommended ratio: {recommendedRatio}</p>
-        </div>
+      {/* Requirements bar */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] text-foreground/55">Recommended: {recommendedRatio}</p>
         <span
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] ${
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${
             altComplete ? "bg-forest/10 text-forest" : "bg-terracotta/10 text-terracotta"
           }`}
         >
-          {altComplete ? <CheckCircle2 className="w-3.5 h-3.5" /> : <CircleAlert className="w-3.5 h-3.5" />}
-          {altComplete ? "Alt text complete" : "Alt text needed"}
+          {altComplete ? "Alt text ✓" : "Alt text needed"}
         </span>
       </div>
 
       {value ? (
-        <div className="border border-border bg-background lg:col-start-1">
+        <div className="border border-border bg-background">
           <div className="bg-muted">
-            <img
-              src={value}
-              alt=""
-              className="mx-auto max-h-72 w-full object-contain"
-              onLoad={(e) =>
-                setDimensions({
-                  width: e.currentTarget.naturalWidth,
-                  height: e.currentTarget.naturalHeight,
-                })
-              }
-            />
+            <img src={value} alt="" className="mx-auto max-h-48 w-full object-contain" />
           </div>
           <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 p-3">
             <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}>
@@ -830,15 +972,14 @@ function ManagedImageUpload({
               variant="outline"
               onClick={() => {
                 setFileMeta(null);
-                setDimensions(null);
                 onChange("");
               }}
               className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
             >
               <X className="w-3.5 h-3.5 mr-1" /> Remove
             </Button>
-            <span className="ml-auto max-w-[60%] truncate text-[11px] text-foreground/50" title={value}>
-              {fileMeta ? `${fileMeta.name} - ${humanSize(fileMeta.size)}` : value.split("/").pop()}
+            <span className="ml-auto max-w-[55%] truncate text-[11px] text-foreground/50" title={value}>
+              {fileMeta ? `${fileMeta.name} – ${humanSize(fileMeta.size)}` : value.split("/").pop()}
             </span>
           </div>
         </div>
@@ -857,7 +998,7 @@ function ManagedImageUpload({
             pick(e.dataTransfer.files?.[0]);
           }}
           disabled={busy}
-          className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed px-6 py-10 text-center transition-colors lg:col-start-1 ${
+          className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed px-6 py-10 text-center transition-colors ${
             drag ? "border-gold bg-gold/5" : "border-border bg-muted/30 hover:border-gold hover:bg-gold/5"
           }`}
         >
@@ -866,48 +1007,32 @@ function ManagedImageUpload({
           </div>
           <div>
             <p className="text-sm font-medium">Drop an image here or click to upload</p>
-            <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF - up to 8MB</p>
+            <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF – up to 8MB</p>
           </div>
         </button>
       )}
 
-      <div className="grid gap-3 lg:col-start-2 lg:row-start-2">
-        <MetaTile label="Focal point" value={`${Math.round(focalX)}% / ${Math.round(focalY)}%`} />
-        {value && (
-          <div className="space-y-3">
-            <FocalSlider
-              label="Horizontal focal point"
-              value={focalX}
-              onChange={(next) => onFocalChange?.(next, focalY)}
-            />
-            <FocalSlider
-              label="Vertical focal point"
-              value={focalY}
-              onChange={(next) => onFocalChange?.(focalX, next)}
-            />
-          </div>
-        )}
-      </div>
-
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => setLibraryOpen(true)}
-        className="w-full lg:col-start-1"
-      >
+      <Button type="button" variant="outline" size="sm" onClick={() => setLibraryOpen(true)} className="w-full">
         <FolderOpen className="w-3.5 h-3.5 mr-1" /> Choose from media library
       </Button>
+
       <Input
         value={value ?? ""}
         onChange={(e) => {
           setFileMeta(null);
-          setDimensions(null);
           onChange(e.target.value);
         }}
-        placeholder="...or paste an image URL"
-        className="text-xs lg:col-start-1"
+        placeholder="…or paste an image URL"
+        className="text-xs"
       />
+
+      {value && (
+        <div className="space-y-2 pt-1">
+          <p className="text-[11px] font-medium text-foreground/60 tracking-[0.15em] uppercase">Focal point</p>
+          <FocalSlider label="Horizontal" value={focalX} onChange={(next) => onFocalChange?.(next, focalY)} />
+          <FocalSlider label="Vertical" value={focalY} onChange={(next) => onFocalChange?.(focalX, next)} />
+        </div>
+      )}
 
       <MediaLibraryPicker
         open={libraryOpen}
@@ -916,7 +1041,6 @@ function ManagedImageUpload({
           const [url] = urls;
           if (!url) return;
           setFileMeta(null);
-          setDimensions(null);
           onChange(url);
         }}
       />
@@ -924,105 +1048,16 @@ function ManagedImageUpload({
   );
 }
 
-function MetaTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border border-border bg-muted/25 px-3 py-2">
-      <p className="text-[10px] uppercase tracking-[0.18em] text-foreground/45">{label}</p>
-      <p className="mt-1 text-xs text-foreground/75">{value}</p>
-    </div>
-  );
-}
+// ─── FocalSlider ──────────────────────────────────────────────────────────────
 
 function FocalSlider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-xs font-medium text-foreground/75">{label}</p>
+        <p className="text-xs text-foreground/75">{label}</p>
         <span className="text-[11px] tabular-nums text-foreground/50">{Math.round(value)}%</span>
       </div>
       <Slider value={[value]} min={0} max={100} step={1} onValueChange={([next]) => onChange(next ?? value)} />
     </div>
   );
 }
-
-function CropPreview({
-  label,
-  ratio,
-  src,
-  objectPosition,
-}: {
-  label: string;
-  ratio: string;
-  src: string;
-  objectPosition: string;
-}) {
-  return (
-    <div>
-      <div className={`${ratio} overflow-hidden border border-border bg-muted`}>
-        <img src={src} alt="" className="h-full w-full object-cover" style={{ objectPosition }} />
-      </div>
-      <p className="mt-1 text-[10px] text-foreground/50">{label}</p>
-    </div>
-  );
-}
-
-function PagePreview({ draft }: { draft: AdventuresPage }) {
-  const heroPosition = `${draft.hero.focalX ?? 50}% ${draft.hero.focalY ?? 50}%`;
-  return (
-    <section className="border border-border bg-background shadow-sm">
-      <header className="border-b border-border px-4 py-3">
-        <h2 className="font-sans text-sm font-semibold text-foreground">Preview</h2>
-      </header>
-      <div className="p-4 space-y-4">
-        <div className="overflow-hidden border border-border bg-forest">
-          <div className="relative aspect-video">
-            {draft.hero.image ? (
-              <img
-                src={draft.hero.image}
-                alt=""
-                className="h-full w-full object-cover opacity-75"
-                style={{ objectPosition: heroPosition }}
-              />
-            ) : (
-              <div className="h-full w-full bg-muted" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-3 text-background">
-              <p className="text-[9px] uppercase tracking-[0.22em] text-gold">{draft.hero.eyebrow || "Adventures"}</p>
-              <p className="mt-1 line-clamp-2 font-serif text-lg leading-tight">
-                {draft.hero.headline || "Untitled hero"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-foreground/50">Signature order</p>
-          <ol className="space-y-2">
-            {draft.signatures.slice(0, 5).map((s, idx) => (
-              <li key={`${s.slug}-${idx}`} className="flex items-center gap-2 text-sm">
-                <span className="w-5 text-[11px] text-foreground/45">{idx + 1}</span>
-                <span className="h-8 w-10 overflow-hidden bg-muted">
-                  {s.image && (
-                    <img
-                      src={s.image}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      style={{ objectPosition: `${s.focalX ?? 50}% ${s.focalY ?? 50}%` }}
-                    />
-                  )}
-                </span>
-                <span className="min-w-0 flex-1 truncate">{s.name || "New itinerary"}</span>
-              </li>
-            ))}
-            {draft.signatures.length === 0 && (
-              <li className="text-sm text-foreground/55">No signature itineraries yet.</li>
-            )}
-          </ol>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-void (null as unknown as AdventuresSignature);
