@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Calendar,
   Compass,
+  ExternalLink,
   FolderOpen,
   Globe,
   Image as ImageIcon,
@@ -24,13 +25,13 @@ import {
   type AdventuresPage,
   type AdventuresSignature,
   adventuresDefaults,
+  buildAdventureSlug,
 } from "@/lib/adventures.functions";
 import { adminUploadImage } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 import {
@@ -86,8 +87,6 @@ function AdminAdventureEdit() {
     difficulty: "Moderate",
     image: "",
     imageAlt: "",
-    focalX: 50,
-    focalY: 50,
     description: "",
     highlights: [],
     included: [],
@@ -133,7 +132,10 @@ function AdminAdventureEdit() {
       };
 
       if (isNew) {
-        const finalSlug = slugify(stampedAdventure.name);
+        const finalSlug = buildAdventureSlug(
+          stampedAdventure.slug || stampedAdventure.name,
+          draft.signatures.map((signature) => signature.slug),
+        );
         updatedSignatures.push({ ...stampedAdventure, slug: finalSlug });
       } else {
         updatedSignatures[adventureIdx] = stampedAdventure;
@@ -152,7 +154,7 @@ function AdminAdventureEdit() {
       if (isNew) {
         navigate({
           to: "/admin/adventures/$slug",
-          params: { slug: slugify(adventure.name) },
+          params: { slug: finalSlug },
           replace: true,
         });
       } else if (adventure.slug !== slug) {
@@ -190,7 +192,7 @@ function AdminAdventureEdit() {
     }
   }
 
-  if (!isNew && isLoading) {
+  if (!isNew && (isLoading || !data)) {
     return (
       <div className="flex items-center justify-center gap-2 py-20 text-foreground/60">
         <Loader2 className="w-5 h-5 animate-spin text-gold" /> Loading adventure…
@@ -216,6 +218,7 @@ function AdminAdventureEdit() {
 
   // Non-null alias — at this point adventure is guaranteed to be non-null for isNew (newForm) and for existing (found above)
   const adv = adventure!;
+  const liveHref = !isNew && adv.slug ? `/adventures/${adv.slug}` : null;
 
   return (
     <form onSubmit={handleSave} className="space-y-6 pb-12">
@@ -605,6 +608,19 @@ function AdminAdventureEdit() {
                     >
                       <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
                     </Button>
+
+                    {liveHref && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-xs text-foreground/60 hover:text-foreground px-2"
+                      >
+                        <a href={liveHref} target="_blank" rel="noreferrer">
+                          <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -623,9 +639,6 @@ function AdminAdventureEdit() {
                 onChange={(url) => updateAdventure({ image: url })}
                 recommendedRatio="4:3 card · 16:9 hero"
                 altText={adv.imageAlt}
-                focalX={adv.focalX ?? 50}
-                focalY={adv.focalY ?? 50}
-                onFocalChange={(focalX, focalY) => updateAdventure({ focalX, focalY })}
               />
 
               <div>
@@ -705,17 +718,11 @@ function ManagedImageUpload({
   onChange,
   recommendedRatio,
   altText,
-  focalX = 50,
-  focalY = 50,
-  onFocalChange,
 }: {
   value: string;
   onChange: (url: string) => void;
   recommendedRatio: string;
   altText?: string;
-  focalX?: number;
-  focalY?: number;
-  onFocalChange?: (x: number, y: number) => void;
 }) {
   const upload = useServerFn(adminUploadImage);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -852,14 +859,6 @@ function ManagedImageUpload({
         className="text-xs"
       />
 
-      {value && (
-        <div className="space-y-2 pt-1">
-          <p className="text-[11px] font-medium text-foreground/60 tracking-[0.15em] uppercase">Focal point</p>
-          <FocalSlider label="Horizontal" value={focalX} onChange={(next) => onFocalChange?.(next, focalY)} />
-          <FocalSlider label="Vertical" value={focalY} onChange={(next) => onFocalChange?.(focalX, next)} />
-        </div>
-      )}
-
       <MediaLibraryPicker
         open={libraryOpen}
         onOpenChange={setLibraryOpen}
@@ -870,18 +869,6 @@ function ManagedImageUpload({
           onChange(url);
         }}
       />
-    </div>
-  );
-}
-
-function FocalSlider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-xs text-foreground/75">{label}</p>
-        <span className="text-[11px] tabular-nums text-foreground/50">{Math.round(value)}%</span>
-      </div>
-      <Slider value={[value]} min={0} max={100} step={1} onValueChange={([next]) => onChange(next ?? value)} />
     </div>
   );
 }
