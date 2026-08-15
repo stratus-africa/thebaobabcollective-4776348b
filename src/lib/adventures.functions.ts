@@ -133,8 +133,7 @@ export const adventuresDefaults: AdventuresPage = {
   hero: {
     eyebrow: "Adventures",
     headline: "EXPERIENCE KENYA BEYOND THE ORDINARY.",
-    subhead:
-      "Journeys designed around your pace, your curiosity and the places you want to discover.",
+    subhead: "Journeys designed around your pace, your curiosity and the places you want to discover.",
     image: "",
     imageAlt: "Sunrise over the African bush — a guide leads a walking safari toward distant baobabs",
   },
@@ -211,13 +210,16 @@ const SavePayload = z.object({
       bestMonths: z.array(z.string()).optional().default([]),
       destinations: z.array(z.string()).optional().default([]),
       lodges: z.array(z.string()).optional().default([]),
-      itinerary: z.array(
-        z.object({
-          day: z.string(),
-          title: z.string(),
-          description: z.string(),
-        })
-      ).optional().default([]),
+      itinerary: z
+        .array(
+          z.object({
+            day: z.string(),
+            title: z.string(),
+            description: z.string(),
+          }),
+        )
+        .optional()
+        .default([]),
       relatedAdventures: z.array(z.string()).optional().default([]),
       relatedDestinations: z.array(z.string()).optional().default([]),
     }),
@@ -248,8 +250,7 @@ export const saveAdventuresPage = createServerFn({ method: "POST" })
       signatures: normalizeAdventureSignatures(data.signatures),
     };
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await context.supabase
       .from("adventures_page_blocks" as any)
       .select("id")
       .limit(1)
@@ -260,15 +261,14 @@ export const saveAdventuresPage = createServerFn({ method: "POST" })
       singleton: true,
     } as any;
     if ((existing as any)?.id) {
-      const { error } = await supabaseAdmin
+      const { error } = await context.supabase
         .from("adventures_page_blocks" as any)
         .update(payload)
         .eq("id", (existing as any).id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin.from("adventures_page_blocks" as any).insert(payload);
+      const { error } = await context.supabase.from("adventures_page_blocks" as any).insert(payload);
       if (error) throw new Error(error.message);
     }
     return { ok: true as const };
   });
- 
