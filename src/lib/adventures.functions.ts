@@ -30,9 +30,20 @@ export type AdventuresSignature = {
   focalX?: number;
   focalY?: number;
   description: string;
+  shortDescription?: string;
   highlights: string[];
   included: string[];
   notIncluded: string[];
+  experienceTypes?: string[];
+  travelStyles?: string[];
+  bestFor?: string[];
+  featured?: boolean;
+  bestMonths?: string[];
+  destinations?: string[];
+  lodges?: string[];
+  itinerary?: { day: string; title: string; description: string }[];
+  relatedAdventures?: string[];
+  relatedDestinations?: string[];
 };
 
 export type AdventuresPage = {
@@ -87,6 +98,17 @@ export function normalizeAdventureSignatures(
       ...item,
       slug: candidate,
       name: item.name ?? "",
+      shortDescription: item.shortDescription ?? "",
+      experienceTypes: Array.isArray(item.experienceTypes) ? item.experienceTypes : [],
+      travelStyles: Array.isArray(item.travelStyles) ? item.travelStyles : [],
+      bestFor: Array.isArray(item.bestFor) ? item.bestFor : [],
+      featured: typeof item.featured === "boolean" ? item.featured : false,
+      bestMonths: Array.isArray(item.bestMonths) ? item.bestMonths : [],
+      destinations: Array.isArray(item.destinations) ? item.destinations : [],
+      lodges: Array.isArray(item.lodges) ? item.lodges : [],
+      itinerary: Array.isArray(item.itinerary) ? item.itinerary : [],
+      relatedAdventures: Array.isArray(item.relatedAdventures) ? item.relatedAdventures : [],
+      relatedDestinations: Array.isArray(item.relatedDestinations) ? item.relatedDestinations : [],
     };
   });
 }
@@ -94,18 +116,18 @@ export function normalizeAdventureSignatures(
 export const adventuresDefaults: AdventuresPage = {
   hero: {
     eyebrow: "Adventures",
-    headline: "Wild Africa, deeply lived.",
+    headline: "EXPERIENCE KENYA BEYOND THE ORDINARY.",
     subhead:
-      "Walking safaris, mokoro mornings, gorilla treks, desert traverses. The adventures we build are slow, private and shaped by the people who know the land best.",
+      "Journeys designed around your pace, your curiosity and the places you want to discover.",
     image: "",
     imageAlt: "Sunrise over the African bush — a guide leads a walking safari toward distant baobabs",
   },
 
   cta: {
-    eyebrow: "Begin",
-    headline: "Your adventure, our craft.",
-    body: "Share your dates, your dreams and the shape of your travelling party. We'll respond within 24 hours with a first sketch.",
-    buttonLabel: "Request Your Adventure",
+    eyebrow: "YOUR ADVENTURE. OUR CRAFT.",
+    headline: "Ready to experience Kenya differently?",
+    body: "Tell us where you want to go, what you want to experience and how you like to travel. We'll take it from there.",
+    buttonLabel: "Start Planning",
   },
   signatures: [],
 };
@@ -160,9 +182,26 @@ const SavePayload = z.object({
       focalX: z.number().min(0).max(100).optional().default(50),
       focalY: z.number().min(0).max(100).optional().default(50),
       description: z.string(),
+      shortDescription: z.string().optional().default(""),
       highlights: z.array(z.string()),
       included: z.array(z.string()).default([]),
       notIncluded: z.array(z.string()).default([]),
+      experienceTypes: z.array(z.string()).optional().default([]),
+      travelStyles: z.array(z.string()).optional().default([]),
+      bestFor: z.array(z.string()).optional().default([]),
+      featured: z.boolean().optional().default(false),
+      bestMonths: z.array(z.string()).optional().default([]),
+      destinations: z.array(z.string()).optional().default([]),
+      lodges: z.array(z.string()).optional().default([]),
+      itinerary: z.array(
+        z.object({
+          day: z.string(),
+          title: z.string(),
+          description: z.string(),
+        })
+      ).optional().default([]),
+      relatedAdventures: z.array(z.string()).optional().default([]),
+      relatedDestinations: z.array(z.string()).optional().default([]),
     }),
   ),
 });
