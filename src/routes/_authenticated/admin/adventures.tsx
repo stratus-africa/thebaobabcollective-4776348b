@@ -392,117 +392,124 @@ function SignatureItineraries({
         </Button>
       </header>
 
-      <div className="p-4 space-y-2">
-        {draft.signatures.length === 0 && (
-          <p className="text-sm text-foreground/60 italic p-4 text-center border border-dashed border-border rounded-md">
+      <div className="p-6">
+        {draft.signatures.length === 0 ? (
+          <div className="border border-dashed border-border bg-background p-16 text-center text-foreground/60">
             No items yet. Click <span className="font-medium">Add</span> to create one.
-          </p>
-        )}
-        {draft.signatures.map((item, idx) => (
-          <div
-            key={`${item.slug}-${idx}`}
-            draggable
-            onDragStart={() => setDragIdx(idx)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => {
-              if (dragIdx !== null) moveTo(dragIdx, idx);
-              setDragIdx(null);
-            }}
-            className="border border-border bg-background overflow-hidden shadow-sm"
-          >
-            <div className="flex items-center gap-3 px-4 py-3 hover:bg-cream/50 transition-colors">
-              <span className="cursor-grab text-foreground/35 hover:text-foreground/60" title="Drag to reorder">
-                <GripVertical className="w-4 h-4" />
-              </span>
-              <div className="h-10 w-14 rounded bg-cream overflow-hidden flex items-center justify-center shrink-0">
-                {item.image ? (
-                  <img src={item.image} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <ImageIcon className="w-4 h-4 text-foreground/30" />
-                )}
-              </div>
-              <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/40 w-6">#{idx + 1}</span>
-              <span className="font-medium text-sm flex-1 truncate">{item.name || "New itinerary"}</span>
-              <button
-                type="button"
-                className="text-foreground/60 hover:text-foreground p-1.5"
-                title="Edit"
-                aria-label={`Edit ${item.name || "adventure"}`}
-                onClick={async () => {
-                  let targetSlug = item.slug;
-                  let signatures = draft.signatures;
-                  if (!targetSlug) {
-                    // Legacy/stuck item with no slug yet — generate one now instead of
-                    // permanently blocking access to the edit page.
-                    const base = item.name ? slugify(item.name) : "";
-                    let unique = base || `new-${Date.now().toString(36)}`;
-                    const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
-                    let n = 2;
-                    const root = unique;
-                    while (existingSlugs.has(unique)) unique = `${root}-${n++}`;
-                    targetSlug = unique;
-                    signatures = draft.signatures.slice();
-                    signatures[idx] = { ...item, slug: targetSlug };
-                    setDraft({ ...draft, signatures });
-                  }
-                  // The edit page reads from the server, so make sure this adventure
-                  // exists there before navigating (otherwise it renders "not found").
-                  try {
-                    setOpeningSlug(targetSlug);
-                    await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
-                  } catch (err: any) {
-                    toast.error(err?.message ?? "Could not open adventure");
-                    setOpeningSlug(null);
-                    return;
-                  }
-                  setOpeningSlug(null);
-                  navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
-                }}
-              >
-                {openingSlug && openingSlug === item.slug ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Edit className="w-4 h-4" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  moveTo(idx, idx - 1);
-                }}
-                disabled={idx === 0}
-                className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                aria-label="Move up"
-              >
-                <ArrowUp className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  moveTo(idx, idx + 1);
-                }}
-                disabled={idx === draft.signatures.length - 1}
-                className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
-                aria-label="Move down"
-              >
-                <ArrowDown className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeAt(idx);
-                }}
-                className="text-foreground/50 hover:text-destructive p-1.5"
-                aria-label="Delete"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
           </div>
-        ))}
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {draft.signatures.map((item, idx) => (
+              <article
+                key={`${item.slug}-${idx}`}
+                draggable
+                onDragStart={() => setDragIdx(idx)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragIdx !== null) moveTo(dragIdx, idx);
+                  setDragIdx(null);
+                }}
+                className="group border border-border bg-background overflow-hidden flex flex-col transition-shadow hover:shadow-lg"
+              >
+                <div className="relative aspect-[16/10] bg-cream overflow-hidden">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.imageAlt || item.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-foreground/30">
+                      <ImageIcon className="w-10 h-10" />
+                    </div>
+                  )}
+                  <span className="absolute top-3 left-3 bg-background/90 px-2 py-0.5 text-[10px] tracking-[0.2em] uppercase text-foreground/60">
+                    #{idx + 1}
+                  </span>
+                  <span
+                    className="absolute top-3 right-3 cursor-grab bg-background/90 p-1.5 text-foreground/50"
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="w-4 h-4" />
+                  </span>
+                </div>
+                <div className="p-4 flex-1 flex flex-col">
+                  <h3 className="font-serif text-lg leading-tight">{item.name || "New itinerary"}</h3>
+                  <p className="text-sm text-foreground/60 mt-1 truncate">
+                    {[item.region, item.nights, item.difficulty].filter(Boolean).join(" · ") || "No details yet"}
+                  </p>
+                  <div className="mt-4 pt-3 border-t border-border flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label={`Edit ${item.name || "adventure"}`}
+                      onClick={async () => {
+                        let targetSlug = item.slug;
+                        let signatures = draft.signatures;
+                        if (!targetSlug) {
+                          const base = item.name ? slugify(item.name) : "";
+                          let unique = base || `new-${Date.now().toString(36)}`;
+                          const existingSlugs = new Set(draft.signatures.map((s) => s.slug).filter(Boolean));
+                          let n = 2;
+                          const root = unique;
+                          while (existingSlugs.has(unique)) unique = `${root}-${n++}`;
+                          targetSlug = unique;
+                          signatures = draft.signatures.slice();
+                          signatures[idx] = { ...item, slug: targetSlug };
+                          setDraft({ ...draft, signatures });
+                        }
+                        try {
+                          setOpeningSlug(targetSlug);
+                          await persistFn({ data: { hero: draft.hero, cta: draft.cta, signatures } });
+                        } catch (err: any) {
+                          toast.error(err?.message ?? "Could not open adventure");
+                          setOpeningSlug(null);
+                          return;
+                        }
+                        setOpeningSlug(null);
+                        navigate({ to: "/admin/adventures/$slug", params: { slug: targetSlug } });
+                      }}
+                    >
+                      {openingSlug && openingSlug === item.slug ? (
+                        <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                      ) : (
+                        <Edit className="w-3.5 h-3.5 mr-1" />
+                      )}
+                      Edit
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => moveTo(idx, idx - 1)}
+                      disabled={idx === 0}
+                      className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                      aria-label="Move up"
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveTo(idx, idx + 1)}
+                      disabled={idx === draft.signatures.length - 1}
+                      className="text-foreground/45 hover:text-foreground p-1.5 disabled:opacity-25"
+                      aria-label="Move down"
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
+                      onClick={() => removeAt(idx)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
