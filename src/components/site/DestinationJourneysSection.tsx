@@ -10,7 +10,10 @@ export function DestinationJourneysSection({ adventures }: DestinationJourneysSe
   if (!adventures || adventures.length === 0) return null;
 
   return (
-    <section aria-labelledby="journeys-section-heading" className="bg-background py-20 md:py-28 border-t border-border/50">
+    <section
+      aria-labelledby="journeys-section-heading"
+      className="bg-background py-20 md:py-28 border-t border-border/50"
+    >
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
@@ -18,7 +21,10 @@ export function DestinationJourneysSection({ adventures }: DestinationJourneysSe
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
               <Compass className="w-3.5 h-3.5" /> Curated Safari Itineraries
             </p>
-            <h2 id="journeys-section-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
+            <h2
+              id="journeys-section-heading"
+              className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+            >
               Journeys Through These Places
             </h2>
             <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed">
@@ -52,9 +58,6 @@ export function DestinationJourneysSection({ adventures }: DestinationJourneysSe
                   alt={adv.imageAlt || adv.name}
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  style={{
-                    objectPosition: `${adv.focalX ?? 50}% ${adv.focalY ?? 50}%`,
-                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75 group-hover:opacity-85 transition-opacity" />
 
@@ -84,9 +87,7 @@ export function DestinationJourneysSection({ adventures }: DestinationJourneysSe
                   </Link>
                 </h3>
 
-                <p className="text-foreground/75 text-sm leading-relaxed mb-6 line-clamp-3 flex-1">
-                  {adv.description}
-                </p>
+                <p className="text-foreground/75 text-sm leading-relaxed mb-6 line-clamp-3 flex-1">{adv.description}</p>
 
                 <div className="pt-4 border-t border-border/60 flex items-center justify-between">
                   <Link
@@ -94,7 +95,8 @@ export function DestinationJourneysSection({ adventures }: DestinationJourneysSe
                     params={{ slug: adv.slug }}
                     className="inline-flex items-center gap-2 text-[11px] tracking-[0.24em] uppercase font-semibold text-gold group-hover:text-terracotta transition-colors"
                   >
-                    View Adventure <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                    View Adventure{" "}
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </div>
               </div>
