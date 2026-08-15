@@ -1,12 +1,14 @@
 import { Compass, ShieldCheck, HeartHandshake, Headphones } from "lucide-react";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { usePreviewMerge } from "@/lib/preview-overrides";
 
 type TrustContent = Partial<typeof PAGE_DEFAULTS.home_trust>;
 
 const ICONS = [Compass, HeartHandshake, ShieldCheck, Headphones];
 
 export function TrustStrip({ content }: { content?: TrustContent | null } = {}) {
-  const c = { ...PAGE_DEFAULTS.home_trust, ...(content ?? {}) };
+  const base = { ...PAGE_DEFAULTS.home_trust, ...(content ?? {}) };
+  const c = usePreviewMerge("home_trust", base);
 
   const items = [
     { icon: ICONS[0], title: c.item_1_title, subtitle: c.item_1_subtitle },
