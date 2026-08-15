@@ -10,8 +10,6 @@ import {
   ChevronUp,
   Copy,
   Edit,
-  ExternalLink,
-  Eye,
   Filter,
   FolderOpen,
   GripVertical,
@@ -532,20 +530,6 @@ function AdminAdventuresDashboard() {
             ) : (
               <span className="inline-flex items-center gap-1 text-xs text-forest font-medium mr-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
-              </span>
-            )}
-
-            <Button
-              variant="outline"
-              asChild
-              className="border-border text-foreground hover:bg-cream"
-            >
-              <a href="/adventures" target="_blank" rel="noreferrer">
-                <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-foreground/60" />
-                Preview Page
-              </a>
-            </Button>
-
             <Button
               onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } })}
               className="bg-forest text-forest-foreground hover:bg-forest/90 shadow-sm"
@@ -960,17 +944,6 @@ function AdminAdventuresDashboard() {
                       >
                         <Edit className="w-3.5 h-3.5 mr-1 text-gold" /> Edit
                       </Button>
-
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        asChild
-                        className="h-8 px-3 text-xs border-border hover:bg-cream"
-                      >
-                        <a href={`/adventures/${item.slug}`} target="_blank" rel="noreferrer">
-                          <Eye className="w-3.5 h-3.5 mr-1 text-foreground/60" /> Preview
-                        </a>
-                      </Button>
                     </div>
 
                     {/* Up / Down reordering controls for accessibility */}
@@ -1335,13 +1308,6 @@ function AdventureCardDropdown({
         <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
           <Edit className="w-3.5 h-3.5 mr-2 text-gold" />
           <span>Edit Adventure</span>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild className="cursor-pointer">
-          <a href={`/adventures/${adventure.slug}`} target="_blank" rel="noreferrer">
-            <Eye className="w-3.5 h-3.5 mr-2 text-foreground/60" />
-            <span>Preview Page</span>
-          </a>
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={onDuplicate} className="cursor-pointer">
