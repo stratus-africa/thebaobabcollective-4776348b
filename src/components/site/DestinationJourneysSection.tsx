@@ -4,9 +4,12 @@ import type { AdventuresSignature } from "@/lib/adventures.functions";
 
 interface DestinationJourneysSectionProps {
   adventures: AdventuresSignature[];
+  eyebrow?: string;
+  title?: string;
+  body?: string;
 }
 
-export function DestinationJourneysSection({ adventures }: DestinationJourneysSectionProps) {
+export function DestinationJourneysSection({ adventures, eyebrow, title, body }: DestinationJourneysSectionProps) {
   if (!adventures || adventures.length === 0) return null;
 
   return (
@@ -19,16 +22,17 @@ export function DestinationJourneysSection({ adventures }: DestinationJourneysSe
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
           <div className="max-w-2xl">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-              <Compass className="w-3.5 h-3.5" /> Curated Safari Itineraries
+              <Compass className="w-3.5 h-3.5" /> {eyebrow || "Curated Safari Itineraries"}
             </p>
             <h2
               id="journeys-section-heading"
               className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
             >
-              Journeys Through These Places
+              {title || "Journeys Through These Places"}
             </h2>
             <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed">
-              Our adventures bring together the destinations, experiences and moments that make Kenya unforgettable.
+              {body ||
+                "Our adventures bring together the destinations, experiences and moments that make Kenya unforgettable."}
             </p>
           </div>
 
