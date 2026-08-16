@@ -107,19 +107,54 @@ export const Route = createFileRoute("/adventures/")({
 });
 
 const EXPERIENCE_CATEGORIES = [
-  { name: "Wildlife", icon: Sparkles, image: elephantImg, desc: "Big cats, migration herds & private conservancies" },
-  { name: "Walking", icon: Footprints, image: g1Img, desc: "Track wildlife on foot with veteran indigenous guides" },
-  { name: "Wilderness", icon: Compass, image: heroBaobab, desc: "Remote, uncrowded landscapes under vast skies" },
+  {
+    name: "Wildlife",
+    icon: Sparkles,
+    image: elephantImg,
+    desc: "Big cats, migration herds & private conservancies",
+  },
+  {
+    name: "Walking",
+    icon: Footprints,
+    image: g1Img,
+    desc: "Track wildlife on foot with veteran indigenous guides",
+  },
+  {
+    name: "Wilderness",
+    icon: Compass,
+    image: heroBaobab,
+    desc: "Remote, uncrowded landscapes under vast skies",
+  },
   {
     name: "Safari + Beach",
     icon: Palmtree,
     image: g4Img,
     desc: "Savannah game drives paired with turquoise coastlines",
   },
-  { name: "Romance", icon: Heart, image: heroBaobab, desc: "Intimate starry camps and quiet, private moments" },
-  { name: "Family", icon: Users, image: elephantImg, desc: "Multi-generational safaris crafted for all ages" },
-  { name: "Photography", icon: Camera, image: g1Img, desc: "Golden hour positioning and expert photographic leads" },
-  { name: "Culture", icon: Feather, image: heroBaobab, desc: "Authentic connections with indigenous pastoralists" },
+  {
+    name: "Romance",
+    icon: Heart,
+    image: heroBaobab,
+    desc: "Intimate starry camps and quiet, private moments",
+  },
+  {
+    name: "Family",
+    icon: Users,
+    image: elephantImg,
+    desc: "Multi-generational safaris crafted for all ages",
+  },
+  {
+    name: "Photography",
+    icon: Camera,
+    image: g1Img,
+    desc: "Golden hour positioning and expert photographic leads",
+  },
+  {
+    name: "Culture",
+    icon: Feather,
+    image: heroBaobab,
+    desc: "Authentic connections with indigenous pastoralists",
+  },
 ];
 
 function AdventuresPage() {
@@ -144,34 +179,34 @@ function AdventuresPage() {
       <Navbar />
       <main>
         {/* 01. Hero Section */}
-        <HeroSection hero={page.hero} />
+        <HeroSection hero={page.hero} content={content} />
 
         {/* 02. A Day in the Field (Timeline) */}
-        <DayInTheFieldSection />
+        {content.show_rhythm !== false && <DayInTheFieldSection content={content} />}
 
         {/* 03. Adventure Finder / Filter UI */}
-        <AdventureFinderSection signatures={page.signatures} />
+        {content.show_finder !== false && <AdventureFinderSection signatures={page.signatures} content={content} />}
 
         {/* 04. Journeys We'd Take Ourselves (Featured Signatures) */}
         <SignatureSection signatures={page.signatures} content={content} />
 
         {/* 05. Explore by Experience */}
-        <ExploreByExperienceSection />
+        {content.show_explore !== false && <ExploreByExperienceSection content={content} />}
 
         {/* 06. Featured Journey (Spotlight) */}
-        <FeaturedJourneySpotlight signatures={page.signatures} />
+        {content.show_spotlight !== false && <FeaturedJourneySpotlight signatures={page.signatures} />}
 
         {/* 07. Main Adventure Catalogue */}
-        <MainCatalogueSection signatures={page.signatures} />
+        <MainCatalogueSection signatures={page.signatures} content={content} />
 
         {/* 08. Journey Combinations / Related Destinations */}
-        <JourneyCombinationsSection />
+        {content.show_combinations !== false && <JourneyCombinationsSection content={content} />}
 
         {/* 09. "Not Quite Right?" Bespoke Banner */}
-        <BespokeConversionBanner />
+        {content.show_enquiry_cta !== false && <BespokeConversionBanner content={content} />}
 
         {/* 10. Final CTA */}
-        <FinalCtaSection cta={page.cta} />
+        {content.show_final_cta !== false && <FinalCtaSection cta={page.cta} />}
       </main>
       <Footer />
     </div>
@@ -182,7 +217,13 @@ function AdventuresPage() {
   /* ─── 01. HERO SECTION ────────────────────────────────────────────────────────── */
 }
 
-function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
+function HeroSection({
+  hero,
+  content,
+}: {
+  hero: AdventuresPage["hero"];
+  content: typeof PAGE_DEFAULTS.adventures_index;
+}) {
   const heroSrc = hero.image || heroBaobab;
   return (
     <section className="relative h-[85vh] min-h-[620px] flex items-end">
@@ -195,13 +236,15 @@ function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
 
       <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-20 text-cream w-full">
         <p className="text-[11px] tracking-[0.35em] uppercase text-gold mb-5 font-semibold">
-          {hero.eyebrow || "Adventures"}
+          {hero.eyebrow || content.eyebrow || "Adventures"}
         </p>
         <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.05] mb-6 max-w-5xl">
-          {hero.headline || "EXPERIENCE KENYA BEYOND THE ORDINARY."}
+          {hero.headline || content.title || "EXPERIENCE KENYA BEYOND THE ORDINARY."}
         </h1>
         <p className="text-lg md:text-xl text-cream/90 max-w-2xl leading-relaxed mb-10 font-sans">
-          {hero.subhead || "Journeys designed around your pace, your curiosity and the places you want to discover."}
+          {hero.subhead ||
+            content.subtitle ||
+            "Journeys designed around your pace, your curiosity and the places you want to discover."}
         </p>
         <div className="flex flex-wrap gap-4 items-center">
           <a
@@ -234,7 +277,7 @@ function HeroSection({ hero }: { hero: AdventuresPage["hero"] }) {
   /* ─── 02. A DAY IN THE FIELD ─────────────────────────────────────────────────── */
 }
 
-function DayInTheFieldSection() {
+function DayInTheFieldSection({ content }: { content: typeof PAGE_DEFAULTS.adventures_index }) {
   const timeline = [
     {
       time: "05:30",
@@ -271,12 +314,14 @@ function DayInTheFieldSection() {
       <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
         <div className="max-w-3xl mb-16">
           <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-3">
-            A DAY IN THE FIELD
+            {(content.rhythm_eyebrow || "A Day in the Field").toUpperCase()}
           </p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">The rhythm of a Baobab safari.</h2>
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+            {content.rhythm_title || "The rhythm of a Baobab safari."}
+          </h2>
           <p className="text-foreground/75 text-lg mt-4 leading-relaxed">
-            We don't rush between sightings. Every day is unhurried, shaped around natural light, wildlife movements,
-            and moments of quiet wonder.
+            {content.rhythm_body ||
+              "We don't rush between sightings. Every day is unhurried, shaped around natural light, wildlife movements, and moments of quiet wonder."}
           </p>
         </div>
 
@@ -312,7 +357,13 @@ function DayInTheFieldSection() {
   /* ─── 03. ADVENTURE FINDER ────────────────────────────────────────────────────── */
 }
 
-function AdventureFinderSection({ signatures }: { signatures: AdventuresSignature[] }) {
+function AdventureFinderSection({
+  signatures,
+  content,
+}: {
+  signatures: AdventuresSignature[];
+  content: typeof PAGE_DEFAULTS.adventures_index;
+}) {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
@@ -325,19 +376,43 @@ function AdventureFinderSection({ signatures }: { signatures: AdventuresSignatur
     return Array.from(set).sort();
   }, [signatures]);
 
-  const experiences = [
-    "Wildlife",
-    "Walking",
-    "Wilderness",
-    "Safari + Beach",
-    "Romance",
-    "Family",
-    "Photography",
-    "Culture",
-    "Conservation",
-  ];
+  const parseOptions = (value: string | undefined, fallback: string[]) => {
+    const list = (value ?? "")
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
+    return list.length > 0 ? list : fallback;
+  };
 
-  const travelStyles = ["Private", "Small Group", "Family", "Honeymoon", "Active", "Slow Safari", "Photography"];
+  const experiences = useMemo(
+    () =>
+      parseOptions(content.finder_experience_options, [
+        "Wildlife",
+        "Walking",
+        "Wilderness",
+        "Safari + Beach",
+        "Romance",
+        "Family",
+        "Photography",
+        "Culture",
+        "Conservation",
+      ]),
+    [content.finder_experience_options],
+  );
+
+  const travelStyles = useMemo(
+    () =>
+      parseOptions(content.finder_travel_style_options, [
+        "Private",
+        "Small Group",
+        "Family",
+        "Honeymoon",
+        "Active",
+        "Slow Safari",
+        "Photography",
+      ]),
+    [content.finder_travel_style_options],
+  );
 
   const setParam = (key: keyof z.infer<typeof searchSchema>, val: string) => {
     navigate({
@@ -348,7 +423,15 @@ function AdventureFinderSection({ signatures }: { signatures: AdventuresSignatur
 
   const clearAll = () => {
     navigate({
-      search: { q: "", region: "", terrain: "", difficulty: "", duration: "", experience: "", travelStyle: "" },
+      search: {
+        q: "",
+        region: "",
+        terrain: "",
+        difficulty: "",
+        duration: "",
+        experience: "",
+        travelStyle: "",
+      },
       replace: true,
     });
   };
@@ -367,10 +450,15 @@ function AdventureFinderSection({ signatures }: { signatures: AdventuresSignatur
     <section id="finder" className="py-20 bg-forest text-forest-foreground scroll-mt-12">
       <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">ADVENTURE FINDER</p>
-          <h2 className="font-serif text-4xl md:text-5xl text-cream">FIND YOUR ADVENTURE</h2>
+          <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">
+            {(content.finder_eyebrow || "Adventure Finder").toUpperCase()}
+          </p>
+          <h2 className="font-serif text-4xl md:text-5xl text-cream">
+            {(content.finder_title || "Find Your Adventure").toUpperCase()}
+          </h2>
           <p className="text-forest-foreground/80 text-base md:text-lg mt-4 leading-relaxed">
-            Tell us what you're looking for and we'll show you the journeys that might be right for you.
+            {content.finder_body ||
+              "Tell us what you're looking for and we'll show you the journeys that might be right for you."}
           </p>
         </div>
 
@@ -524,11 +612,14 @@ function SignatureSection({
       <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-3">
-            SIGNATURE SELECTION
+            {(content.signature_eyebrow || "Signature Selection").toUpperCase()}
           </p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">JOURNEYS WE'D TAKE OURSELVES.</h2>
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+            {(content.signature_title || "Journeys we'd take ourselves.").toUpperCase()}
+          </h2>
           <p className="text-foreground/75 text-lg mt-4 leading-relaxed">
-            Curated safari itineraries designed from personal field experience across Kenya's wild frontiers.
+            {content.signature_body ||
+              "Curated safari itineraries designed from personal field experience across Kenya's wild frontiers."}
           </p>
         </div>
 
@@ -546,7 +637,7 @@ function SignatureSection({
   /* ─── 05. EXPLORE BY EXPERIENCE ──────────────────────────────────────────────── */
 }
 
-function ExploreByExperienceSection() {
+function ExploreByExperienceSection({ content }: { content: typeof PAGE_DEFAULTS.adventures_index }) {
   const navigate = useNavigate({ from: Route.fullPath });
 
   const handleExperienceClick = (expName: string) => {
@@ -562,10 +653,15 @@ function ExploreByExperienceSection() {
     <section className="py-24 bg-cream/70 border-y border-border/40">
       <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">CURATED THEMES</p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">EXPLORE BY EXPERIENCE</h2>
+          <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">
+            {(content.explore_eyebrow || "Curated Themes").toUpperCase()}
+          </p>
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+            {(content.explore_title || "Explore by Experience").toUpperCase()}
+          </h2>
           <p className="text-foreground/75 text-lg mt-4 leading-relaxed">
-            Select what matters most to your journey — from intimate walking safaris to coastal retreats.
+            {content.explore_body ||
+              "Select what matters most to your journey — from intimate walking safaris to coastal retreats."}
           </p>
         </div>
 
@@ -677,7 +773,13 @@ function FeaturedJourneySpotlight({ signatures }: { signatures: AdventuresSignat
   /* ─── 07. MAIN ADVENTURE CATALOGUE ───────────────────────────────────────────── */
 }
 
-function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[] }) {
+function MainCatalogueSection({
+  signatures,
+  content,
+}: {
+  signatures: AdventuresSignature[];
+  content: typeof PAGE_DEFAULTS.adventures_index;
+}) {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const [sortBy, setSortBy] = useState<"featured" | "duration" | "newest">("featured");
@@ -741,7 +843,15 @@ function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[
 
   const clearAll = () => {
     navigate({
-      search: { q: "", region: "", terrain: "", difficulty: "", duration: "", experience: "", travelStyle: "" },
+      search: {
+        q: "",
+        region: "",
+        terrain: "",
+        difficulty: "",
+        duration: "",
+        experience: "",
+        travelStyle: "",
+      },
       replace: true,
     });
   };
@@ -751,8 +861,12 @@ function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[
       <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
         <div className="flex flex-wrap items-end justify-between gap-6 mb-12 border-b border-border/60 pb-6">
           <div>
-            <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-2">FULL CATALOGUE</p>
-            <h2 className="font-serif text-3xl md:text-4xl text-foreground">MORE WAYS TO EXPLORE</h2>
+            <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-2">
+              {(content.catalogue_eyebrow || "Full Catalogue").toUpperCase()}
+            </p>
+            <h2 className="font-serif text-3xl md:text-4xl text-foreground">
+              {(content.catalogue_title || "More Ways to Explore").toUpperCase()}
+            </h2>
             <p className="text-sm text-foreground/60 mt-1">Showing {sorted.length} curated adventures</p>
           </div>
 
@@ -817,15 +931,20 @@ function MainCatalogueSection({ signatures }: { signatures: AdventuresSignature[
   /* ─── 08. JOURNEY COMBINATIONS ────────────────────────────────────────────────── */
 }
 
-function JourneyCombinationsSection() {
+function JourneyCombinationsSection({ content }: { content: typeof PAGE_DEFAULTS.adventures_index }) {
   return (
     <section className="py-24 bg-cream/50 border-t border-border/40">
       <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">SEAMLESS CIRCUITS</p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">CONTINUE YOUR JOURNEY</h2>
+          <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">
+            {(content.combinations_eyebrow || "Seamless Circuits").toUpperCase()}
+          </p>
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+            {(content.combinations_title || "Continue Your Journey").toUpperCase()}
+          </h2>
           <p className="text-foreground/75 text-lg mt-4 leading-relaxed">
-            Combine Kenya's wild savannahs with mountain highlands and pristine Indian Ocean beaches.
+            {content.combinations_body ||
+              "Combine Kenya's wild savannahs with mountain highlands and pristine Indian Ocean beaches."}
           </p>
         </div>
 
@@ -871,14 +990,19 @@ function JourneyCombinationsSection() {
   /* ─── 09. BESPOKE CONVERSION BANNER ───────────────────────────────────────────── */
 }
 
-function BespokeConversionBanner() {
+function BespokeConversionBanner({ content }: { content: typeof PAGE_DEFAULTS.adventures_index }) {
   return (
     <section className="py-20 bg-background border-t border-border/40 text-center">
       <div className="max-w-4xl mx-auto px-6 space-y-6">
-        <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold">CUSTOM JOURNEY DESIGN</p>
-        <h2 className="font-serif text-4xl md:text-5xl text-foreground">CAN'T FIND EXACTLY WHAT YOU'RE LOOKING FOR?</h2>
+        <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold">
+          {(content.bespoke_eyebrow || "Custom Journey Design").toUpperCase()}
+        </p>
+        <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+          {(content.bespoke_title || "Can't find exactly what you're looking for?").toUpperCase()}
+        </h2>
         <p className="text-foreground/75 text-lg leading-relaxed max-w-2xl mx-auto">
-          Our Adventures are starting points. We can reshape the journey around your dates, interests, pace and budget.
+          {content.bespoke_body ||
+            "Our Adventures are starting points. We can reshape the journey around your dates, interests, pace and budget."}
         </p>
         <div className="pt-3">
           <EnquireDialog
