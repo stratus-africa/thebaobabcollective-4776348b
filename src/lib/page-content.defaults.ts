@@ -274,6 +274,7 @@ export const PAGE_DEFAULTS = {
 
     // 3. Map
     show_map: true as boolean,
+    map_positions: {} as Record<string, { left: number; top: number }>,
 
     // 4. Grid / Editorial Groupings
     show_grid: true as boolean,
