@@ -9,6 +9,7 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { useMenuConfig } from "@/hooks/useMenuConfig";
+import { resolveImageSource } from "@/lib/image-resolution";
 
 type HeroContent = Partial<typeof PAGE_DEFAULTS.home>;
 
@@ -17,7 +18,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
   const c = usePreviewMerge("home", base);
   const asBackground = Boolean(c.hero_image_as_background);
   const hideSearch = Boolean(c.hero_hide_search);
-  const heroSrc = c.hero_image_url || heroImg;
+  const heroSrc = resolveImageSource(c.hero_image_url, heroImg) ?? heroImg;
   const navigate = useNavigate();
   const menu = useMenuConfig();
   const overlay = !!menu.transparentOverHero;
@@ -56,6 +57,9 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
             src={heroSrc}
             alt="Baobab safari hero"
             className="absolute inset-0 h-full w-full"
+            decoding="async"
+            fetchPriority="high"
+            sizes="100vw"
             style={{
               objectFit: bgSize,
             }}
@@ -167,6 +171,9 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
                   src={heroSrc}
                   alt="Baobab safari hero"
                   className="w-full h-full max-h-[600px] rounded-[18px] md:rounded-[24px] shadow-2xl"
+                  decoding="async"
+                  fetchPriority="high"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   style={{ objectFit: "cover" }}
                 />
               </div>
