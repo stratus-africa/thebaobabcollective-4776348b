@@ -1014,4 +1014,3 @@ export function AdminDestinationsMapPage() {
     </div>
   );
 }
- 
