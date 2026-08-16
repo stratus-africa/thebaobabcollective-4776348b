@@ -58,7 +58,7 @@ const SORTABLE: Record<TableName, string[]> = {
 
 export const adminList = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListSchema.parse(d))
+  .validator((d: unknown) => ListSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const orderCol = SORTABLE[data.table].includes(data.orderBy) ? data.orderBy : "sort_order";
@@ -85,7 +85,7 @@ const UploadImageSchema = z.object({
 
 export const adminUploadImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UploadImageSchema.parse(d))
+  .validator((d: unknown) => UploadImageSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
@@ -122,7 +122,7 @@ const DeleteMediaSchema = z
 
 export const adminDeleteMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => DeleteMediaSchema.parse(d))
+  .validator((d: unknown) => DeleteMediaSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     let mediaPath = data.path ?? "";
@@ -155,7 +155,7 @@ const ListMediaSchema = z.object({
 
 export const adminListMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListMediaSchema.parse(d ?? {}))
+  .validator((d: unknown) => ListMediaSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
@@ -199,7 +199,7 @@ export const adminListMedia = createServerFn({ method: "POST" })
 
 export const adminUpsert = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpsertSchema.parse(d))
+  .validator((d: unknown) => UpsertSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const row = { ...data.row };
@@ -212,7 +212,7 @@ export const adminUpsert = createServerFn({ method: "POST" })
 
 export const adminDelete = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => DeleteSchema.parse(d))
+  .validator((d: unknown) => DeleteSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { error } = await context.supabase.from(data.table).delete().eq("id", data.id);
@@ -224,7 +224,7 @@ const GetSchema = z.object({ table: z.enum(TABLES), id: z.string().min(1) });
 
 export const adminGet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => GetSchema.parse(d))
+  .validator((d: unknown) => GetSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.id);
@@ -256,7 +256,7 @@ const BookingUpdateSchema = z.object({
 
 export const adminUpdateBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => BookingUpdateSchema.parse(d))
+  .validator((d: unknown) => BookingUpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { id, ...patch } = data;
@@ -274,7 +274,7 @@ const EnquiryListSchema = z.object({
 
 export const adminListEnquiries = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => EnquiryListSchema.parse(d ?? {}))
+  .validator((d: unknown) => EnquiryListSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     let q = context.supabase.from("enquiries").select("*").order("created_at", { ascending: false }).limit(data.limit);
@@ -320,7 +320,7 @@ const EnquiryUpdateSchema = z.object({
 
 export const adminUpdateEnquiry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => EnquiryUpdateSchema.parse(d))
+  .validator((d: unknown) => EnquiryUpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const patch = {
