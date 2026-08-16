@@ -40,8 +40,16 @@ type PageKey = (typeof KEYS)[number];
 const GetSchema = z.object({ key: z.enum(KEYS) });
 const SaveSchema = z.object({
   key: z.enum(KEYS),
-  value: z.record(z.string(), z.any()),
+  value: z
+    .record(z.string(), z.any())
+    .refine((value) => value !== null && typeof value === "object" && !Array.isArray(value), {
+      message: "Page content must be a plain object.",
+    }),
 });
+
+export function validatePageContentSave(input: unknown) {
+  return SaveSchema.parse(input);
+}
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.rpc("has_role", {
@@ -82,15 +90,21 @@ export const getPageContent = createServerFn({ method: "POST" })
 
 export const savePageContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => GetSchema.parse(d))
+  .validator((d: unknown) => validatePageContentSave(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const database = process.env.SUPABASE_SERVICE_ROLE_KEY
       ? (await import("@/integrations/supabase/client.server")).supabaseAdmin
       : context.supabase;
+
+    const pageValue = data.value;
+    if (pageValue == null || typeof pageValue !== "object" || Array.isArray(pageValue)) {
+      throw new Error("Page content must be a plain object.");
+    }
+
     const { error } = await database
       .from("site_settings")
-      .upsert({ key: `page_${data.key}`, value: data.value, updated_at: new Date().toISOString() });
+      .upsert({ key: `page_${data.key}`, value: pageValue, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
