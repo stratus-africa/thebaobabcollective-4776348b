@@ -40,6 +40,7 @@ function AdminAdventureEditor() {
   const { adventure: initialAdventure, isNew } = Route.useLoaderData();
   const [draft, setDraft] = useState<AdventuresSignature>(initialAdventure);
   const [saving, setSaving] = useState(false);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
   const { data: page } = useQuery({
     queryKey: ["admin-adventures-page"],
@@ -82,7 +83,7 @@ function AdminAdventureEditor() {
         ],
       };
 
-      await savePage(nextPage);
+      await savePage({ data: nextPage });
       navigate({ to: "/admin/adventures" });
     } finally {
       setSaving(false);
@@ -214,17 +215,22 @@ function AdminAdventureEditor() {
             )}
 
             {/* Media Picker */}
+            <button
+              type="button"
+              onClick={() => setMediaPickerOpen(true)}
+              className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 hover:border-gold hover:bg-cream/40 bg-background px-4 py-3 text-sm font-medium text-foreground/70 hover:text-gold transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              Choose from Media Library
+            </button>
+
             <MediaLibraryPicker
-              onSelect={(url) => onChange("image", url)}
-              trigger={
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 hover:border-gold hover:bg-cream/40 bg-background px-4 py-3 text-sm font-medium text-foreground/70 hover:text-gold transition-colors"
-                >
-                  <Upload className="w-4 h-4" />
-                  Choose from Media Library
-                </button>
-              }
+              open={mediaPickerOpen}
+              onOpenChange={setMediaPickerOpen}
+              onSelect={(urls) => {
+                const nextUrl = urls[0] ?? "";
+                onChange("image", nextUrl);
+              }}
             />
 
             {/* Manual URL Input */}
