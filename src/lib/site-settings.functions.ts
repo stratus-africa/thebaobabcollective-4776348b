@@ -26,6 +26,27 @@ export type CurrencySettings = {
   symbol?: string; // Display symbol, e.g. "$"
 };
 
+export const CURRENCY_OPTIONS: Array<{ code: string; symbol: string; label: string }> = [
+  { code: "USD", symbol: "$", label: "US Dollar" },
+  { code: "GBP", symbol: "£", label: "British Pound" },
+  { code: "EUR", symbol: "€", label: "Euro" },
+  { code: "ZAR", symbol: "R", label: "South African Rand" },
+  { code: "KES", symbol: "KSh", label: "Kenyan Shilling" },
+  { code: "AUD", symbol: "A$", label: "Australian Dollar" },
+  { code: "CAD", symbol: "C$", label: "Canadian Dollar" },
+];
+
+export const DEFAULT_CURRENCY: CurrencySettings = { code: "USD", symbol: "$" };
+
+export function resolveCurrencySettings(value?: CurrencySettings | null): CurrencySettings {
+  const fallback = value ?? DEFAULT_CURRENCY;
+  const match = CURRENCY_OPTIONS.find((opt) => opt.code === fallback.code) ?? DEFAULT_CURRENCY;
+  return {
+    code: fallback.code || match.code,
+    symbol: fallback.symbol || match.symbol,
+  };
+}
+
 export type SiteSettings = {
   contact: ContactSettings;
   branding: BrandingSettings;
@@ -80,7 +101,7 @@ export const getSiteSettings = createServerFn({ method: "GET" }).handler(async (
   return {
     contact: (map.get("contact") ?? {}) as ContactSettings,
     branding: (map.get("branding") ?? {}) as BrandingSettings,
-    currency: (map.get("currency") ?? { code: "USD", symbol: "$" }) as CurrencySettings,
+    currency: resolveCurrencySettings(map.get("currency") as CurrencySettings | null),
   } satisfies SiteSettings;
 });
 
@@ -103,7 +124,8 @@ export const saveSiteSettings = createServerFn({ method: "POST" })
       { key: "contact", value: data.contact, updated_at: now },
       { key: "branding", value: data.branding, updated_at: now },
     ];
-    if (data.currency) rows.push({ key: "currency", value: data.currency, updated_at: now });
+    const nextCurrency = resolveCurrencySettings(data.currency ?? DEFAULT_CURRENCY);
+    rows.push({ key: "currency", value: nextCurrency, updated_at: now });
     const { error } = await supabaseAdmin.from("site_settings").upsert(rows);
     if (error) throw new Error(error.message);
     return { ok: true };
