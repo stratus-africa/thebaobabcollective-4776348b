@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   LayoutDashboard,
@@ -697,6 +697,7 @@ function PagesHub() {
   };
 
   return (
+  return (
     <div>
       <header className="mb-8">
         <p className="text-[11px] tracking-[0.3em] uppercase text-foreground/60 mb-2">Admin · Pages</p>
@@ -704,9 +705,9 @@ function PagesHub() {
         <p className="text-sm text-foreground/65 mt-1">{cfg.description}</p>
       </header>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        {/* Section Dropdown Selector */}
-        <div className="flex items-center gap-3">
+      <Tabs value={activeTab} onValueChange={handleTabChange} orientation="vertical" className="flex flex-col md:flex-row gap-8">
+        {/* Mobile Dropdown Selector (hidden on desktop) */}
+        <div className="md:hidden flex items-center gap-3">
           <label className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/60 shrink-0">
             Section
           </label>
@@ -730,7 +731,24 @@ function PagesHub() {
           </Select>
         </div>
 
-        <div className="min-w-0">
+        {/* Desktop Tabs Sidebar (hidden on mobile) */}
+        <TabsList className="hidden md:flex h-auto md:w-56 shrink-0 md:flex-col bg-transparent p-0 gap-1 justify-start">
+          {cfg.tabs.map((t) => {
+            const Icon = t.icon;
+            return (
+              <TabsTrigger
+                key={t.value}
+                value={t.value}
+                className="w-full justify-start gap-2 data-[state=active]:bg-cream data-[state=active]:text-foreground data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border px-4 py-2.5"
+              >
+                <Icon className="w-4 h-4" />
+                {t.label}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+
+        <div className="flex-1 min-w-0">
           {cfg.tabs.map((t) => (
             <TabsContent key={t.value} value={t.value} className="mt-0">
               {t.editors.length > 1 ? (
@@ -745,5 +763,6 @@ function PagesHub() {
         </div>
       </Tabs>
     </div>
+  );
   );
 }
