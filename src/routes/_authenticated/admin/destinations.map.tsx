@@ -66,7 +66,8 @@ import { redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/_authenticated/admin/destinations/map")({
   beforeLoad: () => {
     throw redirect({
-      to: "/admin/pages-hub/destinations",
+      to: "/admin/pages-hub/$section",
+      params: { section: "destinations" },
       search: { tab: "map" },
     });
   },
@@ -243,7 +244,7 @@ export function AdminDestinationsMapHub() {
       const savedMapDestinations = content.map_destinations || [];
 
       if (Array.isArray(savedMapDestinations) && savedMapDestinations.length > 0) {
-        setDestinationsOnMap(savedMapDestinations);
+        setDestinationsOnMap(savedMapDestinations as MapDestinationItem[]);
       } else {
         const items = allAvailableDestinations.map((d, idx) => {
           const defaultPos = DEFAULT_DESTINATION_MAP_POSITIONS[d.slug] || { left: 50, top: 50 };
@@ -802,7 +803,9 @@ export function AdminDestinationsMapHub() {
                       return (
                         <tr
                           key={item.slug}
-                          ref={(el) => (tableRowsRef.current[item.slug] = el)}
+                          ref={(el) => {
+                            tableRowsRef.current[item.slug] = el;
+                          }}
                           onClick={() => setActiveSlug(item.slug)}
                           className={`transition-colors cursor-pointer group ${
                             isSelected
@@ -928,7 +931,7 @@ export function AdminDestinationsMapHub() {
             </Button>
           </div>
           <div className="border border-border rounded-2xl overflow-hidden shadow-2xl">
-            <PageLivePreview path="/destinations" />
+            <PageLivePreview path="/destinations" drafts={{}} />
           </div>
         </div>
       )}
