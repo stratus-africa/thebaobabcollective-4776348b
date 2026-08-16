@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { ArrowUp } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -132,6 +133,30 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 320);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      aria-label="Scroll to top"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="fixed bottom-6 right-6 z-[90] inline-flex h-12 w-12 items-center justify-center rounded-full bg-gold text-gold-foreground shadow-lg transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+    >
+      <ArrowUp className="h-5 w-5" />
+    </button>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const record = useServerFn(recordVisit);
@@ -172,6 +197,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <ScrollToTopButton />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );
