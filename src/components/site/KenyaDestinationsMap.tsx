@@ -1,85 +1,98 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, Calendar, ArrowRight, Compass, Sparkles, Navigation } from "lucide-react";
+import {
+  MapPin,
+  Calendar,
+  ArrowRight,
+  Sparkles,
+  Navigation,
+  Move,
+  Save,
+  RotateCcw,
+  Loader2,
+  Sliders,
+} from "lucide-react";
 import type { DestinationMetadata } from "@/lib/destinations.data";
-import { KENYA_REGIONS } from "@/lib/destinations.data";
+import {
+  KENYA_REGIONS,
+  DEFAULT_DESTINATION_MAP_POSITIONS,
+  DESTINATION_LABEL_OFFSETS,
+  getDestinationMapPosition,
+} from "@/lib/destinations.data";
 import kenyaMapAsset from "@/assets/kenya-destinations-map.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-interface KenyaDestinationsMapProps {
+export interface KenyaDestinationsMapProps {
   destinations: DestinationMetadata[];
+  customPositions?: Record<string, { left: number; top: number }> | null;
+  onSavePositions?: (positions: Record<string, { left: number; top: number }>) => Promise<void> | void;
+  isAdmin?: boolean;
+  embeddedAdminView?: boolean;
 }
 
-/**
- * Calibrated Percentage Coordinates for the reference Kenya Map (Kenya-Map1.gif)
- * Positions are normalized (% left, % top) calibrated against the reference map image.
- */
-const DESTINATION_MAP_POSITIONS: Record<string, { left: number; top: number }> = {
-  "maasai-mara": { left: 24.5, top: 64.0 },
-  "amboseli": { left: 47.0, top: 76.5 },
-  "samburu": { left: 47.5, top: 42.5 },
-  "laikipia": { left: 41.5, top: 48.0 },
-  "tsavo": { left: 57.5, top: 78.5 },
-  "lake-nakuru-naivasha": { left: 31.5, top: 56.5 },
-  "mount-kenya": { left: 46.5, top: 51.5 },
-  // Coastal destinations — pinned to the visible Indian Ocean coast strip
-  "lamu-archipelago": { left: 84.5, top: 55.0 },
-  "malindi": { left: 84.0, top: 65.5 },
-  "watamu": { left: 83.5, top: 68.5 },
-  "diani-beach": { left: 82.5, top: 80.5 },
-};
-
-/**
- * Custom Label Offsets to prevent collision with map printed text and neighboring pins.
- */
-const DESTINATION_LABEL_OFFSETS: Record<string, string> = {
-  "laikipia": "-translate-x-[105%] -translate-y-1/2",
-  "mount-kenya": "translate-x-3 -translate-y-1/2",
-  "samburu": "-translate-x-1/2 -translate-y-[200%]",
-  "lake-nakuru-naivasha": "-translate-x-[105%] translate-y-1",
-  // Coastal — labels offset to the LEFT so they don't overflow the right edge
-  "lamu-archipelago": "-translate-x-[105%] -translate-y-1/2",
-  "malindi": "-translate-x-[105%] -translate-y-1/2",
-  "watamu": "-translate-x-[105%] -translate-y-1/2",
-  "diani-beach": "-translate-x-[105%] -translate-y-1/2",
-  "tsavo": "translate-x-3 translate-y-0",
-  "amboseli": "-translate-x-1/2 translate-y-3",
-  "maasai-mara": "-translate-x-1/2 translate-y-3",
-};
-
-/**
- * Calculates percentage pin position on the reference map:
- * Uses pre-calibrated positions first, falling back to calibrated lat/lng box.
- */
-function getMapPosition(d: DestinationMetadata): { left: number; top: number } {
-  // 1. Direct slug match
-  if (DESTINATION_MAP_POSITIONS[d.slug]) {
-    return DESTINATION_MAP_POSITIONS[d.slug];
-  }
-
-  // 2. Loose key match
-  const key = Object.keys(DESTINATION_MAP_POSITIONS).find(
-    (k) => d.slug.includes(k) || k.includes(d.slug) || d.name.toLowerCase().includes(k)
-  );
-  if (key && DESTINATION_MAP_POSITIONS[key]) {
-    return DESTINATION_MAP_POSITIONS[key];
-  }
-
-  // 3. Fallback Lat/Lng Box mapping calibrated to the reference GIF boundaries
-  // Reference GIF Lat: -4.8° S to +5.0° N, Lng: 33.8° E to 42.0° E
-  const minLat = -4.8;
-  const maxLat = 5.0;
-  const minLng = 33.8;
-  const maxLng = 42.0;
-
-  const left = Math.max(8, Math.min(92, 5 + ((d.longitude - minLng) / (maxLng - minLng)) * 88));
-  const top = Math.max(8, Math.min(92, 5 + ((maxLat - d.latitude) / (maxLat - minLat)) * 88));
-
-  return { left, top };
-}
-
-export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps) {
+export function KenyaDestinationsMap({
+  destinations,
+  customPositions: initialCustomPositions,
+  onSavePositions,
+  isAdmin: forcedIsAdmin,
+  embeddedAdminView = false,
+}: KenyaDestinationsMapProps) {
   const [selectedRegion, setSelectedRegion] = useState<string>("All");
   const [activeSlug, setActiveSlug] = useState<string>(destinations[0]?.slug || "maasai-mara");
+
+  // Admin auth check
+  const [isAdminUser, setIsAdminUser] = useState<boolean>(!!forcedIsAdmin);
+  const [isEditMode, setIsEditMode] = useState<boolean>(embeddedAdminView);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  // Pin positions map state
+  const [positions, setPositions] = useState<Record<string, { left: number; top: number }>>(() => {
+    return initialCustomPositions || {};
+  });
+
+  // Track if positions were modified
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+
+  // Dragging state
+  const [draggingSlug, setDraggingSlug] = useState<string | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Sync when initialCustomPositions changes
+  useEffect(() => {
+    if (initialCustomPositions) {
+      setPositions(initialCustomPositions);
+    }
+  }, [initialCustomPositions]);
+
+  // Check admin role if not forced
+  useEffect(() => {
+    if (forcedIsAdmin !== undefined) {
+      setIsAdminUser(forcedIsAdmin);
+      return;
+    }
+    let isMounted = true;
+    void (async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
+        const { data: role } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userData.user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (isMounted && role?.role === "admin") {
+          setIsAdminUser(true);
+        }
+      } catch {
+        // public visitor
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [forcedIsAdmin]);
 
   const filteredDestinations = useMemo(() => {
     if (selectedRegion === "All") return destinations;
@@ -87,15 +100,127 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
   }, [destinations, selectedRegion]);
 
   const activeDestination = useMemo(() => {
-    return (
-      destinations.find((d) => d.slug === activeSlug) ||
-      filteredDestinations[0] ||
-      destinations[0]
-    );
+    return destinations.find((d) => d.slug === activeSlug) || filteredDestinations[0] || destinations[0];
   }, [destinations, activeSlug, filteredDestinations]);
 
+  // Calculate resolved position for a destination
+  const getResolvedPos = useCallback(
+    (d: DestinationMetadata) => {
+      if (positions[d.slug]) {
+        return positions[d.slug];
+      }
+      return getDestinationMapPosition(d, positions);
+    },
+    [positions],
+  );
+
+  // Handle pointer coordinate updates
+  const updatePinPosition = useCallback((slug: string, clientX: number, clientY: number) => {
+    if (!mapContainerRef.current) return;
+    const rect = mapContainerRef.current.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    const rawLeft = ((clientX - rect.left) / rect.width) * 100;
+    const rawTop = ((clientY - rect.top) / rect.height) * 100;
+
+    // Clamp inside boundaries
+    const left = Number(Math.max(2, Math.min(98, rawLeft)).toFixed(1));
+    const top = Number(Math.max(2, Math.min(98, rawTop)).toFixed(1));
+
+    setPositions((prev) => ({
+      ...prev,
+      [slug]: { left, top },
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+
+  // Pointer drag start
+  const handlePointerDownPin = (slug: string, e: React.PointerEvent) => {
+    if (!isEditMode) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveSlug(slug);
+    setDraggingSlug(slug);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  // Pointer drag move
+  const handlePointerMoveMap = (e: React.PointerEvent) => {
+    if (!isEditMode || !draggingSlug) return;
+    updatePinPosition(draggingSlug, e.clientX, e.clientY);
+  };
+
+  // Pointer drag end
+  const handlePointerUpMap = (e: React.PointerEvent) => {
+    if (draggingSlug) {
+      setDraggingSlug(null);
+    }
+  };
+
+  // Click on map container to move selected pin
+  const handleMapClick = (e: React.MouseEvent) => {
+    if (!isEditMode || !activeSlug || draggingSlug) return;
+    // Don't reposition if clicking on a button directly
+    if ((e.target as HTMLElement).closest("button.pin-handle")) return;
+    updatePinPosition(activeSlug, e.clientX, e.clientY);
+  };
+
+  // Save changes
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      if (onSavePositions) {
+        await onSavePositions(positions);
+      } else {
+        // Fallback: save to page_destinations_index site setting
+        const { getPageContent, savePageContent } = await import("@/lib/page-content.functions");
+        const current = (await getPageContent({ data: { key: "destinations_index" } })) || {};
+        await savePageContent({
+          data: {
+            key: "destinations_index",
+            value: {
+              ...current,
+              map_positions: positions,
+            },
+          },
+        });
+      }
+      setHasUnsavedChanges(false);
+      toast.success("Destination map pin positions saved successfully!");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to save map pin positions");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Reset to default coordinates
+  const handleResetToDefaults = () => {
+    if (confirm("Reset all destination pin positions to default Kenya map coordinates?")) {
+      setPositions(DEFAULT_DESTINATION_MAP_POSITIONS);
+      setHasUnsavedChanges(true);
+      toast.info("Reset to default pin positions. Click 'Save' to apply permanently.");
+    }
+  };
+
+  // Fine-tuning nudges for active pin
+  const nudgeActivePin = (dx: number, dy: number) => {
+    if (!activeDestination) return;
+    const cur = getResolvedPos(activeDestination);
+    const nextLeft = Number(Math.max(2, Math.min(98, cur.left + dx)).toFixed(1));
+    const nextTop = Number(Math.max(2, Math.min(98, cur.top + dy)).toFixed(1));
+    setPositions((prev) => ({
+      ...prev,
+      [activeDestination.slug]: { left: nextLeft, top: nextTop },
+    }));
+    setHasUnsavedChanges(true);
+  };
+
   return (
-    <section aria-labelledby="map-heading" className="bg-forest text-forest-foreground py-20 md:py-28 relative overflow-hidden">
+    <section
+      aria-labelledby="map-heading"
+      className={`bg-forest text-forest-foreground ${embeddedAdminView ? "py-4" : "py-20 md:py-28"} relative overflow-hidden`}
+    >
       {/* Subtle Background Pattern */}
       <div
         className="absolute inset-0 opacity-5 pointer-events-none"
@@ -106,70 +231,216 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
       />
 
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 relative z-10">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
-          <div className="max-w-2xl">
-            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-              <Navigation className="w-3.5 h-3.5" /> Explore Kenya Geographically
-            </p>
-            <h2 id="map-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
-              Where in Kenya will your story begin?
-            </h2>
-            <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">
-              Explore Kenya's extraordinary regions — from the northern frontier down through the Great Rift Valley, iconic savannahs, and Swahili coast.
-            </p>
-          </div>
+        {/* Section Header (hidden in embedded view) */}
+        {!embeddedAdminView && (
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3 mb-3">
+                <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold flex items-center gap-2">
+                  <Navigation className="w-3.5 h-3.5" /> Explore Kenya Geographically
+                </p>
+                {isAdminUser && (
+                  <span className="inline-flex items-center gap-1.5 bg-gold/20 text-gold border border-gold/40 text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full">
+                    <Sliders className="w-3 h-3" /> Admin Controls
+                  </span>
+                )}
+              </div>
+              <h2 id="map-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
+                Where in Kenya will your story begin?
+              </h2>
+              <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">
+                Explore Kenya's extraordinary regions — from the northern frontier down through the Great Rift Valley,
+                iconic savannahs, and Swahili coast.
+              </p>
+            </div>
 
-          {/* Region Tabs */}
-          <div className="flex flex-wrap gap-2 self-start md:self-end" role="tablist" aria-label="Kenya Regions">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={selectedRegion === "All"}
-              onClick={() => setSelectedRegion("All")}
-              className={`px-4 py-2 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all ${
-                selectedRegion === "All"
-                  ? "bg-gold text-gold-foreground shadow-sm"
-                  : "bg-forest-foreground/10 text-forest-foreground/80 hover:bg-forest-foreground/20 hover:text-cream border border-forest-foreground/15"
-              }`}
-            >
-              All Regions ({destinations.length})
-            </button>
-            {KENYA_REGIONS.map((reg) => {
-              const count = destinations.filter((d) => d.region === reg.id).length;
-              return (
+            {/* Region Tabs & Admin Edit Button */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 self-start md:self-end">
+              {isAdminUser && (
                 <button
-                  key={reg.id}
+                  type="button"
+                  onClick={() => setIsEditMode((prev) => !prev)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] tracking-[0.2em] uppercase font-bold transition-all shadow-md cursor-pointer ${
+                    isEditMode
+                      ? "bg-terracotta text-white ring-2 ring-terracotta/40 hover:bg-terracotta/90"
+                      : "bg-gold text-gold-foreground hover:bg-gold/90"
+                  }`}
+                >
+                  <Move className="w-3.5 h-3.5" />
+                  {isEditMode ? "Exit Pin Editor" : "Drag & Drop Pins"}
+                </button>
+              )}
+
+              <div className="flex flex-wrap gap-2" role="tablist" aria-label="Kenya Regions">
+                <button
                   type="button"
                   role="tab"
-                  aria-selected={selectedRegion === reg.id}
-                  onClick={() => setSelectedRegion(reg.id)}
-                  className={`px-4 py-2 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all ${
-                    selectedRegion === reg.id
+                  aria-selected={selectedRegion === "All"}
+                  onClick={() => setSelectedRegion("All")}
+                  className={`px-4 py-2 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all cursor-pointer ${
+                    selectedRegion === "All"
                       ? "bg-gold text-gold-foreground shadow-sm"
                       : "bg-forest-foreground/10 text-forest-foreground/80 hover:bg-forest-foreground/20 hover:text-cream border border-forest-foreground/15"
                   }`}
                 >
-                  {reg.label} {count > 0 ? `(${count})` : ""}
+                  All Regions ({destinations.length})
                 </button>
-              );
-            })}
+                {KENYA_REGIONS.map((reg) => {
+                  const count = destinations.filter((d) => d.region === reg.id).length;
+                  return (
+                    <button
+                      key={reg.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={selectedRegion === reg.id}
+                      onClick={() => setSelectedRegion(reg.id)}
+                      className={`px-4 py-2 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all cursor-pointer ${
+                        selectedRegion === reg.id
+                          ? "bg-gold text-gold-foreground shadow-sm"
+                          : "bg-forest-foreground/10 text-forest-foreground/80 hover:bg-forest-foreground/20 hover:text-cream border border-forest-foreground/15"
+                      }`}
+                    >
+                      {reg.label} {count > 0 ? `(${count})` : ""}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* ── ADMIN LIVE PIN POSITIONING TOOLBAR ── */}
+        {isEditMode && (
+          <div className="mb-6 bg-cream text-foreground rounded-2xl p-4 sm:p-5 border-2 border-gold shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2.5 w-2.5 rounded-full bg-terracotta animate-pulse" />
+                  <h3 className="font-serif text-lg font-bold text-forest flex items-center gap-2">
+                    <Move className="w-4 h-4 text-gold" /> Drag & Drop Pin Positioning
+                  </h3>
+                  {hasUnsavedChanges && (
+                    <span className="text-[10px] uppercase font-bold tracking-wider bg-terracotta/15 text-terracotta px-2 py-0.5 rounded-full">
+                      Unsaved Changes
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-foreground/75">
+                  Click and drag any pin directly on the map. You can also click anywhere on the map to place the
+                  selected pin.
+                </p>
+              </div>
+
+              {/* Active Pin Coordinates & Nudge Controls */}
+              {activeDestination && (
+                <div className="flex flex-wrap items-center gap-2 bg-background p-2 rounded-xl border border-border">
+                  <span className="text-xs font-semibold text-foreground/70 pl-2">
+                    Active: <strong className="text-forest">{activeDestination.name}</strong>
+                  </span>
+                  {(() => {
+                    const pos = getResolvedPos(activeDestination);
+                    return (
+                      <span className="font-mono text-xs bg-muted px-2 py-1 rounded text-foreground/90">
+                        X: {pos.left}% | Y: {pos.top}%
+                      </span>
+                    );
+                  })()}
+                  <div className="flex items-center gap-1 pl-1">
+                    <button
+                      type="button"
+                      title="Nudge Left"
+                      onClick={() => nudgeActivePin(-0.5, 0)}
+                      className="px-2 py-1 bg-muted hover:bg-forest hover:text-cream text-xs rounded font-bold cursor-pointer transition-colors"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      title="Nudge Right"
+                      onClick={() => nudgeActivePin(0.5, 0)}
+                      className="px-2 py-1 bg-muted hover:bg-forest hover:text-cream text-xs rounded font-bold cursor-pointer transition-colors"
+                    >
+                      →
+                    </button>
+                    <button
+                      type="button"
+                      title="Nudge Up"
+                      onClick={() => nudgeActivePin(0, -0.5)}
+                      className="px-2 py-1 bg-muted hover:bg-forest hover:text-cream text-xs rounded font-bold cursor-pointer transition-colors"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      title="Nudge Down"
+                      onClick={() => nudgeActivePin(0, 0.5)}
+                      className="px-2 py-1 bg-muted hover:bg-forest hover:text-cream text-xs rounded font-bold cursor-pointer transition-colors"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2 self-end lg:self-center">
+                <button
+                  type="button"
+                  onClick={handleResetToDefaults}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-background hover:bg-destructive/10 text-foreground border border-border hover:border-destructive transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Defaults</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isSaving || !hasUnsavedChanges}
+                  onClick={handleSave}
+                  className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer ${
+                    hasUnsavedChanges
+                      ? "bg-gold text-gold-foreground hover:bg-gold/90 ring-2 ring-gold/40"
+                      : "bg-muted text-muted-foreground cursor-not-allowed"
+                  }`}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Save Pin Positions</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Map Layout Grid: Left Interactive Reference Image Map, Right Active Destination Spotlight */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* ── Left Map Canvas (5 Cols on desktop) ── */}
           <div className="lg:col-span-5 bg-forest-foreground/5 rounded-2xl border border-border/20 p-2 sm:p-3 relative flex flex-col justify-between overflow-hidden shadow-2xl">
-            {/* Reference Map Container — fills column without side gaps */}
-            <div className="relative w-full overflow-hidden rounded-xl" style={{ aspectRatio: '1 / 1.18' }}>
-              {/* Reference Map Image Layer — object-cover fills without side whitespace */}
+            {/* Reference Map Container */}
+            <div
+              ref={mapContainerRef}
+              onClick={handleMapClick}
+              onPointerMove={handlePointerMoveMap}
+              onPointerUp={handlePointerUpMap}
+              className={`relative w-full overflow-hidden rounded-xl touch-none ${
+                isEditMode ? "cursor-crosshair ring-2 ring-gold/60" : ""
+              }`}
+              style={{ aspectRatio: "1 / 1.18" }}
+            >
+              {/* Reference Map Image Layer */}
               <img
                 src="/maps/kenya-destinations-map.gif"
                 alt="Map of Kenya showing major destinations and geographic regions"
-                className="absolute inset-0 w-full h-full object-cover select-none rounded-xl"
+                className="absolute inset-0 w-full h-full object-cover select-none rounded-xl pointer-events-none"
                 onError={(e) => {
-                  // Fallback if public path is served differently in dev preview
                   const target = e.currentTarget as HTMLImageElement;
                   if (target.src !== kenyaMapAsset) {
                     target.src = kenyaMapAsset;
@@ -180,53 +451,99 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
               {/* Overlay Glass Vignette */}
               <div className="absolute inset-0 pointer-events-none rounded-xl ring-1 ring-white/10" />
 
+              {/* Edit Mode Grid Crosshair Guide Overlay */}
+              {isEditMode && (
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-15"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)",
+                    backgroundSize: "10% 10%",
+                  }}
+                />
+              )}
+
               {/* ── INTERACTIVE DESTINATION PINS OVERLAY ── */}
-              <div className="absolute inset-0">
+              <div className="absolute inset-0 pointer-events-auto">
                 {destinations.map((d) => {
-                  const pos = getMapPosition(d);
+                  const pos = getResolvedPos(d);
                   const isActive = activeDestination?.slug === d.slug;
+                  const isDragging = draggingSlug === d.slug;
                   const isRegionMatch = selectedRegion === "All" || d.region === selectedRegion;
                   const labelOffsetClass = DESTINATION_LABEL_OFFSETS[d.slug] || "-translate-x-1/2 translate-y-3";
 
                   return (
-                    <button
+                    <div
                       key={d.slug}
-                      type="button"
-                      onClick={() => setActiveSlug(d.slug)}
-                      onMouseEnter={() => setActiveSlug(d.slug)}
                       style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
-                      aria-label={`Select ${d.name}`}
-                      className={`absolute -translate-x-1/2 -translate-y-1/2 group focus:outline-none transition-all duration-300 z-20 ${
-                        isRegionMatch ? "opacity-100 scale-100" : "opacity-35 scale-75 pointer-events-none"
-                      }`}
+                      className={`absolute -translate-x-1/2 -translate-y-1/2 transition-all select-none ${
+                        isDragging ? "z-50 scale-125" : isActive ? "z-40 scale-110" : "z-20"
+                      } ${isRegionMatch ? "opacity-100" : "opacity-35 pointer-events-none"}`}
                     >
-                      {/* Pulsing ring on active pin */}
-                      {isActive && (
-                        <span className="absolute -inset-3 rounded-full bg-gold/40 animate-ping pointer-events-none" />
-                      )}
-
-                      {/* Pin Circle Icon */}
-                      <div
-                        className={`relative flex items-center justify-center rounded-full transition-all shadow-lg ${
-                          isActive
-                            ? "w-8 h-8 bg-gold text-gold-foreground ring-4 ring-forest ring-offset-2 ring-offset-forest"
-                            : "w-6 h-6 bg-cream text-forest hover:scale-125 hover:bg-gold hover:text-gold-foreground"
-                        }`}
+                      <button
+                        type="button"
+                        className="pin-handle relative group focus:outline-none flex flex-col items-center justify-center cursor-pointer"
+                        onPointerDown={(e) => handlePointerDownPin(d.slug, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveSlug(d.slug);
+                        }}
+                        onMouseEnter={() => {
+                          if (!draggingSlug) setActiveSlug(d.slug);
+                        }}
+                        aria-label={`${isEditMode ? "Drag" : "Select"} ${d.name} (X: ${pos.left}%, Y: ${pos.top}%)`}
+                        title={isEditMode ? `Drag to move ${d.name} (${pos.left}%, ${pos.top}%)` : d.name}
                       >
-                        <MapPin className={`${isActive ? "w-4 h-4" : "w-3 h-3"}`} />
-                      </div>
+                        {/* Pulsing ring on active pin */}
+                        {isActive && !isDragging && (
+                          <span className="absolute -inset-3 rounded-full bg-gold/40 animate-ping pointer-events-none" />
+                        )}
 
-                      {/* Destination Label Badge */}
-                      <div
-                        className={`absolute top-full left-1/2 ${labelOffsetClass} whitespace-nowrap px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider transition-all pointer-events-none shadow-md ${
-                          isActive
-                            ? "bg-gold text-gold-foreground scale-105 z-30"
-                            : "bg-forest/90 text-cream/90 group-hover:bg-cream group-hover:text-forest"
-                        }`}
-                      >
-                        {d.name}
-                      </div>
-                    </button>
+                        {/* Drag mode active aura */}
+                        {isDragging && (
+                          <span className="absolute -inset-4 rounded-full bg-terracotta/50 animate-pulse pointer-events-none ring-4 ring-gold" />
+                        )}
+
+                        {/* Pin Circle Icon */}
+                        <div
+                          className={`relative flex items-center justify-center rounded-full transition-all shadow-xl ${
+                            isDragging
+                              ? "w-9 h-9 bg-terracotta text-white ring-4 ring-gold cursor-grabbing shadow-2xl"
+                              : isEditMode
+                                ? isActive
+                                  ? "w-8 h-8 bg-gold text-gold-foreground ring-4 ring-forest ring-offset-2 ring-offset-forest cursor-grab hover:scale-110"
+                                  : "w-7 h-7 bg-cream text-forest border-2 border-gold/80 hover:bg-gold hover:text-gold-foreground cursor-grab"
+                                : isActive
+                                  ? "w-8 h-8 bg-gold text-gold-foreground ring-4 ring-forest ring-offset-2 ring-offset-forest"
+                                  : "w-6 h-6 bg-cream text-forest hover:scale-125 hover:bg-gold hover:text-gold-foreground"
+                          }`}
+                        >
+                          {isEditMode ? (
+                            <Move className={`${isActive || isDragging ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
+                          ) : (
+                            <MapPin className={`${isActive ? "w-4 h-4" : "w-3 h-3"}`} />
+                          )}
+                        </div>
+
+                        {/* Live Coordinate Tooltip during edit/drag */}
+                        {isEditMode && (isActive || isDragging) && (
+                          <div className="absolute -top-7 whitespace-nowrap bg-black/90 text-gold text-[9px] font-mono font-bold px-2 py-0.5 rounded-full shadow-lg pointer-events-none border border-gold/40">
+                            {pos.left}% · {pos.top}%
+                          </div>
+                        )}
+
+                        {/* Destination Label Badge */}
+                        <div
+                          className={`absolute top-full left-1/2 ${labelOffsetClass} whitespace-nowrap px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider transition-all pointer-events-none shadow-md ${
+                            isActive || isDragging
+                              ? "bg-gold text-gold-foreground scale-105 z-30"
+                              : "bg-forest/90 text-cream/90 group-hover:bg-cream group-hover:text-forest"
+                          }`}
+                        >
+                          {d.name}
+                        </div>
+                      </button>
+                    </div>
                   );
                 })}
               </div>
@@ -235,7 +552,10 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
             {/* Bottom Map Helper Text */}
             <div className="pt-3 mt-2 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-forest-foreground/70 gap-2">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-gold inline-block" /> Hover or tap any pin to explore a destination
+                <span className="w-2 h-2 rounded-full bg-gold inline-block" />
+                {isEditMode
+                  ? "Admin Pin Placement Mode: Click & drag pins or click map to move active pin."
+                  : "Hover or tap any pin to explore a destination"}
               </span>
               <span className="font-mono text-[11px]">Kenya destinations • Geographic reference map</span>
             </div>
@@ -277,9 +597,17 @@ export function KenyaDestinationsMap({ destinations }: KenyaDestinationsMapProps
                 {/* Detail Information */}
                 <div className="p-6 sm:p-8 flex flex-col flex-1 justify-between">
                   <div>
-                    <p className="text-[10px] tracking-[0.25em] uppercase text-gold font-semibold mb-1">
-                      {activeDestination.destinationCategory}
-                    </p>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <p className="text-[10px] tracking-[0.25em] uppercase text-gold font-semibold">
+                        {activeDestination.destinationCategory}
+                      </p>
+                      {isEditMode && (
+                        <span className="text-[10px] font-mono bg-cream px-2 py-0.5 rounded text-foreground/60 border border-border">
+                          Pin: {getResolvedPos(activeDestination).left}% left, {getResolvedPos(activeDestination).top}%
+                          top
+                        </span>
+                      )}
+                    </div>
                     <h3 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
                       {activeDestination.name}
                     </h3>
