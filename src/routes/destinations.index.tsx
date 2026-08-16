@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { MapPin, Sparkles, Compass } from "lucide-react";
+import { ArrowRight, MapPin, Sparkles, Compass } from "lucide-react";
+import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { DestinationCard } from "@/components/site/DestinationCard";
