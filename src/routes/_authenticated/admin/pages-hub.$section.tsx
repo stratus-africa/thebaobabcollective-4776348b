@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   LayoutDashboard,
@@ -15,11 +15,19 @@ import {
   Map,
   Hotel,
   FileText,
+  Search,
+  Star,
+  Layers,
+  Zap,
+  Image,
+  ToggleLeft,
+  List,
+  Grid,
 } from "lucide-react";
 import { PageEditor } from "./pages.$page";
 import type { PageKey } from "@/lib/page-content.defaults";
 
-type SubEditor = { pageKey: PageKey; label: string; icon?: any; description?: string };
+type SubEditor = { pageKey: PageKey; label: string; icon?: any; description?: string; fieldFilter?: string[] };
 type HubTab = { value: string; label: string; icon: any; editors: SubEditor[] };
 type HubSection = { title: string; description: string; tabs: HubTab[] };
 
@@ -209,20 +217,174 @@ const SECTIONS: Record<string, HubSection> = {
       },
     ],
   },
+
+  // ── Adventures ──────────────────────────────────────────────────────────────
   adventures: {
     title: "Adventures Landing",
     description: "Every section of the /adventures page — copy, imagery and section toggles.",
     tabs: [
       {
-        value: "landing",
-        label: "Adventures Landing",
-        icon: Compass,
+        value: "hero",
+        label: "Hero",
+        icon: Image,
         editors: [
           {
             pageKey: "adventures_index",
-            label: "Adventures Landing Page",
-            icon: Compass,
-            description: "Hero, day-in-the-field, finder, signatures, experiences, catalogue and CTAs.",
+            label: "Hero Section",
+            description: "Hero visibility, copy and background image.",
+            fieldFilter: ["show_hero", "eyebrow", "title", "subtitle", "hero_image"],
+          },
+        ],
+      },
+      {
+        value: "rhythm",
+        label: "Day in the Field",
+        icon: Bell,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "A Day in the Field",
+            description: "The day-rhythm timeline section.",
+            fieldFilter: [
+              "show_rhythm",
+              "rhythm_eyebrow",
+              "rhythm_title",
+              "rhythm_body",
+              "rhythm_1_time",
+              "rhythm_1_phase",
+              "rhythm_1_title",
+              "rhythm_1_body",
+              "rhythm_1_image",
+              "rhythm_2_time",
+              "rhythm_2_phase",
+              "rhythm_2_title",
+              "rhythm_2_body",
+              "rhythm_2_image",
+              "rhythm_3_time",
+              "rhythm_3_phase",
+              "rhythm_3_title",
+              "rhythm_3_body",
+              "rhythm_3_image",
+              "rhythm_4_time",
+              "rhythm_4_phase",
+              "rhythm_4_title",
+              "rhythm_4_body",
+              "rhythm_4_image",
+            ],
+          },
+        ],
+      },
+      {
+        value: "finder",
+        label: "Adventure Finder",
+        icon: Search,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "Adventure Finder",
+            description: "Filter bar and copy for the adventure search section.",
+            fieldFilter: [
+              "show_finder",
+              "finder_eyebrow",
+              "finder_title",
+              "finder_body",
+              "finder_experience_options",
+              "finder_travel_style_options",
+            ],
+          },
+        ],
+      },
+      {
+        value: "signature",
+        label: "Signature Selection",
+        icon: Star,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "Signature Selection",
+            description: "The curated signature adventures section.",
+            fieldFilter: ["show_signature", "signature_eyebrow", "signature_title", "signature_body"],
+          },
+        ],
+      },
+      {
+        value: "explore",
+        label: "Explore by Experience",
+        icon: Grid,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "Explore by Experience",
+            description: "Experience type cards and section copy.",
+            fieldFilter: [
+              "show_explore",
+              "explore_eyebrow",
+              "explore_title",
+              "explore_body",
+              "explore_1_title",
+              "explore_1_body",
+              "explore_1_image",
+              "explore_2_title",
+              "explore_2_body",
+              "explore_2_image",
+              "explore_3_title",
+              "explore_3_body",
+              "explore_3_image",
+              "explore_4_title",
+              "explore_4_body",
+              "explore_4_image",
+              "explore_5_title",
+              "explore_5_body",
+              "explore_5_image",
+              "explore_6_title",
+              "explore_6_body",
+              "explore_6_image",
+              "explore_7_title",
+              "explore_7_body",
+              "explore_7_image",
+              "explore_8_title",
+              "explore_8_body",
+              "explore_8_image",
+            ],
+          },
+        ],
+      },
+      {
+        value: "catalogue",
+        label: "Full Catalogue",
+        icon: List,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "Full Catalogue",
+            description: "Full catalogue listing section and spotlight.",
+            fieldFilter: ["show_spotlight", "show_catalogue", "catalogue_eyebrow", "catalogue_title"],
+          },
+        ],
+      },
+      {
+        value: "combinations",
+        label: "Combinations",
+        icon: Layers,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "Journey Combinations",
+            description: "Journey combinations section copy.",
+            fieldFilter: ["show_combinations", "combinations_eyebrow", "combinations_title", "combinations_body"],
+          },
+        ],
+      },
+      {
+        value: "ctas",
+        label: "CTAs & Banner",
+        icon: Megaphone,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "Bespoke Banner & Final CTA",
+            description: "Enquiry banner and final call-to-action section.",
+            fieldFilter: ["show_enquiry_cta", "bespoke_eyebrow", "bespoke_title", "bespoke_body", "show_final_cta"],
           },
         ],
       },
@@ -254,20 +416,137 @@ const SECTIONS: Record<string, HubSection> = {
       },
     ],
   },
+
+  // ── Destinations ────────────────────────────────────────────────────────────
   destinations: {
-    title: "Destinations Landing Page",
-    description: "Hero and content of the /destinations page.",
+    title: "Destinations Landing",
+    description: "Every section of the /destinations page — copy, imagery and section toggles.",
     tabs: [
       {
-        value: "landing",
-        label: "Destinations Landing",
-        icon: MapPin,
+        value: "hero",
+        label: "Hero",
+        icon: Image,
         editors: [
           {
             pageKey: "destinations_index",
-            label: "Destinations Landing Page",
-            icon: Map,
-            description: "Hero copy, imagery and call to action on /destinations.",
+            label: "Hero Section",
+            description: "Hero visibility, copy and background image.",
+            fieldFilter: ["show_hero", "eyebrow", "title", "subtitle", "body", "hero_image", "cta_label"],
+          },
+        ],
+      },
+      {
+        value: "finder",
+        label: "Destination Finder",
+        icon: Search,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Destination Finder",
+            description: "Filter bar and introductory copy for searching destinations.",
+            fieldFilter: ["show_finder", "finder_eyebrow", "finder_title", "finder_body"],
+          },
+        ],
+      },
+      {
+        value: "map",
+        label: "Destinations Map",
+        icon: Map,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Kenya Destinations Map",
+            description: "Interactive map section toggle.",
+            fieldFilter: ["show_map"],
+          },
+        ],
+      },
+      {
+        value: "grid",
+        label: "Destinations Grid",
+        icon: Grid,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Editorial Groupings Grid",
+            description: "Copy and toggle for The Icons, Beyond the Classics, and The Indian Ocean.",
+            fieldFilter: [
+              "show_grid",
+              "icons_eyebrow",
+              "icons_title",
+              "icons_body",
+              "beyond_eyebrow",
+              "beyond_title",
+              "beyond_body",
+              "ocean_eyebrow",
+              "ocean_title",
+              "ocean_body",
+            ],
+          },
+        ],
+      },
+      {
+        value: "journeys",
+        label: "Featured Adventures",
+        icon: Compass,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Featured Adventures",
+            description: "Adventures strip on the destinations page.",
+            fieldFilter: ["show_journeys", "journeys_eyebrow", "journeys_title", "journeys_body"],
+          },
+        ],
+      },
+      {
+        value: "stay",
+        label: "Where You'll Stay",
+        icon: Hotel,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Where You'll Stay",
+            description: "Partner lodges spotlight on the destinations page.",
+            fieldFilter: ["show_stay", "stay_eyebrow", "stay_title", "stay_body"],
+          },
+        ],
+      },
+      {
+        value: "combinations",
+        label: "Combinations",
+        icon: Layers,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Destination Combinations",
+            description: "Seamless itinerary pairings and route combinations section.",
+            fieldFilter: ["show_combinations", "combinations_eyebrow", "combinations_title", "combinations_body"],
+          },
+        ],
+      },
+      {
+        value: "matcher",
+        label: "Destination Matcher",
+        icon: Sparkles,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Destination Matcher",
+            description: "'Where should Kenya take you?' tailor-made matcher section.",
+            fieldFilter: ["show_matcher", "matcher_eyebrow", "matcher_title", "matcher_body"],
+          },
+        ],
+      },
+      {
+        value: "cta",
+        label: "Final CTA",
+        icon: Megaphone,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Final Call to Action",
+            description: "Closing 'Your Kenya is waiting' planning CTA section.",
+            fieldFilter: ["show_final_cta", "final_cta_eyebrow", "final_cta_title", "final_cta_body"],
           },
         ],
       },
@@ -286,20 +565,35 @@ const SECTIONS: Record<string, HubSection> = {
       },
     ],
   },
+
+  // ── Partner Lodges ──────────────────────────────────────────────────────────
   lodges: {
     title: "Partner Lodges Landing Page",
     description: "Hero and content of the /lodges page.",
     tabs: [
       {
-        value: "landing",
-        label: "Lodges Landing",
-        icon: Building,
+        value: "hero",
+        label: "Hero",
+        icon: Image,
         editors: [
           {
             pageKey: "lodges_index",
-            label: "Partner Lodges Landing Page",
-            icon: Hotel,
-            description: "Hero copy, imagery and section toggles on /lodges.",
+            label: "Hero Section",
+            description: "Hero visibility, eyebrow, title, subtitle and background image.",
+            fieldFilter: ["show_hero", "eyebrow", "title", "subtitle", "hero_image"],
+          },
+        ],
+      },
+      {
+        value: "grid",
+        label: "Lodges Grid",
+        icon: Grid,
+        editors: [
+          {
+            pageKey: "lodges_index",
+            label: "Lodges Grid",
+            description: "Toggle visibility of the lodges listing grid.",
+            fieldFilter: ["show_grid"],
           },
         ],
       },
@@ -333,8 +627,10 @@ const SECTIONS: Record<string, HubSection> = {
   },
 };
 
-
 export const Route = createFileRoute("/_authenticated/admin/pages-hub/$section")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+  }),
   beforeLoad: ({ params }) => {
     if (!SECTIONS[params.section]) throw notFound();
   },
@@ -343,7 +639,20 @@ export const Route = createFileRoute("/_authenticated/admin/pages-hub/$section")
 
 function PagesHub() {
   const { section } = Route.useParams();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const cfg = SECTIONS[section];
+
+  // Determine the active tab: if search.tab matches a tab value, use it; otherwise fallback to first tab
+  const validTabValues = cfg.tabs.map((t) => t.value);
+  const activeTab = search.tab && validTabValues.includes(search.tab) ? search.tab : cfg.tabs[0]?.value;
+
+  const handleTabChange = (newTab: string) => {
+    navigate({
+      search: (prev) => ({ ...prev, tab: newTab }),
+      replace: true,
+    });
+  };
 
   return (
     <div>
@@ -353,7 +662,12 @@ function PagesHub() {
         <p className="text-sm text-foreground/65 mt-1">{cfg.description}</p>
       </header>
 
-      <Tabs defaultValue={cfg.tabs[0]?.value} orientation="vertical" className="flex flex-col md:flex-row gap-8">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        orientation="vertical"
+        className="flex flex-col md:flex-row gap-8"
+      >
         <TabsList
           aria-label={`${cfg.title} sections`}
           className="h-auto md:w-56 shrink-0 flex md:flex-col bg-transparent p-0 gap-1 justify-start"
@@ -409,13 +723,13 @@ function PagesHub() {
                   <div className="min-w-0">
                     {t.editors.map((ed) => (
                       <TabsContent key={ed.pageKey} value={ed.pageKey} className="mt-0">
-                        <PageEditor pageKey={ed.pageKey} />
+                        <PageEditor pageKey={ed.pageKey} fieldFilter={ed.fieldFilter} />
                       </TabsContent>
                     ))}
                   </div>
                 </Tabs>
               ) : (
-                <PageEditor pageKey={t.editors[0].pageKey} />
+                <PageEditor pageKey={t.editors[0].pageKey} fieldFilter={t.editors[0].fieldFilter} />
               )}
             </TabsContent>
           ))}
