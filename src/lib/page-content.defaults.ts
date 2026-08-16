@@ -256,22 +256,73 @@ export const PAGE_DEFAULTS = {
   },
 
   destinations_index: {
+    // 1. Hero
+    show_hero: true as boolean,
     eyebrow: "Destination Discovery",
     title: "DISCOVER KENYA",
     subtitle: "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary.",
     body: "Whether drawn to apex predators on the golden Mara plains, private rhino sanctuaries in Laikipia, or sunset dhow sailing in Lamu — find where your story begins.",
     hero_image: "",
     cta_label: "Explore Destinations",
-    // Section visibility toggles
-    show_hero: true as boolean,
+
+    // 2. Destination Finder
     show_finder: true as boolean,
+    finder_eyebrow: "Destination Finder",
+    finder_title: "What are you looking for?",
+    finder_body:
+      "Every part of Kenya tells a different story. Select the experiences that match how you want to travel.",
+
+    // 3. Map
     show_map: true as boolean,
+
+    // 4. Grid / Editorial Groupings
     show_grid: true as boolean,
+    icons_eyebrow: "Signature Kenya",
+    icons_title: "The Icons",
+    icons_body:
+      "Kenya's world-famous wilderness heartlands — legendary predator density, great elephant herds, and dramatic arid frontiers.",
+    beyond_eyebrow: "Untamed & Extraordinary",
+    beyond_title: "Beyond the Classics",
+    beyond_body:
+      "Private conservancies, ancient volcanoes, and Great Rift Valley lakes where wildlife viewing is intimate, active, and conservation-focused.",
+    ocean_eyebrow: "Swahili Coast & Coral Reefs",
+    ocean_title: "The Indian Ocean",
+    ocean_body:
+      "White sands, historic UNESCO Swahili ports, sunset dhow sailing, and marine national parks teeming with reef life.",
+
+    // 5. Featured Adventures
     show_journeys: true as boolean,
+    journeys_eyebrow: "Curated Safari Itineraries",
+    journeys_title: "Journeys Through These Places",
+    journeys_body:
+      "Our adventures bring together the destinations, experiences and moments that make Kenya unforgettable.",
+
+    // 6. Where You'll Stay
     show_stay: true as boolean,
+    stay_eyebrow: "Hand-Picked Accommodations",
+    stay_title: "Where You'll Stay",
+    stay_body: "We choose camps and lodges for their setting, character and the experiences they make possible.",
+
+    // 7. Combinations
     show_combinations: true as boolean,
+    combinations_eyebrow: "Seamless Itinerary Ideas",
+    combinations_title: "Create Your Perfect Combination",
+    combinations_body:
+      "Kenya's dramatic diversity comes alive when you pair contrasting regions — savannah with sea, or northern wilderness with high-altitude forests.",
+
+    // 8. Matcher
     show_matcher: true as boolean,
+    matcher_eyebrow: "Tailor-Made Recommendation",
+    matcher_title: "Where should Kenya take you?",
+    matcher_body:
+      "Tell us what you're looking for and our journey designers will hand-pick the exact lodges, conservancies, and coastlines tailored to your vision.",
+
+    // 9. Final CTA
     show_final_cta: true as boolean,
+    final_cta_eyebrow: "Begin Your Kenyan Journey",
+    final_cta_title: "Your Kenya is waiting.",
+    final_cta_body:
+      "Not sure where to start? Tell us what you love, and we'll help you find the places and rhythm that are right for you.",
   },
   adventures_index: {
     eyebrow: "Signature Adventures",
