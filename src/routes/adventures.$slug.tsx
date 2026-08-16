@@ -1,213 +1,205 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  ArrowRight,
-  Check,
-  Calendar,
-  MapPin,
-  Users,
-  Sparkles,
-  Mountain,
-  X,
-  Shield,
-  Compass,
-  Bed,
-  Layers,
-  ChevronRight,
-} from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { EnquireDialog } from "@/components/site/EnquireDialog";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { ShareButtons } from "@/components/site/ShareButtons";
-import { TheBaobabPick } from "@/components/site/TheBaobabPick";
-import { AdventureCard, getHumanDifficulty } from "@/components/site/AdventureCard";
-import { getAdventuresPage } from "@/lib/adventures.functions";
-import { getDestinations, getLodges } from "@/lib/cms.functions";
-import { KENYA_DESTINATIONS_DATA, DESTINATION_COMBINATIONS } from "@/lib/destinations.data";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { getAdventureEditorDraft, getAdventuresPage, saveAdventuresPage, type AdventuresSignature } from "@/lib/adventures.functions";
 
-const adventuresQuery = queryOptions({
-  queryKey: ["adventures-page"],
+const adventuresQuery = {
+  queryKey: ["admin-adventures-page"],
   queryFn: () => getAdventuresPage(),
-});
+};
 
-export const Route = createFileRoute("/adventures/$slug")({
+export const Route = createFileRoute("/_authenticated/admin/adventures/$slug")({
   loader: async ({ params, context }) => {
     const page = await context.queryClient.ensureQueryData(adventuresQuery);
-    const adv = page.signatures.find((s) => s.slug === params.slug);
-    if (!adv) throw notFound();
-    return { adv };
+    const isNew = params.slug === "new";
+    const adventure = isNew ? getAdventureEditorDraft(page, "new") : page.signatures.find((s) => s.slug === params.slug);
+    if (!adventure && !isNew) throw notFound();
+    return { adventure: adventure ?? getAdventureEditorDraft(page, "new"), isNew };
   },
-  head: ({ loaderData, params }) => {
-    const a = loaderData?.adv;
-    const title = a ? `${a.name} — Kenya Safari Adventures | The Baobab Collective` : "Adventure";
-    const desc = a?.shortDescription || (a?.description ? a.description.slice(0, 160) : "A signature Kenya adventure.");
-    const url = `https://thebaobabcollective.co.uk/adventures/${params.slug}`;
-    const ldTrip = a
-      ? {
-          "@context": "https://schema.org",
-          "@type": "TouristTrip",
-          name: a.name,
-          description: a.description,
-          image: a.image,
-          touristType: a.difficulty,
-          url,
-        }
-      : null;
-    const ldCrumbs = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
-        { "@type": "ListItem", position: 2, name: "Adventures", item: "https://thebaobabcollective.co.uk/adventures" },
-        { "@type": "ListItem", position: 3, name: a?.name ?? params.slug, item: url },
-      ],
-    };
-    return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "article" },
-        { property: "og:url", content: url },
-        ...(a?.image ? [{ property: "og:image", content: a.image }] : []),
-        { name: "twitter:card", content: "summary_large_image" },
-        ...(a?.image ? [{ name: "twitter:image", content: a.image }] : []),
-      ],
-      links: [{ rel: "canonical", href: url }],
-      scripts: [
-        ...(ldTrip ? [{ type: "application/ld+json", children: JSON.stringify(ldTrip) }] : []),
-        { type: "application/ld+json", children: JSON.stringify(ldCrumbs) },
-      ],
-    };
-  },
-  notFoundComponent: () => (
-    <div className="bg-background min-h-screen">
-      <Navbar />
-      <div className="max-w-3xl mx-auto px-6 py-32 text-center">
-        <h1 className="font-serif text-4xl mb-4">Adventure not found</h1>
-        <Link to="/adventures" className="text-gold underline">
-          Browse all adventures
-        </Link>
-      </div>
-      <Footer />
-    </div>
-  ),
-  errorComponent: ({ error, reset }) => {
-    const router = useRouter();
-    return (
-      <div className="bg-background min-h-screen">
-        <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-32 text-center">
-          <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-          <p className="text-foreground/70 mb-6">{error.message}</p>
-          <button
-            onClick={() => {
-              reset();
-              router.invalidate();
-            }}
-            className="bg-gold text-gold-foreground px-6 py-3 uppercase tracking-[0.25em] text-[11px]"
-          >
-            Retry
-          </button>
-        </div>
-        <Footer />
-      </div>
-    );
-  },
-  component: AdventureDetail,
+  component: AdminAdventureEditor,
 });
 
-function AdventureDetail() {
-  const { slug } = Route.useParams();
-  const { data: page } = useSuspenseQuery(adventuresQuery);
-  const a = page.signatures.find((s) => s.slug === slug)!;
-  const url =
-    typeof window !== "undefined" ? window.location.href : `https://thebaobabcollective.co.uk/adventures/${slug}`;
+function AdminAdventureEditor() {
+  const navigate = useNavigate();
+  const fetchPage = useServerFn(getAdventuresPage);
+  const savePage = useServerFn(saveAdventuresPage);
+  const { adventure: initialAdventure, isNew } = Route.useLoaderData();
+  const [draft, setDraft] = useState<AdventuresSignature>(initialAdventure);
+  const [saving, setSaving] = useState(false);
 
-  // Fetch destinations and lodges to render relationships dynamically
-  const fetchDestinationsFn = useServerFn(getDestinations);
-  const { data: dbDestinations } = useQuery({
-    queryKey: ["destinations"],
-    queryFn: () => fetchDestinationsFn(),
+  const { data: page } = useQuery({
+    queryKey: ["admin-adventures-page"],
+    queryFn: () => fetchPage(),
+    initialData: {
+      hero: { eyebrow: "", headline: "", subhead: "", image: "", imageAlt: "" },
+      cta: { eyebrow: "", headline: "", body: "", buttonLabel: "" },
+      signatures: [initialAdventure],
+    },
   });
 
-  const fetchLodgesFn = useServerFn(getLodges);
-  const { data: dbLodges } = useQuery({
-    queryKey: ["lodges"],
-    queryFn: () => fetchLodgesFn(),
-  });
+  useEffect(() => {
+    setDraft(initialAdventure);
+  }, [initialAdventure]);
 
-  const diffMeta = getHumanDifficulty(a.difficulty);
+  const onChange = <K extends keyof AdventuresSignature>(field: K, value: AdventuresSignature[K]) => {
+    setDraft((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const included = (
-    Array.isArray(a.included) ? a.included : typeof a.included === "string" ? (a.included as string).split("\n") : []
-  )
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const currentPage = page ?? { hero: { eyebrow: "", headline: "", subhead: "", image: "", imageAlt: "" }, cta: { eyebrow: "", headline: "", body: "", buttonLabel: "" }, signatures: [] };
+      const nextPage = {
+        ...currentPage,
+        signatures: [
+          ...currentPage.signatures.filter((item) => item.slug !== draft.slug && item.slug !== "new"),
+          {
+            ...draft,
+            slug: draft.slug || (isNew ? "new" : initialAdventure.slug),
+            status: draft.status ?? "draft",
+            highlights: draft.highlights ?? [],
+            included: draft.included ?? [],
+            notIncluded: draft.notIncluded ?? [],
+          },
+        ],
+      };
 
-  const notIncluded = (
-    Array.isArray(a.notIncluded)
-      ? a.notIncluded
-      : typeof a.notIncluded === "string"
-        ? (a.notIncluded as string).split("\n")
-        : []
-  )
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  // Match destinations dynamically from adventure.destinations or region
-  const relatedDestinations = (dbDestinations || []).filter((d) => {
-    if (a.destinations && a.destinations.length > 0) {
-      return a.destinations.some(
-        (target) =>
-          d.name.toLowerCase().includes(target.toLowerCase()) || d.slug.toLowerCase().includes(target.toLowerCase()),
-      );
+      await savePage(nextPage);
+      navigate({ to: "/admin/adventures" });
+    } finally {
+      setSaving(false);
     }
-    return a.region && d.region.toLowerCase().includes(a.region.toLowerCase());
-  });
-
-  // Fallback to static Kenya destinations data if DB destinations are empty
-  const fallbackDestinations = KENYA_DESTINATIONS_DATA.filter((d) => {
-    if (a.destinations && a.destinations.length > 0) {
-      return a.destinations.some((target) => d.name.toLowerCase().includes(target.toLowerCase()));
-    }
-    return a.region && d.region.toLowerCase().includes(a.region.toLowerCase());
-  });
-
-  // Related lodges
-  const relatedLodges = (dbLodges || []).filter((l) => {
-    if (a.lodges && a.lodges.length > 0) {
-      return a.lodges.some((target) => l.name.toLowerCase().includes(target.toLowerCase()));
-    }
-    return a.region && l.location?.toLowerCase().includes(a.region.toLowerCase());
-  });
-
-  // Similar adventures
-  const similarAdventures = page.signatures
-    .filter((other) => other.slug !== a.slug && (other.region === a.region || other.difficulty === a.difficulty))
-    .slice(0, 3);
+  };
 
   return (
-    <div className="bg-background min-h-screen">
-      <Navbar />
-      <main>
-        {/* Editorial Hero */}
-        <section className="relative h-[78vh] min-h-[540px] flex items-end">
-          <img src={a.image} alt={a.imageAlt || a.name} className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-forest/95 via-black/45 to-black/20" />
+    <div className="space-y-6 pb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
+        <div className="space-y-1">
+          <Link
+            to="/admin/adventures"
+            className="inline-flex items-center gap-1.5 text-xs text-foreground/60 hover:text-gold transition-colors font-medium mb-1"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Adventures
+          </Link>
+          <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Adventure" : "Edit Adventure"}</h1>
+        </div>
 
-          <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-16 text-cream w-full">
-            <Link
-              to="/adventures"
-              className="text-[11px] tracking-[0.3em] uppercase text-gold mb-4 inline-flex items-center gap-1.5 hover:underline font-semibold"
-            >
-              ← Back to All Signature Adventures
-            </Link>
+        <Button onClick={handleSave} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
+          {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+          {saving ? "Saving…" : "Save Adventure"}
+        </Button>
+      </div>
 
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl leading-[1.05] mb-4 max-w-4xl">{a.name}</h1>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
+          <div>
+            <Label className="mb-2 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+              Adventure Name
+            </Label>
+            <Input value={draft.name} onChange={(e) => onChange("name", e.target.value)} placeholder="e.g. Great Migration & Beyond" />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Region</Label>
+              <Input value={draft.region} onChange={(e) => onChange("region", e.target.value)} placeholder="Kenya" />
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Terrain</Label>
+              <Input value={draft.terrain} onChange={(e) => onChange("terrain", e.target.value)} placeholder="Savannah & River" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Nights</Label>
+              <Input value={draft.nights} onChange={(e) => onChange("nights", e.target.value)} placeholder="7 nights" />
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Difficulty</Label>
+              <Input value={draft.difficulty} onChange={(e) => onChange("difficulty", e.target.value)} placeholder="Moderate" />
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Slug</Label>
+            <Input value={draft.slug} onChange={(e) => onChange("slug", e.target.value)} placeholder="great-migration-and-beyond" />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Short Description</Label>
+            <Textarea rows={3} value={draft.shortDescription ?? ""} onChange={(e) => onChange("shortDescription", e.target.value)} placeholder="A short summary shown on cards and listings." />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Full Description</Label>
+            <Textarea rows={8} value={draft.description} onChange={(e) => onChange("description", e.target.value)} placeholder="Describe the experience in full detail…" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Hero Image URL</Label>
+            <Input value={draft.image} onChange={(e) => onChange("image", e.target.value)} placeholder="https://..." />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Hero Alt Text</Label>
+            <Input value={draft.imageAlt ?? ""} onChange={(e) => onChange("imageAlt", e.target.value)} placeholder="Describe the image" />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Status</Label>
+            <Input value={draft.status ?? "draft"} onChange={(e) => onChange("status", e.target.value as AdventuresSignature["status"])} placeholder="draft" />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Highlights</Label>
+            <Textarea
+              rows={4}
+              value={(draft.highlights ?? []).join("\n")}
+              onChange={(e) => onChange("highlights", e.target.value.split("\n").map((line) => line.trim()).filter(Boolean))}
+              placeholder="One highlight per line"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Included</Label>
+              <Textarea
+                rows={4}
+                value={(draft.included ?? []).join("\n")}
+                onChange={(e) => onChange("included", e.target.value.split("\n").map((line) => line.trim()).filter(Boolean))}
+                placeholder="One item per line"
+              />
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Not Included</Label>
+              <Textarea
+                rows={4}
+                value={(draft.notIncluded ?? []).join("\n")}
+                onChange={(e) => onChange("notIncluded", e.target.value.split("\n").map((line) => line.trim()).filter(Boolean))}
+                placeholder="One item per line"
+              />
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm text-foreground/80">
+            <input type="checkbox" checked={Boolean(draft.featured)} onChange={(e) => onChange("featured", e.target.checked)} />
+            Featured adventure
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
             {a.shortDescription && (
               <p className="text-lg md:text-xl text-cream/90 max-w-2xl leading-relaxed mb-6 font-sans">
@@ -334,80 +326,59 @@ function AdventureDetail() {
                 note="We deliberately slow the pace on this journey to allow for extended morning walking safaris and unhurried bush breakfasts where you can truly take in Kenya's quiet wilderness."
               />
 
-              {/* Adventure Highlights & YOUR JOURNEY Side-by-Side */}
-              {a.highlights?.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-                  {/* Left Column: Adventure Highlights */}
-                  <div>
-                    <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">Adventure Highlights</h2>
-                    <ul className="space-y-3.5">
-                      {a.highlights.map((h) => (
-                        <li
-                          key={h}
-                          className="flex gap-3.5 text-foreground/85 bg-cream/70 rounded-xl p-5 border border-border/70"
-                        >
-                          <Check className="w-5 h-5 text-gold mt-0.5 shrink-0" />
-                          <span className="text-sm sm:text-base leading-snug font-medium">{h}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Right Column: YOUR JOURNEY / ITINERARY */}
-                  <div>
-                    <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">YOUR JOURNEY</h2>
-                    {a.itinerary && a.itinerary.length > 0 ? (
-                      <div className="space-y-6">
-                        {a.itinerary.map((step, idx) => (
-                          <div key={idx} className="border-l-2 border-gold pl-5 py-1.5">
-                            <span className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold block mb-1">
-                              {step.day}
-                            </span>
-                            <h3 className="font-serif text-xl sm:text-2xl text-foreground mb-1.5">{step.title}</h3>
-                            <p className="text-foreground/75 leading-relaxed text-sm">{step.description}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-5">
-                        {(a.highlights || []).slice(0, 4).map((h, i) => (
-                          <div key={h} className="flex gap-4 border-l-2 border-gold pl-5 py-1.5">
-                            <div className="shrink-0">
-                              <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold">Phase</p>
-                              <p className="font-serif text-2xl text-foreground">{String(i + 1).padStart(2, "0")}</p>
-                            </div>
-                            <div>
-                              <h3 className="font-serif text-lg sm:text-xl text-foreground mb-1">{h}</h3>
-                              <p className="text-foreground/70 text-xs sm:text-sm leading-relaxed">
-                                Days of immersive guiding, intimate camps and conservation-led encounters crafted around
-                                this chapter of your journey.
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                /* Fallback if no highlights: render Your Journey full width */
+              {/* Adventure Highlights */}
+              {a.highlights?.length > 0 && (
                 <div>
-                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-8">YOUR JOURNEY</h2>
-                  {a.itinerary && a.itinerary.length > 0 ? (
-                    <div className="space-y-8">
-                      {a.itinerary.map((step, idx) => (
-                        <div key={idx} className="border-l-2 border-gold pl-6 md:pl-8 py-2">
-                          <span className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold block mb-1">
-                            {step.day}
-                          </span>
-                          <h3 className="font-serif text-2xl text-foreground mb-2">{step.title}</h3>
-                          <p className="text-foreground/75 leading-relaxed text-sm sm:text-base">{step.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
+                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">Adventure Highlights</h2>
+                  <ul className="grid sm:grid-cols-2 gap-4">
+                    {a.highlights.map((h) => (
+                      <li
+                        key={h}
+                        className="flex gap-3.5 text-foreground/85 bg-cream/70 rounded-xl p-5 border border-border/70"
+                      >
+                        <Check className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+                        <span className="text-sm sm:text-base leading-snug font-medium">{h}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
+
+              {/* YOUR JOURNEY / ITINERARY */}
+              <div>
+                <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-8">YOUR JOURNEY</h2>
+                {a.itinerary && a.itinerary.length > 0 ? (
+                  <div className="space-y-8">
+                    {a.itinerary.map((step, idx) => (
+                      <div key={idx} className="border-l-2 border-gold pl-6 md:pl-8 py-2">
+                        <span className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold block mb-1">
+                          {step.day}
+                        </span>
+                        <h3 className="font-serif text-2xl text-foreground mb-2">{step.title}</h3>
+                        <p className="text-foreground/75 leading-relaxed text-sm sm:text-base">{step.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {(a.highlights || []).slice(0, 4).map((h, i) => (
+                      <div key={h} className="flex gap-5 border-l-2 border-gold pl-6 py-2">
+                        <div className="shrink-0">
+                          <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold">Phase</p>
+                          <p className="font-serif text-3xl text-foreground">{String(i + 1).padStart(2, "0")}</p>
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-xl sm:text-2xl text-foreground mb-1.5">{h}</h3>
+                          <p className="text-foreground/70 text-sm leading-relaxed">
+                            Days of immersive guiding, intimate camps and conservation-led encounters crafted around
+                            this chapter of your journey.
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* WHERE YOU'LL STAY */}
               {relatedLodges.length > 0 && (
@@ -453,7 +424,7 @@ function AdventureDetail() {
                 </div>
               )}
 
-              {/* DYNAMIC INCLUSIONS & EXCLUSIONS — side-by-side cards */}
+              {/* DYNAMIC INCLUSIONS & EXCLUSIONS — always show with forest-green background */}
               {(() => {
                 const displayIncluded =
                   included.length > 0
@@ -480,13 +451,12 @@ function AdventureDetail() {
                         "Spa and premium alcohol beyond standard offerings",
                       ];
                 return (
-                  <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
-                    {/* Left Card: WHAT'S INCLUDED */}
-                    <div className="bg-forest text-forest-foreground p-6 sm:p-8 md:p-10 rounded-2xl border border-gold/20 shadow-lg flex flex-col">
+                  <div className="space-y-8">
+                    <div className="bg-forest text-forest-foreground p-8 md:p-10 rounded-2xl border border-gold/20 shadow-lg">
                       <h2 className="font-serif text-2xl sm:text-3xl text-cream mb-6 flex items-center gap-3">
                         <Check className="w-6 h-6 text-gold" /> WHAT'S INCLUDED
                       </h2>
-                      <ul className="space-y-3.5 text-sm text-forest-foreground/90 font-sans">
+                      <ul className="grid sm:grid-cols-2 gap-4 text-sm text-forest-foreground/90 font-sans">
                         {displayIncluded.map((item, idx) => (
                           <li key={`inc-${idx}`} className="flex gap-3 items-start">
                             <span className="text-gold font-bold shrink-0">•</span>
@@ -496,12 +466,11 @@ function AdventureDetail() {
                       </ul>
                     </div>
 
-                    {/* Right Card: WHAT'S NOT INCLUDED */}
-                    <div className="border border-border bg-cream/50 p-6 sm:p-8 md:p-10 rounded-2xl flex flex-col">
+                    <div className="border border-border bg-cream/50 p-8 md:p-10 rounded-2xl">
                       <h2 className="font-serif text-2xl text-foreground mb-6 flex items-center gap-3">
                         <X className="w-6 h-6 text-terracotta" /> WHAT'S NOT INCLUDED
                       </h2>
-                      <ul className="space-y-3.5 text-sm text-foreground/80 font-sans">
+                      <ul className="grid sm:grid-cols-2 gap-4 text-sm text-foreground/80 font-sans">
                         {displayNotIncluded.map((item, idx) => (
                           <li key={`exc-${idx}`} className="flex gap-3 items-start">
                             <span className="text-terracotta font-bold shrink-0">•</span>
@@ -514,79 +483,57 @@ function AdventureDetail() {
                 );
               })()}
 
-              {/* DESTINATIONS & YOUR JOURNEY'S IMPACT SIDE-BY-SIDE */}
-              {relatedDestinations.length > 0 || fallbackDestinations.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-start">
-                  {/* Left: THIS JOURNEY TAKES YOU TO (Related Destinations) */}
-                  <div>
-                    <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">DESTINATIONS</p>
-                    <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">THIS JOURNEY TAKES YOU TO</h2>
-                    <div className="space-y-5">
-                      {(relatedDestinations.length > 0 ? relatedDestinations : fallbackDestinations).map(
-                        (dest: any) => (
-                          <Link
-                            key={dest.slug || dest.id}
-                            to="/destinations/$slug"
-                            params={{ slug: dest.slug || dest.id }}
-                            className="group border border-border bg-background rounded-xl p-5 hover:border-gold/60 transition-all flex flex-col justify-between"
-                          >
-                            <div>
-                              {dest.image && (
-                                <img
-                                  src={dest.image}
-                                  alt={dest.name}
-                                  className="w-full aspect-[16/10] object-cover rounded-lg mb-4 group-hover:scale-102 transition-transform"
-                                />
-                              )}
-                              <h3 className="font-serif text-xl text-foreground group-hover:text-gold transition-colors mb-1">
-                                {dest.name}
-                              </h3>
-                              <p className="text-xs text-foreground/60 mb-2">{dest.region}</p>
-                              <p className="text-xs text-foreground/75 line-clamp-2 leading-relaxed">
-                                {dest.short_description || dest.shortDescription || dest.description}
-                              </p>
-                            </div>
-                            <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-gold font-semibold uppercase tracking-[0.2em]">
-                              <span>Explore Destination</span>
-                              <ChevronRight className="w-4 h-4" />
-                            </div>
-                          </Link>
-                        ),
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right: YOUR JOURNEY'S IMPACT */}
-                  <div className="rounded-2xl border border-border bg-cream/40 p-8 md:p-10 space-y-4">
-                    <div className="flex items-center gap-2 text-gold">
-                      <Shield className="w-5 h-5" />
-                      <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
-                        YOUR JOURNEY'S IMPACT
-                      </span>
-                    </div>
-                    <h3 className="font-serif text-2xl md:text-3xl text-foreground">
-                      Conservation & Local Stewardship
-                    </h3>
-                    <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
-                      By embarking on this journey, you directly support local conservancies, anti-poaching initiatives,
-                      and indigenous guides who steward Kenya's wildest landscapes.
-                    </p>
-                  </div>
+              {/* YOUR JOURNEY'S IMPACT */}
+              <div className="rounded-2xl border border-border bg-cream/40 p-8 md:p-10 space-y-4">
+                <div className="flex items-center gap-2 text-gold">
+                  <Shield className="w-5 h-5" />
+                  <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
+                    YOUR JOURNEY'S IMPACT
+                  </span>
                 </div>
-              ) : (
-                /* Fallback if no destinations: render Impact card full width */
-                <div className="rounded-2xl border border-border bg-cream/40 p-8 md:p-10 space-y-4">
-                  <div className="flex items-center gap-2 text-gold">
-                    <Shield className="w-5 h-5" />
-                    <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
-                      YOUR JOURNEY'S IMPACT
-                    </span>
+                <h3 className="font-serif text-2xl md:text-3xl text-foreground">Conservation & Local Stewardship</h3>
+                <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
+                  By embarking on this journey, you directly support local conservancies, anti-poaching initiatives, and
+                  indigenous guides who steward Kenya's wildest landscapes.
+                </p>
+              </div>
+
+              {/* THIS JOURNEY TAKES YOU TO (Related Destinations) */}
+              {(relatedDestinations.length > 0 || fallbackDestinations.length > 0) && (
+                <div>
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">DESTINATIONS</p>
+                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">THIS JOURNEY TAKES YOU TO</h2>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {(relatedDestinations.length > 0 ? relatedDestinations : fallbackDestinations).map((dest: any) => (
+                      <Link
+                        key={dest.slug || dest.id}
+                        to="/destinations/$slug"
+                        params={{ slug: dest.slug || dest.id }}
+                        className="group border border-border bg-background rounded-xl p-5 hover:border-gold/60 transition-all flex flex-col justify-between"
+                      >
+                        <div>
+                          {dest.image && (
+                            <img
+                              src={dest.image}
+                              alt={dest.name}
+                              className="w-full aspect-[16/10] object-cover rounded-lg mb-4 group-hover:scale-102 transition-transform"
+                            />
+                          )}
+                          <h3 className="font-serif text-xl text-foreground group-hover:text-gold transition-colors mb-1">
+                            {dest.name}
+                          </h3>
+                          <p className="text-xs text-foreground/60 mb-3">{dest.region}</p>
+                          <p className="text-xs text-foreground/75 line-clamp-2 leading-relaxed">
+                            {dest.short_description || dest.shortDescription || dest.description}
+                          </p>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-gold font-semibold uppercase tracking-[0.2em]">
+                          <span>Explore Destination</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                  <h3 className="font-serif text-2xl md:text-3xl text-foreground">Conservation & Local Stewardship</h3>
-                  <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
-                    By embarking on this journey, you directly support local conservancies, anti-poaching initiatives,
-                    and indigenous guides who steward Kenya's wildest landscapes.
-                  </p>
                 </div>
               )}
             </div>
