@@ -140,7 +140,7 @@
   html {
     scroll-behavior: smooth;
     /* Slightly smaller root scale so rem-based type reads less oversized. */
-    font-size: 93.75%; /* 15px */
+    font-size: 87.5%; /* 14px */
   }
 }
 
