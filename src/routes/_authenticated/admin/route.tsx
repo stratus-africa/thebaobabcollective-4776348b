@@ -74,6 +74,11 @@ const groups: NavGroup[] = [
         getBadge: (d) => (d?.total_destinations ? d.total_destinations : undefined),
       },
       {
+        to: "/admin/destinations/map",
+        label: "Destinations Map",
+        icon: Map,
+      },
+      {
         to: "/admin/content/lodges",
         label: "Lodges",
         icon: Building,
