@@ -33,6 +33,7 @@ describe("resolveWatermarkPolicy", () => {
         watermark_mode: "image",
         watermark_image_url: "https://cdn.example.com/logo.png",
         watermark_position: "center",
+        watermark_scale: 1.5,
       },
       "cms/456-photo.jpg",
     );
@@ -40,6 +41,7 @@ describe("resolveWatermarkPolicy", () => {
     expect(policy.enabled).toBe(true);
     expect(policy.mode).toBe("image");
     expect(policy.position).toBe("center");
+    expect(policy.scale).toBe(1.5);
   });
 });
 
@@ -51,10 +53,12 @@ describe("buildWatermarkSvg", () => {
       text: "The Baobab Collective",
       position: "bottom-right",
       opacity: 0.7,
+      scale: 1.5,
     });
 
     expect(svg).toContain("<svg");
     expect(svg).toContain("The Baobab Collective");
-    expect(svg).toContain("text-anchor=\"end\"");
+    expect(svg).toContain('text-anchor="end"');
+    expect(svg).toContain('font-size="36"');
   });
 });
