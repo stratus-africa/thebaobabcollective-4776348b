@@ -61,8 +61,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
+import { redirect } from "@tanstack/react-router";
+
 export const Route = createFileRoute("/_authenticated/admin/destinations/map")({
-  component: AdminDestinationsMapPage,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/admin/pages-hub/destinations",
+      search: { tab: "map" },
+    });
+  },
 });
 
 export interface MapDestinationItem {
@@ -76,7 +83,7 @@ export interface MapDestinationItem {
   order: number;
 }
 
-export function AdminDestinationsMapPage() {
+export function AdminDestinationsMapHub() {
   const queryClient = useQueryClient();
   const getPageFn = useServerFn(getPageContent);
   const savePageFn = useServerFn(savePageContent);
@@ -98,6 +105,7 @@ export function AdminDestinationsMapPage() {
   }, [rawDestinations]);
 
   // Editor State
+  const [showMap, setShowMap] = useState<boolean>(true);
   const [mapImage, setMapImage] = useState<string>("");
   const [destinationsOnMap, setDestinationsOnMap] = useState<MapDestinationItem[]>([]);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
@@ -120,6 +128,7 @@ export function AdminDestinationsMapPage() {
   useEffect(() => {
     if (pageContent !== undefined && allAvailableDestinations.length > 0) {
       const content = { ...PAGE_DEFAULTS.destinations_index, ...((pageContent ?? {}) as Record<string, any>) };
+      setShowMap(content.show_map !== false);
       const savedMapImage = content.map_image || "";
       setMapImage(savedMapImage);
 
@@ -201,6 +210,7 @@ export function AdminDestinationsMapPage() {
 
       const updated = {
         ...current,
+        show_map: showMap,
         map_image: mapImage,
         map_destinations: destinationsOnMap,
         map_positions: nextPositions,
@@ -227,6 +237,7 @@ export function AdminDestinationsMapPage() {
   const handleReset = () => {
     if (pageContent !== undefined) {
       const content = { ...PAGE_DEFAULTS.destinations_index, ...((pageContent ?? {}) as Record<string, any>) };
+      setShowMap(content.show_map !== false);
       setMapImage(content.map_image || "");
       const savedPositions = content.map_positions || {};
       const savedMapDestinations = content.map_destinations || [];
@@ -477,6 +488,23 @@ export function AdminDestinationsMapPage() {
             )}
           </Button>
         </div>
+      </div>
+
+      {/* ── Toggle show_map switch ── */}
+      <div className="flex items-center justify-between gap-4 bg-background border border-border rounded-xl p-4 shadow-sm">
+        <div className="space-y-0.5">
+          <Label className="text-sm font-bold text-foreground">Show Kenya Destinations Map Section</Label>
+          <p className="text-xs text-foreground/60">
+            Toggle whether the interactive destinations map section is visible to visitors on the public Destinations landing page.
+          </p>
+        </div>
+        <Switch
+          checked={showMap}
+          onCheckedChange={(checked) => {
+            setShowMap(checked);
+            setHasUnsavedChanges(true);
+          }}
+        />
       </div>
 
       {/* ── 2. TWO-COLUMN MAIN EDITOR LAYOUT ─────────────────────────── */}
