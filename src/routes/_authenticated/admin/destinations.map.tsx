@@ -620,40 +620,40 @@ export function AdminDestinationsMapHub() {
                         >
                           {/* Pulsing selection aura */}
                           {isSelected && !isDragging && (
-                            <span className="absolute -inset-3 rounded-full bg-gold/50 animate-ping pointer-events-none" />
+                            <span className="absolute -inset-3.5 rounded-full bg-orange-500/40 animate-ping pointer-events-none" />
                           )}
 
                           {/* Drag aura */}
                           {isDragging && (
-                            <span className="absolute -inset-4 rounded-full bg-terracotta/60 animate-pulse pointer-events-none ring-4 ring-gold" />
+                            <span className="absolute -inset-5 rounded-full bg-orange-600/50 animate-pulse pointer-events-none ring-4 ring-orange-300" />
                           )}
 
                           {/* Pin Circular Badge */}
                           <div
-                            className={`relative flex items-center justify-center rounded-full transition-all shadow-xl ${
+                            className={`relative flex items-center justify-center rounded-full transition-all shadow-2xl ${
                               isDragging
-                                ? "w-9 h-9 bg-terracotta text-white ring-4 ring-gold cursor-grabbing shadow-2xl"
+                                ? "w-12 h-12 bg-orange-600 text-white ring-4 ring-orange-300 cursor-grabbing shadow-2xl scale-125"
                                 : isSelected
-                                ? "w-8 h-8 bg-gold text-gold-foreground ring-4 ring-forest ring-offset-2 ring-offset-forest cursor-grab hover:scale-110"
-                                : "w-7 h-7 bg-cream text-forest border-2 border-gold/80 hover:bg-gold hover:text-gold-foreground cursor-grab"
+                                ? "w-11 h-11 bg-orange-500 text-white ring-4 ring-white/90 ring-offset-2 ring-offset-forest cursor-grab hover:scale-110 shadow-orange-500/50 shadow-lg"
+                                : "w-9 h-9 bg-orange-500 text-white border-2 border-white/90 hover:bg-orange-600 hover:scale-110 cursor-grab shadow-md"
                             }`}
                           >
-                            <Move className={`${isSelected || isDragging ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
+                            <Move className={`${isSelected || isDragging ? "w-5 h-5" : "w-4 h-4"}`} />
                           </div>
 
                           {/* Floating normalized coordinates badge */}
                           {(isSelected || isDragging) && (
-                            <div className="absolute -top-7 whitespace-nowrap bg-black/90 text-gold text-[9px] font-mono font-bold px-2 py-0.5 rounded-full shadow-lg pointer-events-none border border-gold/40">
+                            <div className="absolute -top-8 whitespace-nowrap bg-black/90 text-orange-400 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-lg pointer-events-none border border-orange-500/50">
                               x: {dest.x.toFixed(3)} · y: {dest.y.toFixed(3)} ({(dest.x * 100).toFixed(1)}%, {(dest.y * 100).toFixed(1)}%)
                             </div>
                           )}
 
                           {/* Destination Title Label */}
                           <div
-                            className={`absolute top-full left-1/2 ${labelOffset} whitespace-nowrap px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider transition-all pointer-events-none shadow-md ${
+                            className={`absolute top-full left-1/2 ${labelOffset} whitespace-nowrap px-3 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all pointer-events-none shadow-lg ${
                               isSelected || isDragging
-                                ? "bg-gold text-gold-foreground scale-105 z-30"
-                                : "bg-forest/90 text-cream/90 group-hover:bg-cream group-hover:text-forest"
+                                ? "bg-orange-600 text-white scale-110 z-30 ring-2 ring-orange-300 shadow-orange-600/40"
+                                : "bg-orange-500 text-white group-hover:bg-orange-600 group-hover:scale-105"
                             }`}
                           >
                             {dest.name}
