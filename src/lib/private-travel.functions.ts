@@ -14,7 +14,7 @@ const Schema = z.object({
 });
 
 export const submitPrivateTravelRequest = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => Schema.parse(d))
+  .validator((d: unknown) => Schema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("private_travel_requests").insert({

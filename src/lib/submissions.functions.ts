@@ -71,11 +71,7 @@ const EnquirySchema = z
     referral_source: z.string().trim().max(80).optional().or(z.literal("")),
     subscribe_newsletter: z.boolean().optional(),
     source_url: z.string().trim().max(500).optional().or(z.literal("")),
-    message: z
-      .string()
-      .trim()
-      .min(10, "Tell us a little more about your trip")
-      .max(2000),
+    message: z.string().trim().min(10, "Tell us a little more about your trip").max(2000),
     // Honeypot field — must be empty. Bots tend to fill every input.
     company: z.string().max(0).optional().or(z.literal("")),
   })
@@ -112,7 +108,7 @@ const MAX_PER_IP_PER_HOUR = 6;
 const MIN_SECONDS_BETWEEN = 20;
 
 export const submitEnquiry = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => EnquirySchema.parse(input))
+  .validator((input: unknown) => EnquirySchema.parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -128,12 +124,7 @@ export const submitEnquiry = createServerFn({ method: "POST" })
         .select("id", { count: "exact", head: true })
         .ilike("email", data.email)
         .gte("created_at", sinceHour),
-      supabaseAdmin
-        .from("enquiries")
-        .select("id")
-        .ilike("email", data.email)
-        .gte("created_at", sinceMin)
-        .limit(1),
+      supabaseAdmin.from("enquiries").select("id").ilike("email", data.email).gte("created_at", sinceMin).limit(1),
     ]);
     if ((emailCount ?? 0) >= MAX_PER_EMAIL_PER_HOUR) {
       throw new Error("Too many enquiries from this email. Please try again later.");
@@ -155,10 +146,7 @@ export const submitEnquiry = createServerFn({ method: "POST" })
 
     // Stamp IP into referral_source for follow-on rate-limit checks
     const referral =
-      [data.referral_source, ip !== "unknown" ? `ip=${ip}` : ""]
-        .filter(Boolean)
-        .join(" | ")
-        .slice(0, 80) || null;
+      [data.referral_source, ip !== "unknown" ? `ip=${ip}` : ""].filter(Boolean).join(" | ").slice(0, 80) || null;
 
     const { data: inserted, error } = await supabaseAdmin
       .from("enquiries")
@@ -192,15 +180,15 @@ export const submitEnquiry = createServerFn({ method: "POST" })
       await supabaseAdmin
         .from("newsletter_subscribers")
         .insert({ email: data.email.toLowerCase() })
-        .then(() => undefined, () => undefined);
+        .then(
+          () => undefined,
+          () => undefined,
+        );
     }
 
     // Use deterministic message_id so we can join enquiries -> email_send_log
     const messageId = `enquiry-${inserted.id}`;
-    await supabaseAdmin
-      .from("enquiries")
-      .update({ message_id: messageId })
-      .eq("id", inserted.id);
+    await supabaseAdmin.from("enquiries").update({ message_id: messageId }).eq("id", inserted.id);
 
     try {
       const { enqueueInternalEmail } = await import("@/lib/email/send-internal.server");
@@ -237,12 +225,10 @@ const NewsletterSchema = z.object({
 });
 
 export const subscribeNewsletter = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => NewsletterSchema.parse(input))
+  .validator((input: unknown) => NewsletterSchema.parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("newsletter_subscribers")
-      .insert({ email: data.email.toLowerCase() });
+    const { error } = await supabaseAdmin.from("newsletter_subscribers").insert({ email: data.email.toLowerCase() });
     if (error) {
       if (error.code === "23505") return { ok: true as const, alreadySubscribed: true };
       console.error("subscribeNewsletter error", error);
