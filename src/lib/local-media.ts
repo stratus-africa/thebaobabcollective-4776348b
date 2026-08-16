@@ -15,8 +15,17 @@ export function getMediaMimeType(fileName: string): string {
   return "application/octet-stream";
 }
 
+export function isRemoteMediaUrl(value: string | null | undefined): boolean {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  return /^https?:\/\//i.test(trimmed) || /^\/\//.test(trimmed) || /^data:/i.test(trimmed);
+}
+
 export function toPublicMediaUrl(mediaPath: string): string {
-  const clean = mediaPath.replace(/^\/+/, "");
+  if (!mediaPath) return "";
+  const trimmed = mediaPath.trim();
+  if (isRemoteMediaUrl(trimmed)) return trimmed;
+  const clean = trimmed.replace(/^\/+/, "");
   return `/api/public/media/${clean}`;
 }
 
@@ -82,4 +91,3 @@ export async function listLocalMediaRecords(prefix = "cms") {
   items.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
   return items;
 }
- 
