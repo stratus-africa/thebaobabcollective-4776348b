@@ -251,6 +251,7 @@ export const PAGE_DEFAULTS = {
     title: "Partner Lodges",
     subtitle: "Every camp and lodge we work with has been walked, slept in, and chosen for soul as much as setting.",
     hero_image: "",
+    grid_size: 3 as 3 | 4,
     show_hero: true as boolean,
     show_grid: true as boolean,
   },
@@ -274,10 +275,22 @@ export const PAGE_DEFAULTS = {
 
     // 3. Map
     show_map: true as boolean,
-    map_positions: {} as Record<string, { left: number; top: number }>,
+    map_image: "" as string,
+    map_destinations: [] as Array<{
+      id?: string;
+      slug: string;
+      name: string;
+      region?: string;
+      x: number;
+      y: number;
+      visible?: boolean;
+      order?: number;
+    }>,
+    map_positions: {} as Record<string, { left: number; top: number; visible?: boolean }>,
 
     // 4. Grid / Editorial Groupings
     show_grid: true as boolean,
+    grid_size: 3 as 3 | 4,
     icons_eyebrow: "Signature Kenya",
     icons_title: "The Icons",
     icons_body:
@@ -399,6 +412,7 @@ export const PAGE_DEFAULTS = {
     // Catalogue
     catalogue_eyebrow: "The Full Collection",
     catalogue_title: "All Adventures",
+    grid_size: 3 as 3 | 4,
     // Journey combinations
     combinations_eyebrow: "Perfect Pairings",
     combinations_title: "Journey Combinations",
