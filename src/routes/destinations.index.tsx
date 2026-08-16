@@ -14,8 +14,8 @@ import { DestinationStaySection } from "@/components/site/DestinationStaySection
 import { DestinationMatcherSection } from "@/components/site/DestinationMatcherSection";
 import { getDestinations, getLodges } from "@/lib/cms.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { getPageContent } from "@/lib/page-content.functions";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPageContent, savePageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { mergeDestinationsWithDefaults, type DestinationMetadata } from "@/lib/destinations.data";
@@ -136,13 +136,28 @@ function DestinationsDiscoveryPage() {
   const { data: rawDestinations } = useSuspenseQuery(destinationsQuery);
   const { data: adventuresPage } = useSuspenseQuery(adventuresQuery);
   const { data: lodges } = useSuspenseQuery(lodgesQuery);
+  const queryClient = useQueryClient();
   const pageContentFn = useServerFn(getPageContent);
+  const saveContentFn = useServerFn(savePageContent);
   const { data: pcData } = useQuery({
     queryKey: ["page-content", "destinations_index"],
     queryFn: () => pageContentFn({ data: { key: "destinations_index" } }),
     staleTime: 60_000,
   });
   const content = { ...PAGE_DEFAULTS.destinations_index, ...((pcData ?? {}) as Record<string, any>) };
+
+  const handleSaveMapPositions = async (newPositions: Record<string, { left: number; top: number }>) => {
+    await saveContentFn({
+      data: {
+        key: "destinations_index",
+        value: {
+          ...content,
+          map_positions: newPositions,
+        },
+      },
+    });
+    queryClient.invalidateQueries({ queryKey: ["page-content", "destinations_index"] });
+  };
 
   // Merge database records with baseline Kenya data
   const allDestinations = useMemo(() => {
@@ -285,7 +300,13 @@ function DestinationsDiscoveryPage() {
         )}
 
         {/* ── 3. KENYA DESTINATION MAP ────────────────────────────────────── */}
-        {content.show_map !== false && <KenyaDestinationsMap destinations={allDestinations} />}
+        {content.show_map !== false && (
+          <KenyaDestinationsMap
+            destinations={allDestinations}
+            customPositions={content.map_positions}
+            onSavePositions={handleSaveMapPositions}
+          />
+        )}
 
         {/* ── 4. EDITORIAL GROUPINGS GRID ────────────────────────────────── */}
         {content.show_grid !== false && (
