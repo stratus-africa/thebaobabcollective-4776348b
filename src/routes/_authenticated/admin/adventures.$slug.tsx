@@ -1,875 +1,681 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
+import { useSuspenseQuery, queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import {
-  ArrowLeft,
+  ArrowRight,
+  Check,
   Calendar,
-  Compass,
-  ExternalLink,
-  FolderOpen,
-  Globe,
-  Image as ImageIcon,
-  Loader2,
   MapPin,
-  Save,
-  Trash2,
-  Upload,
-  X,
+  Users,
+  Sparkles,
   Mountain,
+  X,
+  Shield,
+  Compass,
+  Bed,
+  Layers,
+  ChevronRight,
 } from "lucide-react";
-import {
-  getAdventuresPage,
-  saveAdventuresPage,
-  type AdventuresPage,
-  type AdventuresSignature,
-  adventuresDefaults,
-  buildAdventureSlug,
-} from "@/lib/adventures.functions";
-import { adminUploadImage } from "@/lib/admin.functions";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Navbar } from "@/components/site/Navbar";
+import { Footer } from "@/components/site/Footer";
+import { EnquireDialog } from "@/components/site/EnquireDialog";
+import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { ShareButtons } from "@/components/site/ShareButtons";
+import { TheBaobabPick } from "@/components/site/TheBaobabPick";
+import { AdventureCard, getHumanDifficulty } from "@/components/site/AdventureCard";
+import { getAdventuresPage } from "@/lib/adventures.functions";
+import { getDestinations, getLodges } from "@/lib/cms.functions";
+import { KENYA_DESTINATIONS_DATA, DESTINATION_COMBINATIONS } from "@/lib/destinations.data";
 
-const DIFFICULTIES = ["Easy", "Moderate", "Active", "Challenging"];
-
-function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function humanSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
-export const Route = createFileRoute("/_authenticated/admin/adventures/$slug")({
-  component: AdminAdventureEdit,
+const adventuresQuery = queryOptions({
+  queryKey: ["adventures-page"],
+  queryFn: () => getAdventuresPage(),
 });
 
-function AdminAdventureEdit() {
-  const { slug } = Route.useParams();
-  const isNew = slug === "new";
-  const navigate = useNavigate();
-  const fetchFn = useServerFn(getAdventuresPage);
-  const saveFn = useServerFn(saveAdventuresPage);
-
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["admin-adventures-page"],
-    queryFn: () => fetchFn(),
-  });
-
-  const [draft, setDraft] = useState<AdventuresPage>(adventuresDefaults);
-  const [newForm, setNewForm] = useState<AdventuresSignature>({
-    slug: "",
-    name: "",
-    region: "",
-    terrain: "",
-    nights: "",
-    difficulty: "Moderate",
-    image: "",
-    imageAlt: "",
-    description: "",
-    highlights: [],
-    included: [],
-    notIncluded: [],
-    status: "published",
-  });
-  const [saving, setSaving] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    if (data) setDraft(data);
-  }, [data]);
-
-  const adventureIdx = isNew ? -1 : draft.signatures.findIndex((s) => s.slug === slug);
-  const adventure = isNew ? newForm : adventureIdx >= 0 ? draft.signatures[adventureIdx] : null;
-
-  function updateAdventure(patch: Partial<AdventuresSignature>) {
-    if (isNew) {
-      setNewForm((prev) => ({ ...prev, ...patch }));
-    } else if (adventureIdx >= 0) {
-      const updated = { ...draft.signatures[adventureIdx], ...patch };
-      const copy = draft.signatures.slice();
-      copy[adventureIdx] = updated;
-      setDraft((prev) => ({ ...prev, signatures: copy }));
-    }
-  }
-
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
-    if (!adventure) return;
-    if (!adventure.name.trim()) {
-      toast.error("Adventure name is required.");
-      return;
-    }
-    setSaving(true);
-    try {
-      let updatedSignatures = [...draft.signatures];
-      let finalSlug = adventure.slug;
-      const stampedAdventure: AdventuresSignature = {
-        ...adventure,
-        status: adventure.status || "published",
-        updatedAt: new Date().toISOString(),
-      };
-
-      if (isNew) {
-        finalSlug = buildAdventureSlug(
-          stampedAdventure.slug || stampedAdventure.name,
-          draft.signatures.map((signature) => signature.slug),
-        );
-        updatedSignatures.push({ ...stampedAdventure, slug: finalSlug });
-      } else {
-        updatedSignatures[adventureIdx] = stampedAdventure;
-      }
-
-      await saveFn({
-        data: {
-          hero: draft.hero,
-          cta: draft.cta,
-          signatures: updatedSignatures,
-        },
-      });
-      toast.success(`"${adventure.name}" ${isNew ? "created" : "updated"} successfully.`);
-      await refetch();
-
-      if (isNew) {
-        navigate({
-          to: "/admin/adventures/$slug",
-          params: { slug: finalSlug },
-          replace: true,
-        });
-      } else if (adventure.slug !== slug) {
-        navigate({
-          to: "/admin/adventures/$slug",
-          params: { slug: adventure.slug },
-          replace: true,
-        });
-      }
-    } catch (err: any) {
-      toast.error(err?.message ?? "Could not save adventure");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete() {
-    if (!adventure || isNew) return;
-    setDeleting(true);
-    try {
-      const remaining = draft.signatures.filter((s) => s.slug !== slug);
-      await saveFn({
-        data: {
-          hero: draft.hero,
-          cta: draft.cta,
-          signatures: remaining,
-        },
-      });
-      toast.success(`"${adventure.name}" deleted.`);
-      navigate({ to: "/admin/adventures" });
-    } catch (err: any) {
-      toast.error(err?.message ?? "Could not delete adventure");
-      setDeleting(false);
-      setDeleteOpen(false);
-    }
-  }
-
-  if (!isNew && (isLoading || !data)) {
-    return (
-      <div className="flex items-center justify-center gap-2 py-20 text-foreground/60">
-        <Loader2 className="w-5 h-5 animate-spin text-gold" /> Loading adventure…
+export const Route = createFileRoute("/adventures/$slug")({
+  loader: async ({ params, context }) => {
+    const page = await context.queryClient.ensureQueryData(adventuresQuery);
+    const adv = page.signatures.find((s) => s.slug === params.slug);
+    if (!adv) throw notFound();
+    return { adv };
+  },
+  head: ({ loaderData, params }) => {
+    const a = loaderData?.adv;
+    const title = a ? `${a.name} — Kenya Safari Adventures | The Baobab Collective` : "Adventure";
+    const desc = a?.shortDescription || (a?.description ? a.description.slice(0, 160) : "A signature Kenya adventure.");
+    const url = `https://thebaobabcollective.co.uk/adventures/${params.slug}`;
+    const ldTrip = a
+      ? {
+          "@context": "https://schema.org",
+          "@type": "TouristTrip",
+          name: a.name,
+          description: a.description,
+          image: a.image,
+          touristType: a.difficulty,
+          url,
+        }
+      : null;
+    const ldCrumbs = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
+        { "@type": "ListItem", position: 2, name: "Adventures", item: "https://thebaobabcollective.co.uk/adventures" },
+        { "@type": "ListItem", position: 3, name: a?.name ?? params.slug, item: url },
+      ],
+    };
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        ...(a?.image ? [{ property: "og:image", content: a.image }] : []),
+        { name: "twitter:card", content: "summary_large_image" },
+        ...(a?.image ? [{ name: "twitter:image", content: a.image }] : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        ...(ldTrip ? [{ type: "application/ld+json", children: JSON.stringify(ldTrip) }] : []),
+        { type: "application/ld+json", children: JSON.stringify(ldCrumbs) },
+      ],
+    };
+  },
+  notFoundComponent: () => (
+    <div className="bg-background min-h-screen">
+      <Navbar />
+      <div className="max-w-3xl mx-auto px-6 py-32 text-center">
+        <h1 className="font-serif text-4xl mb-4">Adventure not found</h1>
+        <Link to="/adventures" className="text-gold underline">
+          Browse all adventures
+        </Link>
       </div>
-    );
-  }
-
-  if (!isNew && !adventure) {
+      <Footer />
+    </div>
+  ),
+  errorComponent: ({ error, reset }) => {
+    const router = useRouter();
     return (
-      <div className="space-y-4 max-w-2xl mx-auto py-12">
-        <Button variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to adventures
-        </Button>
-        <div className="rounded-lg border border-border bg-background p-8 text-center space-y-3">
-          <h2 className="font-serif text-2xl">Adventure not found</h2>
-          <p className="text-sm text-foreground/60">
-            No adventure found with slug <code className="text-xs">{slug}</code>.
-          </p>
+      <div className="bg-background min-h-screen">
+        <Navbar />
+        <div className="max-w-3xl mx-auto px-6 py-32 text-center">
+          <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
+          <p className="text-foreground/70 mb-6">{error.message}</p>
+          <button
+            onClick={() => {
+              reset();
+              router.invalidate();
+            }}
+            className="bg-gold text-gold-foreground px-6 py-3 uppercase tracking-[0.25em] text-[11px]"
+          >
+            Retry
+          </button>
         </div>
+        <Footer />
       </div>
     );
-  }
+  },
+  component: AdventureDetail,
+});
 
-  // Non-null alias — at this point adventure is guaranteed to be non-null for isNew (newForm) and for existing (found above)
-  const adv = adventure!;
-  const liveHref = !isNew && adv.slug ? `/adventures/${adv.slug}` : null;
+function AdventureDetail() {
+  const { slug } = Route.useParams();
+  const { data: page } = useSuspenseQuery(adventuresQuery);
+  const a = page.signatures.find((s) => s.slug === slug)!;
+  const url =
+    typeof window !== "undefined" ? window.location.href : `https://thebaobabcollective.co.uk/adventures/${slug}`;
+
+  // Fetch destinations and lodges to render relationships dynamically
+  const fetchDestinationsFn = useServerFn(getDestinations);
+  const { data: dbDestinations } = useQuery({
+    queryKey: ["destinations"],
+    queryFn: () => fetchDestinationsFn(),
+  });
+
+  const fetchLodgesFn = useServerFn(getLodges);
+  const { data: dbLodges } = useQuery({
+    queryKey: ["lodges"],
+    queryFn: () => fetchLodgesFn(),
+  });
+
+  const diffMeta = getHumanDifficulty(a.difficulty);
+
+  const included = (
+    Array.isArray(a.included) ? a.included : typeof a.included === "string" ? (a.included as string).split("\n") : []
+  )
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const notIncluded = (
+    Array.isArray(a.notIncluded)
+      ? a.notIncluded
+      : typeof a.notIncluded === "string"
+        ? (a.notIncluded as string).split("\n")
+        : []
+  )
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  // Match destinations dynamically from adventure.destinations or region
+  const relatedDestinations = (dbDestinations || []).filter((d) => {
+    if (a.destinations && a.destinations.length > 0) {
+      return a.destinations.some(
+        (target) =>
+          d.name.toLowerCase().includes(target.toLowerCase()) || d.slug.toLowerCase().includes(target.toLowerCase()),
+      );
+    }
+    return a.region && d.region.toLowerCase().includes(a.region.toLowerCase());
+  });
+
+  // Fallback to static Kenya destinations data if DB destinations are empty
+  const fallbackDestinations = KENYA_DESTINATIONS_DATA.filter((d) => {
+    if (a.destinations && a.destinations.length > 0) {
+      return a.destinations.some((target) => d.name.toLowerCase().includes(target.toLowerCase()));
+    }
+    return a.region && d.region.toLowerCase().includes(a.region.toLowerCase());
+  });
+
+  // Related lodges
+  const relatedLodges = (dbLodges || []).filter((l) => {
+    if (a.lodges && a.lodges.length > 0) {
+      return a.lodges.some((target) => l.name.toLowerCase().includes(target.toLowerCase()));
+    }
+    return a.region && l.location?.toLowerCase().includes(a.region.toLowerCase());
+  });
+
+  // Similar adventures
+  const similarAdventures = page.signatures
+    .filter((other) => other.slug !== a.slug && (other.region === a.region || other.difficulty === a.difficulty))
+    .slice(0, 3);
 
   return (
-    <form onSubmit={handleSave} className="space-y-6 pb-12">
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
-        <div className="space-y-1">
-          <Link
-            to="/admin/adventures"
-            className="inline-flex items-center gap-1.5 text-xs text-foreground/60 hover:text-gold transition-colors font-medium mb-1"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to adventures
-          </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Adventure" : "Edit Adventure"}</h1>
-            {!isNew && <Badge className="bg-forest text-forest-foreground">Signature Adventure</Badge>}
-          </div>
-          {!isNew && adventure && adventure.slug && (
-            <div className="flex items-center gap-2 text-xs text-foreground/60 pt-1">
-              <span className="font-medium text-foreground/75">Permalink:</span>
-              <code className="bg-cream px-1.5 py-0.5 rounded text-foreground/80 font-mono text-[11px]">
-                /adventures/{adventure.slug}
-              </code>
-            </div>
-          )}
-        </div>
+    <div className="bg-background min-h-screen">
+      <Navbar />
+      <main>
+        {/* Editorial Hero */}
+        <section className="relative h-[78vh] min-h-[540px] flex items-end">
+          <img src={a.image} alt={a.imageAlt || a.name} className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest/95 via-black/45 to-black/20" />
 
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/adventures" })}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Adventure" : "Save Changes"}
-              </>
+          <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-16 text-cream w-full">
+            <Link
+              to="/adventures"
+              className="text-[11px] tracking-[0.3em] uppercase text-gold mb-4 inline-flex items-center gap-1.5 hover:underline font-semibold"
+            >
+              ← Back to All Signature Adventures
+            </Link>
+
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl leading-[1.05] mb-4 max-w-4xl">{a.name}</h1>
+
+            {a.shortDescription && (
+              <p className="text-lg md:text-xl text-cream/90 max-w-2xl leading-relaxed mb-6 font-sans">
+                {a.shortDescription}
+              </p>
             )}
-          </Button>
-        </div>
-      </div>
 
-      {/* ── WordPress-Style Two-Column Layout (9/12 and 3/12) ────────── */}
-      <div className="grid gap-6 xl:grid-cols-12">
-        {/* ── Main Content Area (Left: 9/12) ─────────────────────────── */}
-        <div className="space-y-6 min-w-0 xl:col-span-9">
-          {/* Adventure Title / Name */}
-          <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
-            <div>
-              <Label className="mb-2 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
-                Adventure Name <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                value={adv.name}
-                onChange={(e) => {
-                  const newName = e.target.value;
-                  updateAdventure({
-                    name: newName,
-                    slug: adv.slug === slugify(adv.name) ? slugify(newName) : adv.slug,
-                  });
-                }}
-                placeholder="e.g. Okavango on Foot"
-                className="font-serif text-xl md:text-2xl h-12"
-              />
-            </div>
-          </div>
-
-          {/* Adventure Information */}
-          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Compass className="w-4 h-4 text-gold" />
-                <h2 className="font-serif text-lg leading-none">Adventure Information & Filtering</h2>
-              </div>
-              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={adv.featured ?? false}
-                  onChange={(e) => updateAdventure({ featured: e.target.checked })}
-                  className="rounded border-border text-gold focus:ring-gold h-4 w-4"
-                />
-                <span>Featured Adventure</span>
-              </label>
-            </header>
-            <div className="p-6 space-y-4">
-              <div>
-                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                  Short Description / Emotional Tagline
-                </Label>
-                <Input
-                  value={adv.shortDescription ?? ""}
-                  onChange={(e) => updateAdventure({ shortDescription: e.target.value })}
-                  placeholder="e.g. Big cats, river crossings and bare-foot coastal luxury."
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Region
-                  </Label>
-                  <Input
-                    value={adv.region}
-                    onChange={(e) => updateAdventure({ region: e.target.value })}
-                    placeholder="e.g. Maasai Mara"
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Terrain
-                  </Label>
-                  <Input
-                    value={adv.terrain}
-                    onChange={(e) => updateAdventure({ terrain: e.target.value })}
-                    placeholder="e.g. Savannah & Riverine"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Nights / Duration
-                  </Label>
-                  <Input
-                    value={adv.nights}
-                    onChange={(e) => updateAdventure({ nights: e.target.value })}
-                    placeholder="e.g. 4 Nights"
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Difficulty / Pacing
-                  </Label>
-                  <select
-                    value={adv.difficulty}
-                    onChange={(e) => updateAdventure({ difficulty: e.target.value })}
-                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gold"
-                  >
-                    {DIFFICULTIES.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Experience Categories (comma separated)
-                  </Label>
-                  <Input
-                    value={(adv.experienceTypes ?? []).join(", ")}
-                    onChange={(e) =>
-                      updateAdventure({
-                        experienceTypes: e.target.value
-                          .split(",")
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    placeholder="Wildlife, Walking, Wilderness, Safari + Beach"
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Travel Styles (comma separated)
-                  </Label>
-                  <Input
-                    value={(adv.travelStyles ?? []).join(", ")}
-                    onChange={(e) =>
-                      updateAdventure({
-                        travelStyles: e.target.value
-                          .split(",")
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    placeholder="Private, Small Group, Family, Honeymoon"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Destinations Covered (comma separated)
-                  </Label>
-                  <Input
-                    value={(adv.destinations ?? []).join(", ")}
-                    onChange={(e) =>
-                      updateAdventure({
-                        destinations: e.target.value
-                          .split(",")
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    placeholder="Maasai Mara, Lake Naivasha, Lake Nakuru"
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Associated Lodges (comma separated)
-                  </Label>
-                  <Input
-                    value={(adv.lodges ?? []).join(", ")}
-                    onChange={(e) =>
-                      updateAdventure({
-                        lodges: e.target.value
-                          .split(",")
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    placeholder="Rekero Camp, Mara Plains"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Description & Story */}
-          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center justify-between">
-              <h2 className="font-serif text-lg leading-none">Full Description & Story</h2>
-            </header>
-            <div className="p-6">
-              <Textarea
-                rows={5}
-                value={adv.description}
-                onChange={(e) => updateAdventure({ description: e.target.value })}
-                placeholder="Describe this adventure, the journey flow, what guests will encounter…"
-                className="leading-relaxed"
-              />
-            </div>
-          </section>
-
-          {/* Highlights */}
-          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-6 py-4 border-b border-border bg-cream/50">
-              <h2 className="font-serif text-lg leading-none">Highlights</h2>
-              <p className="text-xs text-foreground/55 mt-1">Enter each key highlight on a new line.</p>
-            </header>
-            <div className="p-6 space-y-4">
-              <Textarea
-                rows={4}
-                value={(adv.highlights ?? []).join("\n")}
-                onChange={(e) =>
-                  updateAdventure({
-                    highlights: e.target.value.split("\n").map((s) => s.trimEnd()),
-                  })
-                }
-                placeholder="Walking safaris in the Okavango Delta&#10;Night game drives with expert trackers&#10;Private mokoro expeditions"
-              />
-
-              {(adv.highlights ?? []).filter(Boolean).length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {(adv.highlights ?? []).filter(Boolean).map((highlight, idx) => (
-                    <button
-                      key={`${highlight}-${idx}`}
-                      type="button"
-                      onClick={() =>
-                        updateAdventure({
-                          highlights: (adv.highlights ?? []).filter((_, i) => i !== idx),
-                        })
-                      }
-                      className="inline-flex items-center gap-1 rounded-full border border-border bg-cream/40 px-3 py-1 text-xs text-foreground/75 hover:border-destructive hover:text-destructive transition-colors"
-                      title="Click to remove"
-                    >
-                      <span>{highlight}</span>
-                      <span className="opacity-60">×</span>
-                    </button>
-                  ))}
-                </div>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-cream/90 mb-8">
+              {a.region && (
+                <span className="flex items-center gap-1.5 bg-forest/80 backdrop-blur px-3.5 py-1.5 rounded-full border border-gold/30">
+                  <MapPin className="w-3.5 h-3.5 text-gold" /> {a.region}
+                </span>
+              )}
+              {a.nights && (
+                <span className="flex items-center gap-1.5 bg-forest/80 backdrop-blur px-3.5 py-1.5 rounded-full border border-gold/30">
+                  <Calendar className="w-3.5 h-3.5 text-gold" /> {a.nights}
+                </span>
+              )}
+              {a.terrain && (
+                <span className="flex items-center gap-1.5 bg-forest/80 backdrop-blur px-3.5 py-1.5 rounded-full border border-gold/30">
+                  <Mountain className="w-3.5 h-3.5 text-gold" /> {a.terrain}
+                </span>
+              )}
+              {a.difficulty && (
+                <span className="flex items-center gap-1.5 bg-forest/80 backdrop-blur px-3.5 py-1.5 rounded-full border border-gold/30 font-semibold">
+                  <Sparkles className="w-3.5 h-3.5 text-gold" /> {diffMeta.label}
+                </span>
               )}
             </div>
-          </section>
 
-          {/* Planning: Included & Not Included */}
-          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-6 py-4 border-b border-border bg-cream/50">
-              <h2 className="font-serif text-lg leading-none">Planning: Included & Not Included</h2>
-              <p className="text-xs text-foreground/55 mt-1">List inclusions and exclusions (one item per line).</p>
-            </header>
-            <div className="p-6 grid gap-6 sm:grid-cols-2">
-              <div>
-                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                  Included (one per line)
-                </Label>
-                <Textarea
-                  rows={5}
-                  value={(adv.included ?? []).join("\n")}
-                  onChange={(e) =>
-                    updateAdventure({
-                      included: e.target.value.split("\n").map((s) => s.trimEnd()),
-                    })
-                  }
-                  placeholder="All meals & drinks&#10;Park fees&#10;Expert guide&#10;Internal charter flights"
-                />
-              </div>
-
-              <div>
-                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                  Not Included (one per line)
-                </Label>
-                <Textarea
-                  rows={5}
-                  value={(adv.notIncluded ?? []).join("\n")}
-                  onChange={(e) =>
-                    updateAdventure({
-                      notIncluded: e.target.value.split("\n").map((s) => s.trimEnd()),
-                    })
-                  }
-                  placeholder="International flights&#10;Travel insurance&#10;Premium cellar wines&#10;Gratuities"
-                />
-              </div>
+            <div>
+              <EnquireDialog
+                defaultSubject={a.name}
+                defaultDestination={a.region || a.name}
+                sourceUrl={url}
+                context={{ kind: "Itinerary", title: a.name, slug: a.slug, image: a.image }}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-3 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-9 py-4 hover:bg-gold/90 transition-colors shadow-xl"
+                  >
+                    <span>Make This Journey Yours</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                }
+              />
             </div>
-          </section>
+          </div>
+        </section>
+
+        {/* Breadcrumbs */}
+        <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pt-8">
+          <Breadcrumbs
+            items={[{ label: "Home", to: "/" }, { label: "Adventures", to: "/adventures" }, { label: a.name }]}
+          />
         </div>
 
-        {/* ── Sidebar Area (Right: 3/12) ──────────────────────────── */}
-        <aside className="space-y-6 min-w-0 xl:col-span-3">
-          {/* Publish / Status Box */}
-          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
-              <h3 className="font-serif text-base">Publish</h3>
-              <Badge
-                className={
-                  (adv.status || "published") === "published"
-                    ? "bg-forest text-forest-foreground"
-                    : (adv.status || "published") === "draft"
-                      ? "bg-amber-600 text-white"
-                      : "bg-muted-foreground text-background"
-                }
-              >
-                {(adv.status || "published").toUpperCase()}
-              </Badge>
-            </header>
-            <div className="p-5 space-y-4">
+        {/* AT A GLANCE STRIP */}
+        <section className="py-12 border-b border-border/50 bg-cream/40 mt-6">
+          <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-4">AT A GLANCE</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-sm">
               <div>
-                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Status</Label>
-                <select
-                  value={adv.status || "published"}
-                  onChange={(e) => updateAdventure({ status: e.target.value as any })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gold"
-                >
-                  <option value="published">Published (Visible on site)</option>
-                  <option value="draft">Draft (Admin only)</option>
-                  <option value="archived">Archived</option>
-                </select>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Duration
+                </span>
+                <span className="font-serif text-lg text-foreground">{a.nights || "Bespoke"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Region
+                </span>
+                <span className="font-serif text-lg text-foreground">{a.region || "Kenya"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Destinations
+                </span>
+                <span className="font-serif text-lg text-foreground">
+                  {a.destinations && a.destinations.length > 0 ? a.destinations.join(" · ") : a.region}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Terrain
+                </span>
+                <span className="font-serif text-lg text-foreground">{a.terrain || "Savannah & Bush"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Pacing / Difficulty
+                </span>
+                <span className="font-serif text-lg text-foreground">{diffMeta.label}</span>
+              </div>
+              <div>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground/50 block mb-1 font-semibold">
+                  Travel Style
+                </span>
+                <span className="font-serif text-lg text-foreground">
+                  {a.travelStyles && a.travelStyles.length > 0 ? a.travelStyles.join(" · ") : "Private Safari"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Main Content + Sticky Sidebar */}
+        <section className="py-16 md:py-24">
+          <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 grid lg:grid-cols-[1.85fr_1.15fr] gap-12 lg:gap-16">
+            <div className="space-y-16 min-w-0">
+              {/* WHY YOU'LL LOVE IT */}
+              <div>
+                <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-3">
+                  WHY YOU'LL LOVE IT
+                </p>
+                <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">{a.name} Overview</h2>
+                <p className="text-foreground/80 text-lg sm:text-xl leading-relaxed font-sans">{a.description}</p>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground/60 uppercase tracking-wider">Type</span>
-                <span className="text-xs font-medium">Signature Itinerary</span>
-              </div>
+              {/* The Baobab Pick Note */}
+              <TheBaobabPick
+                title="The Baobab Pick"
+                author="Michael & Samra's Recommendation"
+                note="We deliberately slow the pace on this journey to allow for extended morning walking safaris and unhurried bush breakfasts where you can truly take in Kenya's quiet wilderness."
+              />
 
-              <div className="pt-3 border-t border-border flex flex-col gap-2">
-                <Button
-                  type="submit"
-                  disabled={saving}
-                  className="w-full bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Adventure" : "Save Changes"}
-                    </>
-                  )}
-                </Button>
-
-                {!isNew && (
-                  <div className="flex items-center justify-between pt-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive px-2"
-                      onClick={() => setDeleteOpen(true)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
-                    </Button>
-
-                    {liveHref && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="text-xs text-foreground/60 hover:text-foreground px-2"
+              {/* Adventure Highlights */}
+              {a.highlights?.length > 0 && (
+                <div>
+                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">Adventure Highlights</h2>
+                  <ul className="grid sm:grid-cols-2 gap-4">
+                    {a.highlights.map((h) => (
+                      <li
+                        key={h}
+                        className="flex gap-3.5 text-foreground/85 bg-cream/70 rounded-xl p-5 border border-border/70"
                       >
-                        <a href={liveHref} target="_blank" rel="noreferrer">
-                          <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
-                        </a>
-                      </Button>
-                    )}
+                        <Check className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+                        <span className="text-sm sm:text-base leading-snug font-medium">{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* YOUR JOURNEY / ITINERARY */}
+              <div>
+                <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-8">YOUR JOURNEY</h2>
+                {a.itinerary && a.itinerary.length > 0 ? (
+                  <div className="space-y-8">
+                    {a.itinerary.map((step, idx) => (
+                      <div key={idx} className="border-l-2 border-gold pl-6 md:pl-8 py-2">
+                        <span className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold block mb-1">
+                          {step.day}
+                        </span>
+                        <h3 className="font-serif text-2xl text-foreground mb-2">{step.title}</h3>
+                        <p className="text-foreground/75 leading-relaxed text-sm sm:text-base">{step.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {(a.highlights || []).slice(0, 4).map((h, i) => (
+                      <div key={h} className="flex gap-5 border-l-2 border-gold pl-6 py-2">
+                        <div className="shrink-0">
+                          <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold">Phase</p>
+                          <p className="font-serif text-3xl text-foreground">{String(i + 1).padStart(2, "0")}</p>
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-xl sm:text-2xl text-foreground mb-1.5">{h}</h3>
+                          <p className="text-foreground/70 text-sm leading-relaxed">
+                            Days of immersive guiding, intimate camps and conservation-led encounters crafted around
+                            this chapter of your journey.
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-            </div>
-          </div>
 
-          {/* Hero Image Box */}
-          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-gold" />
-              <h3 className="font-serif text-base">Hero Image</h3>
-            </header>
-            <div className="p-5 space-y-4">
-              <ManagedImageUpload
-                value={adv.image}
-                onChange={(url) => updateAdventure({ image: url })}
-                recommendedRatio="4:3 card · 16:9 hero"
-                altText={adv.imageAlt}
-              />
+              {/* WHERE YOU'LL STAY */}
+              {relatedLodges.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 text-gold mb-3">
+                    <Bed className="w-5 h-5" />
+                    <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
+                      ACCOMMODATION
+                    </span>
+                  </div>
+                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">WHERE YOU'LL STAY</h2>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {relatedLodges.map((lodge) => (
+                      <div
+                        key={lodge.id}
+                        className="border border-border bg-cream/40 rounded-xl overflow-hidden p-5 flex flex-col justify-between"
+                      >
+                        <div>
+                          {lodge.hero_image && (
+                            <img
+                              src={lodge.hero_image}
+                              alt={lodge.name}
+                              className="w-full aspect-[16/10] object-cover rounded-lg mb-4"
+                            />
+                          )}
+                          <h3 className="font-serif text-xl text-foreground mb-1">{lodge.name}</h3>
+                          <p className="text-xs text-gold font-medium mb-3">{lodge.location}</p>
+                          <p className="text-xs text-foreground/70 line-clamp-3 leading-relaxed mb-4">
+                            {lodge.description}
+                          </p>
+                        </div>
+                        <Link
+                          to="/lodges/$slug"
+                          params={{ slug: lodge.slug }}
+                          className="inline-flex items-center gap-1.5 text-xs text-gold font-semibold uppercase tracking-[0.2em] hover:underline"
+                        >
+                          <span>Explore Lodge</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              <div>
-                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                  Image alt text
-                </Label>
-                <Input
-                  value={adv.imageAlt ?? ""}
-                  placeholder="Describe the hero image…"
-                  onChange={(e) => updateAdventure({ imageAlt: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
+              {/* DYNAMIC INCLUSIONS & EXCLUSIONS — always show with forest-green background */}
+              {(() => {
+                const displayIncluded =
+                  included.length > 0
+                    ? included
+                    : [
+                        "Expert private guide for the full duration",
+                        "All game drives and bush activities",
+                        "Full-board accommodation at all camps",
+                        "All park and conservancy fees",
+                        "Airport and airstrip transfers",
+                        "Shared charter flights between destinations (where applicable)",
+                        "Sundowner drinks and bush breakfasts",
+                        "All laundry services at camp",
+                      ];
+                const displayNotIncluded =
+                  notIncluded.length > 0
+                    ? notIncluded
+                    : [
+                        "International and domestic scheduled flights",
+                        "Travel insurance (required)",
+                        "Visas and passport fees",
+                        "Tips and gratuities",
+                        "Personal shopping and souvenirs",
+                        "Spa and premium alcohol beyond standard offerings",
+                      ];
+                return (
+                  <div className="space-y-8">
+                    <div className="bg-forest text-forest-foreground p-8 md:p-10 rounded-2xl border border-gold/20 shadow-lg">
+                      <h2 className="font-serif text-2xl sm:text-3xl text-cream mb-6 flex items-center gap-3">
+                        <Check className="w-6 h-6 text-gold" /> WHAT'S INCLUDED
+                      </h2>
+                      <ul className="grid sm:grid-cols-2 gap-4 text-sm text-forest-foreground/90 font-sans">
+                        {displayIncluded.map((item, idx) => (
+                          <li key={`inc-${idx}`} className="flex gap-3 items-start">
+                            <span className="text-gold font-bold shrink-0">•</span>
+                            <span className="leading-snug">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-          {/* Permalink & Slug Box */}
-          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-gold" />
-              <h3 className="font-serif text-base">Permalink & Slug</h3>
-            </header>
-            <div className="p-5 space-y-4">
-              <div>
-                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                  URL Slug
-                </Label>
-                <Input
-                  value={adv.slug}
-                  onChange={(e) => updateAdventure({ slug: slugify(e.target.value) })}
-                  placeholder="e.g. okavango-on-foot"
-                  className="text-xs font-mono"
-                />
-                <p className="text-[11px] text-foreground/50 mt-1">
-                  Defines the URL at <code className="text-[10px]">/adventures/{adv.slug || "slug"}</code>
+                    <div className="border border-border bg-cream/50 p-8 md:p-10 rounded-2xl">
+                      <h2 className="font-serif text-2xl text-foreground mb-6 flex items-center gap-3">
+                        <X className="w-6 h-6 text-terracotta" /> WHAT'S NOT INCLUDED
+                      </h2>
+                      <ul className="grid sm:grid-cols-2 gap-4 text-sm text-foreground/80 font-sans">
+                        {displayNotIncluded.map((item, idx) => (
+                          <li key={`exc-${idx}`} className="flex gap-3 items-start">
+                            <span className="text-terracotta font-bold shrink-0">•</span>
+                            <span className="leading-snug">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* YOUR JOURNEY'S IMPACT */}
+              <div className="rounded-2xl border border-border bg-cream/40 p-8 md:p-10 space-y-4">
+                <div className="flex items-center gap-2 text-gold">
+                  <Shield className="w-5 h-5" />
+                  <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
+                    YOUR JOURNEY'S IMPACT
+                  </span>
+                </div>
+                <h3 className="font-serif text-2xl md:text-3xl text-foreground">Conservation & Local Stewardship</h3>
+                <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
+                  By embarking on this journey, you directly support local conservancies, anti-poaching initiatives, and
+                  indigenous guides who steward Kenya's wildest landscapes.
                 </p>
               </div>
+
+              {/* THIS JOURNEY TAKES YOU TO (Related Destinations) */}
+              {(relatedDestinations.length > 0 || fallbackDestinations.length > 0) && (
+                <div>
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">DESTINATIONS</p>
+                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">THIS JOURNEY TAKES YOU TO</h2>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {(relatedDestinations.length > 0 ? relatedDestinations : fallbackDestinations).map((dest: any) => (
+                      <Link
+                        key={dest.slug || dest.id}
+                        to="/destinations/$slug"
+                        params={{ slug: dest.slug || dest.id }}
+                        className="group border border-border bg-background rounded-xl p-5 hover:border-gold/60 transition-all flex flex-col justify-between"
+                      >
+                        <div>
+                          {dest.image && (
+                            <img
+                              src={dest.image}
+                              alt={dest.name}
+                              className="w-full aspect-[16/10] object-cover rounded-lg mb-4 group-hover:scale-102 transition-transform"
+                            />
+                          )}
+                          <h3 className="font-serif text-xl text-foreground group-hover:text-gold transition-colors mb-1">
+                            {dest.name}
+                          </h3>
+                          <p className="text-xs text-foreground/60 mb-3">{dest.region}</p>
+                          <p className="text-xs text-foreground/75 line-clamp-2 leading-relaxed">
+                            {dest.short_description || dest.shortDescription || dest.description}
+                          </p>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-gold font-semibold uppercase tracking-[0.2em]">
+                          <span>Explore Destination</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sticky Sidebar */}
+            <aside className="lg:sticky lg:top-28 self-start space-y-6">
+              <div className="bg-cream p-8 md:p-10 rounded-2xl border border-border shadow-lg">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-2">
+                  BESPOKE KENYA ADVENTURE
+                </p>
+                <p className="font-serif text-3xl sm:text-4xl text-foreground mb-2">Price on Request</p>
+                <p className="text-xs text-foreground/70 mb-8 leading-relaxed">
+                  {a.nights ? `${a.nights} · ` : ""}Tailored to your travel dates, party size & camp preferences.
+                </p>
+
+                <EnquireDialog
+                  defaultSubject={a.name}
+                  defaultDestination={a.region || a.name}
+                  sourceUrl={url}
+                  context={{ kind: "Itinerary", title: a.name, slug: a.slug, image: a.image }}
+                  trigger={
+                    <button
+                      type="button"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-6 py-4 hover:bg-gold/90 transition-colors shadow-md"
+                    >
+                      <span>Make This Journey Yours</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  }
+                />
+
+                <div className="mt-8 pt-6 border-t border-foreground/10 space-y-4 text-xs text-foreground/75">
+                  <p className="flex items-start gap-2.5">
+                    <Users className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                    <span>100% Bespoke — shaped around your pace, preferences, and travelling party.</span>
+                  </p>
+                  <p className="flex items-start gap-2.5">
+                    <Calendar className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                    <span>Flexible dates — travel at the optimal time for wildlife and weather.</span>
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        {/* SIMILAR ADVENTURES */}
+        {similarAdventures.length > 0 && (
+          <section className="py-20 bg-cream/50 border-t border-border/40">
+            <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16">
+              <div className="text-center max-w-3xl mx-auto mb-12">
+                <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">SIMILAR JOURNEYS</p>
+                <h2 className="font-serif text-3xl md:text-4xl text-foreground">YOU MIGHT ALSO LOVE</h2>
+              </div>
+              <div className="grid md:grid-cols-3 gap-8">
+                {similarAdventures.map((other) => (
+                  <AdventureCard key={other.slug} adventure={other} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Share Strip */}
+        <section className="border-t border-border/40 py-10 bg-background">
+          <div className="max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 flex flex-wrap items-center justify-between gap-6">
+            <p className="font-serif text-xl text-foreground">Inspired? Share {a.name} with a fellow traveller.</p>
+            <ShareButtons
+              title={`${a.name} — The Baobab Collective`}
+              url={url}
+              description={a.description?.slice(0, 140)}
+              label="Share this adventure"
+            />
+          </div>
+        </section>
+
+        {/* "NOT QUITE RIGHT?" CONVERSION BANNER */}
+        <section className="bg-background py-20 border-t border-border/40 text-center">
+          <div className="max-w-3xl mx-auto px-6 space-y-5">
+            <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold">CUSTOM TAILORING</p>
+            <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+              CAN'T FIND EXACTLY WHAT YOU'RE LOOKING FOR?
+            </h2>
+            <p className="text-foreground/75 max-w-xl mx-auto text-base sm:text-lg leading-relaxed">
+              Our Adventures are starting points. We can reshape the journey around your dates, interests, pace and
+              budget.
+            </p>
+            <div className="pt-3">
+              <EnquireDialog
+                defaultSubject={`Custom Tailored — ${a.name}`}
+                defaultDestination={a.region || a.name}
+                sourceUrl={url}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-terracotta text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-9 py-4 hover:bg-terracotta/90 transition-colors shadow-lg"
+                  >
+                    <span>Create My Journey</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                }
+              />
             </div>
           </div>
-        </aside>
-      </div>
+        </section>
 
-      {/* Delete Confirmation Alert Dialog */}
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete adventure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You're about to permanently remove{" "}
-              <span className="font-semibold text-foreground">"{adv.name || "this adventure"}"</span>. This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Deleting…
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </form>
-  );
-}
-
-function ManagedImageUpload({
-  value,
-  onChange,
-  recommendedRatio,
-  altText,
-}: {
-  value: string;
-  onChange: (url: string) => void;
-  recommendedRatio: string;
-  altText?: string;
-}) {
-  const upload = useServerFn(adminUploadImage);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [drag, setDrag] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
-  const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(null);
-  const altComplete = Boolean(altText?.trim());
-
-  async function pick(file: File | undefined) {
-    if (!file) return;
-    if (!/^image\/(png|jpe?g|webp|gif|avif)/i.test(file.type)) {
-      toast.error("Choose a PNG, JPG, WEBP, GIF, or AVIF image.");
-      return;
-    }
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Image must be smaller than 8MB");
-      return;
-    }
-    setBusy(true);
-    setFileMeta({ name: file.name, size: file.size });
-    try {
-      const buf = new Uint8Array(await file.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
-      const res = await upload({
-        data: {
-          filename: file.name,
-          contentType: file.type || "image/jpeg",
-          base64: btoa(binary),
-        },
-      });
-      onChange(res.url);
-      toast.success("Image uploaded");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Upload failed");
-    } finally {
-      setBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
-  }
-
-  return (
-    <div className="space-y-3">
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
-        className="hidden"
-        onChange={(e) => pick(e.target.files?.[0])}
-      />
-
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] text-foreground/55">Recommended: {recommendedRatio}</p>
-        <span
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${
-            altComplete ? "bg-forest/10 text-forest" : "bg-terracotta/10 text-terracotta"
-          }`}
-        >
-          {altComplete ? "Alt text ✓" : "Alt text needed"}
-        </span>
-      </div>
-
-      {value ? (
-        <div className="border border-border bg-background">
-          <div className="bg-muted">
-            <img src={value} alt="" className="mx-auto max-h-48 w-full object-contain" />
+        {/* FINAL CTA SECTION */}
+        <section className="bg-forest text-forest-foreground py-24 text-center border-t border-border/40">
+          <div className="max-w-3xl mx-auto px-6 space-y-6">
+            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold">MAKE THIS JOURNEY YOURS.</p>
+            <h2 className="font-serif text-4xl md:text-5xl text-cream">
+              Tell us what you're dreaming of and we'll shape this adventure around you.
+            </h2>
+            <div className="pt-4">
+              <EnquireDialog
+                defaultSubject={a.name}
+                defaultDestination={a.region || a.name}
+                sourceUrl={url}
+                context={{ kind: "Itinerary", title: a.name, slug: a.slug, image: a.image }}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-9 py-4 hover:bg-gold/90 transition-colors shadow-xl"
+                  >
+                    <span>Plan This Journey</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                }
+              />
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 p-3">
-            <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}>
-              {busy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1" />}
-              Replace
-            </Button>
-            <Button type="button" size="sm" variant="outline" onClick={() => setLibraryOpen(true)} disabled={busy}>
-              <FolderOpen className="w-3.5 h-3.5 mr-1" /> Library
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setFileMeta(null);
-                onChange("");
-              }}
-              className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
-            >
-              <X className="w-3.5 h-3.5 mr-1" /> Remove
-            </Button>
-            <span className="ml-auto max-w-[55%] truncate text-[11px] text-foreground/50" title={value}>
-              {fileMeta ? `${fileMeta.name} – ${humanSize(fileMeta.size)}` : value.split("/").pop()}
-            </span>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDrag(true);
-          }}
-          onDragLeave={() => setDrag(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDrag(false);
-            pick(e.dataTransfer.files?.[0]);
-          }}
-          disabled={busy}
-          className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed px-4 py-8 text-center transition-colors ${
-            drag ? "border-gold bg-gold/5" : "border-border bg-muted/30 hover:border-gold hover:bg-gold/5"
-          }`}
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-foreground/70">
-            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          </div>
-          <div>
-            <p className="text-xs font-medium">Drop or click to upload</p>
-            <p className="mt-1 text-[11px] text-foreground/50">PNG, JPG, WEBP, GIF, AVIF – up to 8MB</p>
-          </div>
-        </button>
-      )}
-
-      <Button type="button" variant="outline" size="sm" onClick={() => setLibraryOpen(true)} className="w-full">
-        <FolderOpen className="w-3.5 h-3.5 mr-1" /> Choose from library
-      </Button>
-
-      <Input
-        value={value ?? ""}
-        onChange={(e) => {
-          setFileMeta(null);
-          onChange(e.target.value);
-        }}
-        placeholder="…or paste image URL"
-        className="text-xs"
-      />
-
-      <MediaLibraryPicker
-        open={libraryOpen}
-        onOpenChange={setLibraryOpen}
-        onSelect={(urls) => {
-          const [url] = urls;
-          if (!url) return;
-          setFileMeta(null);
-          onChange(url);
-        }}
-      />
+        </section>
+      </main>
+      <Footer />
     </div>
   );
 }
