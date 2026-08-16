@@ -6,11 +6,15 @@ import { getPageContent, savePageContent } from "@/lib/page-content.functions";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { PageLivePreview } from "@/components/admin/PageLivePreview";
 import { PAGE_DEFAULTS, mergePageContent, type PageKey } from "@/lib/page-content.defaults";
+import { getDestinations } from "@/lib/cms.functions";
+import { mergeDestinationsWithDefaults } from "@/lib/destinations.data";
+import { KenyaDestinationsMap } from "@/components/site/KenyaDestinationsMap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 import { toast } from "sonner";
@@ -80,8 +84,9 @@ function reorderGroup(draft: Record<string, any>, suffixes: string[], order: num
 type FieldDef = {
   name: string;
   label: string;
-  type: "text" | "textarea" | "image" | "boolean";
+  type: "text" | "textarea" | "image" | "boolean" | "select";
   placeholder?: string;
+  options?: { value: string; label: string }[];
 };
 
 export const SCHEMAS: Record<PageKey, { title: string; description: string; preview: string; fields: FieldDef[] }> = {
@@ -440,6 +445,15 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
       { name: "subtitle", label: "Subtitle", type: "textarea" },
       { name: "hero_image", label: "Hero Background Image (optional)", type: "image" },
       { name: "show_grid", label: "Show lodges grid", type: "boolean" },
+      {
+        name: "grid_size",
+        label: "Lodges Grid Columns",
+        type: "select",
+        options: [
+          { value: "3", label: "3 Columns Grid" },
+          { value: "4", label: "4 Columns Grid" },
+        ],
+      },
     ],
   },
   destinations_index: {
@@ -467,6 +481,15 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
 
       // ── 4. Destinations Grid (Editorial Groupings) ──────────────────────
       { name: "show_grid", label: "Show destinations grid section", type: "boolean" },
+      {
+        name: "grid_size",
+        label: "Destinations Grid Columns (The Icons, Beyond Classics, Indian Ocean)",
+        type: "select",
+        options: [
+          { value: "3", label: "3 Columns Grid" },
+          { value: "4", label: "4 Columns Grid" },
+        ],
+      },
       { name: "icons_eyebrow", label: "The Icons Group — Eyebrow", type: "text" },
       { name: "icons_title", label: "The Icons Group — Title", type: "text" },
       { name: "icons_body", label: "The Icons Group — Description", type: "textarea" },
@@ -597,7 +620,15 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
       { name: "show_spotlight", label: "Show Featured Journey spotlight section", type: "boolean" },
 
       { name: "show_catalogue", label: "Show full catalogue section", type: "boolean" },
-
+      {
+        name: "grid_size",
+        label: "Adventures Catalogue Grid Columns",
+        type: "select",
+        options: [
+          { value: "3", label: "3 Columns Grid" },
+          { value: "4", label: "4 Columns Grid" },
+        ],
+      },
       { name: "catalogue_eyebrow", label: "Full Catalogue — Eyebrow", type: "text" },
       { name: "catalogue_title", label: "Full Catalogue — Title", type: "text" },
 
@@ -860,6 +891,20 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                   onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
                 />
               ))}
+              {page === "destinations_index" && visibleFields.some((f) => f.name === "show_map") && (
+                <div className="pt-4 border-t border-border">
+                  <div className="mb-3">
+                    <h3 className="font-serif text-base font-bold text-foreground">Interactive Pin Placement Map</h3>
+                    <p className="text-xs text-foreground/60">
+                      Drag and drop pins directly on the map below to position each destination visually across Kenya.
+                    </p>
+                  </div>
+                  <AdminDestinationsMapField
+                    customPositions={draft.map_positions}
+                    onUpdatePositions={(next) => setDraft((d) => ({ ...d, map_positions: next }))}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -882,6 +927,31 @@ function FieldRow({ field, value, onChange }: { field: FieldDef; value: any; onC
       <div className="flex items-center justify-between gap-4 py-2">
         <Label>{field.label}</Label>
         <Switch checked={!!value} onCheckedChange={onChange} />
+      </div>
+    );
+  }
+  if (field.type === "select" && field.options) {
+    return (
+      <div>
+        <Label className="mb-1.5 block">{field.label}</Label>
+        <Select
+          value={String(value ?? field.options[0]?.value)}
+          onValueChange={(val) => {
+            const num = Number(val);
+            onChange(!isNaN(num) ? num : val);
+          }}
+        >
+          <SelectTrigger className="w-full bg-background border border-border">
+            <SelectValue placeholder={field.placeholder || "Select option…"} />
+          </SelectTrigger>
+          <SelectContent>
+            {field.options.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     );
   }
@@ -1151,6 +1221,37 @@ function InstagramGallerySelector({
         onSelect={applySelection}
         multi
         title="Instagram gallery"
+      />
+    </div>
+  );
+}
+
+function AdminDestinationsMapField({
+  customPositions,
+  onUpdatePositions,
+}: {
+  customPositions?: Record<string, { left: number; top: number }>;
+  onUpdatePositions: (next: Record<string, { left: number; top: number }>) => void;
+}) {
+  const { data: rawDestinations } = useQuery({
+    queryKey: ["destinations"],
+    queryFn: () => getDestinations(),
+  });
+
+  const destinations = useMemo(() => {
+    return mergeDestinationsWithDefaults(rawDestinations || []);
+  }, [rawDestinations]);
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-border shadow-lg">
+      <KenyaDestinationsMap
+        destinations={destinations}
+        customPositions={customPositions}
+        onSavePositions={async (next) => {
+          onUpdatePositions(next);
+        }}
+        isAdmin={true}
+        embeddedAdminView={true}
       />
     </div>
   );
