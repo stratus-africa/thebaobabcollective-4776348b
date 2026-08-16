@@ -1,502 +1,1001 @@
-// Default content for editable pages, used as fallback if no override is saved.
-export const PAGE_DEFAULTS = {
-  home: {
-    hero_title_line1: "KENYA,",
-    hero_title_line2: "CURATED PERSONALLY.",
-    hero_subtitle: "Private safaris, wild landscapes and meaningful encounters — thoughtfully designed around you.",
-    hero_cta_primary: "Plan Your Journey",
-    hero_cta_secondary: "Explore Adventures",
-    hero_proof_text: "Private Kenya journeys shaped with care, context and local knowledge.",
-    hero_image_url: "",
-    hero_image_as_background: true,
-    hero_hide_search: true,
-    hero_bg_size: "cover" as "cover" | "contain",
-  },
-  about: {
-    eyebrow: "The feeling of Kenya",
-    title_line1: "KENYA ISN'T JUST",
-    title_line2: "A DESTINATION.",
-    title_line3: "IT'S A FEELING.",
-    body: "The Baobab Collective designs private journeys through Kenya with the calm confidence of people who know the place intimately — its landscapes, its lodges, its guides, and the small moments that make a journey stay with you.",
-    image_left_url: "",
-    image_right_url: "",
-  },
-  about_mission: {
-    eyebrow: "Our Mission",
-    title: "Journeys with purpose",
-    body: "Every safari we design supports conservation, community, and the guides who make Africa feel like home. We believe travel should give back as much as it gives.",
-  },
-  about_values: {
-    eyebrow: "What guides us",
-    title: "Our values",
-    value_1_title: "Conservation-led",
-    value_1_body: "Each journey supports the wild places we love.",
-    value_2_title: "Community-first",
-    value_2_body: "We partner with local guides and lodges.",
-    value_3_title: "Slow travel",
-    value_3_body: "Fewer destinations. Deeper connections.",
-    value_4_title: "Bespoke by design",
-    value_4_body: "No two itineraries are ever the same.",
-  },
-  about_team: {
-    eyebrow: "The people",
-    title: "Meet the collective",
-    body: "A small team of Africa specialists, guides and storytellers with deep roots in Kenya.",
-    image_1_url: "",
-    image_1_name: "Michael D'Souza",
-    image_1_role: "Co-Founder",
-    image_1_bio:
-      "Kenya has been home for most of my life. I created Baobab to share the places and people I know best.",
-    image_2_url: "",
-    image_2_name: "Samra D'Souza",
-    image_2_role: "Co-Founder",
-    image_2_bio:
-      "Samra brings a deeply personal eye to each journey, shaping travel with warmth, care and an instinct for meaningful connection.",
-    image_3_url: "",
-    image_3_name: "",
-    image_3_role: "",
-    image_3_bio: "",
-    image_4_url: "",
-    image_4_name: "",
-    image_4_role: "",
-    image_4_bio: "",
-  },
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import {
+  ArrowLeft,
+  Calendar,
+  Globe,
+  Hash,
+  Image as ImageIcon,
+  Loader2,
+  MapPin,
+  Save,
+  Trash2,
+  Sparkles,
+  Compass,
+  Check,
+  Move,
+  RotateCcw,
+} from "lucide-react";
+import kenyaMapAsset from "@/assets/kenya-destinations-map.jpg";
+import { adminGet, adminUpsert, adminDelete } from "@/lib/admin.functions";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { BEST_FOR_CATEGORIES, KENYA_REGIONS, KENYA_DESTINATIONS_DATA } from "@/lib/destinations.data";
 
-  private_travel: {
-    eyebrow: "Private Travel",
-    title: "Designed entirely around you.",
-    subtitle: "For travellers who want something truly bespoke — every camp, guide and moment shaped to your story.",
-    success_title: "Request received",
-    success_body:
-      "A confirmation has been sent to your inbox. One of our journey designers will reach out within 48 hours.",
-    submit_label: "Request my bespoke journey",
-  },
-  home_trust: {
-    item_1_title: "Kenya Specialists",
-    item_1_subtitle: "Born from a deep, lifelong connection",
-    item_2_title: "Tailor-Made Journeys",
-    item_2_subtitle: "Designed around you — no catalog packages",
-    item_3_title: "Personally Curated",
-    item_3_subtitle: "Every camp, lodge & guide walked & vetted",
-    item_4_title: "24/7 On-Ground Support",
-    item_4_subtitle: "Seamless care from landing to departure",
-  },
-  home_find_journey: {
-    eyebrow: "Find Your Journey",
-    title: "What kind of journey are you dreaming of?",
-    body: "Whether you are drawn to the pulse of the Great Migration, secluded romantic sanctuaries, or coastal dhow sailing, we curate every detail around your vision.",
-    card_1_image: "",
-    card_2_image: "",
-    card_3_image: "",
-    card_4_image: "",
-    card_5_image: "",
-    card_6_image: "",
-  },
-  home_adventures: {
-    eyebrow: "Signature Adventures",
-    title: "Find Your Adventure",
-    body: "Journeys designed around the places, experiences and moments that make Kenya unforgettable.",
-    cta_label: "Explore All Journeys",
-  },
-  home_destinations: {
-    eyebrow: "The Continent",
-    title: "DESTINATIONS",
-    body: "From the deltas of Botswana to the highlands of Ethiopia — explore where each journey could take you.",
-    cta_label: "Explore destinations",
-    hidden: false,
-  },
-  home_why_baobab: {
-    eyebrow: "Quiet Expertise",
-    title: "Why The Baobab Collective?",
-    body: "We operate as your personal Kenya travel designer and advisor — bringing deep local context, unhurried pacing, and genuine care to every moment of your adventure.",
-    pillar_1_num: "01",
-    pillar_1_title: "Kenya is Home",
-    pillar_1_body:
-      "We're not simply selling Kenya from a desk abroad. We know its rhythms, seasons, guides, and secret corners personally.",
-    pillar_2_num: "02",
-    pillar_2_title: "Personally Curated",
-    pillar_2_body:
-      "Every journey is designed from scratch around you, your travelling party and your pace — never selected from a rigid catalogue.",
-    pillar_3_num: "03",
-    pillar_3_title: "Trusted Local Relationships",
-    pillar_3_body:
-      "Decades of friendship with conservationists, master trackers and private camp owners unlock encounters ordinary tourists never see.",
-    pillar_4_num: "04",
-    pillar_4_title: "Travel With Purpose",
-    pillar_4_body:
-      "Your journey directly contributes to wildlife conservation, anti-poaching, and empowering local community custodians.",
-  },
-  home_founders: {
-    eyebrow: "Direct Personal Connection",
-    title: "Meet Your Journey Designers",
-    body: "When you plan with The Baobab Collective, you do not speak to a call center or browse a mass catalog. You design your safari directly with people who have lived the land, walked every camp, and built decades of trusted relationships in Kenya.",
-    cta_label: "Meet the Collective",
-    founder_1_name: "Michael D'Souza",
-    founder_1_role: "Co-Founder & Expedition Lead",
-    founder_1_tag: "Lifelong Kenya Resident",
-    founder_1_quote:
-      "Kenya has been home for most of my life. I created Baobab to share the wild, intimate places and the people I know and respect most.",
-    founder_1_image: "",
-    founder_2_name: "Samra D'Souza",
-    founder_2_role: "Co-Founder & Experience Curator",
-    founder_2_tag: "Journey Architect",
-    founder_2_quote:
-      "We believe luxury is not about excess, but about intimacy, soul, and time well-spent in places that truly leave a lasting mark.",
-    founder_2_image: "",
-  },
-  home_lodges: {
-    eyebrow: "Places We Love",
-    title: "Where You'll Stay",
-    body: "Every camp and lodge has been walked, slept in, and chosen for soul as much as setting.",
-    cta_label: "Explore All Lodges",
-  },
-  home_impact: {
-    eyebrow: "Responsible Tourism",
-    title: "Your Journey's Impact",
-    body: "We believe travel in Kenya should give back as much as it gives. When designed with intention, a safari is one of the most powerful catalysts for conservation and community resilience on earth.",
-    pillar_1_subtitle: "Securing wilderness corridors",
-    pillar_1_title: "Wild Habitat & Conservation",
-    pillar_1_body:
-      "Every safari directly funds conservancy lease fees, ranger patrols, and wildlife protection in critical biodiversity areas across Kenya.",
-    pillar_2_subtitle: "Equitable local benefit",
-    pillar_2_title: "Community Partnerships",
-    pillar_2_body:
-      "We prioritize locally-owned camps, indigenous guides, and community projects ensuring travel revenue stays directly in the hands of traditional custodians.",
-    pillar_3_subtitle: "Slow, respectful exploration",
-    pillar_3_title: "Ethical, Low-Impact Footprint",
-    pillar_3_body:
-      "Small private parties, solar-powered eco-camps, and strict non-invasive wildlife protocols ensure Africa remains wild for generations to come.",
-  },
-  home_how_it_works: {
-    eyebrow: "Seamless Planning",
-    title: "Your Journey Starts Here",
-    body: "Planning a private safari with The Baobab Collective is calm, collaborative, and entirely stress-free.",
-    cta_label: "Start Planning My Journey",
-    step_1_num: "01",
-    step_1_title: "Tell Us What You're Dreaming Of",
-    step_1_body:
-      "A quick conversation about your dates, travelling party, travel style, and the sights and wildlife you long to see.",
-    step_2_num: "02",
-    step_2_title: "We Design Your Journey",
-    step_2_body:
-      "We create a thoughtful, completely personalised itinerary based on our firsthand knowledge and local relationships.",
-    step_3_num: "03",
-    step_3_title: "Refine The Details",
-    step_3_body:
-      "Together, we talk through camps, pacing, private guides, unique encounters, and make adjustments until it feels perfect.",
-    step_4_num: "04",
-    step_4_title: "Experience Kenya",
-    step_4_body:
-      "From the moment you step off the plane in Nairobi, our on-ground team takes care of every single detail.",
-  },
-  home_final_cta: {
-    eyebrow: "Begin Your Journey",
-    title_line1: "Your Kenya is waiting.",
-    title_line2: "Let's create it together.",
-    body: "Tell us about your ideal travel dates and dreams. We'll respond within 24 hours with an initial private itinerary sketch.",
-    cta_label: "Plan Your Journey",
-  },
-  home_journal: {
-    eyebrow: "Stories from the road",
-    title_line1: "A JOURNAL",
-    title_line2: "OF PLACES,",
-    title_line3: "PEOPLE & LIGHT.",
-    body: "Field notes, travel ideas and considered guidance for journeys that begin before you board the plane.",
-    cta_label: "Explore the Journal",
-  },
-  home_instagram: {
-    heading: "Follow Our Journeys",
-    handle: "@thebaobabcollective",
-    url: "https://instagram.com/thebaobabcollective",
-    image_1_url: "",
-    image_1_caption: "",
-    image_2_url: "",
-    image_2_caption: "",
-    image_3_url: "",
-    image_3_caption: "",
-    image_4_url: "",
-    image_4_caption: "",
-    image_5_url: "",
-    image_5_caption: "",
-    image_6_url: "",
-    image_6_caption: "",
-    image_7_url: "",
-    image_7_caption: "",
-  },
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
-  top_bar: {
-    text: "Curated Safari Journeys. Authentic Connections. Extraordinary Experiences.",
-    enabled: true,
-  },
-  contact: {
-    eyebrow: "We'd love to hear from you",
-    title_line1: "Let's Plan",
-    title_line2: "Your Journey",
-    body: "Tell us a little about who's travelling, when, and the kind of experience you're after. One of our journey designers will respond within 24 hours with first ideas and next steps.",
-    form_title: "Share Your Vision",
-    form_intro:
-      "Open our detailed enquiry form — tell us who's travelling, when, your budget, and the experiences you're dreaming of. We'll respond within 24 hours.",
-    form_cta: "Open Enquiry Form",
-    email_label: "Email us",
-    phone_label: "Call / WhatsApp",
-    instagram_label: "Instagram",
-    facebook_label: "Facebook",
-    instagram_url: "https://instagram.com/thebaobabcollective",
-    instagram_handle: "@thebaobabcollective",
-    facebook_url: "https://facebook.com/thebaobabcollective",
-    facebook_handle: "/thebaobabcollective",
-  },
-  lodges_index: {
-    eyebrow: "Where you'll stay",
-    title: "Partner Lodges",
-    subtitle: "Every camp and lodge we work with has been walked, slept in, and chosen for soul as much as setting.",
-    hero_image: "",
-    show_hero: true as boolean,
-    show_grid: true as boolean,
-  },
+export const Route = createFileRoute("/_authenticated/admin/destinations/$id")({
+  component: AdminDestinationEdit,
+});
 
-  destinations_index: {
-    // 1. Hero
-    show_hero: true as boolean,
-    eyebrow: "Destination Discovery",
-    title: "DISCOVER KENYA",
-    subtitle: "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary.",
-    body: "Whether drawn to apex predators on the golden Mara plains, private rhino sanctuaries in Laikipia, or sunset dhow sailing in Lamu — find where your story begins.",
-    hero_image: "",
-    cta_label: "Explore Destinations",
+type DestinationRecord = {
+  id: string;
+  name: string;
+  country: string;
+  region: string;
+  slug: string;
+  best_season: string | null;
+  description: string;
+  short_description?: string | null;
+  destination_category?: string | null;
+  best_for?: string[] | null;
+  best_months?: string[] | null;
+  also_good_months?: string[] | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  featured?: boolean | null;
+  related_destinations?: string[] | null;
+  image: string;
+  featured_trips: string[];
+  sort_order: number;
+  published: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
 
-    // 2. Destination Finder
-    show_finder: true as boolean,
-    finder_eyebrow: "Destination Finder",
-    finder_title: "What are you looking for?",
-    finder_body:
-      "Every part of Kenya tells a different story. Select the experiences that match how you want to travel.",
+const BLANK_DESTINATION: DestinationRecord = {
+  id: "",
+  name: "",
+  country: "Kenya",
+  region: "Southern Kenya",
+  slug: "",
+  best_season: "Jul – Oct",
+  description: "",
+  short_description: "",
+  destination_category: "The Icons",
+  best_for: ["Wildlife", "Photography"],
+  best_months: ["Jul", "Aug", "Sep", "Oct"],
+  also_good_months: ["Jan", "Feb"],
+  latitude: -1.4061,
+  longitude: 35.139,
+  featured: false,
+  related_destinations: [],
+  image: "",
+  featured_trips: [],
+  sort_order: 0,
+  published: true,
+};
 
-    // 3. Map
-    show_map: true as boolean,
-    map_image: "" as string,
-    map_destinations: [] as Array<{
-      id?: string;
-      slug: string;
-      name: string;
-      region?: string;
-      x: number;
-      y: number;
-      visible?: boolean;
-      order?: number;
-    }>,
-    map_positions: {} as Record<string, { left: number; top: number; visible?: boolean }>,
+const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    // 4. Grid / Editorial Groupings
-    show_grid: true as boolean,
-    icons_eyebrow: "Signature Kenya",
-    icons_title: "The Icons",
-    icons_body:
-      "Kenya's world-famous wilderness heartlands — legendary predator density, great elephant herds, and dramatic arid frontiers.",
-    beyond_eyebrow: "Untamed & Extraordinary",
-    beyond_title: "Beyond the Classics",
-    beyond_body:
-      "Private conservancies, ancient volcanoes, and Great Rift Valley lakes where wildlife viewing is intimate, active, and conservation-focused.",
-    ocean_eyebrow: "Swahili Coast & Coral Reefs",
-    ocean_title: "The Indian Ocean",
-    ocean_body:
-      "White sands, historic UNESCO Swahili ports, sunset dhow sailing, and marine national parks teeming with reef life.",
+function AdminDestinationEdit() {
+  const { id } = Route.useParams();
+  const isNew = id === "new";
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const getFn = useServerFn(adminGet);
+  const upsertFn = useServerFn(adminUpsert);
+  const deleteFn = useServerFn(adminDelete);
 
-    // 5. Featured Adventures
-    show_journeys: true as boolean,
-    journeys_eyebrow: "Curated Safari Itineraries",
-    journeys_title: "Journeys Through These Places",
-    journeys_body:
-      "Our adventures bring together the destinations, experiences and moments that make Kenya unforgettable.",
+  const [form, setForm] = useState<DestinationRecord>(BLANK_DESTINATION);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-    // 6. Where You'll Stay
-    show_stay: true as boolean,
-    stay_eyebrow: "Hand-Picked Accommodations",
-    stay_title: "Where You'll Stay",
-    stay_body: "We choose camps and lodges for their setting, character and the experiences they make possible.",
+  const {
+    data: destination,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["admin-destination", id],
+    queryFn: async () => {
+      if (isNew) return null;
+      try {
+        const res = await getFn({ data: { table: "destinations", id } });
+        if (res) return res as unknown as DestinationRecord | null;
+      } catch {
+        // Fall through to check static defaults
+      }
 
-    // 7. Combinations
-    show_combinations: true as boolean,
-    combinations_eyebrow: "Seamless Itinerary Ideas",
-    combinations_title: "Create Your Perfect Combination",
-    combinations_body:
-      "Kenya's dramatic diversity comes alive when you pair contrasting regions — savannah with sea, or northern wilderness with high-altitude forests.",
+      // Check static defaults if not yet in database
+      const fallback = KENYA_DESTINATIONS_DATA.find((d) => d.slug === id || d.name.toLowerCase() === id.toLowerCase());
+      if (fallback) {
+        return {
+          id: "",
+          name: fallback.name,
+          country: fallback.country || "Kenya",
+          region: fallback.region || "Southern Kenya",
+          slug: fallback.slug,
+          best_season: fallback.bestSeason || "Jul – Oct",
+          description: fallback.fullDescriptionFallback || fallback.shortDescription || "",
+          short_description: fallback.shortDescription || "",
+          destination_category: fallback.destinationCategory || "The Icons",
+          best_for: fallback.bestFor || ["Wildlife"],
+          best_months: fallback.bestMonths || ["Jul", "Aug", "Sep", "Oct"],
+          also_good_months: fallback.alsoGoodMonths || ["Jan", "Feb"],
+          latitude: fallback.latitude ?? -1.4061,
+          longitude: fallback.longitude ?? 35.139,
+          featured: fallback.featured ?? false,
+          related_destinations: fallback.relatedDestinations || [],
+          image: fallback.fallbackImage || "",
+          featured_trips: [],
+          sort_order: 0,
+          published: true,
+        } as DestinationRecord;
+      }
 
-    // 8. Matcher
-    show_matcher: true as boolean,
-    matcher_eyebrow: "Tailor-Made Recommendation",
-    matcher_title: "Where should Kenya take you?",
-    matcher_body:
-      "Tell us what you're looking for and our journey designers will hand-pick the exact lodges, conservancies, and coastlines tailored to your vision.",
+      return null;
+    },
+    enabled: !isNew,
+  });
 
-    // 9. Final CTA
-    show_final_cta: true as boolean,
-    final_cta_eyebrow: "Begin Your Kenyan Journey",
-    final_cta_title: "Your Kenya is waiting.",
-    final_cta_body:
-      "Not sure where to start? Tell us what you love, and we'll help you find the places and rhythm that are right for you.",
-  },
-  adventures_index: {
-    eyebrow: "Signature Adventures",
-    title: "Wild Africa, Deeply Lived",
-    subtitle: "Walking safaris, mokoro expeditions, desert traverses, gorilla treks and migration chases.",
-    hero_image: "",
-    // Rhythm section (editable)
-    rhythm_eyebrow: "A Day in the Field",
-    rhythm_title: "The rhythm of an adventure day.",
-    rhythm_body:
-      "No two days repeat — but the cadence is the same. Up before the bush, slow through the heat, alive again at dusk.",
-    rhythm_1_time: "05:30",
-    rhythm_1_phase: "DAWN",
-    rhythm_1_title: "First light. First tracks.",
-    rhythm_1_body:
-      "Coffee in camp, then out before the bush wakes — when leopards are still moving and the morning air is crisp.",
-    rhythm_1_image: "",
-    rhythm_2_time: "10:00",
-    rhythm_2_phase: "THE ENCOUNTER",
-    rhythm_2_title: "Read the signs, stories and silence.",
-    rhythm_2_body: "Time on foot with your guide, reading wildlife tracks, bird calls, and riverbank shadows.",
-    rhythm_2_image: "",
-    rhythm_3_time: "15:00",
-    rhythm_3_phase: "SLOW DOWN",
-    rhythm_3_title: "Rest, swim, journal.",
-    rhythm_3_body:
-      "Unhurried afternoon hours at camp. Swim in the shade, write in your travel journal, or rest through the heat of the day.",
-    rhythm_3_image: "",
-    rhythm_4_time: "18:30",
-    rhythm_4_phase: "SUNDOWN",
-    rhythm_4_title: "Stories under the African sky.",
-    rhythm_4_body:
-      "Sundowner drinks on a kopje overlooking the savannah, followed by dinner beneath a clear canopy of stars.",
-    rhythm_4_image: "",
-    // Adventure finder
-    finder_eyebrow: "Adventure Finder",
-    finder_title: "Find your adventure",
-    finder_body: "Filter by region, terrain, duration and the kind of experience you're after.",
-    finder_experience_options: "",
-    finder_travel_style_options: "",
-    // Signature section header
-    signature_eyebrow: "Signature Adventures",
-    signature_title: "Journeys we'd take ourselves.",
-    signature_body: "Each is a starting point — every detail is reshaped around you, your dates and your pace.",
-    // Explore by experience
-    explore_eyebrow: "Curated Themes",
-    explore_title: "Explore by Experience",
-    explore_body: "Select what matters most to your journey — from intimate walking safaris to coastal retreats.",
-    explore_1_title: "Wildlife",
-    explore_1_body: "Big cats, migration herds & private conservancies",
-    explore_1_image: "",
-    explore_2_title: "Walking",
-    explore_2_body: "Track wildlife on foot with veteran indigenous guides",
-    explore_2_image: "",
-    explore_3_title: "Wilderness",
-    explore_3_body: "Remote, uncrowded landscapes under vast skies",
-    explore_3_image: "",
-    explore_4_title: "Safari + Beach",
-    explore_4_body: "Savannah game drives paired with turquoise coastlines",
-    explore_4_image: "",
-    explore_5_title: "Romance",
-    explore_5_body: "Intimate starry camps and quiet, private moments",
-    explore_5_image: "",
-    explore_6_title: "Family",
-    explore_6_body: "Multi-generational safaris crafted for all ages",
-    explore_6_image: "",
-    explore_7_title: "Photography",
-    explore_7_body: "Golden hour positioning and expert photographic leads",
-    explore_7_image: "",
-    explore_8_title: "Culture",
-    explore_8_body: "Authentic connections with indigenous pastoralists",
-    explore_8_image: "",
-    // Catalogue
-    catalogue_eyebrow: "The Full Collection",
-    catalogue_title: "All Adventures",
-    // Journey combinations
-    combinations_eyebrow: "Perfect Pairings",
-    combinations_title: "Journey Combinations",
-    combinations_body: "Some places are even better together — these are the pairings we return to.",
-    // Bespoke banner
-    bespoke_eyebrow: "Not quite right?",
-    bespoke_title: "Let's design something entirely yours.",
-    bespoke_body: "Tell us how you like to travel and we'll shape a journey around it.",
-    // Show/hide sections
-    show_hero: true as boolean,
-    show_rhythm: true as boolean,
-    show_finder: true as boolean,
-    show_signature: true as boolean,
-    show_explore: true as boolean,
-    show_spotlight: true as boolean,
-    show_catalogue: true as boolean,
-    show_combinations: true as boolean,
-    show_enquiry_cta: true as boolean,
-    show_final_cta: true as boolean,
-  },
+  useEffect(() => {
+    if (destination) {
+      setForm({
+        id: destination.id,
+        name: destination.name ?? "",
+        country: destination.country ?? "Kenya",
+        region: destination.region ?? "Southern Kenya",
+        slug: destination.slug ?? "",
+        best_season: destination.best_season ?? "",
+        description: destination.description ?? "",
+        short_description: destination.short_description ?? "",
+        destination_category: destination.destination_category ?? "The Icons",
+        best_for: Array.isArray(destination.best_for)
+          ? destination.best_for
+          : typeof destination.best_for === "string"
+            ? (destination.best_for as string).split(",").map((s) => s.trim())
+            : [],
+        best_months: Array.isArray(destination.best_months) ? destination.best_months : [],
+        also_good_months: Array.isArray(destination.also_good_months) ? destination.also_good_months : [],
+        latitude: destination.latitude ?? null,
+        longitude: destination.longitude ?? null,
+        featured: destination.featured ?? false,
+        related_destinations: Array.isArray(destination.related_destinations) ? destination.related_destinations : [],
+        image: destination.image ?? "",
+        featured_trips: Array.isArray(destination.featured_trips)
+          ? destination.featured_trips
+          : typeof destination.featured_trips === "string"
+            ? (destination.featured_trips as string).split("\n").filter(Boolean)
+            : [],
+        sort_order: destination.sort_order ?? 0,
+        published: destination.published ?? true,
+        created_at: destination.created_at,
+        updated_at: destination.updated_at,
+      });
+    }
+  }, [destination]);
 
-  testimonials_page: {
-    eyebrow: "Guest Stories",
-    title: "In their words",
-    subtitle: "The clearest measure of a journey is how it stays with you afterwards.",
-    show_metrics: true,
-    metric_1_value: "12+",
-    metric_1_label: "Years of journeys",
-    metric_2_value: "800+",
-    metric_2_label: "Travellers hosted",
-    metric_3_value: "40+",
-    metric_3_label: "Lodge partners",
-    cta_title: "Let your story begin here",
-    cta_button: "Start planning",
-  },
-  // Detail-page templates (shared intros / CTAs)
-  detail_journey: {
-    enquire_cta: "Enquire about this journey",
-    intro_eyebrow: "The Journey",
-    related_title: "Other journeys you might love",
-  },
-  detail_lodge: {
-    enquire_cta: "Enquire about this lodge",
-    intro_eyebrow: "The Lodge",
-    related_title: "Similar lodges",
-  },
-  // Footer copy (columns are managed via Menu editor; socials are editable here)
-  footer: {
-    newsletter_title: "Newsletter",
-    newsletter_body: "Receive travel inspiration and special offers.",
-    newsletter_placeholder: "Your email address",
-    copyright: "© The Baobab Collective {year} | All Rights Reserved",
-    contact_heading: "Get in Touch",
-    instagram_url: "https://instagram.com",
-    facebook_url: "https://facebook.com",
-    linkedin_url: "",
-    twitter_url: "",
-    youtube_url: "",
-  },
-  // 404 / Auth / global SEO
-  not_found: {
-    title: "Page not found",
-    body: "The page you're looking for doesn't exist or has been moved.",
-    cta_label: "Go home",
-  },
-  auth_page: {
-    title: "Admin sign in",
-    subtitle: "Access The Baobab Collective admin.",
-    email_label: "Email",
-    password_label: "Password",
-    submit_label: "Sign in",
-  },
-  seo: {
-    site_name: "The Baobab Collective",
-    default_title: "The Baobab Collective — Curated Safari Journeys",
-    default_description:
-      "Luxury curated safari experiences in Africa. Authentic connections, conservation-led journeys, and extraordinary moments.",
-    default_og_image: "",
-  },
-} as const;
+  const mUpsert = useMutation({
+    mutationFn: (row: DestinationRecord) => upsertFn({ data: { table: "destinations", row } }),
+    onSuccess: async (saved: any) => {
+      toast.success(`"${saved.name || "Destination"}" saved successfully.`);
+      queryClient.invalidateQueries({ queryKey: ["admin-list"] });
+      queryClient.invalidateQueries({ queryKey: ["destinations"] });
+      queryClient.invalidateQueries({ queryKey: ["destination", form.slug] });
+      if (isNew && saved?.id) {
+        navigate({ to: "/admin/destinations/$id", params: { id: saved.id }, replace: true });
+      } else {
+        await refetch();
+      }
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not save destination"),
+  });
 
-export type PageDefaults = typeof PAGE_DEFAULTS;
-export type PageKey = keyof PageDefaults;
+  function patch<K extends keyof DestinationRecord>(key: K, value: DestinationRecord[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
 
-export function mergePageContent<K extends PageKey>(
-  key: K,
-  override: Record<string, unknown> | null | undefined,
-): PageDefaults[K] {
-  return { ...PAGE_DEFAULTS[key], ...(override ?? {}) } as PageDefaults[K];
+  function toggleBestFor(tag: string) {
+    const cur = form.best_for || [];
+    const next = cur.includes(tag) ? cur.filter((t) => t !== tag) : [...cur, tag];
+    patch("best_for", next);
+  }
+
+  function toggleBestMonth(month: string) {
+    const cur = form.best_months || [];
+    const next = cur.includes(month) ? cur.filter((m) => m !== month) : [...cur, month];
+    patch("best_months", next);
+  }
+
+  function toggleAlsoGoodMonth(month: string) {
+    const cur = form.also_good_months || [];
+    const next = cur.includes(month) ? cur.filter((m) => m !== month) : [...cur, month];
+    patch("also_good_months", next);
+  }
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) {
+      toast.error("Destination name is required.");
+      return;
+    }
+    const rowToSave: any = { ...form };
+    if (!rowToSave.slug.trim()) {
+      rowToSave.slug = slugify(rowToSave.name);
+    }
+    mUpsert.mutate(rowToSave);
+  }
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    try {
+      await deleteFn({ data: { table: "destinations", id } });
+      toast.success("Destination deleted.");
+      queryClient.invalidateQueries({ queryKey: ["admin-list"] });
+      queryClient.invalidateQueries({ queryKey: ["destinations"] });
+      navigate({ to: "/admin/content/$table", params: { table: "destinations" } });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not delete destination");
+      setIsDeleting(false);
+      setDeleteOpen(false);
+    }
+  }
+
+  if (isLoading && !isNew) {
+    return (
+      <div className="flex items-center gap-2 py-20 justify-center text-foreground/60">
+        <Loader2 className="w-5 h-5 animate-spin text-gold" /> Loading destination details…
+      </div>
+    );
+  }
+
+  if (!isNew && (isError || !destination)) {
+    return (
+      <div className="space-y-4 max-w-2xl mx-auto py-12">
+        <Button
+          variant="outline"
+          onClick={() => navigate({ to: "/admin/content/$table", params: { table: "destinations" } })}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Destinations
+        </Button>
+        <div className="rounded-lg border border-border bg-background p-8 text-center space-y-3">
+          <h2 className="font-serif text-2xl">Destination not found</h2>
+          <p className="text-sm text-foreground/60">
+            {(error as any)?.message ?? "The requested destination could not be loaded."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSave} className="space-y-6 pb-12">
+      {/* ── Top Bar Header ───────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
+        <div className="space-y-1">
+          <Link
+            to="/admin/content/$table"
+            params={{ table: "destinations" }}
+            className="inline-flex items-center gap-1.5 text-xs text-foreground/60 hover:text-gold transition-colors font-medium mb-1"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Destinations
+          </Link>
+          <div className="flex items-center gap-3">
+            <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Destination" : "Edit Destination"}</h1>
+            {!isNew && (
+              <Badge
+                variant={form.published ? "default" : "secondary"}
+                className={form.published ? "bg-forest text-forest-foreground" : ""}
+              >
+                {form.published ? "Active" : "Draft"}
+              </Badge>
+            )}
+          </div>
+          {!isNew && form.slug && (
+            <div className="flex items-center gap-2 text-xs text-foreground/60 pt-1">
+              <span className="font-medium text-foreground/75">Permalink:</span>
+              <code className="bg-cream px-1.5 py-0.5 rounded text-foreground/80 font-mono text-[11px]">
+                /destinations/{form.slug}
+              </code>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate({ to: "/admin/content/$table", params: { table: "destinations" } })}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={mUpsert.isPending}
+            className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
+          >
+            {mUpsert.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Destination" : "Update Destination"}
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Two-Column Layout ─────────────────────────────────────────── */}
+      <div className="grid gap-6 xl:grid-cols-12">
+        {/* ── Main Content Area (Left: 9/12) ─────────────────────────── */}
+        <div className="space-y-6 min-w-0 xl:col-span-9">
+          {/* Destination Title / Name & Short Description */}
+          <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
+            <div>
+              <Label className="mb-2 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+                Destination Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                value={form.name}
+                onChange={(e) => {
+                  const newName = e.target.value;
+                  setForm((prev) => ({
+                    ...prev,
+                    name: newName,
+                    slug: prev.slug === slugify(prev.name) ? slugify(newName) : prev.slug,
+                  }));
+                }}
+                placeholder="e.g. Maasai Mara"
+                className="font-serif text-xl md:text-2xl h-12"
+              />
+            </div>
+
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+                Short Editorial Description (1–2 sentences for index cards)
+              </Label>
+              <Textarea
+                rows={2}
+                value={form.short_description ?? ""}
+                onChange={(e) => patch("short_description", e.target.value)}
+                placeholder="e.g. World-renowned savannah teeming with apex predators, vast migratory herds, and authentic Maasai conservancies."
+                className="text-sm leading-relaxed"
+              />
+            </div>
+          </div>
+
+          {/* Location, Category & Coordinates */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center gap-2.5">
+              <MapPin className="w-4 h-4 text-gold" />
+              <h2 className="font-serif text-lg leading-none">Location & Geography</h2>
+            </header>
+            <div className="p-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Country
+                  </Label>
+                  <Input
+                    value={form.country}
+                    onChange={(e) => patch("country", e.target.value)}
+                    placeholder="e.g. Kenya"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Region
+                  </Label>
+                  <Select value={form.region || "Southern Kenya"} onValueChange={(val) => patch("region", val)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {KENYA_REGIONS.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="Other Africa">Other Region</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                    Discovery Category
+                  </Label>
+                  <Select
+                    value={form.destination_category || "The Icons"}
+                    onValueChange={(val) => patch("destination_category", val)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Category grouping" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="The Icons">The Icons (Featured)</SelectItem>
+                      <SelectItem value="Beyond the Classics">Beyond the Classics</SelectItem>
+                      <SelectItem value="The Indian Ocean">The Indian Ocean</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Coordinates for Interactive Map */}
+              <div className="space-y-4 pt-2 border-t border-border/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <Label className="block text-[11px] tracking-[0.2em] uppercase text-forest font-bold">
+                      Map Location & Pin Coordinates
+                    </Label>
+                    <p className="text-xs text-foreground/60">
+                      Drag the pin on the map or click to position this destination visually across Kenya.
+                    </p>
+                  </div>
+                  {form.latitude != null && form.longitude != null && (
+                    <span className="text-[11px] font-mono bg-cream px-2.5 py-1 rounded text-foreground/70 border border-border self-start sm:self-auto">
+                      Lat: {Number(form.latitude).toFixed(4)}, Lng: {Number(form.longitude).toFixed(4)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Interactive Mini-Map Pin Locator */}
+                <DestinationPinLocator
+                  name={form.name || "Destination"}
+                  latitude={form.latitude}
+                  longitude={form.longitude}
+                  onChange={(lat, lng) => {
+                    patch("latitude", lat);
+                    patch("longitude", lng);
+                  }}
+                />
+
+                <div className="grid gap-4 sm:grid-cols-2 pt-2">
+                  <div>
+                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                      Latitude (e.g. -1.4061 for Maasai Mara)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.latitude ?? ""}
+                      onChange={(e) => patch("latitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="-1.4061"
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                      Longitude (e.g. 35.1390 for Maasai Mara)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.longitude ?? ""}
+                      onChange={(e) => patch("longitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="35.1390"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* "Best For" Experience Categories */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-gold" />
+                <h2 className="font-serif text-lg leading-none">"Best For" Tags & Travel Styles</h2>
+              </div>
+              <span className="text-xs text-foreground/55">Used in dynamic category filtering</span>
+            </header>
+            <div className="p-6 space-y-4">
+              <div className="flex flex-wrap gap-2.5">
+                {BEST_FOR_CATEGORIES.map((cat) => {
+                  const isChecked = (form.best_for || []).includes(cat.id);
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => toggleBestFor(cat.id)}
+                      className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold tracking-wider uppercase transition-all ${
+                        isChecked
+                          ? "bg-forest text-cream ring-2 ring-forest ring-offset-2 ring-offset-background"
+                          : "bg-cream/60 text-foreground/75 border border-border hover:border-gold"
+                      }`}
+                    >
+                      {isChecked && <Check className="w-3.5 h-3.5 text-gold" />}
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* Seasonality & Monthly Guide */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center gap-2.5">
+              <Calendar className="w-4 h-4 text-gold" />
+              <h2 className="font-serif text-lg leading-none">Best Time to Visit & Seasonal Calendar</h2>
+            </header>
+            <div className="p-6 space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Best Season Summary String
+                </Label>
+                <Input
+                  value={form.best_season ?? ""}
+                  onChange={(e) => patch("best_season", e.target.value)}
+                  placeholder="e.g. Jul – Oct (Great Migration & Peak Wildlife)"
+                />
+              </div>
+
+              {/* Peak Months */}
+              <div className="space-y-2 pt-2 border-t border-border/60">
+                <Label className="block text-[11px] tracking-[0.2em] uppercase text-forest font-semibold">
+                  Peak / Best Months
+                </Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {ALL_MONTHS.map((m) => {
+                    const active = (form.best_months || []).includes(m);
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => toggleBestMonth(m)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition-colors ${
+                          active
+                            ? "bg-forest text-cream"
+                            : "bg-cream text-foreground/60 border border-border hover:border-forest"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Also Good Months */}
+              <div className="space-y-2 pt-2">
+                <Label className="block text-[11px] tracking-[0.2em] uppercase text-gold font-semibold">
+                  Also Good Months
+                </Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {ALL_MONTHS.map((m) => {
+                    const active = (form.also_good_months || []).includes(m);
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => toggleAlsoGoodMonth(m)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition-colors ${
+                          active
+                            ? "bg-gold text-gold-foreground"
+                            : "bg-cream text-foreground/60 border border-border hover:border-gold"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Description (Rich Text) */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-gold" />
+                <h2 className="font-serif text-lg leading-none">Full Description & Story</h2>
+              </div>
+            </header>
+            <div className="p-6">
+              <RichTextEditor
+                value={form.description}
+                onChange={(html) => patch("description", html)}
+                autosaveKey={`cms:dest:${id}:desc`}
+                placeholder="Describe this destination, its landscapes, wildlife, and safari experience…"
+              />
+            </div>
+          </section>
+
+          {/* Featured Trips & Activities */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50">
+              <h2 className="font-serif text-lg leading-none">Featured Trips & Activities</h2>
+              <p className="text-xs text-foreground/55 mt-1">
+                List the signature highlights or trips for this destination (one per line).
+              </p>
+            </header>
+            <div className="p-6 space-y-4">
+              <Textarea
+                rows={4}
+                value={form.featured_trips.join("\n")}
+                onChange={(e) =>
+                  patch(
+                    "featured_trips",
+                    e.target.value.split("\n").map((s) => s.trimEnd()),
+                  )
+                }
+                placeholder="Great Migration river crossings&#10;Walking safaris with Maasai elders&#10;Sunrise hot-air ballooning"
+              />
+
+              {form.featured_trips.filter(Boolean).length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {form.featured_trips.filter(Boolean).map((trip, idx) => (
+                    <button
+                      key={`${trip}-${idx}`}
+                      type="button"
+                      onClick={() =>
+                        patch(
+                          "featured_trips",
+                          form.featured_trips.filter((_, i) => i !== idx),
+                        )
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-cream/40 px-3 py-1 text-xs text-foreground/75 hover:border-destructive hover:text-destructive transition-colors"
+                      title="Click to remove"
+                    >
+                      <span>{trip}</span>
+                      <span className="opacity-60">×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* ── Sidebar Area (Right: 3/12) ──────────────────────────── */}
+        <aside className="space-y-6 min-w-0 xl:col-span-3">
+          {/* Publish / Status Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
+              <h3 className="font-serif text-base">Publish</h3>
+              <Badge
+                variant={form.published ? "default" : "secondary"}
+                className={form.published ? "bg-forest text-forest-foreground" : ""}
+              >
+                {form.published ? "Published" : "Draft"}
+              </Badge>
+            </header>
+            <div className="p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground/60 uppercase tracking-wider">Status</span>
+                <label className="flex items-center gap-2 text-sm cursor-pointer font-medium">
+                  <Checkbox checked={form.published} onCheckedChange={(v) => patch("published", !!v)} id="published" />
+                  <span>Active / Published</span>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                <span className="text-xs text-foreground/60 uppercase tracking-wider">Iconic / Featured</span>
+                <label className="flex items-center gap-2 text-xs cursor-pointer font-medium">
+                  <Checkbox checked={!!form.featured} onCheckedChange={(v) => patch("featured", !!v)} id="featured" />
+                  <span>Highlight on Index</span>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                <span className="text-xs text-foreground/60 uppercase tracking-wider">Sort Order</span>
+                <div className="relative w-24">
+                  <Hash className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-foreground/40" />
+                  <Input
+                    type="number"
+                    value={form.sort_order}
+                    onChange={(e) => patch("sort_order", Number(e.target.value))}
+                    className="pl-8 text-right h-8 text-xs"
+                  />
+                </div>
+              </div>
+
+              {form.created_at && (
+                <div className="pt-2 border-t border-border/60 text-[11px] text-foreground/50 space-y-1">
+                  <div>Created: {new Date(form.created_at).toLocaleDateString()}</div>
+                  {form.updated_at && <div>Updated: {new Date(form.updated_at).toLocaleDateString()}</div>}
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-border flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  disabled={mUpsert.isPending}
+                  className="w-full bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm cursor-pointer"
+                >
+                  {mUpsert.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Saving…
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-1.5" /> {isNew ? "Create Destination" : "Update Destination"}
+                    </>
+                  )}
+                </Button>
+
+                {!isNew && (
+                  <div className="flex items-center justify-between pt-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive px-2"
+                      onClick={() => setDeleteOpen(true)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Move to trash
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Featured Image Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Hero Image</h3>
+            </header>
+            <div className="p-5">
+              <ImageUploader
+                label="Destination Hero Image"
+                value={form.image}
+                onChange={(url) => patch("image", url)}
+              />
+            </div>
+          </div>
+
+          {/* URL Slug & Attributes */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Permalink & Slug</h3>
+            </header>
+            <div className="p-5 space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  URL Slug
+                </Label>
+                <Input
+                  value={form.slug}
+                  onChange={(e) => patch("slug", slugify(e.target.value))}
+                  placeholder="e.g. maasai-mara"
+                  className="text-xs font-mono"
+                />
+                <p className="text-[11px] text-foreground/50 mt-1">
+                  Defines the URL at <code className="text-[10px]">/destinations/{form.slug || "slug"}</code>
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* Delete Confirmation Alert Dialog */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete destination?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're about to permanently delete{" "}
+              <span className="font-semibold text-foreground">"{form.name || "this destination"}"</span>. This action
+              cannot be undone and will remove it from the live site.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Deleting…
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </form>
+  );
+}
+
+/**
+ * Interactive Pin Locator for a Single Destination
+ * Converts between map percentage coordinates and Kenya GPS Lat/Lng
+ */
+function DestinationPinLocator({
+  name,
+  latitude,
+  longitude,
+  onChange,
+}: {
+  name: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  onChange: (lat: number, lng: number) => void;
+}) {
+  const containerRef = useState<HTMLDivElement | null>(null)[0];
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Kenya Map Bounds: Lat: -4.8 to +5.0, Lng: 33.8 to 42.0
+  const minLat = -4.8;
+  const maxLat = 5.0;
+  const minLng = 33.8;
+  const maxLng = 42.0;
+
+  // Derive percent position from lat/lng or default to center-ish
+  const curLat = latitude ?? -1.286389;
+  const curLng = longitude ?? 36.817223;
+
+  const left = Math.max(5, Math.min(95, 5 + ((curLng - minLng) / (maxLng - minLng)) * 88));
+  const top = Math.max(5, Math.min(95, 5 + ((maxLat - curLat) / (maxLat - minLat)) * 88));
+
+  const updateFromPointer = (clientX: number, clientY: number) => {
+    if (!containerEl) return;
+    const rect = containerEl.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    const rawLeft = ((clientX - rect.left) / rect.width) * 100;
+    const rawTop = ((clientY - rect.top) / rect.height) * 100;
+
+    const clampedLeft = Math.max(5, Math.min(95, rawLeft));
+    const clampedTop = Math.max(5, Math.min(95, rawTop));
+
+    // Convert back to Lat/Lng
+    const nextLng = minLng + ((clampedLeft - 5) / 88) * (maxLng - minLng);
+    const nextLat = maxLat - ((clampedTop - 5) / 88) * (maxLat - minLat);
+
+    onChange(Number(nextLat.toFixed(4)), Number(nextLng.toFixed(4)));
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    updateFromPointer(e.clientX, e.clientY);
+  };
+
+  const handlePointerUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleContainerClick = (e: React.MouseEvent) => {
+    if (isDragging) return;
+    updateFromPointer(e.clientX, e.clientY);
+  };
+
+  return (
+    <div className="space-y-3 bg-muted/40 rounded-xl p-3 border border-border">
+      <div
+        ref={setContainerEl}
+        onClick={handleContainerClick}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        className="relative w-full overflow-hidden rounded-lg bg-forest cursor-crosshair select-none ring-1 ring-border/50 shadow-inner"
+        style={{ aspectRatio: "1 / 0.85" }}
+      >
+        {/* Map Background */}
+        <img
+          src="/maps/kenya-destinations-map.gif"
+          alt="Kenya Pin Locator Map"
+          className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-90"
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement;
+            if (target.src !== kenyaMapAsset) {
+              target.src = kenyaMapAsset;
+            }
+          }}
+        />
+
+        <div className="absolute inset-0 pointer-events-none bg-black/10" />
+
+        {/* Grid crosshair guide */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.4) 1px, transparent 1px)",
+            backgroundSize: "20% 20%",
+          }}
+        />
+
+        {/* Draggable Pin */}
+        <div
+          style={{ left: `${left}%`, top: `${top}%` }}
+          className={`absolute -translate-x-1/2 -translate-y-1/2 transition-all ${
+            isDragging ? "z-50 scale-125" : "z-30"
+          }`}
+        >
+          <button
+            type="button"
+            onPointerDown={handlePointerDown}
+            className="group flex flex-col items-center justify-center focus:outline-none cursor-grab active:cursor-grabbing"
+            title={`Drag to reposition ${name}`}
+          >
+            {/* Pulsing ring */}
+            <span className="absolute -inset-2 rounded-full bg-gold/50 animate-ping pointer-events-none" />
+
+            {/* Pin Badge */}
+            <div className="w-8 h-8 rounded-full bg-gold text-gold-foreground flex items-center justify-center shadow-2xl ring-4 ring-forest ring-offset-2 ring-offset-forest group-hover:scale-110 transition-transform">
+              <Move className="w-4 h-4" />
+            </div>
+
+            {/* Name label */}
+            <div className="mt-1 whitespace-nowrap bg-forest text-cream text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-gold/40">
+              {name || "Pin"}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Preset Buttons */}
+      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+        <span className="text-[10px] tracking-wider uppercase text-foreground/50 font-semibold pr-1">
+          Quick Presets:
+        </span>
+        {[
+          { label: "Mara", lat: -1.4061, lng: 35.139 },
+          { label: "Amboseli", lat: -2.6527, lng: 37.2606 },
+          { label: "Samburu", lat: 0.6234, lng: 37.5317 },
+          { label: "Laikipia", lat: 0.3297, lng: 36.9062 },
+          { label: "Tsavo", lat: -2.7667, lng: 38.7667 },
+          { label: "Mt Kenya", lat: -0.1521, lng: 37.3084 },
+          { label: "Lamu", lat: -2.2717, lng: 40.902 },
+          { label: "Diani", lat: -4.2794, lng: 39.5855 },
+        ].map((preset) => (
+          <button
+            key={preset.label}
+            type="button"
+            onClick={() => onChange(preset.lat, preset.lng)}
+            className="text-[10px] px-2 py-1 rounded bg-background hover:bg-gold hover:text-gold-foreground border border-border transition-colors cursor-pointer"
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
