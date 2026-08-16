@@ -251,9 +251,10 @@ export const PAGE_DEFAULTS = {
     title: "Partner Lodges",
     subtitle: "Every camp and lodge we work with has been walked, slept in, and chosen for soul as much as setting.",
     hero_image: "",
-    show_hero: true,
-    show_grid: true,
+    show_hero: true as boolean,
+    show_grid: true as boolean,
   },
+
   destinations_index: {
     eyebrow: "Destination Discovery",
     title: "DISCOVER KENYA",
