@@ -297,11 +297,20 @@ export const PAGE_DEFAULTS = {
     rhythm_4_body:
       "Sundowner drinks on a kopje overlooking the savannah, followed by dinner beneath a clear canopy of stars.",
     rhythm_4_image: "",
+    // Adventure finder
+    finder_eyebrow: "Adventure Finder",
+    finder_title: "Find your adventure",
+    finder_body: "Filter by region, terrain, duration and the kind of experience you're after.",
+    finder_experience_options: "",
+    finder_travel_style_options: "",
     // Signature section header
     signature_eyebrow: "Signature Adventures",
     signature_title: "Journeys we'd take ourselves.",
     signature_body: "Each is a starting point — every detail is reshaped around you, your dates and your pace.",
-    // Explore by experience cards
+    // Explore by experience
+    explore_eyebrow: "Curated Themes",
+    explore_title: "Explore by Experience",
+    explore_body: "Select what matters most to your journey — from intimate walking safaris to coastal retreats.",
     explore_1_title: "Wildlife",
     explore_1_body: "Big cats, migration herds & private conservancies",
     explore_1_image: "",
@@ -326,13 +335,30 @@ export const PAGE_DEFAULTS = {
     explore_8_title: "Culture",
     explore_8_body: "Authentic connections with indigenous pastoralists",
     explore_8_image: "",
+    // Catalogue
+    catalogue_eyebrow: "The Full Collection",
+    catalogue_title: "All Adventures",
+    // Journey combinations
+    combinations_eyebrow: "Perfect Pairings",
+    combinations_title: "Journey Combinations",
+    combinations_body: "Some places are even better together — these are the pairings we return to.",
+    // Bespoke banner
+    bespoke_eyebrow: "Not quite right?",
+    bespoke_title: "Let's design something entirely yours.",
+    bespoke_body: "Tell us how you like to travel and we'll shape a journey around it.",
     // Show/hide sections
-    show_hero: true,
-    show_rhythm: true,
-    show_signature: true,
-    show_catalogue: true,
-    show_enquiry_cta: true,
+    show_hero: true as boolean,
+    show_rhythm: true as boolean,
+    show_finder: true as boolean,
+    show_signature: true as boolean,
+    show_explore: true as boolean,
+    show_spotlight: true as boolean,
+    show_catalogue: true as boolean,
+    show_combinations: true as boolean,
+    show_enquiry_cta: true as boolean,
+    show_final_cta: true as boolean,
   },
+
 
   testimonials_page: {
     eyebrow: "Guest Stories",
