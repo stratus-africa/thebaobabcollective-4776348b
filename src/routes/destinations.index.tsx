@@ -13,6 +13,10 @@ import { DestinationJourneysSection } from "@/components/site/DestinationJourney
 import { DestinationStaySection } from "@/components/site/DestinationStaySection";
 import { DestinationMatcherSection } from "@/components/site/DestinationMatcherSection";
 import { getDestinations, getLodges } from "@/lib/cms.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getPageContent } from "@/lib/page-content.functions";
+import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { mergeDestinationsWithDefaults, type DestinationMetadata } from "@/lib/destinations.data";
 import heroBaobab from "@/assets/hero-baobab.jpg";
@@ -127,6 +131,13 @@ function DestinationsDiscoveryPage() {
   const { data: rawDestinations } = useSuspenseQuery(destinationsQuery);
   const { data: adventuresPage } = useSuspenseQuery(adventuresQuery);
   const { data: lodges } = useSuspenseQuery(lodgesQuery);
+  const pageContentFn = useServerFn(getPageContent);
+  const { data: pcData } = useQuery({
+    queryKey: ["page-content", "destinations_index"],
+    queryFn: () => pageContentFn({ data: { key: "destinations_index" } }),
+    staleTime: 60_000,
+  });
+  const content = { ...PAGE_DEFAULTS.destinations_index, ...((pcData ?? {}) as Record<string, any>) };
 
   // Merge database records with baseline Kenya data
   const allDestinations = useMemo(() => {
@@ -188,7 +199,7 @@ function DestinationsDiscoveryPage() {
         >
           {/* Background Image */}
           <img
-            src={heroBaobab}
+            src={content.hero_image || heroBaobab}
             alt="Golden sunrise across Kenya's wild savannah and acacia trees"
             className="absolute inset-0 w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
           />
@@ -201,19 +212,19 @@ function DestinationsDiscoveryPage() {
           <div className="relative max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 text-center py-24 sm:py-32 w-full">
             <div className="max-w-4xl mx-auto space-y-6">
               <p className="text-[11px] sm:text-xs tracking-[0.4em] uppercase text-gold font-semibold flex items-center justify-center gap-2">
-                <Sparkles className="w-3.5 h-3.5" /> Destination Discovery
+                <Sparkles className="w-3.5 h-3.5" /> {content.eyebrow || "Destination Discovery"}
               </p>
 
               <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight text-cream leading-[1.02]">
-                DISCOVER KENYA
+                {content.title || "DISCOVER KENYA"}
               </h1>
 
               <p className="text-base sm:text-xl md:text-2xl text-cream/90 font-serif max-w-2xl mx-auto leading-relaxed italic">
-                "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary."
+                {content.subtitle}
               </p>
 
               <p className="text-xs sm:text-sm text-cream/75 max-w-xl mx-auto leading-relaxed">
-                Whether drawn to apex predators on the golden Mara plains, private rhino sanctuaries in Laikipia, or sunset dhow sailing in Lamu — find where your story begins.
+                {content.body}
               </p>
 
               {/* Action Buttons */}
@@ -223,7 +234,7 @@ function DestinationsDiscoveryPage() {
                   onClick={scrollToDiscovery}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-8 py-4 hover:bg-gold/90 transition-all shadow-lg hover:shadow-gold/20 cursor-pointer"
                 >
-                  <span>Explore Destinations</span>
+                  <span>{content.cta_label || "Explore Destinations"}</span>
                   <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
                 </button>
 
