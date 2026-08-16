@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeAdventureSignatures, slugifyAdventureSegment } from "./adventures.functions";
+import { getAdventureEditorDraft, normalizeAdventureSignatures, slugifyAdventureSegment } from "./adventures.functions";
 
 describe("adventure slug normalization", () => {
   it("creates a valid URL-safe slug from a title", () => {
@@ -20,10 +20,24 @@ describe("adventure slug normalization", () => {
   });
 
   it("keeps a valid slug when the title changes later", () => {
-    const output = normalizeAdventureSignatures([
-      { slug: "mount-kilimanjaro", name: "Kilimanjaro Expedition" },
-    ] as any);
+    const output = normalizeAdventureSignatures([{ slug: "mount-kilimanjaro", name: "Kilimanjaro Expedition" }] as any);
 
     expect(output[0].slug).toBe("mount-kilimanjaro");
+  });
+
+  it("creates a blank draft for new adventure records", () => {
+    const draft = getAdventureEditorDraft(
+      {
+        hero: { eyebrow: "", headline: "", subhead: "", image: "", imageAlt: "" },
+        cta: { eyebrow: "", headline: "", body: "", buttonLabel: "" },
+        signatures: [],
+      },
+      "new",
+    );
+
+    expect(draft.slug).toBe("new");
+    expect(draft.name).toBe("");
+    expect(draft.status).toBe("draft");
+    expect(Array.isArray(draft.highlights)).toBe(true);
   });
 });
