@@ -35,6 +35,7 @@ export function resolveWatermarkPolicy(
         watermark_text?: string;
         watermark_image_url?: string;
         watermark_position?: WatermarkPosition;
+        watermark_scale?: number;
         watermark_overrides?: Record<string, { enabled: boolean }>;
       }
     | null
