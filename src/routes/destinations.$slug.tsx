@@ -22,6 +22,7 @@ import { TheBaobabPick } from "@/components/site/TheBaobabPick";
 import { DestinationCard } from "@/components/site/DestinationCard";
 import { getDestinationBySlug, getDestinations, getLodges } from "@/lib/cms.functions";
 import { getAdventuresPage } from "@/lib/adventures.functions";
+import { resolveImageSource } from "@/lib/image-resolution";
 import {
   enrichDestination,
   mergeDestinationsWithDefaults,
@@ -164,7 +165,6 @@ function DestinationDetailPage() {
   const { data: rawDestList } = useSuspenseQuery(allDestQuery);
   const { data: adventuresPage } = useSuspenseQuery(adventuresQuery);
   const { data: lodges } = useSuspenseQuery(lodgesQuery);
-
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -175,6 +175,8 @@ function DestinationDetailPage() {
     if (!fallback) throw notFound();
     return fallback;
   }, [rawDest, slug]);
+
+  const heroImage = resolveImageSource(rawDest?.image, d?.fallbackImage) ?? null;
 
   const allDestinations = useMemo(() => {
     return mergeDestinationsWithDefaults(rawDestList || []);
@@ -236,11 +238,21 @@ function DestinationDetailPage() {
       <main id="main-content">
         {/* ── 1. CINEMATIC HERO ────────────────────────────────────────── */}
         <section className="relative h-[65vh] min-h-[460px] max-h-[720px] flex items-end bg-forest text-cream overflow-hidden">
-          <img
-            src={d.fallbackImage}
-            alt={`${d.name}, ${d.region}`}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+          {heroImage ? (
+            <img
+              src={heroImage}
+              alt={`${d.name}, ${d.region}`}
+              className="absolute inset-0 w-full h-full object-cover"
+              decoding="async"
+              fetchPriority="high"
+              sizes="100vw"
+            />
+          ) : (
+            <div
+              className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(216,174,88,0.34),_transparent_45%),linear-gradient(135deg,_#1f2b1d,_#0f1a12)]"
+              aria-hidden="true"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
 
           <div className="relative max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 pb-14 text-cream w-full flex flex-wrap items-end justify-between gap-6">
