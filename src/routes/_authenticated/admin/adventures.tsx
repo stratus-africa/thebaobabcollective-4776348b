@@ -860,11 +860,10 @@ function AdminAdventuresDashboard() {
                   <div>
                     {/* Title */}
                     <h3 className="font-serif text-xl md:text-2xl text-foreground leading-snug group-hover:text-gold transition-colors">
-                      <a href={`/admin/adventures/${encodeURIComponent(item.slug)}`}>
                       <Link to="/admin/adventures/$slug" params={{ slug: item.slug }}>
                         {item.name || "Untitled Adventure"}
-                      </a>
                       </Link>
+
                     </h3>
 
                     {/* Metadata line: Region · Nights · Difficulty · Terrain */}
