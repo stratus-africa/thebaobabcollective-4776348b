@@ -23,6 +23,9 @@ import { adminListMedia, adminUploadImage } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { getSiteSettings, saveSiteSettings } from "@/lib/site-settings.functions";
+import { resolveWatermarkPolicy } from "@/lib/watermark";
 
 export const Route = createFileRoute("/_authenticated/admin/media")({
   component: MediaLibraryAdmin,
@@ -48,6 +51,12 @@ function humanSize(bytes: number) {
 function MediaLibraryAdmin() {
   const listFn = useServerFn(adminListMedia);
   const uploadFn = useServerFn(adminUploadImage);
+  const saveSettings = useServerFn(saveSiteSettings);
+  const fetchSettings = useServerFn(getSiteSettings);
+  const settingsQuery = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => fetchSettings(),
+  });
   const qc = useQueryClient();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -151,6 +160,24 @@ function MediaLibraryAdmin() {
     setTimeout(() => setCopiedUrl(null), 2000);
   };
 
+  const updateWatermarkOverride = async (imagePath: string, enabled: boolean) => {
+    const branding = settingsQuery.data?.branding ?? {};
+    const nextOverrides = { ...(branding.watermark_overrides ?? {}) };
+    const effectiveGlobal = Boolean(branding.watermark_enabled);
+    if (enabled === effectiveGlobal) delete nextOverrides[imagePath];
+    else nextOverrides[imagePath] = { enabled };
+
+    await saveSettings({
+      data: {
+        contact: settingsQuery.data?.contact ?? {},
+        branding: { ...branding, watermark_overrides: nextOverrides },
+        currency: settingsQuery.data?.currency ?? { code: "USD", symbol: "$" },
+      },
+    });
+    await qc.invalidateQueries({ queryKey: ["site-settings"] });
+    await qc.invalidateQueries({ queryKey: ["admin", "media"] });
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* ── Page Header ── */}
@@ -158,18 +185,13 @@ function MediaLibraryAdmin() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] tracking-[0.28em] uppercase font-semibold text-gold">
-                ASSET MANAGER
-              </span>
+              <span className="text-[10px] tracking-[0.28em] uppercase font-semibold text-gold">ASSET MANAGER</span>
               <span className="text-foreground/30">•</span>
               <span className="text-[11px] text-foreground/55">{total} Assets</span>
             </div>
-            <h1 className="font-serif text-3xl md:text-4xl text-foreground tracking-tight">
-              Media Library
-            </h1>
+            <h1 className="font-serif text-3xl md:text-4xl text-foreground tracking-tight">Media Library</h1>
             <p className="text-sm text-foreground/60 max-w-xl">
-              Upload, browse and manage high-resolution safari and destination images across the
-              site.
+              Upload, browse and manage high-resolution safari and destination images across the site.
             </p>
           </div>
 
@@ -215,26 +237,16 @@ function MediaLibraryAdmin() {
         }}
         onClick={() => fileInputRef.current?.click()}
         className={`rounded-xl border-2 border-dashed p-6 md:p-8 text-center cursor-pointer transition-colors ${
-          dragOver
-            ? "border-gold bg-gold/10"
-            : "border-border bg-background hover:border-gold/60 hover:bg-cream/30"
+          dragOver ? "border-gold bg-gold/10" : "border-border bg-background hover:border-gold/60 hover:bg-cream/30"
         }`}
       >
         <div className="flex flex-col items-center justify-center gap-2">
           <div className="h-10 w-10 rounded-full bg-gold/10 text-gold flex items-center justify-center">
-            {isUploading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Upload className="w-5 h-5" />
-            )}
+            {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">
-              Drop images here or click to browse files
-            </p>
-            <p className="text-xs text-foreground/50 mt-0.5">
-              Supports PNG, JPG, WEBP, GIF, AVIF — up to 8MB each
-            </p>
+            <p className="text-sm font-medium text-foreground">Drop images here or click to browse files</p>
+            <p className="text-xs text-foreground/50 mt-0.5">Supports PNG, JPG, WEBP, GIF, AVIF — up to 8MB each</p>
           </div>
         </div>
       </div>
@@ -313,9 +325,7 @@ function MediaLibraryAdmin() {
           <ImageIcon className="w-10 h-10 mx-auto text-foreground/30" />
           <h3 className="font-serif text-xl text-foreground">No media found</h3>
           <p className="text-xs max-w-sm mx-auto text-foreground/50">
-            {search
-              ? `No images match "${search}".`
-              : "Your media library is empty. Upload your first image above."}
+            {search ? `No images match "${search}".` : "Your media library is empty. Upload your first image above."}
           </p>
         </div>
       ) : (
@@ -350,11 +360,7 @@ function MediaLibraryAdmin() {
                       title="Copy URL"
                       className="p-1 rounded bg-black/60 text-white hover:bg-gold hover:text-gold-foreground transition-colors shadow"
                     >
-                      {isCopied ? (
-                        <Check className="w-3.5 h-3.5" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
+                      {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
                   </div>
 
@@ -410,26 +416,24 @@ function MediaLibraryAdmin() {
                 <img src={selectedItem.url} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-medium text-sm text-foreground truncate">
-                  {selectedItem.name}
-                </h3>
+                <h3 className="font-medium text-sm text-foreground truncate">{selectedItem.name}</h3>
                 <p className="text-xs text-foreground/60 mt-0.5">
-                  {humanSize(selectedItem.size)} · Uploaded{" "}
-                  {new Date(selectedItem.updated_at).toLocaleDateString()}
+                  {humanSize(selectedItem.size)} · Uploaded {new Date(selectedItem.updated_at).toLocaleDateString()}
                 </p>
-                <p className="text-[11px] text-foreground/45 font-mono truncate max-w-md mt-1">
-                  {selectedItem.url}
-                </p>
+                <p className="text-[11px] text-foreground/45 font-mono truncate max-w-md mt-1">{selectedItem.url}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyToClipboard(selectedItem.url)}
-                className="text-xs"
-              >
+              <div className="flex items-center gap-2 rounded-md border border-border bg-cream/40 px-3 py-2 text-xs">
+                <span className="text-foreground/65">Watermark</span>
+                <Switch
+                  checked={resolveWatermarkPolicy(settingsQuery.data?.branding ?? null, selectedItem.path).enabled}
+                  onCheckedChange={(checked) => updateWatermarkOverride(selectedItem.path, checked)}
+                  disabled={settingsQuery.isLoading}
+                />
+              </div>
+              <Button variant="outline" size="sm" onClick={() => copyToClipboard(selectedItem.url)} className="text-xs">
                 {copiedUrl === selectedItem.url ? (
                   <>
                     <Check className="w-3.5 h-3.5 mr-1" /> Copied
@@ -440,12 +444,7 @@ function MediaLibraryAdmin() {
                   </>
                 )}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedItem(null)}
-                className="text-xs"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setSelectedItem(null)} className="text-xs">
                 <X className="w-3.5 h-3.5" /> Close
               </Button>
             </div>
