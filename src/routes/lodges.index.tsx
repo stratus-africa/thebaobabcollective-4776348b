@@ -24,12 +24,19 @@ export const Route = createFileRoute("/lodges/")({
   head: () => ({
     meta: [
       { title: "Partner Lodges — The Baobab Collective" },
-      { name: "description", content: "Hand-picked luxury safari lodges across Africa — each chosen for its setting, soul and ethics." },
+      {
+        name: "description",
+        content: "Hand-picked luxury safari lodges across Africa — each chosen for its setting, soul and ethics.",
+      },
       { property: "og:title", content: "Partner Lodges — The Baobab Collective" },
       { property: "og:description", content: "Hand-picked luxury safari lodges across Africa." },
     ],
   }),
-  errorComponent: ({ error }) => <div className="p-10 text-center" role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-10 text-center" role="alert">
+      {error.message}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-10 text-center">Not found</div>,
   component: LodgesPage,
 });
@@ -69,7 +76,7 @@ function LodgesPage() {
           <section className="py-12 md:py-16">
             <div className="max-w-[1920px] mx-auto px-6 lg:px-10 space-y-8">
               <Suspense fallback={<CardGridSkeleton count={6} />}>
-                <LodgesGrid />
+                <LodgesGrid content={content} />
               </Suspense>
             </div>
           </section>
@@ -80,7 +87,7 @@ function LodgesPage() {
   );
 }
 
-function LodgesGrid() {
+function LodgesGrid({ content }: { content: typeof PAGE_DEFAULTS.lodges_index }) {
   const { data: lodges } = useSuspenseQuery(lodgesQuery);
   const { formatPrice } = useSiteSettings();
 
@@ -96,7 +103,9 @@ function LodgesGrid() {
   return (
     <ul
       aria-label="Partner lodges"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 list-none p-0"
+      className={`grid grid-cols-1 sm:grid-cols-2 ${
+        Number(content.grid_size) === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"
+      } gap-6 md:gap-8 list-none p-0`}
     >
       {lodges.map((l) => {
         const titleId = `lodge-${l.id}-title`;
@@ -132,11 +141,11 @@ function LodgesGrid() {
                   id={titleId}
                   className="font-serif text-2xl md:text-3xl text-foreground mb-3 group-hover:text-gold transition-colors"
                 >
-                  <Link to="/lodges/$slug" params={{ slug: l.slug }}>{l.name}</Link>
+                  <Link to="/lodges/$slug" params={{ slug: l.slug }}>
+                    {l.name}
+                  </Link>
                 </h2>
-                <p className="text-foreground/70 text-sm leading-relaxed mb-5 line-clamp-3 flex-1">
-                  {l.description}
-                </p>
+                <p className="text-foreground/70 text-sm leading-relaxed mb-5 line-clamp-3 flex-1">{l.description}</p>
                 {l.amenities?.length ? (
                   <ul aria-label="Amenities" className="flex flex-wrap gap-1.5 mb-5">
                     {l.amenities.slice(0, 4).map((a: string) => (
