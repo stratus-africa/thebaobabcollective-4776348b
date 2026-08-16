@@ -68,6 +68,7 @@ export function Navbar() {
     (overlay ? "focus-visible:ring-offset-transparent" : "focus-visible:ring-offset-background");
   const linkBase = `relative text-[15px] tracking-[0.22em] uppercase font-semibold px-1 transition-colors after:absolute after:-bottom-2 after:left-0 after:h-px after:w-0 after:bg-gold after:transition-all hover:after:w-full ${focusRing}`;
   const linkColor = overlay ? "text-cream/85 hover:text-cream" : "text-foreground/80 hover:text-foreground";
+  const adminCta = !!user && isAdmin;
 
   const topBar =
     menu.topBarEnabled && menu.topBarText ? (
@@ -197,7 +198,14 @@ export function Navbar() {
               >
                 <Search className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
               </button>
-              {menu.ctaTo ? (
+              {adminCta ? (
+                <Link
+                  to="/admin"
+                  className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-3 hover:bg-gold/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+                >
+                  Dashboard
+                </Link>
+              ) : menu.ctaTo ? (
                 <Link
                   to={menu.ctaTo as any}
                   className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-3 hover:bg-gold/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
@@ -291,7 +299,15 @@ export function Navbar() {
                     </button>
                   </>
                 )}
-                {menu.ctaTo ? (
+                {adminCta ? (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-3 mt-2"
+                  >
+                    Dashboard
+                  </Link>
+                ) : menu.ctaTo ? (
                   <Link
                     to={menu.ctaTo as any}
                     onClick={() => setOpen(false)}
