@@ -54,7 +54,10 @@ export const Route = createFileRoute("/destinations/")({
         content:
           "Discover Kenya's most extraordinary safari, wilderness and coastal destinations. Explore tailor-made journeys with The Baobab Collective.",
       },
-      { property: "og:title", content: "Kenya Safari & Beach Destinations | The Baobab Collective" },
+      {
+        property: "og:title",
+        content: "Kenya Safari & Beach Destinations | The Baobab Collective",
+      },
       {
         property: "og:description",
         content:
@@ -64,7 +67,10 @@ export const Route = createFileRoute("/destinations/")({
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://thebaobabcollective.co.uk/destinations" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Kenya Safari & Beach Destinations | The Baobab Collective" },
+      {
+        name: "twitter:title",
+        content: "Kenya Safari & Beach Destinations | The Baobab Collective",
+      },
       {
         name: "twitter:description",
         content:
@@ -96,7 +102,12 @@ export const Route = createFileRoute("/destinations/")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Home",
+              item: "https://thebaobabcollective.co.uk/",
+            },
             {
               "@type": "ListItem",
               position: 2,
@@ -145,7 +156,10 @@ function DestinationsDiscoveryPage() {
     queryFn: () => pageContentFn({ data: { key: "destinations_index" } }),
     staleTime: 60_000,
   });
-  const content = { ...PAGE_DEFAULTS.destinations_index, ...((pcData ?? {}) as Record<string, any>) };
+  const content = {
+    ...PAGE_DEFAULTS.destinations_index,
+    ...((pcData ?? {}) as Record<string, any>),
+  };
 
   const handleSaveMapPositions = async (newPositions: Record<string, { left: number; top: number }>) => {
     await saveContentFn({
