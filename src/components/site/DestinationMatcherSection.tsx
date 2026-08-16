@@ -5,30 +5,41 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { BEST_FOR_CATEGORIES } from "@/lib/destinations.data";
 import journalLodgeImg from "@/assets/journal-lodge.jpg";
 
-export function DestinationMatcherSection() {
+interface DestinationMatcherSectionProps {
+  eyebrow?: string;
+  title?: string;
+  body?: string;
+}
+
+export function DestinationMatcherSection({ eyebrow, title, body }: DestinationMatcherSectionProps = {}) {
   const [selectedInterests, setSelectedInterests] = useState<string[]>(["Wildlife", "Romance"]);
 
   function toggleInterest(id: string) {
-    setSelectedInterests((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
+    setSelectedInterests((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   }
 
   return (
-    <section aria-labelledby="matcher-heading" className="bg-cream py-20 md:py-28 relative overflow-hidden border-t border-border/50">
+    <section
+      aria-labelledby="matcher-heading"
+      className="bg-cream py-20 md:py-28 relative overflow-hidden border-t border-border/50"
+    >
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 relative z-10">
         <div className="bg-background rounded-3xl border border-border overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12">
           {/* Left Matcher Column */}
           <div className="lg:col-span-7 p-8 sm:p-12 md:p-16 flex flex-col justify-between">
             <div>
               <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-                <Compass className="w-3.5 h-3.5" /> Tailor-Made Recommendation
+                <Compass className="w-3.5 h-3.5" /> {eyebrow || "Tailor-Made Recommendation"}
               </p>
-              <h2 id="matcher-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground leading-[1.12] mb-4">
-                Where should Kenya take you?
+              <h2
+                id="matcher-heading"
+                className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground leading-[1.12] mb-4"
+              >
+                {title || "Where should Kenya take you?"}
               </h2>
               <p className="text-foreground/75 text-base sm:text-lg leading-relaxed mb-8">
-                Tell us what you're looking for and our journey designers will hand-pick the exact lodges, conservancies, and coastlines tailored to your vision.
+                {body ||
+                  "Tell us what you're looking for and our journey designers will hand-pick the exact lodges, conservancies, and coastlines tailored to your vision."}
               </p>
 
               {/* Multi-Select Badges */}
@@ -110,9 +121,7 @@ export function DestinationMatcherSection() {
               <p className="font-serif text-2xl text-cream leading-snug">
                 "No two travellers are the same. We take the time to know you before sketching a single day."
               </p>
-              <p className="text-xs text-cream/70 mt-2 font-mono">
-                — The Baobab Collective Founders
-              </p>
+              <p className="text-xs text-cream/70 mt-2 font-mono">— The Baobab Collective Founders</p>
             </div>
           </div>
         </div>
