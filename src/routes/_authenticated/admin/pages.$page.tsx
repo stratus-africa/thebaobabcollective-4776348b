@@ -471,7 +471,11 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
       { name: "cta_label", label: "Hero — Primary Button Label", type: "text" },
 
       // ── 2. Destination Finder ───────────────────────────────────────────
-      { name: "show_finder", label: "Show Destination Finder (filter bar) section", type: "boolean" },
+      {
+        name: "show_finder",
+        label: "Show Destination Finder (filter bar) section",
+        type: "boolean",
+      },
       { name: "finder_eyebrow", label: "Destination Finder — Eyebrow", type: "text" },
       { name: "finder_title", label: "Destination Finder — Title", type: "text" },
       { name: "finder_body", label: "Destination Finder — Body", type: "textarea" },
@@ -513,13 +517,21 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
       { name: "stay_body", label: "Where You'll Stay — Description", type: "textarea" },
 
       // ── 7. Destination Combinations ─────────────────────────────────────
-      { name: "show_combinations", label: "Show Destination Combinations section", type: "boolean" },
+      {
+        name: "show_combinations",
+        label: "Show Destination Combinations section",
+        type: "boolean",
+      },
       { name: "combinations_eyebrow", label: "Combinations — Eyebrow", type: "text" },
       { name: "combinations_title", label: "Combinations — Title", type: "text" },
       { name: "combinations_body", label: "Combinations — Description", type: "textarea" },
 
       // ── 8. Matcher ──────────────────────────────────────────────────────
-      { name: "show_matcher", label: "Show 'Where Should Kenya Take You?' matcher", type: "boolean" },
+      {
+        name: "show_matcher",
+        label: "Show 'Where Should Kenya Take You?' matcher",
+        type: "boolean",
+      },
       { name: "matcher_eyebrow", label: "Destination Matcher — Eyebrow", type: "text" },
       { name: "matcher_title", label: "Destination Matcher — Title", type: "text" },
       { name: "matcher_body", label: "Destination Matcher — Description", type: "textarea" },
