@@ -55,15 +55,31 @@ export interface DestinationMetadata {
 }
 
 export const BEST_FOR_CATEGORIES: { id: BestForTag; label: string; description: string }[] = [
-  { id: "Wildlife", label: "Wildlife", description: "Unrivalled game viewing and legendary predator density" },
-  { id: "Beach", label: "Beach", description: "Pristine Swahili sands and turquoise Indian Ocean waters" },
-  { id: "Culture", label: "Culture", description: "Deep encounters with Maasai, Samburu, and Swahili heritage" },
+  {
+    id: "Wildlife",
+    label: "Wildlife",
+    description: "Unrivalled game viewing and legendary predator density",
+  },
+  {
+    id: "Beach",
+    label: "Beach",
+    description: "Pristine Swahili sands and turquoise Indian Ocean waters",
+  },
+  {
+    id: "Culture",
+    label: "Culture",
+    description: "Deep encounters with Maasai, Samburu, and Swahili heritage",
+  },
   {
     id: "Romance",
     label: "Romance",
     description: "Intimate star beds, secluded sanctuaries, and lantern-lit bush dinners",
   },
-  { id: "Family", label: "Family", description: "Thoughtfully paced adventures designed for all generations" },
+  {
+    id: "Family",
+    label: "Family",
+    description: "Thoughtfully paced adventures designed for all generations",
+  },
   {
     id: "Adventure",
     label: "Adventure",
@@ -466,7 +482,7 @@ export function enrichDestination(dbDest: any): DestinationMetadata {
   }
 
   // Category fallback
-  let destinationCategory: DestinationCategory =
+  const destinationCategory: DestinationCategory =
     (dbDest.destination_category as DestinationCategory) ||
     meta?.destinationCategory ||
     (region.includes("Ocean") || region.includes("Coast")
