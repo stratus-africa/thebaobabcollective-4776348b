@@ -1,31 +1,41 @@
+import { promises as fs } from "node:fs";
 import { createFileRoute } from "@tanstack/react-router";
-import { isSafePublicMediaPath } from "@/lib/public-media-path";
+import { getMediaMimeType, resolveLocalMediaPath } from "@/lib/local-media";
 import { getSiteSettings } from "@/lib/site-settings.functions";
 import { buildWatermarkSvg, resolveWatermarkPolicy } from "@/lib/watermark";
 
-// Public media proxy — streams files from the private `journal-images`
-// Supabase Storage bucket using the admin client. Keeps the bucket private
-// while giving uploaded images a stable, public URL we can store in the DB.
 export const Route = createFileRoute("/api/public/media/$")({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const path = (params as any)._splat as string | undefined;
-        if (!path || !isSafePublicMediaPath(path)) {
+        const rawPath = (params as any)._splat as string | undefined;
+        if (!rawPath) {
           return new Response("Not found", { status: 404 });
         }
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data, error } = await supabaseAdmin.storage.from("journal-images").download(path);
-        if (error || !data) return new Response("Not found", { status: 404 });
+        const safePath = rawPath.trim();
+        if (!safePath || safePath.includes("..") || safePath.startsWith("/")) {
+          return new Response("Invalid path", { status: 400 });
+        }
 
-        const buf = await data.arrayBuffer();
+        const localPath = resolveLocalMediaPath(safePath);
+        if (!localPath) {
+          return new Response("Invalid path", { status: 400 });
+        }
+
+        let fileBuffer: Buffer;
+        try {
+          fileBuffer = await fs.readFile(localPath);
+        } catch {
+          return new Response("Not found", { status: 404 });
+        }
+
         const settings = await getSiteSettings();
-        const policy = resolveWatermarkPolicy(settings.branding, path);
+        const policy = resolveWatermarkPolicy(settings.branding, safePath);
 
         if (policy.enabled) {
-          const mime = data.type || "image/jpeg";
-          const base64 = Buffer.from(buf).toString("base64");
+          const mime = getMediaMimeType(safePath) || "image/jpeg";
+          const base64 = fileBuffer.toString("base64");
           const svg = buildWatermarkSvg({
             mode: policy.mode,
             text: policy.text,
@@ -44,10 +54,12 @@ export const Route = createFileRoute("/api/public/media/$")({
           });
         }
 
-        return new Response(buf, {
+        const contentType = getMediaMimeType(safePath);
+
+        return new Response(fileBuffer, {
           status: 200,
           headers: {
-            "Content-Type": data.type || "application/octet-stream",
+            "Content-Type": contentType,
             "Cache-Control": "public, max-age=31536000, immutable",
           },
         });
