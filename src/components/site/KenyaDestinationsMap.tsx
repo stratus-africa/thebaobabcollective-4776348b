@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 export interface KenyaDestinationsMapProps {
   destinations: DestinationMetadata[];
+  mapImage?: string | null;
   customPositions?: Record<string, { left: number; top: number }> | null;
   onSavePositions?: (positions: Record<string, { left: number; top: number }>) => Promise<void> | void;
   isAdmin?: boolean;
@@ -33,6 +34,7 @@ export interface KenyaDestinationsMapProps {
 
 export function KenyaDestinationsMap({
   destinations,
+  mapImage,
   customPositions: initialCustomPositions,
   onSavePositions,
   isAdmin: forcedIsAdmin,
@@ -437,7 +439,7 @@ export function KenyaDestinationsMap({
             >
               {/* Reference Map Image Layer */}
               <img
-                src="/maps/kenya-destinations-map.gif"
+                src={mapImage || "/maps/kenya-destinations-map.gif"}
                 alt="Map of Kenya showing major destinations and geographic regions"
                 className="absolute inset-0 w-full h-full object-cover select-none rounded-xl pointer-events-none"
                 onError={(e) => {
