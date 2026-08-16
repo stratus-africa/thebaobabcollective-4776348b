@@ -27,7 +27,7 @@ export const getJourneyCategories = createServerFn({ method: "GET" }).handler(as
 });
 
 export const getJourneyBySlug = createServerFn({ method: "GET" })
-  .inputValidator((d: { slug: string }) => d)
+  .validator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
     const supabase = publicClient();
     const { data: cat } = await supabase
@@ -60,7 +60,7 @@ export const getArticles = createServerFn({ method: "GET" }).handler(async () =>
 });
 
 export const getArticleBySlug = createServerFn({ method: "GET" })
-  .inputValidator((d: { slug: string }) => d)
+  .validator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
     const supabase = publicClient();
     const nowIso = new Date().toISOString();
@@ -81,7 +81,7 @@ export const getLodges = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 export const getLodgeBySlug = createServerFn({ method: "GET" })
-  .inputValidator((d: { slug: string }) => d)
+  .validator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
     const supabase = publicClient();
     const { data: lodge } = await supabase
@@ -120,7 +120,7 @@ export const getFaqs = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 export const getItineraryBySlug = createServerFn({ method: "GET" })
-  .inputValidator((d: { slug: string }) => d)
+  .validator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
     const supabase = publicClient();
     const { data: it } = await supabase
@@ -133,7 +133,7 @@ export const getItineraryBySlug = createServerFn({ method: "GET" })
   });
 
 export const getDestinationBySlug = createServerFn({ method: "GET" })
-  .inputValidator((d: { slug: string }) => d)
+  .validator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
     const supabase = publicClient();
     const { data: dest } = await supabase
