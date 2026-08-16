@@ -1,9 +1,24 @@
-import { promises as fs } from "node:fs";
+import { promises as fs, constants as fsConstants } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { isSafePublicMediaPath } from "./public-media-path";
 
-export const LOCAL_MEDIA_ROOT = path.resolve(process.cwd(), "public", "uploads");
-export const LOCAL_CMS_MEDIA_DIR = path.join(LOCAL_MEDIA_ROOT, "cms");
+const DEFAULT_MEDIA_ROOT = path.resolve(process.cwd(), "public", "uploads");
+const FALLBACK_MEDIA_ROOT = path.join(os.tmpdir(), "baobab-collective-media");
+let activeMediaRoot: string | null = null;
+
+export function getLocalMediaRoot(): string {
+  const configuredRoot = process.env.MEDIA_UPLOAD_ROOT?.trim();
+  if (configuredRoot) return path.resolve(configuredRoot);
+
+  if (activeMediaRoot) return activeMediaRoot;
+
+  return DEFAULT_MEDIA_ROOT;
+}
+
+export function getLocalCmsMediaDir(): string {
+  return path.join(getLocalMediaRoot(), "cms");
+}
 
 export function getMediaMimeType(fileName: string): string {
   const lower = fileName.toLowerCase();
@@ -43,7 +58,7 @@ export function resolveLocalMediaPath(rawPath: string | null | undefined): strin
 
   if (!isSafePublicMediaPath(normalized)) return null;
 
-  const root = LOCAL_MEDIA_ROOT;
+  const root = getLocalMediaRoot();
   const resolved = path.resolve(root, normalized);
   if (resolved !== root && !resolved.startsWith(root + path.sep)) return null;
 
@@ -51,12 +66,33 @@ export function resolveLocalMediaPath(rawPath: string | null | undefined): strin
 }
 
 export async function ensureLocalMediaDirectory(): Promise<string> {
-  await fs.mkdir(LOCAL_CMS_MEDIA_DIR, { recursive: true });
-  return LOCAL_CMS_MEDIA_DIR;
+  const candidates = [
+    process.env.MEDIA_UPLOAD_ROOT?.trim() ? path.resolve(process.env.MEDIA_UPLOAD_ROOT.trim()) : null,
+    DEFAULT_MEDIA_ROOT,
+    FALLBACK_MEDIA_ROOT,
+  ].filter((value): value is string => Boolean(value));
+
+  const uniqueCandidates = [...new Set(candidates)];
+
+  for (const root of uniqueCandidates) {
+    try {
+      await fs.mkdir(root, { recursive: true });
+      await fs.access(root, fsConstants.W_OK);
+      activeMediaRoot = root;
+      if (root !== DEFAULT_MEDIA_ROOT) {
+        process.env.MEDIA_UPLOAD_ROOT = root;
+      }
+      return path.join(root, "cms");
+    } catch {
+      continue;
+    }
+  }
+
+  throw new Error("No writable media upload directory is available.");
 }
 
 export async function listLocalMediaRecords(prefix = "cms") {
-  const baseDir = path.resolve(LOCAL_MEDIA_ROOT, prefix);
+  const baseDir = path.resolve(getLocalMediaRoot(), prefix);
   await fs.mkdir(baseDir, { recursive: true });
 
   const entries = await fs.readdir(baseDir, { withFileTypes: true });
