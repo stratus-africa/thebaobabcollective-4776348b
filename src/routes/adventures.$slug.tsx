@@ -199,20 +199,6 @@ function AdminAdventureEditor() {
     </div>
   );
 }
-
-
-            {a.shortDescription && (
-              <p className="text-lg md:text-xl text-cream/90 max-w-2xl leading-relaxed mb-6 font-sans">
-                {a.shortDescription}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-3 text-xs text-cream/90 mb-8">
-              {a.region && (
-                <span className="flex items-center gap-1.5 bg-forest/80 backdrop-blur px-3.5 py-1.5 rounded-full border border-gold/30">
-                  <MapPin className="w-3.5 h-3.5 text-gold" /> {a.region}
-                </span>
-              )}
               {a.nights && (
                 <span className="flex items-center gap-1.5 bg-forest/80 backdrop-blur px-3.5 py-1.5 rounded-full border border-gold/30">
                   <Calendar className="w-3.5 h-3.5 text-gold" /> {a.nights}
