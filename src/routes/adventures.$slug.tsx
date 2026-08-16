@@ -334,59 +334,80 @@ function AdventureDetail() {
                 note="We deliberately slow the pace on this journey to allow for extended morning walking safaris and unhurried bush breakfasts where you can truly take in Kenya's quiet wilderness."
               />
 
-              {/* Adventure Highlights */}
-              {a.highlights?.length > 0 && (
+              {/* Adventure Highlights & YOUR JOURNEY Side-by-Side */}
+              {a.highlights?.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+                  {/* Left Column: Adventure Highlights */}
+                  <div>
+                    <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">Adventure Highlights</h2>
+                    <ul className="space-y-3.5">
+                      {a.highlights.map((h) => (
+                        <li
+                          key={h}
+                          className="flex gap-3.5 text-foreground/85 bg-cream/70 rounded-xl p-5 border border-border/70"
+                        >
+                          <Check className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+                          <span className="text-sm sm:text-base leading-snug font-medium">{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Right Column: YOUR JOURNEY / ITINERARY */}
+                  <div>
+                    <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">YOUR JOURNEY</h2>
+                    {a.itinerary && a.itinerary.length > 0 ? (
+                      <div className="space-y-6">
+                        {a.itinerary.map((step, idx) => (
+                          <div key={idx} className="border-l-2 border-gold pl-5 py-1.5">
+                            <span className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold block mb-1">
+                              {step.day}
+                            </span>
+                            <h3 className="font-serif text-xl sm:text-2xl text-foreground mb-1.5">{step.title}</h3>
+                            <p className="text-foreground/75 leading-relaxed text-sm">{step.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-5">
+                        {(a.highlights || []).slice(0, 4).map((h, i) => (
+                          <div key={h} className="flex gap-4 border-l-2 border-gold pl-5 py-1.5">
+                            <div className="shrink-0">
+                              <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold">Phase</p>
+                              <p className="font-serif text-2xl text-foreground">{String(i + 1).padStart(2, "0")}</p>
+                            </div>
+                            <div>
+                              <h3 className="font-serif text-lg sm:text-xl text-foreground mb-1">{h}</h3>
+                              <p className="text-foreground/70 text-xs sm:text-sm leading-relaxed">
+                                Days of immersive guiding, intimate camps and conservation-led encounters crafted around
+                                this chapter of your journey.
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Fallback if no highlights: render Your Journey full width */
                 <div>
-                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">Adventure Highlights</h2>
-                  <ul className="grid sm:grid-cols-2 gap-4">
-                    {a.highlights.map((h) => (
-                      <li
-                        key={h}
-                        className="flex gap-3.5 text-foreground/85 bg-cream/70 rounded-xl p-5 border border-border/70"
-                      >
-                        <Check className="w-5 h-5 text-gold mt-0.5 shrink-0" />
-                        <span className="text-sm sm:text-base leading-snug font-medium">{h}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-8">YOUR JOURNEY</h2>
+                  {a.itinerary && a.itinerary.length > 0 ? (
+                    <div className="space-y-8">
+                      {a.itinerary.map((step, idx) => (
+                        <div key={idx} className="border-l-2 border-gold pl-6 md:pl-8 py-2">
+                          <span className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold block mb-1">
+                            {step.day}
+                          </span>
+                          <h3 className="font-serif text-2xl text-foreground mb-2">{step.title}</h3>
+                          <p className="text-foreground/75 leading-relaxed text-sm sm:text-base">{step.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               )}
-
-              {/* YOUR JOURNEY / ITINERARY */}
-              <div>
-                <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-8">YOUR JOURNEY</h2>
-                {a.itinerary && a.itinerary.length > 0 ? (
-                  <div className="space-y-8">
-                    {a.itinerary.map((step, idx) => (
-                      <div key={idx} className="border-l-2 border-gold pl-6 md:pl-8 py-2">
-                        <span className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold block mb-1">
-                          {step.day}
-                        </span>
-                        <h3 className="font-serif text-2xl text-foreground mb-2">{step.title}</h3>
-                        <p className="text-foreground/75 leading-relaxed text-sm sm:text-base">{step.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {(a.highlights || []).slice(0, 4).map((h, i) => (
-                      <div key={h} className="flex gap-5 border-l-2 border-gold pl-6 py-2">
-                        <div className="shrink-0">
-                          <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold">Phase</p>
-                          <p className="font-serif text-3xl text-foreground">{String(i + 1).padStart(2, "0")}</p>
-                        </div>
-                        <div>
-                          <h3 className="font-serif text-xl sm:text-2xl text-foreground mb-1.5">{h}</h3>
-                          <p className="text-foreground/70 text-sm leading-relaxed">
-                            Days of immersive guiding, intimate camps and conservation-led encounters crafted around
-                            this chapter of your journey.
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
 
               {/* WHERE YOU'LL STAY */}
               {relatedLodges.length > 0 && (
@@ -432,94 +453,140 @@ function AdventureDetail() {
                 </div>
               )}
 
-              {/* DYNAMIC INCLUSIONS & EXCLUSIONS */}
-              {(included.length > 0 || notIncluded.length > 0) && (
-                <div className="space-y-8">
-                  {included.length > 0 && (
-                    <div className="bg-forest text-forest-foreground p-8 md:p-10 rounded-2xl border border-gold/20 shadow-lg">
+              {/* DYNAMIC INCLUSIONS & EXCLUSIONS — side-by-side cards */}
+              {(() => {
+                const displayIncluded =
+                  included.length > 0
+                    ? included
+                    : [
+                        "Expert private guide for the full duration",
+                        "All game drives and bush activities",
+                        "Full-board accommodation at all camps",
+                        "All park and conservancy fees",
+                        "Airport and airstrip transfers",
+                        "Shared charter flights between destinations (where applicable)",
+                        "Sundowner drinks and bush breakfasts",
+                        "All laundry services at camp",
+                      ];
+                const displayNotIncluded =
+                  notIncluded.length > 0
+                    ? notIncluded
+                    : [
+                        "International and domestic scheduled flights",
+                        "Travel insurance (required)",
+                        "Visas and passport fees",
+                        "Tips and gratuities",
+                        "Personal shopping and souvenirs",
+                        "Spa and premium alcohol beyond standard offerings",
+                      ];
+                return (
+                  <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+                    {/* Left Card: WHAT'S INCLUDED */}
+                    <div className="bg-forest text-forest-foreground p-6 sm:p-8 md:p-10 rounded-2xl border border-gold/20 shadow-lg flex flex-col">
                       <h2 className="font-serif text-2xl sm:text-3xl text-cream mb-6 flex items-center gap-3">
                         <Check className="w-6 h-6 text-gold" /> WHAT'S INCLUDED
                       </h2>
-                      <ul className="grid sm:grid-cols-2 gap-4 text-sm text-forest-foreground/90 font-sans">
-                        {included.map((item, idx) => (
-                          <li key={`${item}-${idx}`} className="flex gap-3 items-start">
-                            <span className="text-gold font-bold">•</span>
+                      <ul className="space-y-3.5 text-sm text-forest-foreground/90 font-sans">
+                        {displayIncluded.map((item, idx) => (
+                          <li key={`inc-${idx}`} className="flex gap-3 items-start">
+                            <span className="text-gold font-bold shrink-0">•</span>
                             <span className="leading-snug">{item}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
-                  )}
 
-                  {notIncluded.length > 0 && (
-                    <div className="border border-border bg-cream/50 p-8 md:p-10 rounded-2xl">
+                    {/* Right Card: WHAT'S NOT INCLUDED */}
+                    <div className="border border-border bg-cream/50 p-6 sm:p-8 md:p-10 rounded-2xl flex flex-col">
                       <h2 className="font-serif text-2xl text-foreground mb-6 flex items-center gap-3">
                         <X className="w-6 h-6 text-terracotta" /> WHAT'S NOT INCLUDED
                       </h2>
-                      <ul className="grid sm:grid-cols-2 gap-4 text-sm text-foreground/80 font-sans">
-                        {notIncluded.map((item, idx) => (
-                          <li key={`${item}-${idx}`} className="flex gap-3 items-start">
-                            <span className="text-terracotta font-bold">•</span>
+                      <ul className="space-y-3.5 text-sm text-foreground/80 font-sans">
+                        {displayNotIncluded.map((item, idx) => (
+                          <li key={`exc-${idx}`} className="flex gap-3 items-start">
+                            <span className="text-terracotta font-bold shrink-0">•</span>
                             <span className="leading-snug">{item}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* YOUR JOURNEY'S IMPACT */}
-              <div className="rounded-2xl border border-border bg-cream/40 p-8 md:p-10 space-y-4">
-                <div className="flex items-center gap-2 text-gold">
-                  <Shield className="w-5 h-5" />
-                  <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
-                    YOUR JOURNEY'S IMPACT
-                  </span>
-                </div>
-                <h3 className="font-serif text-2xl md:text-3xl text-foreground">Conservation & Local Stewardship</h3>
-                <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
-                  By embarking on this journey, you directly support local conservancies, anti-poaching initiatives, and
-                  indigenous guides who steward Kenya's wildest landscapes.
-                </p>
-              </div>
-
-              {/* THIS JOURNEY TAKES YOU TO (Related Destinations) */}
-              {(relatedDestinations.length > 0 || fallbackDestinations.length > 0) && (
-                <div>
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">DESTINATIONS</p>
-                  <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">THIS JOURNEY TAKES YOU TO</h2>
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    {(relatedDestinations.length > 0 ? relatedDestinations : fallbackDestinations).map((dest: any) => (
-                      <Link
-                        key={dest.slug || dest.id}
-                        to="/destinations/$slug"
-                        params={{ slug: dest.slug || dest.id }}
-                        className="group border border-border bg-background rounded-xl p-5 hover:border-gold/60 transition-all flex flex-col justify-between"
-                      >
-                        <div>
-                          {dest.image && (
-                            <img
-                              src={dest.image}
-                              alt={dest.name}
-                              className="w-full aspect-[16/10] object-cover rounded-lg mb-4 group-hover:scale-102 transition-transform"
-                            />
-                          )}
-                          <h3 className="font-serif text-xl text-foreground group-hover:text-gold transition-colors mb-1">
-                            {dest.name}
-                          </h3>
-                          <p className="text-xs text-foreground/60 mb-3">{dest.region}</p>
-                          <p className="text-xs text-foreground/75 line-clamp-2 leading-relaxed">
-                            {dest.short_description || dest.shortDescription || dest.description}
-                          </p>
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-gold font-semibold uppercase tracking-[0.2em]">
-                          <span>Explore Destination</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </div>
-                      </Link>
-                    ))}
                   </div>
+                );
+              })()}
+
+              {/* DESTINATIONS & YOUR JOURNEY'S IMPACT SIDE-BY-SIDE */}
+              {relatedDestinations.length > 0 || fallbackDestinations.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-start">
+                  {/* Left: THIS JOURNEY TAKES YOU TO (Related Destinations) */}
+                  <div>
+                    <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">DESTINATIONS</p>
+                    <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-6">THIS JOURNEY TAKES YOU TO</h2>
+                    <div className="space-y-5">
+                      {(relatedDestinations.length > 0 ? relatedDestinations : fallbackDestinations).map(
+                        (dest: any) => (
+                          <Link
+                            key={dest.slug || dest.id}
+                            to="/destinations/$slug"
+                            params={{ slug: dest.slug || dest.id }}
+                            className="group border border-border bg-background rounded-xl p-5 hover:border-gold/60 transition-all flex flex-col justify-between"
+                          >
+                            <div>
+                              {dest.image && (
+                                <img
+                                  src={dest.image}
+                                  alt={dest.name}
+                                  className="w-full aspect-[16/10] object-cover rounded-lg mb-4 group-hover:scale-102 transition-transform"
+                                />
+                              )}
+                              <h3 className="font-serif text-xl text-foreground group-hover:text-gold transition-colors mb-1">
+                                {dest.name}
+                              </h3>
+                              <p className="text-xs text-foreground/60 mb-2">{dest.region}</p>
+                              <p className="text-xs text-foreground/75 line-clamp-2 leading-relaxed">
+                                {dest.short_description || dest.shortDescription || dest.description}
+                              </p>
+                            </div>
+                            <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-gold font-semibold uppercase tracking-[0.2em]">
+                              <span>Explore Destination</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </div>
+                          </Link>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: YOUR JOURNEY'S IMPACT */}
+                  <div className="rounded-2xl border border-border bg-cream/40 p-8 md:p-10 space-y-4">
+                    <div className="flex items-center gap-2 text-gold">
+                      <Shield className="w-5 h-5" />
+                      <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
+                        YOUR JOURNEY'S IMPACT
+                      </span>
+                    </div>
+                    <h3 className="font-serif text-2xl md:text-3xl text-foreground">
+                      Conservation & Local Stewardship
+                    </h3>
+                    <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
+                      By embarking on this journey, you directly support local conservancies, anti-poaching initiatives,
+                      and indigenous guides who steward Kenya's wildest landscapes.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Fallback if no destinations: render Impact card full width */
+                <div className="rounded-2xl border border-border bg-cream/40 p-8 md:p-10 space-y-4">
+                  <div className="flex items-center gap-2 text-gold">
+                    <Shield className="w-5 h-5" />
+                    <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-foreground">
+                      YOUR JOURNEY'S IMPACT
+                    </span>
+                  </div>
+                  <h3 className="font-serif text-2xl md:text-3xl text-foreground">Conservation & Local Stewardship</h3>
+                  <p className="text-foreground/75 text-sm md:text-base leading-relaxed font-sans">
+                    By embarking on this journey, you directly support local conservancies, anti-poaching initiatives,
+                    and indigenous guides who steward Kenya's wildest landscapes.
+                  </p>
                 </div>
               )}
             </div>
