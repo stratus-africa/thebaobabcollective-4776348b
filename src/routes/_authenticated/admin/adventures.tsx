@@ -537,7 +537,6 @@ function AdminAdventuresDashboard() {
               </span>
             )}
             <Button
-              onClick={() => openEditor("new")}
               type="button"
               onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } })}
               className="bg-forest text-forest-foreground hover:bg-forest/90 shadow-sm"
@@ -708,7 +707,6 @@ function AdminAdventuresDashboard() {
               </p>
               <div className="pt-2">
                 <Button
-                  onClick={() => openEditor("new")}
                   type="button"
                   onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: "new" } })}
                   className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm"
@@ -827,7 +825,6 @@ function AdminAdventuresDashboard() {
                     {/* Three-Dot Actions Dropdown */}
                     <AdventureCardDropdown
                       adventure={item}
-                      onEdit={() => openEditor(item.slug)}
                       onEdit={() => navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } })}
                       onDuplicate={() => handleDuplicate(item.slug)}
                       onToggleFeatured={() => handleToggleFeatured(item.slug)}
@@ -860,11 +857,10 @@ function AdminAdventuresDashboard() {
                   <div>
                     {/* Title */}
                     <h3 className="font-serif text-xl md:text-2xl text-foreground leading-snug group-hover:text-gold transition-colors">
-                      <a href={`/admin/adventures/${encodeURIComponent(item.slug)}`}>
                       <Link to="/admin/adventures/$slug" params={{ slug: item.slug }}>
                         {item.name || "Untitled Adventure"}
-                      </a>
                       </Link>
+
                     </h3>
 
                     {/* Metadata line: Region · Nights · Difficulty · Terrain */}
@@ -953,7 +949,6 @@ function AdminAdventuresDashboard() {
                         size="sm"
                         variant="outline"
                         className="h-8 px-3 text-xs border-border hover:bg-cream"
-                        onClick={() => openEditor(item.slug)}
                         type="button"
                         onClick={() => navigate({ to: "/admin/adventures/$slug", params: { slug: item.slug } })}
                       >

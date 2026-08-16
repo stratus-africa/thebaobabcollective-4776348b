@@ -125,6 +125,7 @@ function AdminAdventureEdit() {
     setSaving(true);
     try {
       let updatedSignatures = [...draft.signatures];
+      let finalSlug = adventure.slug;
       const stampedAdventure: AdventuresSignature = {
         ...adventure,
         status: adventure.status || "published",
@@ -132,7 +133,7 @@ function AdminAdventureEdit() {
       };
 
       if (isNew) {
-        const finalSlug = buildAdventureSlug(
+        finalSlug = buildAdventureSlug(
           stampedAdventure.slug || stampedAdventure.name,
           draft.signatures.map((signature) => signature.slug),
         );
