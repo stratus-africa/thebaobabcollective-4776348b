@@ -1,213 +1,205 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  ArrowRight,
-  Check,
-  Calendar,
-  MapPin,
-  Users,
-  Sparkles,
-  Mountain,
-  X,
-  Shield,
-  Compass,
-  Bed,
-  Layers,
-  ChevronRight,
-} from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { EnquireDialog } from "@/components/site/EnquireDialog";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { ShareButtons } from "@/components/site/ShareButtons";
-import { TheBaobabPick } from "@/components/site/TheBaobabPick";
-import { AdventureCard, getHumanDifficulty } from "@/components/site/AdventureCard";
-import { getAdventuresPage } from "@/lib/adventures.functions";
-import { getDestinations, getLodges } from "@/lib/cms.functions";
-import { KENYA_DESTINATIONS_DATA, DESTINATION_COMBINATIONS } from "@/lib/destinations.data";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { getAdventureEditorDraft, getAdventuresPage, saveAdventuresPage, type AdventuresSignature } from "@/lib/adventures.functions";
 
-const adventuresQuery = queryOptions({
-  queryKey: ["adventures-page"],
+const adventuresQuery = {
+  queryKey: ["admin-adventures-page"],
   queryFn: () => getAdventuresPage(),
-});
+};
 
 export const Route = createFileRoute("/_authenticated/admin/adventures/$slug")({
   loader: async ({ params, context }) => {
     const page = await context.queryClient.ensureQueryData(adventuresQuery);
-    const adv = page.signatures.find((s) => s.slug === params.slug);
-    if (!adv) throw notFound();
-    return { adv };
+    const isNew = params.slug === "new";
+    const adventure = isNew ? getAdventureEditorDraft(page, "new") : page.signatures.find((s) => s.slug === params.slug);
+    if (!adventure && !isNew) throw notFound();
+    return { adventure: adventure ?? getAdventureEditorDraft(page, "new"), isNew };
   },
-  head: ({ loaderData, params }) => {
-    const a = loaderData?.adv;
-    const title = a ? `${a.name} — Kenya Safari Adventures | The Baobab Collective` : "Adventure";
-    const desc = a?.shortDescription || (a?.description ? a.description.slice(0, 160) : "A signature Kenya adventure.");
-    const url = `https://thebaobabcollective.co.uk/adventures/${params.slug}`;
-    const ldTrip = a
-      ? {
-          "@context": "https://schema.org",
-          "@type": "TouristTrip",
-          name: a.name,
-          description: a.description,
-          image: a.image,
-          touristType: a.difficulty,
-          url,
-        }
-      : null;
-    const ldCrumbs = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
-        { "@type": "ListItem", position: 2, name: "Adventures", item: "https://thebaobabcollective.co.uk/adventures" },
-        { "@type": "ListItem", position: 3, name: a?.name ?? params.slug, item: url },
-      ],
-    };
-    return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "article" },
-        { property: "og:url", content: url },
-        ...(a?.image ? [{ property: "og:image", content: a.image }] : []),
-        { name: "twitter:card", content: "summary_large_image" },
-        ...(a?.image ? [{ name: "twitter:image", content: a.image }] : []),
-      ],
-      links: [{ rel: "canonical", href: url }],
-      scripts: [
-        ...(ldTrip ? [{ type: "application/ld+json", children: JSON.stringify(ldTrip) }] : []),
-        { type: "application/ld+json", children: JSON.stringify(ldCrumbs) },
-      ],
-    };
-  },
-  notFoundComponent: () => (
-    <div className="bg-background min-h-screen">
-      <Navbar />
-      <div className="max-w-3xl mx-auto px-6 py-32 text-center">
-        <h1 className="font-serif text-4xl mb-4">Adventure not found</h1>
-        <Link to="/adventures" className="text-gold underline">
-          Browse all adventures
-        </Link>
-      </div>
-      <Footer />
-    </div>
-  ),
-  errorComponent: ({ error, reset }) => {
-    const router = useRouter();
-    return (
-      <div className="bg-background min-h-screen">
-        <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-32 text-center">
-          <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-          <p className="text-foreground/70 mb-6">{error.message}</p>
-          <button
-            onClick={() => {
-              reset();
-              router.invalidate();
-            }}
-            className="bg-gold text-gold-foreground px-6 py-3 uppercase tracking-[0.25em] text-[11px]"
-          >
-            Retry
-          </button>
-        </div>
-        <Footer />
-      </div>
-    );
-  },
-  component: AdventureDetail,
+  component: AdminAdventureEditor,
 });
 
-function AdventureDetail() {
-  const { slug } = Route.useParams();
-  const { data: page } = useSuspenseQuery(adventuresQuery);
-  const a = page.signatures.find((s) => s.slug === slug)!;
-  const url =
-    typeof window !== "undefined" ? window.location.href : `https://thebaobabcollective.co.uk/adventures/${slug}`;
+function AdminAdventureEditor() {
+  const navigate = useNavigate();
+  const fetchPage = useServerFn(getAdventuresPage);
+  const savePage = useServerFn(saveAdventuresPage);
+  const { adventure: initialAdventure, isNew } = Route.useLoaderData();
+  const [draft, setDraft] = useState<AdventuresSignature>(initialAdventure);
+  const [saving, setSaving] = useState(false);
 
-  // Fetch destinations and lodges to render relationships dynamically
-  const fetchDestinationsFn = useServerFn(getDestinations);
-  const { data: dbDestinations } = useQuery({
-    queryKey: ["destinations"],
-    queryFn: () => fetchDestinationsFn(),
+  const { data: page } = useQuery({
+    queryKey: ["admin-adventures-page"],
+    queryFn: () => fetchPage(),
+    initialData: {
+      hero: { eyebrow: "", headline: "", subhead: "", image: "", imageAlt: "" },
+      cta: { eyebrow: "", headline: "", body: "", buttonLabel: "" },
+      signatures: [initialAdventure],
+    },
   });
 
-  const fetchLodgesFn = useServerFn(getLodges);
-  const { data: dbLodges } = useQuery({
-    queryKey: ["lodges"],
-    queryFn: () => fetchLodgesFn(),
-  });
+  useEffect(() => {
+    setDraft(initialAdventure);
+  }, [initialAdventure]);
 
-  const diffMeta = getHumanDifficulty(a.difficulty);
+  const onChange = <K extends keyof AdventuresSignature>(field: K, value: AdventuresSignature[K]) => {
+    setDraft((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const included = (
-    Array.isArray(a.included) ? a.included : typeof a.included === "string" ? (a.included as string).split("\n") : []
-  )
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const currentPage = page ?? { hero: { eyebrow: "", headline: "", subhead: "", image: "", imageAlt: "" }, cta: { eyebrow: "", headline: "", body: "", buttonLabel: "" }, signatures: [] };
+      const nextPage = {
+        ...currentPage,
+        signatures: [
+          ...currentPage.signatures.filter((item) => item.slug !== draft.slug && item.slug !== "new"),
+          {
+            ...draft,
+            slug: draft.slug || (isNew ? "new" : initialAdventure.slug),
+            status: draft.status ?? "draft",
+            highlights: draft.highlights ?? [],
+            included: draft.included ?? [],
+            notIncluded: draft.notIncluded ?? [],
+          },
+        ],
+      };
 
-  const notIncluded = (
-    Array.isArray(a.notIncluded)
-      ? a.notIncluded
-      : typeof a.notIncluded === "string"
-        ? (a.notIncluded as string).split("\n")
-        : []
-  )
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  // Match destinations dynamically from adventure.destinations or region
-  const relatedDestinations = (dbDestinations || []).filter((d) => {
-    if (a.destinations && a.destinations.length > 0) {
-      return a.destinations.some(
-        (target) =>
-          d.name.toLowerCase().includes(target.toLowerCase()) || d.slug.toLowerCase().includes(target.toLowerCase()),
-      );
+      await savePage(nextPage);
+      navigate({ to: "/admin/adventures" });
+    } finally {
+      setSaving(false);
     }
-    return a.region && d.region.toLowerCase().includes(a.region.toLowerCase());
-  });
-
-  // Fallback to static Kenya destinations data if DB destinations are empty
-  const fallbackDestinations = KENYA_DESTINATIONS_DATA.filter((d) => {
-    if (a.destinations && a.destinations.length > 0) {
-      return a.destinations.some((target) => d.name.toLowerCase().includes(target.toLowerCase()));
-    }
-    return a.region && d.region.toLowerCase().includes(a.region.toLowerCase());
-  });
-
-  // Related lodges
-  const relatedLodges = (dbLodges || []).filter((l) => {
-    if (a.lodges && a.lodges.length > 0) {
-      return a.lodges.some((target) => l.name.toLowerCase().includes(target.toLowerCase()));
-    }
-    return a.region && l.location?.toLowerCase().includes(a.region.toLowerCase());
-  });
-
-  // Similar adventures
-  const similarAdventures = page.signatures
-    .filter((other) => other.slug !== a.slug && (other.region === a.region || other.difficulty === a.difficulty))
-    .slice(0, 3);
+  };
 
   return (
-    <div className="bg-background min-h-screen">
-      <Navbar />
-      <main>
-        {/* Editorial Hero */}
-        <section className="relative h-[78vh] min-h-[540px] flex items-end">
-          <img src={a.image} alt={a.imageAlt || a.name} className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-forest/95 via-black/45 to-black/20" />
+    <div className="space-y-6 pb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-background p-5 md:p-6 shadow-sm">
+        <div className="space-y-1">
+          <Link
+            to="/admin/adventures"
+            className="inline-flex items-center gap-1.5 text-xs text-foreground/60 hover:text-gold transition-colors font-medium mb-1"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Adventures
+          </Link>
+          <h1 className="font-serif text-3xl text-foreground">{isNew ? "New Adventure" : "Edit Adventure"}</h1>
+        </div>
 
-          <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-16 text-cream w-full">
-            <Link
-              to="/adventures"
-              className="text-[11px] tracking-[0.3em] uppercase text-gold mb-4 inline-flex items-center gap-1.5 hover:underline font-semibold"
-            >
-              ← Back to All Signature Adventures
-            </Link>
+        <Button onClick={handleSave} disabled={saving} className="bg-gold text-gold-foreground hover:bg-gold/90 shadow-sm">
+          {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+          {saving ? "Saving…" : "Save Adventure"}
+        </Button>
+      </div>
 
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl leading-[1.05] mb-4 max-w-4xl">{a.name}</h1>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
+          <div>
+            <Label className="mb-2 block text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+              Adventure Name
+            </Label>
+            <Input value={draft.name} onChange={(e) => onChange("name", e.target.value)} placeholder="e.g. Great Migration & Beyond" />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Region</Label>
+              <Input value={draft.region} onChange={(e) => onChange("region", e.target.value)} placeholder="Kenya" />
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Terrain</Label>
+              <Input value={draft.terrain} onChange={(e) => onChange("terrain", e.target.value)} placeholder="Savannah & River" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Nights</Label>
+              <Input value={draft.nights} onChange={(e) => onChange("nights", e.target.value)} placeholder="7 nights" />
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Difficulty</Label>
+              <Input value={draft.difficulty} onChange={(e) => onChange("difficulty", e.target.value)} placeholder="Moderate" />
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Slug</Label>
+            <Input value={draft.slug} onChange={(e) => onChange("slug", e.target.value)} placeholder="great-migration-and-beyond" />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Short Description</Label>
+            <Textarea rows={3} value={draft.shortDescription ?? ""} onChange={(e) => onChange("shortDescription", e.target.value)} placeholder="A short summary shown on cards and listings." />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Full Description</Label>
+            <Textarea rows={8} value={draft.description} onChange={(e) => onChange("description", e.target.value)} placeholder="Describe the experience in full detail…" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Hero Image URL</Label>
+            <Input value={draft.image} onChange={(e) => onChange("image", e.target.value)} placeholder="https://..." />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Hero Alt Text</Label>
+            <Input value={draft.imageAlt ?? ""} onChange={(e) => onChange("imageAlt", e.target.value)} placeholder="Describe the image" />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Status</Label>
+            <Input value={draft.status ?? "draft"} onChange={(e) => onChange("status", e.target.value as AdventuresSignature["status"])} placeholder="draft" />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Highlights</Label>
+            <Textarea
+              rows={4}
+              value={(draft.highlights ?? []).join("\n")}
+              onChange={(e) => onChange("highlights", e.target.value.split("\n").map((line) => line.trim()).filter(Boolean))}
+              placeholder="One highlight per line"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Included</Label>
+              <Textarea
+                rows={4}
+                value={(draft.included ?? []).join("\n")}
+                onChange={(e) => onChange("included", e.target.value.split("\n").map((line) => line.trim()).filter(Boolean))}
+                placeholder="One item per line"
+              />
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Not Included</Label>
+              <Textarea
+                rows={4}
+                value={(draft.notIncluded ?? []).join("\n")}
+                onChange={(e) => onChange("notIncluded", e.target.value.split("\n").map((line) => line.trim()).filter(Boolean))}
+                placeholder="One item per line"
+              />
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm text-foreground/80">
+            <input type="checkbox" checked={Boolean(draft.featured)} onChange={(e) => onChange("featured", e.target.checked)} />
+            Featured adventure
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
             {a.shortDescription && (
               <p className="text-lg md:text-xl text-cream/90 max-w-2xl leading-relaxed mb-6 font-sans">
