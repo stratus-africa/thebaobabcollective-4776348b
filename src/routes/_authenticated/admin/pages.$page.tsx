@@ -84,7 +84,7 @@ type FieldDef = {
   placeholder?: string;
 };
 
-const SCHEMAS: Record<PageKey, { title: string; description: string; preview: string; fields: FieldDef[] }> = {
+export const SCHEMAS: Record<PageKey, { title: string; description: string; preview: string; fields: FieldDef[] }> = {
   home: {
     title: "Home — Hero",
     description: "Hero copy, CTAs and background image on the homepage.",
@@ -444,9 +444,20 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
   },
   destinations_index: {
     title: "Destinations — Landing",
-    description: "Hero copy and imagery on the /destinations page.",
+    description: "Hero copy, imagery and section toggles on the /destinations page.",
     preview: "/destinations",
     fields: [
+      // ── Section visibility ───────────────────────────────────────────────
+      { name: "show_hero", label: "Show hero section", type: "boolean" },
+      { name: "show_finder", label: "Show Destination Finder (filter bar) section", type: "boolean" },
+      { name: "show_map", label: "Show Kenya Destinations Map", type: "boolean" },
+      { name: "show_grid", label: "Show destinations grid (Icons / Beyond / Ocean)", type: "boolean" },
+      { name: "show_journeys", label: "Show Featured Adventures section", type: "boolean" },
+      { name: "show_stay", label: "Show 'Where You'll Stay' lodges section", type: "boolean" },
+      { name: "show_combinations", label: "Show Destination Combinations section", type: "boolean" },
+      { name: "show_matcher", label: "Show 'Where Should Kenya Take You?' matcher", type: "boolean" },
+      { name: "show_final_cta", label: "Show final CTA section", type: "boolean" },
+      // ── Hero copy ────────────────────────────────────────────────────────
       { name: "eyebrow", label: "Hero — Eyebrow", type: "text" },
       { name: "title", label: "Hero — Title", type: "text" },
       { name: "subtitle", label: "Hero — Quote / Subhead", type: "textarea" },
@@ -544,7 +555,6 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
       { name: "show_spotlight", label: "Show Featured Journey spotlight section", type: "boolean" },
 
       { name: "show_catalogue", label: "Show full catalogue section", type: "boolean" },
-
 
       { name: "catalogue_eyebrow", label: "Full Catalogue — Eyebrow", type: "text" },
       { name: "catalogue_title", label: "Full Catalogue — Title", type: "text" },
@@ -673,11 +683,13 @@ function PageEditorRoute() {
   return <PageEditor pageKey={page} />;
 }
 
-export function PageEditor({ pageKey: page }: { pageKey: PageKey }) {
+export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; fieldFilter?: string[] }) {
   const fetchFn = useServerFn(getPageContent);
   const saveFn = useServerFn(savePageContent);
   const qc = useQueryClient();
   const schema = SCHEMAS[page];
+  // When a fieldFilter is provided, only render those fields.
+  const visibleFields = fieldFilter ? schema.fields.filter((f) => fieldFilter.includes(f.name)) : schema.fields;
   const [showPreview, setShowPreview] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -798,7 +810,7 @@ export function PageEditor({ pageKey: page }: { pageKey: PageKey }) {
             </div>
           ) : (
             <div className="bg-background border border-border p-6 space-y-5">
-              {schema.fields.map((f) => (
+              {visibleFields.map((f) => (
                 <FieldRow
                   key={f.name}
                   field={f}
