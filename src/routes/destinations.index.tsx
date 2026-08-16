@@ -1,10 +1,9 @@
 import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { ArrowRight, ArrowDown, MapPin, Sparkles, Compass } from "lucide-react";
+import { MapPin, Sparkles, Compass } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { DestinationCard } from "@/components/site/DestinationCard";
 import { KenyaDestinationsMap } from "@/components/site/KenyaDestinationsMap";
 import { DestinationFinderSection } from "@/components/site/DestinationFinderSection";
@@ -203,11 +202,6 @@ function DestinationsDiscoveryPage() {
 
   const isFiltered = selectedCategory !== "All" || searchQuery.trim().length > 0;
 
-  function scrollToDiscovery() {
-    const el = document.getElementById("discovery-grid");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  }
-
   return (
     <div className="bg-background min-h-screen selection:bg-gold selection:text-gold-foreground">
       <Navbar />
@@ -245,46 +239,12 @@ function DestinationsDiscoveryPage() {
                 </p>
 
                 <p className="text-xs sm:text-sm text-cream/75 max-w-xl mx-auto leading-relaxed">{content.body}</p>
-
-                {/* Action Buttons */}
-                <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <button
-                    type="button"
-                    onClick={scrollToDiscovery}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.24em] text-[11px] font-semibold px-8 py-4 hover:bg-gold/90 transition-all shadow-lg hover:shadow-gold/20 cursor-pointer"
-                  >
-                    <span>{content.cta_label || "Explore Destinations"}</span>
-                    <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
-                  </button>
-
-                  <EnquireDialog
-                    defaultSubject="Tailor-Made Kenya Journey Inquiry"
-                    defaultDestination="Kenya (All Destinations)"
-                    sourceUrl="/destinations"
-                    autosaveKey="enquire:destinations-hero"
-                    context={{
-                      kind: "Destination",
-                      title: "Discover Kenya",
-                      slug: "discover-kenya",
-                      image: heroBaobab,
-                    }}
-                    trigger={
-                      <button
-                        type="button"
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-forest/80 text-cream backdrop-blur-md border border-gold/40 uppercase tracking-[0.22em] text-[11px] font-semibold px-8 py-4 hover:bg-forest hover:border-gold transition-all cursor-pointer shadow-md"
-                      >
-                        <span>Plan Your Journey</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    }
-                  />
-                </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* ── 2. DESTINATION FINDER ──────────────────────────────────────── */}
+        {/* ── 2. DESTINATION FINDER (merged into Hero) ────────────────────── */}
         {content.show_finder !== false && (
           <DestinationFinderSection
             selectedCategory={selectedCategory}
