@@ -224,6 +224,7 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
   const [watermarkPosition, setWatermarkPosition] = useState<
     "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center"
   >("bottom-right");
+  const [watermarkScale, setWatermarkScale] = useState(1);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneTel, setPhoneTel] = useState("");
@@ -241,6 +242,7 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
     setWatermarkText(data.branding?.watermark_text || "The Baobab Collective");
     setWatermarkImageUrl(data.branding?.watermark_image_url ?? "");
     setWatermarkPosition(data.branding?.watermark_position ?? "bottom-right");
+    setWatermarkScale(typeof data.branding?.watermark_scale === "number" ? data.branding.watermark_scale : 1);
     setEmail(data.contact?.email ?? "");
     setPhone(data.contact?.phone ?? "");
     setPhoneTel(data.contact?.phone_tel ?? "");
@@ -295,6 +297,7 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
         watermark_text: watermarkText.trim() || "The Baobab Collective",
         watermark_image_url: watermarkImageUrl.trim(),
         watermark_position: watermarkPosition,
+        watermark_scale: watermarkScale,
         watermark_overrides: data?.branding?.watermark_overrides ?? {},
       };
 
@@ -446,6 +449,20 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
                       <SelectItem value="center">Center</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="md:col-span-2 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label className="text-sm">Watermark size</Label>
+                    <span className="text-xs font-medium text-foreground/70">{watermarkScale.toFixed(2)}×</span>
+                  </div>
+                  <Slider
+                    value={[watermarkScale]}
+                    min={0.25}
+                    max={2}
+                    step={0.05}
+                    onValueChange={(value) => setWatermarkScale(value[0] ?? 1)}
+                  />
                 </div>
               </div>
             )}
