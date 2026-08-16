@@ -356,9 +356,9 @@ function AdminDestinationEdit() {
       </div>
 
       {/* ── Two-Column Layout ─────────────────────────────────────────── */}
-      <div className="grid gap-6 xl:grid-cols-12">
-        {/* ── Main Content Area (Left: 9/12) ─────────────────────────── */}
-        <div className="space-y-6 min-w-0 xl:col-span-9">
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* ── Main Content Area (Left: 7/12 or 8/12) ─────────────────────────── */}
+        <div className="space-y-6 min-w-0 lg:col-span-7 xl:col-span-8">
           {/* Destination Title / Name & Short Description */}
           <div className="rounded-lg border border-border bg-background p-6 shadow-sm space-y-4">
             <div>
@@ -393,121 +393,6 @@ function AdminDestinationEdit() {
               />
             </div>
           </div>
-
-          {/* Location, Category & Coordinates */}
-          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-6 py-4 border-b border-border bg-cream/50 flex items-center gap-2.5">
-              <MapPin className="w-4 h-4 text-gold" />
-              <h2 className="font-serif text-lg leading-none">Location & Geography</h2>
-            </header>
-            <div className="p-6 space-y-4">
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Country
-                  </Label>
-                  <Input
-                    value={form.country}
-                    onChange={(e) => patch("country", e.target.value)}
-                    placeholder="e.g. Kenya"
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Region
-                  </Label>
-                  <Select value={form.region || "Southern Kenya"} onValueChange={(val) => patch("region", val)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select region" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {KENYA_REGIONS.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          {r.label}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="Other Africa">Other Region</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Discovery Category
-                  </Label>
-                  <Select
-                    value={form.destination_category || "The Icons"}
-                    onValueChange={(val) => patch("destination_category", val)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Category grouping" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="The Icons">The Icons (Featured)</SelectItem>
-                      <SelectItem value="Beyond the Classics">Beyond the Classics</SelectItem>
-                      <SelectItem value="The Indian Ocean">The Indian Ocean</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Coordinates for Interactive Map */}
-              <div className="space-y-4 pt-2 border-t border-border/60">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <Label className="block text-[11px] tracking-[0.2em] uppercase text-forest font-bold">
-                      Map Location & Pin Coordinates
-                    </Label>
-                    <p className="text-xs text-foreground/60">
-                      Drag the pin on the map or click to position this destination visually across Kenya.
-                    </p>
-                  </div>
-                  {form.latitude != null && form.longitude != null && (
-                    <span className="text-[11px] font-mono bg-cream px-2.5 py-1 rounded text-foreground/70 border border-border self-start sm:self-auto">
-                      Lat: {Number(form.latitude).toFixed(4)}, Lng: {Number(form.longitude).toFixed(4)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Interactive Mini-Map Pin Locator */}
-                <DestinationPinLocator
-                  name={form.name || "Destination"}
-                  latitude={form.latitude}
-                  longitude={form.longitude}
-                  onChange={(lat, lng) => {
-                    patch("latitude", lat);
-                    patch("longitude", lng);
-                  }}
-                />
-
-                <div className="grid gap-4 sm:grid-cols-2 pt-2">
-                  <div>
-                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                      Latitude (e.g. -1.4061 for Maasai Mara)
-                    </Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      value={form.latitude ?? ""}
-                      onChange={(e) => patch("latitude", e.target.value ? Number(e.target.value) : null)}
-                      placeholder="-1.4061"
-                    />
-                  </div>
-                  <div>
-                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                      Longitude (e.g. 35.1390 for Maasai Mara)
-                    </Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      value={form.longitude ?? ""}
-                      onChange={(e) => patch("longitude", e.target.value ? Number(e.target.value) : null)}
-                      placeholder="35.1390"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* "Best For" Experience Categories */}
           <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
@@ -678,8 +563,8 @@ function AdminDestinationEdit() {
           </section>
         </div>
 
-        {/* ── Sidebar Area (Right: 3/12) ──────────────────────────── */}
-        <aside className="space-y-6 min-w-0 xl:col-span-3">
+        {/* ── Sidebar Area (Right: 5/12 or 4/12) ──────────────────────────── */}
+        <aside className="space-y-6 min-w-0 lg:col-span-5 xl:col-span-4">
           {/* Publish / Status Box */}
           <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
             <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center justify-between">
@@ -774,6 +659,119 @@ function AdminDestinationEdit() {
                 value={form.image}
                 onChange={(url) => patch("image", url)}
               />
+            </div>
+          </div>
+
+          {/* Location, Category & Coordinates Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Location & Geography</h3>
+            </header>
+            <div className="p-5 space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Country
+                </Label>
+                <Input
+                  value={form.country}
+                  onChange={(e) => patch("country", e.target.value)}
+                  placeholder="e.g. Kenya"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Region</Label>
+                <Select value={form.region || "Southern Kenya"} onValueChange={(val) => patch("region", val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {KENYA_REGIONS.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="Other Africa">Other Region</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Discovery Category
+                </Label>
+                <Select
+                  value={form.destination_category || "The Icons"}
+                  onValueChange={(val) => patch("destination_category", val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category grouping" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="The Icons">The Icons (Featured)</SelectItem>
+                    <SelectItem value="Beyond the Classics">Beyond the Classics</SelectItem>
+                    <SelectItem value="The Indian Ocean">The Indian Ocean</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Coordinates for Interactive Map */}
+              <div className="space-y-3 pt-3 border-t border-border/60">
+                <div className="flex items-center justify-between gap-2">
+                  <Label className="block text-[11px] tracking-[0.2em] uppercase text-forest font-bold">
+                    Pin Coordinates
+                  </Label>
+                  {form.latitude != null && form.longitude != null && (
+                    <span className="text-[10px] font-mono bg-cream px-2 py-0.5 rounded text-foreground/70 border border-border">
+                      {Number(form.latitude).toFixed(3)}, {Number(form.longitude).toFixed(3)}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-foreground/60 leading-snug">
+                  Drag the pin on the map or click to position this destination visually across Kenya.
+                </p>
+
+                {/* Interactive Mini-Map Pin Locator */}
+                <DestinationPinLocator
+                  name={form.name || "Destination"}
+                  latitude={form.latitude}
+                  longitude={form.longitude}
+                  onChange={(lat, lng) => {
+                    patch("latitude", lat);
+                    patch("longitude", lng);
+                  }}
+                />
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <Label className="mb-1 block text-[10px] tracking-wider uppercase text-foreground/60">
+                      Latitude
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.latitude ?? ""}
+                      onChange={(e) => patch("latitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="-1.4061"
+                      className="text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1 block text-[10px] tracking-wider uppercase text-foreground/60">
+                      Longitude
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.longitude ?? ""}
+                      onChange={(e) => patch("longitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="35.1390"
+                      className="text-xs font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
