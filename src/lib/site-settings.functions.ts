@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import type { WatermarkMode, WatermarkPosition } from "@/lib/watermark";
 
 export type ContactSettings = {
   email?: string;
@@ -12,10 +13,16 @@ export type ContactSettings = {
 
 export type BrandingSettings = {
   logo_url?: string;
+  watermark_enabled?: boolean;
+  watermark_mode?: WatermarkMode;
+  watermark_text?: string;
+  watermark_image_url?: string;
+  watermark_position?: WatermarkPosition;
+  watermark_overrides?: Record<string, { enabled: boolean }>;
 };
 
 export type CurrencySettings = {
-  code?: string;   // ISO 4217, e.g. "USD"
+  code?: string; // ISO 4217, e.g. "USD"
   symbol?: string; // Display symbol, e.g. "$"
 };
 
@@ -34,6 +41,12 @@ const SaveSchema = z.object({
   }),
   branding: z.object({
     logo_url: z.string().url().or(z.literal("")).optional(),
+    watermark_enabled: z.boolean().optional(),
+    watermark_mode: z.enum(["text", "image"]).optional(),
+    watermark_text: z.string().max(120).optional(),
+    watermark_image_url: z.string().url().or(z.literal("")).optional(),
+    watermark_position: z.enum(["top-left", "top-right", "bottom-left", "bottom-right", "center"]).optional(),
+    watermark_overrides: z.record(z.object({ enabled: z.boolean() })).optional(),
   }),
   currency: z
     .object({
@@ -60,10 +73,7 @@ export const getSiteSettings = createServerFn({ method: "GET" }).handler(async (
     data = res.data;
   } catch {
     const supabase = publicClient();
-    const res = await supabase
-      .from("site_settings")
-      .select("key,value")
-      .in("key", ["contact", "branding", "currency"]);
+    const res = await supabase.from("site_settings").select("key,value").in("key", ["contact", "branding", "currency"]);
     data = res.data;
   }
   const map = new Map<string, any>((data ?? []).map((r: any) => [r.key, r.value]));
