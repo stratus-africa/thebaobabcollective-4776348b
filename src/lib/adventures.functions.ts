@@ -8,7 +8,10 @@ export type AdventuresHero = {
   subhead: string;
   image: string;
   imageAlt: string;
+  focalX?: number;
+  focalY?: number;
 };
+
 
 export type AdventuresCta = {
   eyebrow: string;
