@@ -23,6 +23,7 @@ import { TheBaobabPick } from "@/components/site/TheBaobabPick";
 import { AdventureCard, getHumanDifficulty } from "@/components/site/AdventureCard";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { getDestinations, getLodges } from "@/lib/cms.functions";
+import { resolveImageSource } from "@/lib/image-resolution";
 
 const adventuresQuery = queryOptions({
   queryKey: ["adventures-page"],
@@ -139,6 +140,7 @@ function AdventureDetailPage() {
   }, [page, slug]);
 
   const diffMeta = getHumanDifficulty(a.difficulty);
+  const heroImage = resolveImageSource(a.image) ?? null;
   const url = `https://thebaobabcollective.co.uk/adventures/${a.slug}`;
   const included = a.included ?? [];
   const notIncluded = a.notIncluded ?? [];
@@ -178,7 +180,21 @@ function AdventureDetailPage() {
       <main id="main-content">
         {/* ── CINEMATIC HERO ───────────────────────────────────────────── */}
         <section className="relative h-[65vh] min-h-[460px] max-h-[720px] flex items-end bg-forest text-cream overflow-hidden">
-          <img src={a.image} alt={a.imageAlt || a.name} className="absolute inset-0 w-full h-full object-cover" />
+          {heroImage ? (
+            <img
+              src={heroImage}
+              alt={a.imageAlt || a.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              decoding="async"
+              fetchPriority="high"
+              sizes="100vw"
+            />
+          ) : (
+            <div
+              className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(216,174,88,0.34),_transparent_45%),linear-gradient(135deg,_#1f2b1d,_#0f1a12)]"
+              aria-hidden="true"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
 
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-14 text-cream w-full flex flex-wrap items-end justify-between gap-6">
