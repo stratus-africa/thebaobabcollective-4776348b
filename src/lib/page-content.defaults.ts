@@ -258,11 +258,20 @@ export const PAGE_DEFAULTS = {
   destinations_index: {
     eyebrow: "Destination Discovery",
     title: "DISCOVER KENYA",
-    subtitle:
-      "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary.",
+    subtitle: "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary.",
     body: "Whether drawn to apex predators on the golden Mara plains, private rhino sanctuaries in Laikipia, or sunset dhow sailing in Lamu — find where your story begins.",
     hero_image: "",
     cta_label: "Explore Destinations",
+    // Section visibility toggles
+    show_hero: true as boolean,
+    show_finder: true as boolean,
+    show_map: true as boolean,
+    show_grid: true as boolean,
+    show_journeys: true as boolean,
+    show_stay: true as boolean,
+    show_combinations: true as boolean,
+    show_matcher: true as boolean,
+    show_final_cta: true as boolean,
   },
   adventures_index: {
     eyebrow: "Signature Adventures",
@@ -358,7 +367,6 @@ export const PAGE_DEFAULTS = {
     show_enquiry_cta: true as boolean,
     show_final_cta: true as boolean,
   },
-
 
   testimonials_page: {
     eyebrow: "Guest Stories",
