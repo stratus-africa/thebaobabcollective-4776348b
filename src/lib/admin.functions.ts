@@ -199,14 +199,21 @@ export const adminDelete = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-const GetSchema = z.object({ table: z.enum(TABLES), id: z.string().uuid() });
+const GetSchema = z.object({ table: z.enum(TABLES), id: z.string().min(1) });
 
 export const adminGet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => GetSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { data: row, error } = await context.supabase.from(data.table).select("*").eq("id", data.id).maybeSingle();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.id);
+    let query = context.supabase.from(data.table).select("*");
+    if (isUuid) {
+      query = query.eq("id", data.id);
+    } else {
+      query = query.or(`id.eq.${data.id},slug.eq.${data.id}`);
+    }
+    const { data: row, error } = await query.maybeSingle();
     if (error) throw new Error(error.message);
     return row;
   });
