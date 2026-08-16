@@ -25,6 +25,7 @@ import {
   Grid,
 } from "lucide-react";
 import { PageEditor } from "./pages.$page";
+import { AdminDestinationsMapHub } from "./destinations.map";
 import type { PageKey } from "@/lib/page-content.defaults";
 
 type SubEditor = { pageKey: PageKey; label: string; icon?: any; description?: string; fieldFilter?: string[] };
@@ -728,6 +729,8 @@ function PagesHub() {
                     ))}
                   </div>
                 </Tabs>
+              ) : section === "destinations" && t.value === "map" ? (
+                <AdminDestinationsMapHub />
               ) : (
                 <PageEditor pageKey={t.editors[0].pageKey} fieldFilter={t.editors[0].fieldFilter} />
               )}
