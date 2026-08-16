@@ -28,6 +28,8 @@ export type AdventuresSignature = {
   difficulty: "Easy" | "Moderate" | "Active" | "Challenging" | string;
   image: string;
   imageAlt?: string;
+  focalX?: number;
+  focalY?: number;
   description: string;
   shortDescription?: string;
   highlights: string[];
@@ -171,6 +173,8 @@ const SavePayload = z.object({
     subhead: z.string(),
     image: z.string().default(""),
     imageAlt: z.string().default(""),
+    focalX: z.number().optional(),
+    focalY: z.number().optional(),
   }),
 
   cta: z.object({
@@ -189,6 +193,8 @@ const SavePayload = z.object({
       difficulty: z.string(),
       image: z.string(),
       imageAlt: z.string().optional().default(""),
+      focalX: z.number().optional(),
+      focalY: z.number().optional(),
       description: z.string(),
       shortDescription: z.string().optional().default(""),
       highlights: z.array(z.string()),

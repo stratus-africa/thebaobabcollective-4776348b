@@ -115,7 +115,7 @@ function LodgesGrid() {
                 </p>
                 {l.amenities?.length ? (
                   <ul aria-label="Amenities" className="flex flex-wrap gap-1.5 mb-5">
-                    {l.amenities.slice(0, 4).map((a) => (
+                    {l.amenities.slice(0, 4).map((a: string) => (
                       <li
                         key={a}
                         className="text-[10px] tracking-[0.15em] uppercase border border-border/70 px-2.5 py-1 text-foreground/70 rounded-full"
