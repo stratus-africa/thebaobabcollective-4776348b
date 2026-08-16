@@ -278,19 +278,19 @@ function HeroSection({
 }
 
 function DayInTheFieldSection({ content }: { content: typeof PAGE_DEFAULTS.adventures_index }) {
-  const timeline = [1, 2, 3, 4].map((i) => {
-    const get = (suffix: string) => (content as Record<string, any>)[`rhythm_${i}_${suffix}`] as string | undefined;
-    const fallbackImages = [g1Img, heroBaobab, g4Img, elephantImg];
-    return {
-      time: get("time") || "",
-      phase: get("phase") || "",
-      title: get("title") || "",
-      body: get("body") || "",
-      image: get("image") || fallbackImages[i - 1],
-    };
-  }).filter((step) => step.title || step.body || step.time);
-
-
+  const timeline = [1, 2, 3, 4]
+    .map((i) => {
+      const get = (suffix: string) => (content as Record<string, any>)[`rhythm_${i}_${suffix}`] as string | undefined;
+      const fallbackImages = [g1Img, heroBaobab, g4Img, elephantImg];
+      return {
+        time: get("time") || "",
+        phase: get("phase") || "",
+        title: get("title") || "",
+        body: get("body") || "",
+        image: get("image") || fallbackImages[i - 1],
+      };
+    })
+    .filter((step) => step.title || step.body || step.time);
 
   return (
     <section className="py-24 md:py-32 bg-cream/60 border-b border-border/40">
@@ -401,6 +401,7 @@ function AdventureFinderSection({
     navigate({
       search: (prev) => ({ ...prev, [key]: val }),
       replace: true,
+      resetScroll: false,
     });
   };
 
@@ -416,6 +417,7 @@ function AdventureFinderSection({
         travelStyle: "",
       },
       replace: true,
+      resetScroll: false,
     });
   };
 
@@ -606,7 +608,11 @@ function SignatureSection({
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div
+          className={`grid sm:grid-cols-2 ${
+            Number(content.grid_size) === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"
+          } gap-8`}
+        >
           {featuredList.map((adv) => (
             <AdventureCard key={adv.slug} adventure={adv} featured />
           ))}
@@ -627,6 +633,7 @@ function ExploreByExperienceSection({ content }: { content: typeof PAGE_DEFAULTS
     navigate({
       search: (prev: any) => ({ ...prev, experience: expName }),
       replace: true,
+      resetScroll: false,
     });
     const catalogueEl = document.getElementById("catalogue");
     if (catalogueEl) catalogueEl.scrollIntoView({ behavior: "smooth" });
@@ -843,6 +850,7 @@ function MainCatalogueSection({
         travelStyle: "",
       },
       replace: true,
+      resetScroll: false,
     });
   };
 
@@ -906,7 +914,11 @@ function MainCatalogueSection({
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            className={`grid sm:grid-cols-2 ${
+              Number(content.grid_size) === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"
+            } gap-8`}
+          >
             {sorted.map((adv) => (
               <AdventureCard key={adv.slug} adventure={adv} />
             ))}
