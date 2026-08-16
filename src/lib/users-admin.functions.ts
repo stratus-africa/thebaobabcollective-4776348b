@@ -67,7 +67,7 @@ const SetRoleInput = z.object({
 
 export const setUserRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => SetRoleInput.parse(d))
+  .validator((d: unknown) => SetRoleInput.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     if (data.user_id === context.userId && data.role === "admin" && !data.grant) {
@@ -94,7 +94,7 @@ const DeleteInput = z.object({ user_id: z.string().uuid() });
 
 export const deleteAdminUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => DeleteInput.parse(d))
+  .validator((d: unknown) => DeleteInput.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     if (data.user_id === context.userId) throw new Error("You cannot delete your own account.");
@@ -112,7 +112,7 @@ const InviteInput = z.object({
 
 export const inviteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => InviteInput.parse(d))
+  .validator((d: unknown) => InviteInput.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
