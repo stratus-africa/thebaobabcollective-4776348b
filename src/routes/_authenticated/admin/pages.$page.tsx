@@ -430,15 +430,32 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
     ],
   },
   lodges_index: {
-    title: "Lodges — Landing",
-    description: "Intro band on the /lodges listing page.",
+    title: "Partner Lodges — Landing",
+    description: "Hero copy and section toggles on the /lodges listing page.",
     preview: "/lodges",
     fields: [
+      { name: "show_hero", label: "Show hero band", type: "boolean" },
       { name: "eyebrow", label: "Eyebrow", type: "text" },
       { name: "title", label: "Title", type: "text" },
       { name: "subtitle", label: "Subtitle", type: "textarea" },
+      { name: "hero_image", label: "Hero Background Image (optional)", type: "image" },
+      { name: "show_grid", label: "Show lodges grid", type: "boolean" },
     ],
   },
+  destinations_index: {
+    title: "Destinations — Landing",
+    description: "Hero copy and imagery on the /destinations page.",
+    preview: "/destinations",
+    fields: [
+      { name: "eyebrow", label: "Hero — Eyebrow", type: "text" },
+      { name: "title", label: "Hero — Title", type: "text" },
+      { name: "subtitle", label: "Hero — Quote / Subhead", type: "textarea" },
+      { name: "body", label: "Hero — Supporting Copy", type: "textarea" },
+      { name: "hero_image", label: "Hero Background Image", type: "image" },
+      { name: "cta_label", label: "Hero — Primary Button Label", type: "text" },
+    ],
+  },
+
   adventures_index: {
     title: "Adventures — Landing",
     description: "All editable sections on the /adventures listing page. Toggle sections on/off and edit their copy.",
