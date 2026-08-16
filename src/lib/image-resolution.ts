@@ -5,11 +5,14 @@ export function resolveImageSource(...values: Array<string | null | undefined>):
     const normalized = value.trim();
     if (!normalized) continue;
 
+    const candidate = normalized.startsWith("blob:") || normalized.startsWith("data:") ? normalized : normalized;
+
     try {
-      const decoded = decodeURIComponent(normalized);
-      if (decoded) return decoded;
+      const decoded = decodeURIComponent(candidate);
+      const clean = decoded.trim();
+      if (clean) return clean;
     } catch {
-      if (normalized) return normalized;
+      if (candidate) return candidate;
     }
   }
 
