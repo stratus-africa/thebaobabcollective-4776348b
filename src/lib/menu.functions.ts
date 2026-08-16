@@ -28,21 +28,38 @@ export type MenuConfig = {
 };
 
 export const MENU_DEFAULTS: MenuConfig = {
-  topBarText: "Kenya, curated personally.",
+  topBarText: "CURATED KENYAN JOURNEYS · AUTHENTIC CONNECTIONS · EXTRAORDINARY EXPERIENCES",
   topBarEnabled: true,
   transparentOverHero: false,
   primary: [
-    { label: "Journeys", to: "/adventures" },
-    { label: "Destinations", to: "/destinations" },
-    { label: "Lodges", to: "/lodges" },
-    { label: "Why Baobab", to: "/about" },
+    {
+      label: "Destinations",
+      to: "/destinations",
+      children: [
+        { label: "All Destinations", to: "/destinations" },
+        { label: "Safari Destinations", to: "/destinations" },
+        { label: "Coast & Beach", to: "/destinations" },
+      ],
+    },
+    {
+      label: "Adventures",
+      to: "/adventures",
+      children: [
+        { label: "All Adventures", to: "/adventures" },
+        { label: "Wildlife Safaris", to: "/adventures" },
+        { label: "Beach Escapes", to: "/adventures" },
+        { label: "Family Journeys", to: "/adventures" },
+        { label: "Private Travel", to: "/private-travel" },
+      ],
+    },
     { label: "Journal", to: "/journal" },
+    { label: "About", to: "/about" },
+    { label: "Contact", to: "/contact" },
   ],
   more: [
-    { label: "About The Collective", to: "/about" },
+    { label: "Lodges", to: "/lodges" },
     { label: "Testimonials", to: "/testimonials" },
     { label: "FAQ", to: "/faq" },
-    { label: "Contact", to: "/contact" },
   ],
   ctaLabel: "Plan Your Journey",
   ctaTo: "",
