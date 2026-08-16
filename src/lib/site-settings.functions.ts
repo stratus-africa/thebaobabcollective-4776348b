@@ -18,6 +18,7 @@ export type BrandingSettings = {
   watermark_text?: string;
   watermark_image_url?: string;
   watermark_position?: WatermarkPosition;
+  watermark_scale?: number;
   watermark_overrides?: Record<string, { enabled: boolean }>;
 };
 
@@ -67,6 +68,7 @@ const SaveSchema = z.object({
     watermark_text: z.string().max(120).optional(),
     watermark_image_url: z.string().url().or(z.literal("")).optional(),
     watermark_position: z.enum(["top-left", "top-right", "bottom-left", "bottom-right", "center"]).optional(),
+    watermark_scale: z.number().min(0.25).max(2).optional(),
     watermark_overrides: z.record(z.object({ enabled: z.boolean() })).optional(),
   }),
   currency: z
