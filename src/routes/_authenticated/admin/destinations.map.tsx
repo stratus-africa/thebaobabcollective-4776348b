@@ -128,7 +128,10 @@ export function AdminDestinationsMapHub() {
   // Initialize and sync state from database
   useEffect(() => {
     if (pageContent !== undefined && allAvailableDestinations.length > 0) {
-      const content = { ...PAGE_DEFAULTS.destinations_index, ...((pageContent ?? {}) as Record<string, any>) };
+      const content = {
+        ...PAGE_DEFAULTS.destinations_index,
+        ...((pageContent ?? {}) as Record<string, any>),
+      };
       setShowMap(content.show_map !== false);
       const savedMapImage = content.map_image || "";
       setMapImage(savedMapImage);
@@ -197,7 +200,10 @@ export function AdminDestinationsMapHub() {
   // Save Mutation
   const mSave = useMutation({
     mutationFn: async () => {
-      const current = { ...PAGE_DEFAULTS.destinations_index, ...((pageContent ?? {}) as Record<string, any>) };
+      const current = {
+        ...PAGE_DEFAULTS.destinations_index,
+        ...((pageContent ?? {}) as Record<string, any>),
+      };
 
       // Build map_positions map for backward compatibility
       const nextPositions: Record<string, { left: number; top: number; visible?: boolean }> = {};
@@ -237,7 +243,10 @@ export function AdminDestinationsMapHub() {
   // Revert / Reset unsaved changes
   const handleReset = () => {
     if (pageContent !== undefined) {
-      const content = { ...PAGE_DEFAULTS.destinations_index, ...((pageContent ?? {}) as Record<string, any>) };
+      const content = {
+        ...PAGE_DEFAULTS.destinations_index,
+        ...((pageContent ?? {}) as Record<string, any>),
+      };
       setShowMap(content.show_map !== false);
       setMapImage(content.map_image || "");
       const savedPositions = content.map_positions || {};
@@ -282,7 +291,7 @@ export function AdminDestinationsMapHub() {
     const clampedY = Number(Math.max(0.02, Math.min(0.98, rawY)).toFixed(3));
 
     setDestinationsOnMap((prev) =>
-      prev.map((item) => (item.slug === slug ? { ...item, x: clampedX, y: clampedY } : item))
+      prev.map((item) => (item.slug === slug ? { ...item, x: clampedX, y: clampedY } : item)),
     );
     setHasUnsavedChanges(true);
   }, []);
@@ -329,7 +338,7 @@ export function AdminDestinationsMapHub() {
         const nextX = Number(Math.max(0.02, Math.min(0.98, item.x + dx)).toFixed(3));
         const nextY = Number(Math.max(0.02, Math.min(0.98, item.y + dy)).toFixed(3));
         return { ...item, x: nextX, y: nextY };
-      })
+      }),
     );
     setHasUnsavedChanges(true);
   };
@@ -337,7 +346,7 @@ export function AdminDestinationsMapHub() {
   // Toggle Visibility
   const toggleVisibility = (slug: string) => {
     setDestinationsOnMap((prev) =>
-      prev.map((item) => (item.slug === slug ? { ...item, visible: !item.visible } : item))
+      prev.map((item) => (item.slug === slug ? { ...item, visible: !item.visible } : item)),
     );
     setHasUnsavedChanges(true);
   };
@@ -382,7 +391,7 @@ export function AdminDestinationsMapHub() {
       (d) =>
         d.name.toLowerCase().includes(q) ||
         d.slug.toLowerCase().includes(q) ||
-        (d.region && d.region.toLowerCase().includes(q))
+        (d.region && d.region.toLowerCase().includes(q)),
     );
   }, [destinationsOnMap, searchQuery]);
 
@@ -423,14 +432,18 @@ export function AdminDestinationsMapHub() {
               <Map className="w-3.5 h-3.5" /> Destinations CMS
             </span>
             {hasUnsavedChanges && (
-              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[10px] font-semibold uppercase tracking-wider">
+              <Badge
+                variant="outline"
+                className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[10px] font-semibold uppercase tracking-wider"
+              >
                 Unsaved Changes
               </Badge>
             )}
           </div>
           <h1 className="font-serif text-3xl sm:text-4xl text-foreground">Destinations — Map</h1>
           <p className="text-sm text-foreground/65 mt-1 max-w-2xl">
-            Manage the Kenya destinations map, gallery map artwork, destination pins, and normalized locations.
+            Manage the Kenya destinations map, gallery map artwork, destination pins, and normalized
+            locations.
           </p>
         </div>
 
@@ -447,12 +460,7 @@ export function AdminDestinationsMapHub() {
             {showPreview ? "Hide Preview" : "Show Preview"}
           </Button>
 
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="text-xs font-semibold"
-          >
+          <Button asChild variant="outline" size="sm" className="text-xs font-semibold">
             <Link to="/destinations" target="_blank" rel="noreferrer">
               <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
               Open Live Page
@@ -494,9 +502,12 @@ export function AdminDestinationsMapHub() {
       {/* ── Toggle show_map switch ── */}
       <div className="flex items-center justify-between gap-4 bg-background border border-border rounded-xl p-4 shadow-sm">
         <div className="space-y-0.5">
-          <Label className="text-sm font-bold text-foreground">Show Kenya Destinations Map Section</Label>
+          <Label className="text-sm font-bold text-foreground">
+            Show Kenya Destinations Map Section
+          </Label>
           <p className="text-xs text-foreground/60">
-            Toggle whether the interactive destinations map section is visible to visitors on the public Destinations landing page.
+            Toggle whether the interactive destinations map section is visible to visitors on the
+            public Destinations landing page.
           </p>
         </div>
         <Switch
@@ -635,17 +646,20 @@ export function AdminDestinationsMapHub() {
                               isDragging
                                 ? "w-12 h-12 bg-gold text-gold-foreground ring-4 ring-gold/40 cursor-grabbing shadow-2xl scale-125"
                                 : isSelected
-                                ? "w-11 h-11 bg-gold text-gold-foreground ring-4 ring-white/90 ring-offset-2 ring-offset-forest cursor-grab hover:scale-110 shadow-gold/50 shadow-lg"
-                                : "w-9 h-9 bg-gold text-gold-foreground border-2 border-white/90 hover:bg-gold/90 hover:scale-110 cursor-grab shadow-md"
+                                  ? "w-11 h-11 bg-gold text-gold-foreground ring-4 ring-white/90 ring-offset-2 ring-offset-forest cursor-grab hover:scale-110 shadow-gold/50 shadow-lg"
+                                  : "w-9 h-9 bg-gold text-gold-foreground border-2 border-white/90 hover:bg-gold/90 hover:scale-110 cursor-grab shadow-md"
                             }`}
                           >
-                            <Move className={`${isSelected || isDragging ? "w-5 h-5" : "w-4 h-4"}`} />
+                            <Move
+                              className={`${isSelected || isDragging ? "w-5 h-5" : "w-4 h-4"}`}
+                            />
                           </div>
 
                           {/* Floating normalized coordinates badge */}
                           {(isSelected || isDragging) && (
                             <div className="absolute -top-8 whitespace-nowrap bg-black/90 text-gold text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-lg pointer-events-none border border-gold/50">
-                              x: {dest.x.toFixed(3)} · y: {dest.y.toFixed(3)} ({(dest.x * 100).toFixed(1)}%, {(dest.y * 100).toFixed(1)}%)
+                              x: {dest.x.toFixed(3)} · y: {dest.y.toFixed(3)} (
+                              {(dest.x * 100).toFixed(1)}%, {(dest.y * 100).toFixed(1)}%)
                             </div>
                           )}
 
@@ -686,11 +700,10 @@ export function AdminDestinationsMapHub() {
                 <p className="text-[10px] font-bold uppercase tracking-wider text-gold">
                   Selected Destination
                 </p>
-                <h4 className="font-serif text-lg font-bold text-foreground">
-                  {activeItem.name}
-                </h4>
+                <h4 className="font-serif text-lg font-bold text-foreground">{activeItem.name}</h4>
                 <p className="text-xs text-foreground/60 font-mono">
-                  Normalized: x={activeItem.x.toFixed(3)}, y={activeItem.y.toFixed(3)} | Screen: {(activeItem.x * 100).toFixed(1)}% L, {(activeItem.y * 100).toFixed(1)}% T
+                  Normalized: x={activeItem.x.toFixed(3)}, y={activeItem.y.toFixed(3)} | Screen:{" "}
+                  {(activeItem.x * 100).toFixed(1)}% L, {(activeItem.y * 100).toFixed(1)}% T
                 </p>
               </div>
 
@@ -829,9 +842,7 @@ export function AdminDestinationsMapHub() {
                                 <p className="font-serif text-sm font-medium text-foreground">
                                   {item.name}
                                 </p>
-                                <p className="text-[11px] text-foreground/50">
-                                  {item.region}
-                                </p>
+                                <p className="text-[11px] text-foreground/50">{item.region}</p>
                               </div>
                             </div>
                           </td>
@@ -842,7 +853,10 @@ export function AdminDestinationsMapHub() {
                           </td>
 
                           {/* Visibility Toggle */}
-                          <td className="py-3 px-2 text-center" onClick={(e) => e.stopPropagation()}>
+                          <td
+                            className="py-3 px-2 text-center"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <button
                               type="button"
                               onClick={() => toggleVisibility(item.slug)}
@@ -862,7 +876,10 @@ export function AdminDestinationsMapHub() {
                           </td>
 
                           {/* Actions */}
-                          <td className="py-3 px-3 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
+                          <td
+                            className="py-3 px-3 text-right space-x-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button
                               asChild
                               variant="ghost"
@@ -989,11 +1006,7 @@ export function AdminDestinationsMapHub() {
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setAddDestinationOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setAddDestinationOpen(false)}>
               Cancel
             </Button>
           </DialogFooter>
@@ -1007,10 +1020,12 @@ export function AdminDestinationsMapHub() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif text-xl">Remove destination from map?</AlertDialogTitle>
+            <AlertDialogTitle className="font-serif text-xl">
+              Remove destination from map?
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs text-foreground/70">
-              This will remove the pin from the Destinations Map. It does{" "}
-              <strong>NOT</strong> delete the underlying destination record from your database or CMS.
+              This will remove the pin from the Destinations Map. It does <strong>NOT</strong>{" "}
+              delete the underlying destination record from your database or CMS.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1029,14 +1044,19 @@ export function AdminDestinationsMapHub() {
       <AlertDialog open={resetAlertOpen} onOpenChange={setResetAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif text-xl">Reset unsaved changes?</AlertDialogTitle>
+            <AlertDialogTitle className="font-serif text-xl">
+              Reset unsaved changes?
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs text-foreground/70">
               Are you sure you want to revert all map changes back to the last saved state?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleReset}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Reset Changes
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1045,4 +1065,3 @@ export function AdminDestinationsMapHub() {
     </div>
   );
 }
- 
