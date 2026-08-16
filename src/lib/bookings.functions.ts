@@ -13,7 +13,7 @@ const BookingSchema = z.object({
 });
 
 export const createBooking = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => BookingSchema.parse(d))
+  .validator((d: unknown) => BookingSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -98,10 +98,7 @@ export const createBooking = createServerFn({ method: "POST" })
         const json = await r.json();
         if (r.ok && json.url) {
           checkoutUrl = json.url;
-          await supabaseAdmin
-            .from("bookings")
-            .update({ stripe_session_id: json.id })
-            .eq("id", booking.id);
+          await supabaseAdmin.from("bookings").update({ stripe_session_id: json.id }).eq("id", booking.id);
         } else {
           console.error("Stripe checkout error", json);
         }
