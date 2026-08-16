@@ -179,7 +179,7 @@ function AdventuresPage() {
       <Navbar />
       <main>
         {/* 01. Hero Section */}
-        <HeroSection hero={page.hero} content={content} />
+        {content.show_hero !== false && <HeroSection hero={page.hero} content={content} />}
 
         {/* 02. A Day in the Field (Timeline) */}
         {content.show_rhythm !== false && <DayInTheFieldSection content={content} />}
@@ -188,7 +188,7 @@ function AdventuresPage() {
         {content.show_finder !== false && <AdventureFinderSection signatures={page.signatures} content={content} />}
 
         {/* 04. Journeys We'd Take Ourselves (Featured Signatures) */}
-        <SignatureSection signatures={page.signatures} content={content} />
+        {content.show_signature !== false && <SignatureSection signatures={page.signatures} content={content} />}
 
         {/* 05. Explore by Experience */}
         {content.show_explore !== false && <ExploreByExperienceSection content={content} />}
@@ -197,7 +197,7 @@ function AdventuresPage() {
         {content.show_spotlight !== false && <FeaturedJourneySpotlight signatures={page.signatures} />}
 
         {/* 07. Main Adventure Catalogue */}
-        <MainCatalogueSection signatures={page.signatures} content={content} />
+        {content.show_catalogue !== false && <MainCatalogueSection signatures={page.signatures} content={content} />}
 
         {/* 08. Journey Combinations / Related Destinations */}
         {content.show_combinations !== false && <JourneyCombinationsSection content={content} />}
@@ -224,7 +224,7 @@ function HeroSection({
   hero: AdventuresPage["hero"];
   content: typeof PAGE_DEFAULTS.adventures_index;
 }) {
-  const heroSrc = hero.image || heroBaobab;
+  const heroSrc = content.hero_image || hero.image || heroBaobab;
   return (
     <section className="relative h-[85vh] min-h-[620px] flex items-end">
       <img
@@ -278,36 +278,19 @@ function HeroSection({
 }
 
 function DayInTheFieldSection({ content }: { content: typeof PAGE_DEFAULTS.adventures_index }) {
-  const timeline = [
-    {
-      time: "05:30",
-      phase: "DAWN",
-      title: "First light. First tracks.",
-      body: "Coffee in camp, then out before the bush wakes — when leopards are still moving and the morning air is crisp.",
-      image: g1Img,
-    },
-    {
-      time: "10:00",
-      phase: "THE ENCOUNTER",
-      title: "Read the signs, stories and silence.",
-      body: "Time on foot with your guide, reading wildlife tracks, bird calls, and riverbank shadows.",
-      image: heroBaobab,
-    },
-    {
-      time: "15:00",
-      phase: "SLOW DOWN",
-      title: "Rest, swim, journal.",
-      body: "Unhurried afternoon hours at camp. Swim in the shade, write in your travel journal, or rest through the heat of the day.",
-      image: g4Img,
-    },
-    {
-      time: "18:30",
-      phase: "SUNDOWN",
-      title: "Stories under the African sky.",
-      body: "Sundowner drinks on a kopje overlooking the savannah, followed by dinner beneath a clear canopy of stars.",
-      image: elephantImg,
-    },
-  ];
+  const timeline = [1, 2, 3, 4].map((i) => {
+    const get = (suffix: string) => (content as Record<string, any>)[`rhythm_${i}_${suffix}`] as string | undefined;
+    const fallbackImages = [g1Img, heroBaobab, g4Img, elephantImg];
+    return {
+      time: get("time") || "",
+      phase: get("phase") || "",
+      title: get("title") || "",
+      body: get("body") || "",
+      image: get("image") || fallbackImages[i - 1],
+    };
+  }).filter((step) => step.title || step.body || step.time);
+
+
 
   return (
     <section className="py-24 md:py-32 bg-cream/60 border-b border-border/40">
@@ -329,7 +312,7 @@ function DayInTheFieldSection({ content }: { content: typeof PAGE_DEFAULTS.adven
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {timeline.map((step) => (
             <div
-              key={step.time}
+              key={`${step.time}-${step.title}`}
               className="bg-background border border-border/60 rounded-xl overflow-hidden p-6 md:p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
             >
               <div>
@@ -666,8 +649,15 @@ function ExploreByExperienceSection({ content }: { content: typeof PAGE_DEFAULTS
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {EXPERIENCE_CATEGORIES.map((exp) => {
-            const IconComp = exp.icon;
+          {EXPERIENCE_CATEGORIES.map((cat, idx) => {
+            const get = (suffix: string) =>
+              (content as Record<string, any>)[`explore_${idx + 1}_${suffix}`] as string | undefined;
+            const exp = {
+              name: get("title") || cat.name,
+              desc: get("body") || cat.desc,
+              image: get("image") || cat.image,
+            };
+            const IconComp = cat.icon;
             return (
               <button
                 key={exp.name}
