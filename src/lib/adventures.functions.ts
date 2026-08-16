@@ -12,7 +12,6 @@ export type AdventuresHero = {
   focalY?: number;
 };
 
-
 export type AdventuresCta = {
   eyebrow: string;
   headline: string;
@@ -145,6 +144,40 @@ export const adventuresDefaults: AdventuresPage = {
   },
   signatures: [],
 };
+
+export function getAdventureEditorDraft(page: AdventuresPage, slug: string): AdventuresSignature {
+  const safeSlug = slug && slug !== "new" ? slug : "new";
+  const match = page.signatures.find((item) => item.slug === safeSlug);
+  if (match) return { ...match };
+
+  return {
+    slug: safeSlug,
+    name: "",
+    region: "",
+    terrain: "",
+    nights: "",
+    difficulty: "Moderate",
+    image: "",
+    imageAlt: "",
+    description: "",
+    shortDescription: "",
+    highlights: [],
+    included: [],
+    notIncluded: [],
+    experienceTypes: [],
+    travelStyles: [],
+    bestFor: [],
+    featured: false,
+    status: "draft",
+    updatedAt: new Date().toISOString(),
+    bestMonths: [],
+    destinations: [],
+    lodges: [],
+    itinerary: [],
+    relatedAdventures: [],
+    relatedDestinations: [],
+  };
+}
 
 export const getAdventuresPage = createServerFn({ method: "GET" }).handler(async (): Promise<AdventuresPage> => {
   const { createClient } = await import("@supabase/supabase-js");
