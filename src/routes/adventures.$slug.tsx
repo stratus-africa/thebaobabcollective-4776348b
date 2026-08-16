@@ -74,8 +74,18 @@ export const Route = createFileRoute("/adventures/$slug")({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
-        { "@type": "ListItem", position: 2, name: "Adventures", item: "https://thebaobabcollective.co.uk/adventures" },
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://thebaobabcollective.co.uk/",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Adventures",
+          item: "https://thebaobabcollective.co.uk/adventures",
+        },
         { "@type": "ListItem", position: 3, name: a?.name ?? params.slug, item: url },
       ],
     };
