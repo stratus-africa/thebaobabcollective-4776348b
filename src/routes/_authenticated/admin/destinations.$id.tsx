@@ -517,50 +517,118 @@ function AdminDestinationEdit() {
             </div>
           </section>
 
-          {/* Featured Trips & Activities */}
-          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
-            <header className="px-6 py-4 border-b border-border bg-cream/50">
-              <h2 className="font-serif text-lg leading-none">Featured Trips & Activities</h2>
-              <p className="text-xs text-foreground/55 mt-1">
-                List the signature highlights or trips for this destination (one per line).
-              </p>
+          {/* Location, Category & Coordinates Box */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-5 py-3.5 border-b border-border bg-cream/50 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gold" />
+              <h3 className="font-serif text-base">Location & Geography</h3>
             </header>
-            <div className="p-6 space-y-4">
-              <Textarea
-                rows={4}
-                value={form.featured_trips.join("\n")}
-                onChange={(e) =>
-                  patch(
-                    "featured_trips",
-                    e.target.value.split("\n").map((s) => s.trimEnd()),
-                  )
-                }
-                placeholder="Great Migration river crossings&#10;Walking safaris with Maasai elders&#10;Sunrise hot-air ballooning"
-              />
+            <div className="p-5 space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Country
+                </Label>
+                <Input
+                  value={form.country}
+                  onChange={(e) => patch("country", e.target.value)}
+                  placeholder="e.g. Kenya"
+                />
+              </div>
 
-              {form.featured_trips.filter(Boolean).length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {form.featured_trips.filter(Boolean).map((trip, idx) => (
-                    <button
-                      key={`${trip}-${idx}`}
-                      type="button"
-                      onClick={() =>
-                        patch(
-                          "featured_trips",
-                          form.featured_trips.filter((_, i) => i !== idx),
-                        )
-                      }
-                      className="inline-flex items-center gap-1 rounded-full border border-border bg-cream/40 px-3 py-1 text-xs text-foreground/75 hover:border-destructive hover:text-destructive transition-colors"
-                      title="Click to remove"
-                    >
-                      <span>{trip}</span>
-                      <span className="opacity-60">×</span>
-                    </button>
-                  ))}
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">Region</Label>
+                <Select value={form.region || "Southern Kenya"} onValueChange={(val) => patch("region", val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {KENYA_REGIONS.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="Other Africa">Other Region</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                  Discovery Category
+                </Label>
+                <Select
+                  value={form.destination_category || "The Icons"}
+                  onValueChange={(val) => patch("destination_category", val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category grouping" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="The Icons">The Icons (Featured)</SelectItem>
+                    <SelectItem value="Beyond the Classics">Beyond the Classics</SelectItem>
+                    <SelectItem value="The Indian Ocean">The Indian Ocean</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Coordinates for Interactive Map */}
+              <div className="space-y-3 pt-3 border-t border-border/60">
+                <div className="flex items-center justify-between gap-2">
+                  <Label className="block text-[11px] tracking-[0.2em] uppercase text-forest font-bold">
+                    Pin Coordinates
+                  </Label>
+                  {form.latitude != null && form.longitude != null && (
+                    <span className="text-[10px] font-mono bg-cream px-2 py-0.5 rounded text-foreground/70 border border-border">
+                      {Number(form.latitude).toFixed(3)}, {Number(form.longitude).toFixed(3)}
+                    </span>
+                  )}
                 </div>
-              )}
+                <p className="text-[11px] text-foreground/60 leading-snug">
+                  Drag the pin on the map or click to position this destination visually across Kenya.
+                </p>
+
+                {/* Interactive Mini-Map Pin Locator */}
+                <DestinationPinLocator
+                  name={form.name || "Destination"}
+                  latitude={form.latitude}
+                  longitude={form.longitude}
+                  onChange={(lat, lng) => {
+                    patch("latitude", lat);
+                    patch("longitude", lng);
+                  }}
+                />
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <Label className="mb-1 block text-[10px] tracking-wider uppercase text-foreground/60">
+                      Latitude
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.latitude ?? ""}
+                      onChange={(e) => patch("latitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="-1.4061"
+                      className="text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1 block text-[10px] tracking-wider uppercase text-foreground/60">
+                      Longitude
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.longitude ?? ""}
+                      onChange={(e) => patch("longitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="36.7470"
+                      className="text-xs font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-          </section>
+          </div>
         </div>
 
         {/* ── Sidebar Area (Right: 5/12 or 4/12) ──────────────────────────── */}
@@ -661,6 +729,51 @@ function AdminDestinationEdit() {
               />
             </div>
           </div>
+
+          {/* Featured Trips & Activities */}
+          <section className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
+            <header className="px-6 py-4 border-b border-border bg-cream/50">
+              <h2 className="font-serif text-lg leading-none">Featured Trips & Activities</h2>
+              <p className="text-xs text-foreground/55 mt-1">
+                List the signature highlights or trips for this destination (one per line).
+              </p>
+            </header>
+            <div className="p-6 space-y-4">
+              <Textarea
+                rows={4}
+                value={form.featured_trips.join("\n")}
+                onChange={(e) =>
+                  patch(
+                    "featured_trips",
+                    e.target.value.split("\n").map((s) => s.trimEnd()),
+                  )
+                }
+                placeholder="Great Migration river crossings&#10;Walking safaris with Maasai elders&#10;Sunrise hot-air ballooning"
+              />
+
+              {form.featured_trips.filter(Boolean).length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {form.featured_trips.filter(Boolean).map((trip, idx) => (
+                    <button
+                      key={`${trip}-${idx}`}
+                      type="button"
+                      onClick={() =>
+                        patch(
+                          "featured_trips",
+                          form.featured_trips.filter((_, i) => i !== idx),
+                        )
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-cream/40 px-3 py-1 text-xs text-foreground/75 hover:border-destructive hover:text-destructive transition-colors"
+                      title="Click to remove"
+                    >
+                      <span>{trip}</span>
+                      <span className="opacity-60">×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
 
           {/* Location, Category & Coordinates Box */}
           <div className="rounded-lg border border-border bg-background overflow-hidden shadow-sm">
