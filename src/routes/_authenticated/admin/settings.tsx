@@ -3,27 +3,51 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Loader2, Save, Image as ImageIcon, Shield, ShieldOff, Trash2, UserCog, Search,
-  Upload, Mail, Palette, Users as UsersIcon, X, Send, Coins, LogIn, FileWarning, ExternalLink,
+  Loader2,
+  Save,
+  Image as ImageIcon,
+  Shield,
+  ShieldOff,
+  Trash2,
+  UserCog,
+  Search,
+  Upload,
+  Mail,
+  Palette,
+  Users as UsersIcon,
+  X,
+  Send,
+  Coins,
+  LogIn,
+  FileWarning,
+  ExternalLink,
   LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  getSiteSettings,
-  saveSiteSettings,
-  type SiteSettings,
-} from "@/lib/site-settings.functions";
+import { getSiteSettings, saveSiteSettings, type SiteSettings } from "@/lib/site-settings.functions";
 import { adminUploadImage } from "@/lib/admin.functions";
 import {
-  listAdminUsers, setUserRole, deleteAdminUser, inviteUser, type AdminUserRow,
+  listAdminUsers,
+  setUserRole,
+  deleteAdminUser,
+  inviteUser,
+  type AdminUserRow,
 } from "@/lib/users-admin.functions";
 import { SITE_SETTINGS_QUERY_KEY } from "@/hooks/useSiteSettings";
 import { supabase } from "@/integrations/supabase/client";
@@ -186,6 +210,13 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
   });
 
   const [logoUrl, setLogoUrl] = useState("");
+  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
+  const [watermarkMode, setWatermarkMode] = useState<"text" | "image">("text");
+  const [watermarkText, setWatermarkText] = useState("The Baobab Collective");
+  const [watermarkImageUrl, setWatermarkImageUrl] = useState("");
+  const [watermarkPosition, setWatermarkPosition] = useState<
+    "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center"
+  >("bottom-right");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneTel, setPhoneTel] = useState("");
@@ -198,6 +229,11 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
   useEffect(() => {
     if (!data) return;
     setLogoUrl(data.branding?.logo_url ?? "");
+    setWatermarkEnabled(Boolean(data.branding?.watermark_enabled));
+    setWatermarkMode(data.branding?.watermark_mode ?? "text");
+    setWatermarkText(data.branding?.watermark_text || "The Baobab Collective");
+    setWatermarkImageUrl(data.branding?.watermark_image_url ?? "");
+    setWatermarkPosition(data.branding?.watermark_position ?? "bottom-right");
     setEmail(data.contact?.email ?? "");
     setPhone(data.contact?.phone ?? "");
     setPhoneTel(data.contact?.phone_tel ?? "");
@@ -245,6 +281,16 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
     }
     setSaving(true);
     try {
+      const branding = {
+        logo_url: logoUrl.trim(),
+        watermark_enabled: watermarkEnabled,
+        watermark_mode: watermarkMode,
+        watermark_text: watermarkText.trim() || "The Baobab Collective",
+        watermark_image_url: watermarkImageUrl.trim(),
+        watermark_position: watermarkPosition,
+        watermark_overrides: data?.branding?.watermark_overrides ?? {},
+      };
+
       await save({
         data: {
           contact: {
@@ -253,7 +299,7 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
             phone_tel: phoneTel.trim() || phone.trim().replace(/[^\d+]/g, ""),
             address: address.trim(),
           },
-          branding: { logo_url: logoUrl.trim() },
+          branding,
         },
       });
       await queryClient.invalidateQueries({ queryKey: SITE_SETTINGS_QUERY_KEY });
@@ -319,9 +365,83 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
                     </button>
                   )}
                 </div>
-                <p className="text-xs text-foreground/55">PNG, JPG, WEBP, or SVG. Stored privately and served via signed URL.</p>
+                <p className="text-xs text-foreground/55">
+                  PNG, JPG, WEBP, or SVG. Stored privately and served via signed URL.
+                </p>
               </div>
             </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-cream/30 p-4 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Watermark all website images</p>
+                <p className="text-xs text-foreground/60">
+                  Adds a brand mark to uploaded gallery and asset images across the site.
+                </p>
+              </div>
+              <Switch checked={watermarkEnabled} onCheckedChange={setWatermarkEnabled} />
+            </div>
+
+            {watermarkEnabled && (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <Label className="text-sm">Watermark type</Label>
+                  <Select value={watermarkMode} onValueChange={(value) => setWatermarkMode(value as "text" | "image")}>
+                    <SelectTrigger className="mt-2 w-full">
+                      <SelectValue placeholder="Choose watermark type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="image">Image</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {watermarkMode === "text" ? (
+                  <div className="md:col-span-2">
+                    <Label htmlFor="watermark-text" className="text-sm">
+                      Watermark text
+                    </Label>
+                    <Input
+                      id="watermark-text"
+                      value={watermarkText}
+                      onChange={(e) => setWatermarkText(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                ) : (
+                  <div className="md:col-span-2">
+                    <Label htmlFor="watermark-image-url" className="text-sm">
+                      Watermark image URL
+                    </Label>
+                    <Input
+                      id="watermark-image-url"
+                      value={watermarkImageUrl}
+                      onChange={(e) => setWatermarkImageUrl(e.target.value)}
+                      placeholder="https://.../brand-mark.png"
+                      className="mt-2"
+                    />
+                  </div>
+                )}
+
+                <div className="md:col-span-2">
+                  <Label className="text-sm">Position</Label>
+                  <Select value={watermarkPosition} onValueChange={(value) => setWatermarkPosition(value as any)}>
+                    <SelectTrigger className="mt-2 w-full">
+                      <SelectValue placeholder="Choose position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="top-left">Top left</SelectItem>
+                      <SelectItem value="top-right">Top right</SelectItem>
+                      <SelectItem value="bottom-left">Bottom left</SelectItem>
+                      <SelectItem value="bottom-right">Bottom right</SelectItem>
+                      <SelectItem value="center">Center</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       ) : (
@@ -332,7 +452,9 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="email" className="text-sm">Email</Label>
+              <Label htmlFor="email" className="text-sm">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -344,11 +466,15 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
                 className="mt-2"
               />
               {emailError && (
-                <p id="email-error" role="alert" className="mt-1 text-xs text-destructive">{emailError}</p>
+                <p id="email-error" role="alert" className="mt-1 text-xs text-destructive">
+                  {emailError}
+                </p>
               )}
             </div>
             <div>
-              <Label htmlFor="phone" className="text-sm">Phone (display)</Label>
+              <Label htmlFor="phone" className="text-sm">
+                Phone (display)
+              </Label>
               <Input
                 id="phone"
                 type="tel"
@@ -359,7 +485,9 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
               />
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="phone_tel" className="text-sm">Phone (tel link, optional)</Label>
+              <Label htmlFor="phone_tel" className="text-sm">
+                Phone (tel link, optional)
+              </Label>
               <Input
                 id="phone_tel"
                 placeholder="+442000000000"
@@ -372,7 +500,9 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
               </p>
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="address" className="text-sm">Address</Label>
+              <Label htmlFor="address" className="text-sm">
+                Address
+              </Label>
               <Input
                 id="address"
                 placeholder="London · Cape Town · Nairobi"
@@ -392,9 +522,13 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
           className="inline-flex items-center gap-2 bg-gold text-gold-foreground uppercase tracking-[0.25em] text-[11px] px-6 py-3 hover:bg-gold/90 transition-colors disabled:opacity-60"
         >
           {saving ? (
-            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…</>
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
+            </>
           ) : (
-            <><Save className="w-3.5 h-3.5" /> Save Settings</>
+            <>
+              <Save className="w-3.5 h-3.5" /> Save Settings
+            </>
           )}
         </button>
       </div>
@@ -478,7 +612,9 @@ function CurrencyForm() {
         </p>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="currency-code" className="text-sm">Currency</Label>
+            <Label htmlFor="currency-code" className="text-sm">
+              Currency
+            </Label>
             <select
               id="currency-code"
               value={code}
@@ -486,12 +622,16 @@ function CurrencyForm() {
               className="mt-2 h-10 w-full bg-background border border-border rounded-md px-3 text-sm"
             >
               {CURRENCY_OPTIONS.map((o) => (
-                <option key={o.code} value={o.code}>{o.code} — {o.label}</option>
+                <option key={o.code} value={o.code}>
+                  {o.code} — {o.label}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <Label htmlFor="currency-symbol" className="text-sm">Symbol</Label>
+            <Label htmlFor="currency-symbol" className="text-sm">
+              Symbol
+            </Label>
             <Input
               id="currency-symbol"
               value={symbol}
@@ -513,16 +653,19 @@ function CurrencyForm() {
           className="inline-flex items-center gap-2 bg-gold text-gold-foreground uppercase tracking-[0.25em] text-[11px] px-6 py-3 hover:bg-gold/90 transition-colors disabled:opacity-60"
         >
           {saving ? (
-            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…</>
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
+            </>
           ) : (
-            <><Save className="w-3.5 h-3.5" /> Save Settings</>
+            <>
+              <Save className="w-3.5 h-3.5" /> Save Settings
+            </>
           )}
         </button>
       </div>
     </form>
   );
 }
-
 
 // ─── Invite ──────────────────────────────────────────────────────────
 function InvitePanel() {
@@ -564,7 +707,9 @@ function InvitePanel() {
       </p>
       <form onSubmit={send} className="grid md:grid-cols-[1fr_180px_auto] gap-3 items-end">
         <div>
-          <Label htmlFor="invite-email" className="text-sm">Email</Label>
+          <Label htmlFor="invite-email" className="text-sm">
+            Email
+          </Label>
           <Input
             id="invite-email"
             type="email"
@@ -576,7 +721,9 @@ function InvitePanel() {
           />
         </div>
         <div>
-          <Label htmlFor="invite-role" className="text-sm">Initial role</Label>
+          <Label htmlFor="invite-role" className="text-sm">
+            Initial role
+          </Label>
           <select
             id="invite-role"
             value={role}
@@ -625,9 +772,7 @@ function UsersManagement() {
     if (!q.trim()) return list;
     const needle = q.toLowerCase();
     return list.filter(
-      (u) =>
-        (u.email ?? "").toLowerCase().includes(needle) ||
-        (u.full_name ?? "").toLowerCase().includes(needle),
+      (u) => (u.email ?? "").toLowerCase().includes(needle) || (u.full_name ?? "").toLowerCase().includes(needle),
     );
   }, [users, q]);
 
@@ -700,7 +845,9 @@ function UsersManagement() {
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-foreground/60">No users found.</td>
+                <td colSpan={5} className="px-6 py-10 text-center text-foreground/60">
+                  No users found.
+                </td>
               </tr>
             ) : (
               filtered.map((u) => {
@@ -766,7 +913,8 @@ function UsersManagement() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete user?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This permanently removes <strong>{u.email}</strong> and all their data. This cannot be undone.
+                                This permanently removes <strong>{u.email}</strong> and all their data. This cannot be
+                                undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
