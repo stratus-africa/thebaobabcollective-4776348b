@@ -1,6 +1,7 @@
 import elephantImg from "@/assets/elephant.jpg";
 import lodgeTentImg from "@/assets/lodge-tent.jpg";
 import heroBaobabImg from "@/assets/hero-baobab.jpg";
+import { resolveImageSource } from "@/lib/image-resolution";
 import journalLionImg from "@/assets/journal-lion.jpg";
 import g1Img from "@/assets/gallery-1.jpg";
 import g2Img from "@/assets/gallery-2.jpg";
@@ -504,8 +505,8 @@ export function enrichDestination(dbDest: any): DestinationMetadata {
     shortDescription = "Experience the extraordinary wilderness, wildlife, and cultures of Kenya.";
   }
 
-  // Image fallback
-  const fallbackImage = dbDest.image || meta?.fallbackImage || elephantImg;
+  // Image fallback: prefer a real user/media image, then curated metadata, then intentional placeholder.
+  const fallbackImage = resolveImageSource(dbDest.image, meta?.fallbackImage, elephantImg) ?? elephantImg;
 
   // Highlights
   const highlights =
