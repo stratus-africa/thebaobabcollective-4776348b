@@ -9,6 +9,10 @@ import { getLodges } from "@/lib/cms.functions";
 import { MapPin, ArrowRight } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getPageContent } from "@/lib/page-content.functions";
+import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 
 const lodgesQuery = queryOptions({
   queryKey: ["lodges"],
@@ -31,25 +35,45 @@ export const Route = createFileRoute("/lodges/")({
 });
 
 function LodgesPage() {
+  const pageContentFn = useServerFn(getPageContent);
+  const { data: pcData } = useQuery({
+    queryKey: ["page-content", "lodges_index"],
+    queryFn: () => pageContentFn({ data: { key: "lodges_index" } }),
+    staleTime: 60_000,
+  });
+  const content = { ...PAGE_DEFAULTS.lodges_index, ...((pcData ?? {}) as Record<string, any>) };
+
   return (
     <div className="bg-background min-h-screen">
       <Navbar />
       <main>
-        <section className="bg-forest text-forest-foreground py-24 text-center px-6">
-          <p className="text-[11px] tracking-[0.3em] uppercase text-gold mb-4">Where you'll stay</p>
-          <h1 className="font-serif text-5xl md:text-6xl mb-5">Partner Lodges</h1>
-          <p className="max-w-2xl mx-auto text-forest-foreground/80">
-            Every camp and lodge we work with has been walked, slept in, and chosen for soul as much as setting.
-          </p>
-        </section>
+        {content.show_hero !== false && (
+          <section className="relative bg-forest text-forest-foreground py-24 text-center px-6 overflow-hidden">
+            {content.hero_image ? (
+              <>
+                <img src={content.hero_image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-forest/70" />
+              </>
+            ) : null}
+            <div className="relative">
+              <p className="text-[11px] tracking-[0.3em] uppercase text-gold mb-4">
+                {content.eyebrow || "Where you'll stay"}
+              </p>
+              <h1 className="font-serif text-5xl md:text-6xl mb-5">{content.title || "Partner Lodges"}</h1>
+              <p className="max-w-2xl mx-auto text-forest-foreground/80">{content.subtitle}</p>
+            </div>
+          </section>
+        )}
 
-        <section className="py-12 md:py-16">
-          <div className="max-w-[1920px] mx-auto px-6 lg:px-10 space-y-8">
-            <Suspense fallback={<CardGridSkeleton count={6} />}>
-              <LodgesGrid />
-            </Suspense>
-          </div>
-        </section>
+        {content.show_grid !== false && (
+          <section className="py-12 md:py-16">
+            <div className="max-w-[1920px] mx-auto px-6 lg:px-10 space-y-8">
+              <Suspense fallback={<CardGridSkeleton count={6} />}>
+                <LodgesGrid />
+              </Suspense>
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>

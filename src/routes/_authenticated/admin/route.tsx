@@ -105,17 +105,18 @@ const groups: NavGroup[] = [
     ],
   },
   {
-    label: "Pages",
+    label: "Landing Pages",
     items: [
       { to: "/admin/pages-hub/home", label: "Home", icon: Home },
       { to: "/admin/pages-hub/about", label: "About", icon: BookOpen },
-      { to: "/admin/pages-hub/adventures", label: "Adventures Page", icon: Compass },
-      { to: "/admin/pages-hub/destinations", label: "Destinations Page", icon: Map },
-      { to: "/admin/pages/contact", label: "Contact", icon: Mail },
+      { to: "/admin/pages-hub/adventures", label: "Adventures", icon: Compass },
+      { to: "/admin/pages-hub/destinations", label: "Destinations", icon: Map },
+      { to: "/admin/pages-hub/lodges", label: "Partner Lodges", icon: Building },
       { to: "/admin/pages/testimonials", label: "Testimonials Page", icon: Star },
-      { to: "/admin/private-travel", label: "Private Travel", icon: Briefcase },
+      { to: "/admin/pages/contact", label: "Contact Us", icon: Mail },
     ],
   },
+
   {
     label: "Site",
     items: [

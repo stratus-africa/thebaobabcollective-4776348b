@@ -5,10 +5,33 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Search, CheckCircle2, Mail, Loader2, AlertCircle, Ban, RotateCcw } from "lucide-react";
 import { adminListEnquiries, adminUpdateEnquiry } from "@/lib/admin.functions";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PrivateTravelList } from "@/components/admin/PrivateTravelList";
 
 export const Route = createFileRoute("/_authenticated/admin/enquiries")({
-  component: EnquiriesAdmin,
+  component: EnquiriesTabs,
 });
+
+function EnquiriesTabs() {
+  return (
+    <Tabs defaultValue="enquiries" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="enquiries">Enquiries</TabsTrigger>
+        <TabsTrigger value="private-travel">Private Travel</TabsTrigger>
+      </TabsList>
+      <TabsContent value="enquiries" className="mt-0">
+        <EnquiriesAdmin />
+      </TabsContent>
+      <TabsContent value="private-travel" className="mt-0 space-y-6">
+        <div>
+          <h1 className="font-serif text-3xl text-foreground">Private Travel Requests</h1>
+          <p className="text-sm text-foreground/60 mt-1">Bespoke private travel enquiries.</p>
+        </div>
+        <PrivateTravelList />
+      </TabsContent>
+    </Tabs>
+  );
+}
 
 type StatusFilter = "all" | "new" | "handled" | "spam";
 
