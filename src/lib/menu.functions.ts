@@ -141,7 +141,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 
 export const saveMenuConfig = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => MenuSchema.parse(d))
+  .validator((d: unknown) => MenuSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const database = process.env.SUPABASE_SERVICE_ROLE_KEY
