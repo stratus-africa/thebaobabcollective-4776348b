@@ -422,31 +422,91 @@ function DestinationDetailPage() {
         </section>
 
         {/* ── 3. SIGNATURE EXPERIENCES ─────────────────────────────────── */}
-        {d.highlights && d.highlights.length > 0 && (
+        {(d.highlights && d.highlights.length > 0) || relevantCombinations.length > 0 ? (
           <section className="py-20 bg-background border-b border-border/50">
             <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
-              <div className="text-center max-w-2xl mx-auto mb-12">
-                <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
-                  Activities & Moments
-                </p>
-                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
-                  Signature Experiences
-                </h2>
-                <p className="text-foreground/70 text-sm mt-3">
-                  Unforgettable ways to live and breathe {d.name}
-                </p>
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {d.highlights && d.highlights.length > 0 && (
+                  <div>
+                    <div className="text-center max-w-2xl mx-auto mb-8 lg:text-left lg:mx-0">
+                      <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
+                        Activities & Moments
+                      </p>
+                      <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
+                        Signature Experiences
+                      </h2>
+                      <p className="text-foreground/70 text-sm mt-3">
+                        Unforgettable ways to live and breathe {d.name}
+                      </p>
+                    </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {d.highlights.map((h, i) => (
-                  <div
-                    key={i}
-                    className="p-6 bg-cream/40 rounded-2xl border border-border flex items-start gap-3 hover:border-gold/50 transition-colors"
-                  >
-                    <Check className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
-                    <p className="text-sm font-medium text-foreground/85 leading-snug">{h}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {d.highlights.map((h, i) => (
+                        <div
+                          key={i}
+                          className="p-6 bg-cream/40 rounded-2xl border border-border flex items-start gap-3 hover:border-gold/50 transition-colors"
+                        >
+                          <Check className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
+                          <p className="text-sm font-medium text-foreground/85 leading-snug">{h}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                )}
+
+                {relevantCombinations.length > 0 && (
+                  <div>
+                    <div className="mb-8">
+                      <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
+                        Combine With
+                      </p>
+                      <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
+                        Perfect Journeys Combining {d.name}
+                      </h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {relevantCombinations.map((combo) => (
+                        <div
+                          key={combo.id}
+                          className="p-6 sm:p-8 bg-cream/30 rounded-2xl border border-border space-y-4 shadow-sm"
+                        >
+                          <p className="text-xs uppercase tracking-[0.2em] text-gold font-semibold">
+                            {combo.subtitle}
+                          </p>
+                          <h3 className="font-serif text-2xl sm:text-3xl text-foreground">
+                            {combo.destinationNames.join("  +  ")}
+                          </h3>
+                          <p className="text-foreground/75 text-sm leading-relaxed">{combo.tagline}</p>
+                          <div className="pt-2 flex items-center justify-between text-xs font-semibold">
+                            <span className="text-foreground/60">{combo.days}</span>
+                            <EnquireDialog
+                              defaultSubject={`Inquiry: Combining ${d.name}`}
+                              defaultDestination={combo.destinationNames.join(" & ")}
+                              sourceUrl={`/destinations/${d.slug}`}
+                              autosaveKey={`enquire:combo:${combo.id}`}
+                              context={{
+                                kind: "Journey",
+                                title: combo.title,
+                                dates: combo.days,
+                                slug: combo.id,
+                                image: combo.image,
+                              }}
+                              trigger={
+                                <button
+                                  type="button"
+                                  className="text-gold hover:underline uppercase tracking-wider text-xs"
+                                >
+                                  Plan this route →
+                                </button>
+                              }
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </section>
@@ -588,64 +648,7 @@ function DestinationDetailPage() {
           </section>
         )}
 
-        {/* ── 6. SUGGESTED COMBINATIONS ────────────────────────────────── */}
-        {relevantCombinations.length > 0 && (
-          <section className="py-20 bg-cream/30 border-t border-border/50">
-            <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
-              <div className="mb-10">
-                <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
-                  Combine With
-                </p>
-                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
-                  Perfect Journeys Combining {d.name}
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {relevantCombinations.map((combo) => (
-                  <div
-                    key={combo.id}
-                    className="p-6 sm:p-8 bg-background rounded-2xl border border-border space-y-4 shadow-sm"
-                  >
-                    <p className="text-xs uppercase tracking-[0.2em] text-gold font-semibold">
-                      {combo.subtitle}
-                    </p>
-                    <h3 className="font-serif text-2xl sm:text-3xl text-foreground">
-                      {combo.destinationNames.join("  +  ")}
-                    </h3>
-                    <p className="text-foreground/75 text-sm leading-relaxed">{combo.tagline}</p>
-                    <div className="pt-2 flex items-center justify-between text-xs font-semibold">
-                      <span className="text-foreground/60">{combo.days}</span>
-                      <EnquireDialog
-                        defaultSubject={`Inquiry: Combining ${d.name}`}
-                        defaultDestination={combo.destinationNames.join(" & ")}
-                        sourceUrl={`/destinations/${d.slug}`}
-                        autosaveKey={`enquire:combo:${combo.id}`}
-                        context={{
-                          kind: "Journey",
-                          title: combo.title,
-                          dates: combo.days,
-                          slug: combo.id,
-                          image: combo.image,
-                        }}
-                        trigger={
-                          <button
-                            type="button"
-                            className="text-gold hover:underline uppercase tracking-wider text-xs"
-                          >
-                            Plan this route →
-                          </button>
-                        }
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── 7. OTHER DESTINATIONS ────────────────────────────────────── */}
+        {/* ── 6. OTHER DESTINATIONS ────────────────────────────────────── */}
         {otherDestinations.length > 0 && (
           <section className="py-20 bg-background border-t border-border/50">
             <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
