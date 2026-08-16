@@ -303,6 +303,7 @@ function DestinationsDiscoveryPage() {
         {content.show_map !== false && (
           <KenyaDestinationsMap
             destinations={allDestinations}
+            mapImage={content.map_image}
             customPositions={content.map_positions}
             onSavePositions={handleSaveMapPositions}
           />
