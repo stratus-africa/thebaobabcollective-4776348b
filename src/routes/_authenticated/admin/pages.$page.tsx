@@ -91,15 +91,34 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
     preview: "/",
     fields: [
       { name: "hero_image_url", label: "Hero Background Image", type: "image" },
-      { name: "hero_title_line1", label: "Hero Title — Line 1", type: "text", placeholder: "JOURNEYS" },
-      { name: "hero_title_line2", label: "Hero Title — Line 2", type: "text", placeholder: "THAT CONNECT" },
+      {
+        name: "hero_title_line1",
+        label: "Hero Title — Line 1",
+        type: "text",
+        placeholder: "JOURNEYS",
+      },
+      {
+        name: "hero_title_line2",
+        label: "Hero Title — Line 2",
+        type: "text",
+        placeholder: "THAT CONNECT",
+      },
       { name: "hero_subtitle", label: "Hero Subtitle", type: "textarea" },
       { name: "hero_cta_primary", label: "Primary CTA Label", type: "text" },
       { name: "hero_cta_secondary", label: "Secondary CTA Label", type: "text" },
       { name: "hero_proof_text", label: "Social Proof Text", type: "text" },
-      { name: "hero_image_as_background", label: "Use Hero Image as Full Background", type: "boolean" },
+      {
+        name: "hero_image_as_background",
+        label: "Use Hero Image as Full Background",
+        type: "boolean",
+      },
       { name: "hero_hide_search", label: "Hide Search Filter", type: "boolean" },
-      { name: "hero_bg_size", label: "Background size ('cover' or 'contain')", type: "text", placeholder: "cover" },
+      {
+        name: "hero_bg_size",
+        label: "Background size ('cover' or 'contain')",
+        type: "text",
+        placeholder: "cover",
+      },
     ],
   },
   about: {
@@ -422,20 +441,62 @@ const SCHEMAS: Record<PageKey, { title: string; description: string; preview: st
   },
   adventures_index: {
     title: "Adventures — Landing",
-    description: "All editable sections on the /adventures listing page.",
+    description: "All editable sections on the /adventures listing page. Toggle sections on/off and edit their copy.",
     preview: "/adventures",
     fields: [
-      { name: "eyebrow", label: "Hero Eyebrow", type: "text" },
-      { name: "title", label: "Hero Title", type: "text" },
-      { name: "subtitle", label: "Hero Subtitle", type: "textarea" },
+      { name: "eyebrow", label: "Hero — Eyebrow (fallback)", type: "text" },
+      { name: "title", label: "Hero — Title (fallback)", type: "text" },
+      { name: "subtitle", label: "Hero — Subhead (fallback)", type: "textarea" },
+
+      { name: "show_rhythm", label: "Show 'A Day in the Field' section", type: "boolean" },
+      { name: "rhythm_eyebrow", label: "Day in the Field — Eyebrow", type: "text" },
+      { name: "rhythm_title", label: "Day in the Field — Title", type: "text" },
+      { name: "rhythm_body", label: "Day in the Field — Body", type: "textarea" },
+
+      { name: "show_finder", label: "Show Adventure Finder (filter bar) section", type: "boolean" },
+      { name: "finder_eyebrow", label: "Adventure Finder — Eyebrow", type: "text" },
+      { name: "finder_title", label: "Adventure Finder — Title", type: "text" },
+      { name: "finder_body", label: "Adventure Finder — Body", type: "textarea" },
+      {
+        name: "finder_experience_options",
+        label: "Adventure Finder — Experience filter options (comma-separated)",
+        type: "text",
+      },
+      {
+        name: "finder_travel_style_options",
+        label: "Adventure Finder — Travel style filter options (comma-separated)",
+        type: "text",
+      },
+
       { name: "signature_eyebrow", label: "Signature Section — Eyebrow", type: "text" },
       { name: "signature_title", label: "Signature Section — Title", type: "text" },
       { name: "signature_body", label: "Signature Section — Body", type: "textarea" },
-      { name: "show_rhythm", label: "Show 'Rhythm of an adventure day' section", type: "boolean" },
-      { name: "rhythm_eyebrow", label: "Rhythm — Eyebrow", type: "text" },
-      { name: "rhythm_title", label: "Rhythm — Title", type: "text" },
-      { name: "rhythm_body", label: "Rhythm — Body", type: "textarea" },
-      { name: "show_enquiry_cta", label: "Show closing Enquiry CTA section", type: "boolean" },
+
+      { name: "show_explore", label: "Show 'Explore by Experience' section", type: "boolean" },
+      { name: "explore_eyebrow", label: "Explore by Experience — Eyebrow", type: "text" },
+      { name: "explore_title", label: "Explore by Experience — Title", type: "text" },
+      { name: "explore_body", label: "Explore by Experience — Body", type: "textarea" },
+
+      { name: "show_spotlight", label: "Show Featured Journey spotlight section", type: "boolean" },
+
+      { name: "catalogue_eyebrow", label: "Full Catalogue — Eyebrow", type: "text" },
+      { name: "catalogue_title", label: "Full Catalogue — Title", type: "text" },
+
+      { name: "show_combinations", label: "Show Journey Combinations section", type: "boolean" },
+      { name: "combinations_eyebrow", label: "Journey Combinations — Eyebrow", type: "text" },
+      { name: "combinations_title", label: "Journey Combinations — Title", type: "text" },
+      { name: "combinations_body", label: "Journey Combinations — Body", type: "textarea" },
+
+      {
+        name: "show_enquiry_cta",
+        label: "Show 'Not quite right?' bespoke banner",
+        type: "boolean",
+      },
+      { name: "bespoke_eyebrow", label: "Bespoke Banner — Eyebrow", type: "text" },
+      { name: "bespoke_title", label: "Bespoke Banner — Title", type: "text" },
+      { name: "bespoke_body", label: "Bespoke Banner — Body", type: "textarea" },
+
+      { name: "show_final_cta", label: "Show final CTA section", type: "boolean" },
     ],
   },
   testimonials_page: {
@@ -827,7 +888,9 @@ function SortableItem({
   onDown: () => void;
   children: ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
