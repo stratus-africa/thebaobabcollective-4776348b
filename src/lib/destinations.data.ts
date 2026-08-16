@@ -57,12 +57,32 @@ export const BEST_FOR_CATEGORIES: { id: BestForTag; label: string; description: 
   { id: "Wildlife", label: "Wildlife", description: "Unrivalled game viewing and legendary predator density" },
   { id: "Beach", label: "Beach", description: "Pristine Swahili sands and turquoise Indian Ocean waters" },
   { id: "Culture", label: "Culture", description: "Deep encounters with Maasai, Samburu, and Swahili heritage" },
-  { id: "Romance", label: "Romance", description: "Intimate star beds, secluded sanctuaries, and lantern-lit bush dinners" },
+  {
+    id: "Romance",
+    label: "Romance",
+    description: "Intimate star beds, secluded sanctuaries, and lantern-lit bush dinners",
+  },
   { id: "Family", label: "Family", description: "Thoughtfully paced adventures designed for all generations" },
-  { id: "Adventure", label: "Adventure", description: "Walking safaris, dhow sailing, and camel treks in wild country" },
-  { id: "Conservation", label: "Conservation", description: "Community conservancies and pioneering anti-poaching initiatives" },
-  { id: "Photography", label: "Photography", description: "Cinematic light, dramatic river crossings, and sweeping vistas" },
-  { id: "Wellness", label: "Wellness", description: "Open-air yoga, spa pavilions, and restorative wilderness stillness" },
+  {
+    id: "Adventure",
+    label: "Adventure",
+    description: "Walking safaris, dhow sailing, and camel treks in wild country",
+  },
+  {
+    id: "Conservation",
+    label: "Conservation",
+    description: "Community conservancies and pioneering anti-poaching initiatives",
+  },
+  {
+    id: "Photography",
+    label: "Photography",
+    description: "Cinematic light, dramatic river crossings, and sweeping vistas",
+  },
+  {
+    id: "Wellness",
+    label: "Wellness",
+    description: "Open-air yoga, spa pavilions, and restorative wilderness stillness",
+  },
 ];
 
 export const KENYA_REGIONS: { id: GeographicRegion; label: string; description: string }[] = [
@@ -108,7 +128,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 35.139,
     featured: true,
     fallbackImage: g4Img,
-    highlights: ["Great Migration River Crossings", "Private Conservancy Game Drives", "Hot-Air Ballooning at Sunrise", "Maasai Guided Bush Walks"],
+    highlights: [
+      "Great Migration River Crossings",
+      "Private Conservancy Game Drives",
+      "Hot-Air Ballooning at Sunrise",
+      "Maasai Guided Bush Walks",
+    ],
     relatedDestinations: ["diani-beach", "samburu", "laikipia"],
   },
   {
@@ -129,7 +154,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 37.2606,
     featured: true,
     fallbackImage: elephantImg,
-    highlights: ["Big Tusker Elephant Encounters", "Kilimanjaro Sunrise Backdrops", "Observation Hill Panoramas", "Swamp Birdlife Exploration"],
+    highlights: [
+      "Big Tusker Elephant Encounters",
+      "Kilimanjaro Sunrise Backdrops",
+      "Observation Hill Panoramas",
+      "Swamp Birdlife Exploration",
+    ],
     relatedDestinations: ["tsavo", "maasai-mara", "diani-beach"],
   },
   {
@@ -150,7 +180,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 37.5317,
     featured: true,
     fallbackImage: g1Img,
-    highlights: ["Samburu Special Five Tracking", "Ewaso Nyiro River Sundowners", "Cultural Walks with Samburu Warriors", "Dramatic Rocky Kopjes"],
+    highlights: [
+      "Samburu Special Five Tracking",
+      "Ewaso Nyiro River Sundowners",
+      "Cultural Walks with Samburu Warriors",
+      "Dramatic Rocky Kopjes",
+    ],
     relatedDestinations: ["laikipia", "maasai-mara", "mount-kenya"],
   },
 
@@ -173,7 +208,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 36.9062,
     featured: false,
     fallbackImage: lodgeTentImg,
-    highlights: ["Black Rhino Sanctuaries", "Horseback & Walking Safaris", "Wild Dog Pack Tracking", "Star Bed Sleep-outs"],
+    highlights: [
+      "Black Rhino Sanctuaries",
+      "Horseback & Walking Safaris",
+      "Wild Dog Pack Tracking",
+      "Star Bed Sleep-outs",
+    ],
     relatedDestinations: ["samburu", "maasai-mara", "mount-kenya"],
   },
   {
@@ -194,7 +234,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 38.7667,
     featured: false,
     fallbackImage: g6Img,
-    highlights: ["Red Elephant Herds", "Mzima Springs Underwater Viewing", "Shetani Lava Flow", "Mudanda Rock Waterhole"],
+    highlights: [
+      "Red Elephant Herds",
+      "Mzima Springs Underwater Viewing",
+      "Shetani Lava Flow",
+      "Mudanda Rock Waterhole",
+    ],
     relatedDestinations: ["amboseli", "diani-beach", "watamu"],
   },
   {
@@ -215,7 +260,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 36.2167,
     featured: false,
     fallbackImage: g5Img,
-    highlights: ["Rhino Sanctuary Drives", "Lake Naivasha Boat Expeditions", "Crescent Island Walking Safari", "Hell's Gate Gorge Biking"],
+    highlights: [
+      "Rhino Sanctuary Drives",
+      "Lake Naivasha Boat Expeditions",
+      "Crescent Island Walking Safari",
+      "Hell's Gate Gorge Biking",
+    ],
     relatedDestinations: ["maasai-mara", "mount-kenya", "laikipia"],
   },
   {
@@ -236,7 +286,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 37.3084,
     featured: false,
     fallbackImage: heroBaobabImg,
-    highlights: ["Alpine Mountain Trekking", "Wilderness Forest Walks", "Trout Stream Fly-Fishing", "Canopy Walkways & Waterfalls"],
+    highlights: [
+      "Alpine Mountain Trekking",
+      "Wilderness Forest Walks",
+      "Trout Stream Fly-Fishing",
+      "Canopy Walkways & Waterfalls",
+    ],
     relatedDestinations: ["laikipia", "samburu", "lake-nakuru-naivasha"],
   },
 
@@ -259,7 +314,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 40.902,
     featured: true,
     fallbackImage: g2Img,
-    highlights: ["Sunset Dhow Sailing", "UNESCO Swahili Town Immersion", "Deserted Shela Beach Walks", "Rooftop Swahili Dinners"],
+    highlights: [
+      "Sunset Dhow Sailing",
+      "UNESCO Swahili Town Immersion",
+      "Deserted Shela Beach Walks",
+      "Rooftop Swahili Dinners",
+    ],
     relatedDestinations: ["watamu", "maasai-mara", "laikipia"],
   },
   {
@@ -280,7 +340,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 40.0167,
     featured: false,
     fallbackImage: g7Img,
-    highlights: ["Marine National Park Snorkelling", "Sea Turtle Sanctuary Visits", "Mida Creek Boardwalk & Birding", "Pristine Sandbar Lounging"],
+    highlights: [
+      "Marine National Park Snorkelling",
+      "Sea Turtle Sanctuary Visits",
+      "Mida Creek Boardwalk & Birding",
+      "Pristine Sandbar Lounging",
+    ],
     relatedDestinations: ["lamu-archipelago", "diani-beach", "tsavo"],
   },
   {
@@ -301,7 +366,12 @@ export const KENYA_DESTINATIONS_DATA: DestinationMetadata[] = [
     longitude: 39.5855,
     featured: true,
     fallbackImage: g3Img,
-    highlights: ["Kite Surfing & Paddleboarding", "Kwale Forest Elephant Reserve Day Trip", "Private Sandbank Dhow Excursions", "Oceanfront Spa & Wellness"],
+    highlights: [
+      "Kite Surfing & Paddleboarding",
+      "Kwale Forest Elephant Reserve Day Trip",
+      "Private Sandbank Dhow Excursions",
+      "Oceanfront Spa & Wellness",
+    ],
     relatedDestinations: ["maasai-mara", "amboseli", "tsavo"],
   },
 ];
@@ -364,7 +434,8 @@ export const DESTINATION_COMBINATIONS: DestinationCombination[] = [
     id: "mount-kenya-naivasha-mara",
     title: "Mount Kenya + Great Rift + Maasai Mara",
     subtitle: "Highlands, Rift Valley Lakes & Savannah",
-    tagline: "A sweeping overland journey across Kenya's high afro-alpine forests, rift lakes, and predator heartlands.",
+    tagline:
+      "A sweeping overland journey across Kenya's high afro-alpine forests, rift lakes, and predator heartlands.",
     destinations: ["mount-kenya", "lake-nakuru-naivasha", "maasai-mara"],
     destinationNames: ["Mount Kenya", "Lake Naivasha", "Maasai Mara"],
     days: "9 – 12 nights",
@@ -489,4 +560,91 @@ export function mergeDestinationsWithDefaults(dbList: any[]): DestinationMetadat
   }
 
   return merged;
+}
+
+/**
+ * Calibrated default percentage coordinates for reference Kenya Map
+ */
+export const DEFAULT_DESTINATION_MAP_POSITIONS: Record<string, { left: number; top: number }> = {
+  "maasai-mara": { left: 24.5, top: 64.0 },
+  amboseli: { left: 47.0, top: 76.5 },
+  samburu: { left: 47.5, top: 42.5 },
+  laikipia: { left: 41.5, top: 48.0 },
+  tsavo: { left: 57.5, top: 78.5 },
+  "lake-nakuru-naivasha": { left: 31.5, top: 56.5 },
+  "mount-kenya": { left: 46.5, top: 51.5 },
+  "lamu-archipelago": { left: 84.5, top: 55.0 },
+  malindi: { left: 84.0, top: 65.5 },
+  watamu: { left: 83.5, top: 68.5 },
+  "diani-beach": { left: 82.5, top: 80.5 },
+};
+
+/**
+ * Custom Label Offsets to prevent collision with map printed text and neighboring pins.
+ */
+export const DESTINATION_LABEL_OFFSETS: Record<string, string> = {
+  laikipia: "-translate-x-[105%] -translate-y-1/2",
+  "mount-kenya": "translate-x-3 -translate-y-1/2",
+  samburu: "-translate-x-1/2 -translate-y-[200%]",
+  "lake-nakuru-naivasha": "-translate-x-[105%] translate-y-1",
+  "lamu-archipelago": "-translate-x-[105%] -translate-y-1/2",
+  malindi: "-translate-x-[105%] -translate-y-1/2",
+  watamu: "-translate-x-[105%] -translate-y-1/2",
+  "diani-beach": "-translate-x-[105%] -translate-y-1/2",
+  tsavo: "translate-x-3 translate-y-0",
+  amboseli: "-translate-x-1/2 translate-y-3",
+  "maasai-mara": "-translate-x-1/2 translate-y-3",
+};
+
+/**
+ * Calculates percentage pin position on reference map:
+ * Checks custom admin positions first, then default positions, then geographic fallback.
+ */
+export function getDestinationMapPosition(
+  d: DestinationMetadata,
+  customPositions?: Record<string, { left: number; top: number }> | null,
+): { left: number; top: number } {
+  // 1. Custom positions (saved by admin)
+  if (customPositions && customPositions[d.slug]) {
+    const p = customPositions[d.slug];
+    if (typeof p.left === "number" && typeof p.top === "number") {
+      return { left: p.left, top: p.top };
+    }
+  }
+
+  // 2. Direct slug match in default positions
+  if (DEFAULT_DESTINATION_MAP_POSITIONS[d.slug]) {
+    return DEFAULT_DESTINATION_MAP_POSITIONS[d.slug];
+  }
+
+  // 3. Loose key match in custom positions or defaults
+  if (customPositions) {
+    const customKey = Object.keys(customPositions).find(
+      (k) => d.slug.includes(k) || k.includes(d.slug) || d.name.toLowerCase().includes(k),
+    );
+    if (customKey && customPositions[customKey]) {
+      return customPositions[customKey];
+    }
+  }
+
+  const key = Object.keys(DEFAULT_DESTINATION_MAP_POSITIONS).find(
+    (k) => d.slug.includes(k) || k.includes(d.slug) || d.name.toLowerCase().includes(k),
+  );
+  if (key && DEFAULT_DESTINATION_MAP_POSITIONS[key]) {
+    return DEFAULT_DESTINATION_MAP_POSITIONS[key];
+  }
+
+  // 4. Fallback Lat/Lng Box mapping calibrated to the reference GIF boundaries
+  const minLat = -4.8;
+  const maxLat = 5.0;
+  const minLng = 33.8;
+  const maxLng = 42.0;
+
+  const left = Math.max(8, Math.min(92, 5 + ((d.longitude - minLng) / (maxLng - minLng)) * 88));
+  const top = Math.max(8, Math.min(92, 5 + ((maxLat - d.latitude) / (maxLat - minLat)) * 88));
+
+  return {
+    left: Number(left.toFixed(1)),
+    top: Number(top.toFixed(1)),
+  };
 }
