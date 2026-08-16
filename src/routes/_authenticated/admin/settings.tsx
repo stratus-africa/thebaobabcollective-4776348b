@@ -40,7 +40,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { getSiteSettings, saveSiteSettings, type SiteSettings } from "@/lib/site-settings.functions";
+import {
+  CURRENCY_OPTIONS,
+  DEFAULT_CURRENCY,
+  getSiteSettings,
+  resolveCurrencySettings,
+  saveSiteSettings,
+  type SiteSettings,
+} from "@/lib/site-settings.functions";
 import { adminUploadImage } from "@/lib/admin.functions";
 import {
   listAdminUsers,
@@ -537,16 +544,6 @@ function SiteSettingsForm({ tab }: { tab: "branding" | "contact" }) {
 }
 
 // ─── Currency ────────────────────────────────────────────────────────
-const CURRENCY_OPTIONS: { code: string; symbol: string; label: string }[] = [
-  { code: "USD", symbol: "$", label: "US Dollar" },
-  { code: "GBP", symbol: "£", label: "British Pound" },
-  { code: "EUR", symbol: "€", label: "Euro" },
-  { code: "ZAR", symbol: "R", label: "South African Rand" },
-  { code: "KES", symbol: "KSh", label: "Kenyan Shilling" },
-  { code: "AUD", symbol: "A$", label: "Australian Dollar" },
-  { code: "CAD", symbol: "C$", label: "Canadian Dollar" },
-];
-
 function CurrencyForm() {
   const fetchSettings = useServerFn(getSiteSettings);
   const save = useServerFn(saveSiteSettings);
@@ -556,14 +553,15 @@ function CurrencyForm() {
     queryFn: () => fetchSettings(),
   });
 
-  const [code, setCode] = useState("USD");
-  const [symbol, setSymbol] = useState("$");
+  const [code, setCode] = useState(DEFAULT_CURRENCY.code ?? "USD");
+  const [symbol, setSymbol] = useState(DEFAULT_CURRENCY.symbol ?? "$");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!data) return;
-    setCode(data.currency?.code ?? "USD");
-    setSymbol(data.currency?.symbol ?? "$");
+    const resolved = resolveCurrencySettings(data.currency ?? DEFAULT_CURRENCY);
+    setCode(resolved.code ?? DEFAULT_CURRENCY.code ?? "USD");
+    setSymbol(resolved.symbol ?? DEFAULT_CURRENCY.symbol ?? "$");
   }, [data]);
 
   function onSelect(nextCode: string) {
@@ -580,7 +578,7 @@ function CurrencyForm() {
         data: {
           contact: data?.contact ?? {},
           branding: data?.branding ?? {},
-          currency: { code, symbol },
+          currency: resolveCurrencySettings({ code, symbol }),
         },
       });
       await queryClient.invalidateQueries({ queryKey: SITE_SETTINGS_QUERY_KEY });
