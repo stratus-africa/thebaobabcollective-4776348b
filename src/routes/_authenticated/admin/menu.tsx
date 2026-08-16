@@ -51,7 +51,10 @@ function MenuEditor() {
   const fetchFn = useServerFn(getMenuConfig);
   const saveFn = useServerFn(saveMenuConfig);
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ["admin", "menu_config"], queryFn: () => fetchFn() });
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "menu_config"],
+    queryFn: () => fetchFn(),
+  });
   const [draft, setDraft] = useState<MenuConfig>(MENU_DEFAULTS);
 
   useEffect(() => {
@@ -242,7 +245,10 @@ function MenuEditor() {
                         size="sm"
                         onClick={() => {
                           const cols = [...draft.footerColumns];
-                          cols[idx] = { ...cols[idx], links: [...cols[idx].links, { label: "New link", to: "/" }] };
+                          cols[idx] = {
+                            ...cols[idx],
+                            links: [...cols[idx].links, { label: "New link", to: "/" }],
+                          };
                           setDraft({ ...draft, footerColumns: cols });
                         }}
                       >
@@ -489,7 +495,9 @@ function SortableMenuRow({
   onOutdent: () => void;
   onChange: (patch: Partial<ItemLike>) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: row.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.id,
+  });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
