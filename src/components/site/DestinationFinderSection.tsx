@@ -9,6 +9,9 @@ interface DestinationFinderSectionProps {
   onSearchChange: (query: string) => void;
   matchCount: number;
   totalCount: number;
+  eyebrow?: string;
+  title?: string;
+  body?: string;
 }
 
 export function DestinationFinderSection({
@@ -18,6 +21,9 @@ export function DestinationFinderSection({
   onSearchChange,
   matchCount,
   totalCount,
+  eyebrow,
+  title,
+  body,
 }: DestinationFinderSectionProps) {
   const isFiltered = selectedCategory !== "All" || searchQuery.trim().length > 0;
 
@@ -27,13 +33,17 @@ export function DestinationFinderSection({
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-12">
           <p className="text-[11px] tracking-[0.35em] uppercase text-terracotta font-semibold mb-3 flex items-center justify-center gap-2">
-            <Sparkles className="w-3.5 h-3.5" /> Destination Finder
+            <Sparkles className="w-3.5 h-3.5" /> {eyebrow || "Destination Finder"}
           </p>
-          <h2 id="finder-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground leading-[1.12]">
-            What are you looking for?
+          <h2
+            id="finder-heading"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground leading-[1.12]"
+          >
+            {title || "What are you looking for?"}
           </h2>
           <p className="mt-3 text-foreground/75 text-base sm:text-lg leading-relaxed">
-            Every part of Kenya tells a different story. Select the experiences that match how you want to travel.
+            {body ||
+              "Every part of Kenya tells a different story. Select the experiences that match how you want to travel."}
           </p>
         </div>
 
@@ -117,15 +127,18 @@ export function DestinationFinderSection({
           {/* Results Summary Counter */}
           <div className="text-center">
             <p className="text-xs text-foreground/60 tracking-wider uppercase font-medium">
-              Showing <span className="font-semibold text-foreground">{matchCount}</span> of {totalCount} places in Kenya
+              Showing <span className="font-semibold text-foreground">{matchCount}</span> of {totalCount} places in
+              Kenya
               {selectedCategory !== "All" && (
                 <>
-                  {" "}matching <span className="text-gold font-semibold">"{selectedCategory}"</span>
+                  {" "}
+                  matching <span className="text-gold font-semibold">"{selectedCategory}"</span>
                 </>
               )}
               {searchQuery.trim() && (
                 <>
-                  {" "}for <span className="text-gold font-semibold">"{searchQuery}"</span>
+                  {" "}
+                  for <span className="text-gold font-semibold">"{searchQuery}"</span>
                 </>
               )}
             </p>
