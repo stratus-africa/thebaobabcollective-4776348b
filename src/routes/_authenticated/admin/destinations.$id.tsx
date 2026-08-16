@@ -16,7 +16,10 @@ import {
   Sparkles,
   Compass,
   Check,
+  Move,
+  RotateCcw,
 } from "lucide-react";
+import kenyaMapAsset from "@/assets/kenya-destinations-map.jpg";
 import { adminGet, adminUpsert, adminDelete } from "@/lib/admin.functions";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -415,30 +418,59 @@ function AdminDestinationEdit() {
               </div>
 
               {/* Coordinates for Interactive Map */}
-              <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-border/60">
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Latitude (e.g. -1.4061 for Maasai Mara)
-                  </Label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={form.latitude ?? ""}
-                    onChange={(e) => patch("latitude", e.target.value ? Number(e.target.value) : null)}
-                    placeholder="-1.4061"
-                  />
+              <div className="space-y-4 pt-2 border-t border-border/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <Label className="block text-[11px] tracking-[0.2em] uppercase text-forest font-bold">
+                      Map Location & Pin Coordinates
+                    </Label>
+                    <p className="text-xs text-foreground/60">
+                      Drag the pin on the map or click to position this destination visually across Kenya.
+                    </p>
+                  </div>
+                  {form.latitude != null && form.longitude != null && (
+                    <span className="text-[11px] font-mono bg-cream px-2.5 py-1 rounded text-foreground/70 border border-border self-start sm:self-auto">
+                      Lat: {Number(form.latitude).toFixed(4)}, Lng: {Number(form.longitude).toFixed(4)}
+                    </span>
+                  )}
                 </div>
-                <div>
-                  <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
-                    Longitude (e.g. 35.1390 for Maasai Mara)
-                  </Label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={form.longitude ?? ""}
-                    onChange={(e) => patch("longitude", e.target.value ? Number(e.target.value) : null)}
-                    placeholder="35.1390"
-                  />
+
+                {/* Interactive Mini-Map Pin Locator */}
+                <DestinationPinLocator
+                  name={form.name || "Destination"}
+                  latitude={form.latitude}
+                  longitude={form.longitude}
+                  onChange={(lat, lng) => {
+                    patch("latitude", lat);
+                    patch("longitude", lng);
+                  }}
+                />
+
+                <div className="grid gap-4 sm:grid-cols-2 pt-2">
+                  <div>
+                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                      Latitude (e.g. -1.4061 for Maasai Mara)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.latitude ?? ""}
+                      onChange={(e) => patch("latitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="-1.4061"
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1.5 block text-[11px] tracking-[0.2em] uppercase text-foreground/60">
+                      Longitude (e.g. 35.1390 for Maasai Mara)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={form.longitude ?? ""}
+                      onChange={(e) => patch("longitude", e.target.value ? Number(e.target.value) : null)}
+                      placeholder="35.1390"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -768,5 +800,169 @@ function AdminDestinationEdit() {
         </AlertDialogContent>
       </AlertDialog>
     </form>
+  );
+}
+
+/**
+ * Interactive Pin Locator for a Single Destination
+ * Converts between map percentage coordinates and Kenya GPS Lat/Lng
+ */
+function DestinationPinLocator({
+  name,
+  latitude,
+  longitude,
+  onChange,
+}: {
+  name: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  onChange: (lat: number, lng: number) => void;
+}) {
+  const containerRef = useState<HTMLDivElement | null>(null)[0];
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Kenya Map Bounds: Lat: -4.8 to +5.0, Lng: 33.8 to 42.0
+  const minLat = -4.8;
+  const maxLat = 5.0;
+  const minLng = 33.8;
+  const maxLng = 42.0;
+
+  // Derive percent position from lat/lng or default to center-ish
+  const curLat = latitude ?? -1.286389;
+  const curLng = longitude ?? 36.817223;
+
+  const left = Math.max(5, Math.min(95, 5 + ((curLng - minLng) / (maxLng - minLng)) * 88));
+  const top = Math.max(5, Math.min(95, 5 + ((maxLat - curLat) / (maxLat - minLat)) * 88));
+
+  const updateFromPointer = (clientX: number, clientY: number) => {
+    if (!containerEl) return;
+    const rect = containerEl.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    const rawLeft = ((clientX - rect.left) / rect.width) * 100;
+    const rawTop = ((clientY - rect.top) / rect.height) * 100;
+
+    const clampedLeft = Math.max(5, Math.min(95, rawLeft));
+    const clampedTop = Math.max(5, Math.min(95, rawTop));
+
+    // Convert back to Lat/Lng
+    const nextLng = minLng + ((clampedLeft - 5) / 88) * (maxLng - minLng);
+    const nextLat = maxLat - ((clampedTop - 5) / 88) * (maxLat - minLat);
+
+    onChange(Number(nextLat.toFixed(4)), Number(nextLng.toFixed(4)));
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    updateFromPointer(e.clientX, e.clientY);
+  };
+
+  const handlePointerUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleContainerClick = (e: React.MouseEvent) => {
+    if (isDragging) return;
+    updateFromPointer(e.clientX, e.clientY);
+  };
+
+  return (
+    <div className="space-y-3 bg-muted/40 rounded-xl p-3 border border-border">
+      <div
+        ref={setContainerEl}
+        onClick={handleContainerClick}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        className="relative w-full overflow-hidden rounded-lg bg-forest cursor-crosshair select-none ring-1 ring-border/50 shadow-inner"
+        style={{ aspectRatio: "1 / 0.85" }}
+      >
+        {/* Map Background */}
+        <img
+          src="/maps/kenya-destinations-map.gif"
+          alt="Kenya Pin Locator Map"
+          className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-90"
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement;
+            if (target.src !== kenyaMapAsset) {
+              target.src = kenyaMapAsset;
+            }
+          }}
+        />
+
+        <div className="absolute inset-0 pointer-events-none bg-black/10" />
+
+        {/* Grid crosshair guide */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.4) 1px, transparent 1px)",
+            backgroundSize: "20% 20%",
+          }}
+        />
+
+        {/* Draggable Pin */}
+        <div
+          style={{ left: `${left}%`, top: `${top}%` }}
+          className={`absolute -translate-x-1/2 -translate-y-1/2 transition-all ${
+            isDragging ? "z-50 scale-125" : "z-30"
+          }`}
+        >
+          <button
+            type="button"
+            onPointerDown={handlePointerDown}
+            className="group flex flex-col items-center justify-center focus:outline-none cursor-grab active:cursor-grabbing"
+            title={`Drag to reposition ${name}`}
+          >
+            {/* Pulsing ring */}
+            <span className="absolute -inset-2 rounded-full bg-gold/50 animate-ping pointer-events-none" />
+
+            {/* Pin Badge */}
+            <div className="w-8 h-8 rounded-full bg-gold text-gold-foreground flex items-center justify-center shadow-2xl ring-4 ring-forest ring-offset-2 ring-offset-forest group-hover:scale-110 transition-transform">
+              <Move className="w-4 h-4" />
+            </div>
+
+            {/* Name label */}
+            <div className="mt-1 whitespace-nowrap bg-forest text-cream text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-gold/40">
+              {name || "Pin"}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Preset Buttons */}
+      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+        <span className="text-[10px] tracking-wider uppercase text-foreground/50 font-semibold pr-1">
+          Quick Presets:
+        </span>
+        {[
+          { label: "Mara", lat: -1.4061, lng: 35.139 },
+          { label: "Amboseli", lat: -2.6527, lng: 37.2606 },
+          { label: "Samburu", lat: 0.6234, lng: 37.5317 },
+          { label: "Laikipia", lat: 0.3297, lng: 36.9062 },
+          { label: "Tsavo", lat: -2.7667, lng: 38.7667 },
+          { label: "Mt Kenya", lat: -0.1521, lng: 37.3084 },
+          { label: "Lamu", lat: -2.2717, lng: 40.902 },
+          { label: "Diani", lat: -4.2794, lng: 39.5855 },
+        ].map((preset) => (
+          <button
+            key={preset.label}
+            type="button"
+            onClick={() => onChange(preset.lat, preset.lng)}
+            className="text-[10px] px-2 py-1 rounded bg-background hover:bg-gold hover:text-gold-foreground border border-border transition-colors cursor-pointer"
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
