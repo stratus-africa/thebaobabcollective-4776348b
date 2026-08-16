@@ -1,5 +1,8 @@
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { ensureLocalMediaDirectory, toPublicMediaUrl } from "@/lib/local-media";
 import { z } from "zod";
 
 type Ctx = { supabase: any; userId: string };
@@ -44,7 +47,7 @@ export const adminListArticles = createServerFn({ method: "GET" })
 
 export const adminUpsertArticle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ArticleSchema.parse(d))
+  .validator((d: unknown) => ArticleSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const row: any = { ...data };
@@ -76,7 +79,7 @@ export const adminUpsertArticle = createServerFn({ method: "POST" })
 
 export const adminDeleteArticle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { error } = await context.supabase.from("journal_articles").delete().eq("id", data.id);
@@ -92,7 +95,7 @@ const UploadSchema = z.object({
 
 export const adminUploadJournalImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UploadSchema.parse(d))
+  .validator((d: unknown) => UploadSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
@@ -100,19 +103,17 @@ export const adminUploadJournalImage = createServerFn({ method: "POST" })
       .toLowerCase()
       .replace(/[^a-z0-9.]+/g, "-")
       .replace(/^-|-$/g, "");
-    const path = `${Date.now()}-${cleanName}`;
+    const mediaPath = `cms/${Date.now()}-${cleanName}`;
 
-    // Decode base64 → Uint8Array (Worker-compatible)
     const binary = atob(data.base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-    const { error: upErr } = await context.supabase.storage
-      .from("journal-images")
-      .upload(path, bytes, { contentType: data.contentType, upsert: false });
-    if (upErr) throw new Error(upErr.message);
+    const dir = await ensureLocalMediaDirectory();
+    const fullPath = path.join(dir, mediaPath.replace(/^cms\//, ""));
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+    await fs.writeFile(fullPath, Buffer.from(bytes));
 
-    // Serve via our public media proxy so the URL is stable and never expires.
-    const url = `/api/public/media/${path}`;
-    return { url, path };
+    const url = toPublicMediaUrl(mediaPath);
+    return { url, path: mediaPath };
   });

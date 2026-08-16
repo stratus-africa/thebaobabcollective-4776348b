@@ -52,7 +52,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 }
 
 export const getPageContent = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => GetSchema.parse(d))
+  .validator((d: unknown) => GetSchema.parse(d))
   .handler(async ({ data }) => {
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -82,7 +82,7 @@ export const getPageContent = createServerFn({ method: "POST" })
 
 export const savePageContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => SaveSchema.parse(d))
+  .validator((d: unknown) => GetSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const database = process.env.SUPABASE_SERVICE_ROLE_KEY
