@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
+import { resolveImageSource } from "@/lib/image-resolution";
 import {
   ArrowRight,
   Check,
@@ -224,13 +225,16 @@ function HeroSection({
   hero: AdventuresPage["hero"];
   content: typeof PAGE_DEFAULTS.adventures_index;
 }) {
-  const heroSrc = content.hero_image || hero.image || heroBaobab;
+  const heroSrc = resolveImageSource(content.hero_image, hero.image, heroBaobab) ?? heroBaobab;
   return (
     <section className="relative h-[85vh] min-h-[620px] flex items-end">
       <img
         src={heroSrc}
         alt={hero.imageAlt || "Sunrise over the African bush — a guide leads a walking safari toward distant baobabs"}
         className="absolute inset-0 w-full h-full object-cover"
+        decoding="async"
+        fetchPriority="high"
+        sizes="100vw"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-forest/90 via-black/40 to-black/20" />
 

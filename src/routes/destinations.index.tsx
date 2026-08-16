@@ -19,6 +19,7 @@ import { getPageContent, savePageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { mergeDestinationsWithDefaults, type DestinationMetadata } from "@/lib/destinations.data";
+import { resolveImageSource } from "@/lib/image-resolution";
 import heroBaobab from "@/assets/hero-baobab.jpg";
 import g4Img from "@/assets/gallery-4.jpg";
 
@@ -215,9 +216,12 @@ function DestinationsDiscoveryPage() {
           >
             {/* Background Image */}
             <img
-              src={content.hero_image || heroBaobab}
+              src={resolveImageSource(content.hero_image, heroBaobab) ?? heroBaobab}
               alt="Golden sunrise across Kenya's wild savannah and acacia trees"
               className="absolute inset-0 w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
+              decoding="async"
+              fetchPriority="high"
+              sizes="100vw"
             />
 
             {/* Gradients */}

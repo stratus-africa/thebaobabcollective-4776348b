@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { resolveImageSource } from "./image-resolution";
 import { getMediaMimeType, resolveLocalMediaPath, toPublicMediaUrl } from "./local-media";
 
 describe("local media helpers", () => {
@@ -23,5 +24,13 @@ describe("local media helpers", () => {
     expect(toPublicMediaUrl("cms/1786292097632-pexels-sam-kim1-11811982.jpg")).toBe(
       "/api/public/media/cms/1786292097632-pexels-sam-kim1-11811982.jpg",
     );
+  });
+
+  it("prefers the real media URL over fallback placeholders", () => {
+    expect(resolveImageSource("", "/api/public/media/cms/real.jpg", "/assets/fallback.jpg")).toBe(
+      "/api/public/media/cms/real.jpg",
+    );
+    expect(resolveImageSource(undefined, null, "", "/assets/fallback.jpg")).toBe("/assets/fallback.jpg");
+    expect(resolveImageSource("   ", "")).toBeNull();
   });
 });

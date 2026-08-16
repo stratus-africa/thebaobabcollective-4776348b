@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Hero } from "@/components/site/Hero";
@@ -16,7 +16,27 @@ import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import heroBaobab from "@/assets/hero-baobab.jpg";
 
+const pageContentQuery = (key: keyof typeof PAGE_DEFAULTS) =>
+  queryOptions({
+    queryKey: ["page-content", key],
+    queryFn: () => getPageContent({ data: { key } }),
+    staleTime: 60_000,
+  });
+
 export const Route = createFileRoute("/")({
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(pageContentQuery("home")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_founders")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_trust")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_why_baobab")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_final_cta")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_find_journey")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_impact")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_how_it_works")),
+      context.queryClient.ensureQueryData(pageContentQuery("home_instagram")),
+    ]);
+  },
   head: () => ({
     meta: [
       { title: "The Baobab Collective — Private Kenya Safaris & Tailor-Made Journeys" },
@@ -41,60 +61,24 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const pageContentFn = useServerFn(getPageContent);
 
-  const { data: heroData } = useQuery({
-    queryKey: ["page-content", "home"],
-    queryFn: () => pageContentFn({ data: { key: "home" } }),
-    staleTime: 60_000,
-  });
+  const { data: heroData } = useSuspenseQuery(pageContentQuery("home"));
   const heroContent = { ...PAGE_DEFAULTS.home, ...(heroData ?? {}) };
 
-  const { data: foundersData } = useQuery({
-    queryKey: ["page-content", "home_founders"],
-    queryFn: () => pageContentFn({ data: { key: "home_founders" } }),
-    staleTime: 60_000,
-  });
+  const { data: foundersData } = useSuspenseQuery(pageContentQuery("home_founders"));
 
-  const { data: trustData } = useQuery({
-    queryKey: ["page-content", "home_trust"],
-    queryFn: () => pageContentFn({ data: { key: "home_trust" } }),
-    staleTime: 60_000,
-  });
+  const { data: trustData } = useSuspenseQuery(pageContentQuery("home_trust"));
 
-  const { data: whyBaobabData } = useQuery({
-    queryKey: ["page-content", "home_why_baobab"],
-    queryFn: () => pageContentFn({ data: { key: "home_why_baobab" } }),
-    staleTime: 60_000,
-  });
+  const { data: whyBaobabData } = useSuspenseQuery(pageContentQuery("home_why_baobab"));
 
-  const { data: finalCtaData } = useQuery({
-    queryKey: ["page-content", "home_final_cta"],
-    queryFn: () => pageContentFn({ data: { key: "home_final_cta" } }),
-    staleTime: 60_000,
-  });
+  const { data: finalCtaData } = useSuspenseQuery(pageContentQuery("home_final_cta"));
 
-  const { data: findJourneyData } = useQuery({
-    queryKey: ["page-content", "home_find_journey"],
-    queryFn: () => pageContentFn({ data: { key: "home_find_journey" } }),
-    staleTime: 60_000,
-  });
+  const { data: findJourneyData } = useSuspenseQuery(pageContentQuery("home_find_journey"));
 
-  const { data: impactData } = useQuery({
-    queryKey: ["page-content", "home_impact"],
-    queryFn: () => pageContentFn({ data: { key: "home_impact" } }),
-    staleTime: 60_000,
-  });
+  const { data: impactData } = useSuspenseQuery(pageContentQuery("home_impact"));
 
-  const { data: howItWorksData } = useQuery({
-    queryKey: ["page-content", "home_how_it_works"],
-    queryFn: () => pageContentFn({ data: { key: "home_how_it_works" } }),
-    staleTime: 60_000,
-  });
+  const { data: howItWorksData } = useSuspenseQuery(pageContentQuery("home_how_it_works"));
 
-  const { data: instagramData } = useQuery({
-    queryKey: ["page-content", "home_instagram"],
-    queryFn: () => pageContentFn({ data: { key: "home_instagram" } }),
-    staleTime: 60_000,
-  });
+  const { data: instagramData } = useSuspenseQuery(pageContentQuery("home_instagram"));
 
   return (
     <div className="bg-background min-h-screen">
