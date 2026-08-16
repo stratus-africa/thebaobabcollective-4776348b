@@ -1,5 +1,14 @@
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  ensureLocalMediaDirectory,
+  getMediaMimeType,
+  listLocalMediaRecords,
+  resolveLocalMediaPath,
+  toPublicMediaUrl,
+} from "@/lib/local-media";
 import { z } from "zod";
 
 type Ctx = { supabase: any; userId: string };
@@ -84,23 +93,21 @@ export const adminUploadImage = createServerFn({ method: "POST" })
       .toLowerCase()
       .replace(/[^a-z0-9.]+/g, "-")
       .replace(/^-|-$/g, "");
-    const path = `cms/${Date.now()}-${cleanName}`;
+    const storedPath = `cms/${Date.now()}-${cleanName}`;
 
     const binary = atob(data.base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-    // 8 MB hard limit (Worker memory)
     if (bytes.length > 8 * 1024 * 1024) throw new Error("Image exceeds 8MB limit");
 
-    const { error: upErr } = await context.supabase.storage
-      .from("journal-images")
-      .upload(path, bytes, { contentType: data.contentType, upsert: false });
-    if (upErr) throw new Error(upErr.message);
+    const uploadDir = await ensureLocalMediaDirectory();
+    const fullPath = path.join(uploadDir, storedPath.replace(/^cms\//, ""));
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+    await fs.writeFile(fullPath, Buffer.from(bytes));
 
-    // Serve via our public media proxy so the URL is stable and never expires.
-    const url = `/api/public/media/${path}`;
-    return { url, path, size: bytes.length };
+    const url = toPublicMediaUrl(storedPath);
+    return { url, path: storedPath, size: bytes.length };
   });
 
 // Delete a previously-uploaded media file so the storage stays in sync with
@@ -118,15 +125,21 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => DeleteMediaSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    let path = data.path ?? "";
-    if (!path && data.url) {
+    let mediaPath = data.path ?? "";
+    if (!mediaPath && data.url) {
       const m = data.url.match(/\/api\/public\/media\/(.+)$/);
-      if (m) path = m[1];
+      if (m) mediaPath = m[1];
     }
-    if (!path || path.includes("..")) return { ok: false as const };
-    const { error } = await context.supabase.storage.from("journal-images").remove([path]);
-    if (error) return { ok: false as const, error: error.message };
-    return { ok: true as const };
+
+    const resolvedPath = mediaPath ? resolveLocalMediaPath(mediaPath) : null;
+    if (!resolvedPath) return { ok: false as const };
+
+    try {
+      await fs.unlink(resolvedPath);
+      return { ok: true as const };
+    } catch {
+      return { ok: false as const };
+    }
   });
 
 // List previously-uploaded media so the admin can reuse images without
@@ -134,7 +147,10 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
 // root (legacy journal uploads) and returns a stable, newest-first list.
 const ListMediaSchema = z.object({
   search: z.string().trim().max(120).optional(),
+  sort: z.enum(["newest", "oldest", "name-asc", "name-desc", "size-desc", "size-asc"]).optional(),
   limit: z.number().int().min(1).max(500).default(200),
+  page: z.number().int().min(1).default(1).optional(),
+  pageSize: z.number().int().min(1).max(500).default(24).optional(),
 });
 
 export const adminListMedia = createServerFn({ method: "POST" })
@@ -142,37 +158,42 @@ export const adminListMedia = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ListMediaSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const bucket = context.supabase.storage.from("journal-images");
 
-    async function listPrefix(prefix: string) {
-      const { data: files } = await bucket.list(prefix, {
-        limit: 1000,
-        sortBy: { column: "created_at", order: "desc" },
-      });
-      return (files ?? [])
-        .filter((f: any) => f?.name && f.id) // skip folders (id is null for folders)
-        .map((f: any) => ({
-          name: f.name as string,
-          path: prefix ? `${prefix}/${f.name}` : (f.name as string),
-          size: (f.metadata?.size as number) ?? 0,
-          contentType: (f.metadata?.mimetype as string) ?? "image/jpeg",
-          updated_at: (f.updated_at ?? f.created_at) as string,
-        }));
-    }
+    await ensureLocalMediaDirectory();
+    const files = await listLocalMediaRecords("cms");
 
-    const [cmsFiles, rootFiles] = await Promise.all([listPrefix("cms"), listPrefix("")]);
-    let files = [...cmsFiles, ...rootFiles]
-      .filter((f) => /\.(png|jpe?g|webp|gif|avif|svg)$/i.test(f.name))
-      .sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""));
-
+    let filtered = files.filter((f) => /\.(png|jpe?g|webp|gif|avif)$/i.test(f.name));
     if (data.search) {
       const s = data.search.toLowerCase();
-      files = files.filter((f) => f.name.toLowerCase().includes(s));
+      filtered = filtered.filter((f) => f.name.toLowerCase().includes(s));
     }
 
-    return files.slice(0, data.limit).map((f) => ({
-      ...f,
-      url: `/api/public/media/${f.path}`,
+    const sortKey = data.sort ?? "newest";
+    filtered = [...filtered].sort((a, b) => {
+      switch (sortKey) {
+        case "oldest":
+          return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "size-desc":
+          return b.size - a.size;
+        case "size-asc":
+          return a.size - b.size;
+        case "newest":
+        default:
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      }
+    });
+
+    return filtered.slice(0, data.limit).map((f) => ({
+      name: f.name,
+      path: f.path,
+      size: f.size,
+      contentType: f.contentType,
+      updated_at: f.updated_at,
+      url: toPublicMediaUrl(f.path),
     }));
   });
 
