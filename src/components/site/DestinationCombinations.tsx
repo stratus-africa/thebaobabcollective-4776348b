@@ -3,7 +3,13 @@ import { ArrowRight, Plane, Clock, Sparkles, Compass } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { DESTINATION_COMBINATIONS, type DestinationCombination } from "@/lib/destinations.data";
 
-export function DestinationCombinations() {
+interface DestinationCombinationsProps {
+  eyebrow?: string;
+  title?: string;
+  body?: string;
+}
+
+export function DestinationCombinations({ eyebrow, title, body }: DestinationCombinationsProps = {}) {
   return (
     <section aria-labelledby="combinations-heading" className="bg-cream/40 py-20 md:py-28 border-t border-border/50">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
@@ -11,13 +17,17 @@ export function DestinationCombinations() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
           <div className="max-w-2xl">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-              <Compass className="w-3.5 h-3.5" /> Seamless Itinerary Ideas
+              <Compass className="w-3.5 h-3.5" /> {eyebrow || "Seamless Itinerary Ideas"}
             </p>
-            <h2 id="combinations-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
-              Create Your Perfect Combination
+            <h2
+              id="combinations-heading"
+              className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+            >
+              {title || "Create Your Perfect Combination"}
             </h2>
             <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed">
-              Kenya's dramatic diversity comes alive when you pair contrasting regions — savannah with sea, or northern wilderness with high-altitude forests.
+              {body ||
+                "Kenya's dramatic diversity comes alive when you pair contrasting regions — savannah with sea, or northern wilderness with high-altitude forests."}
             </p>
           </div>
 
@@ -68,9 +78,7 @@ export function DestinationCombinations() {
               {/* Body Content */}
               <div className="p-6 sm:p-8 flex flex-col flex-1 justify-between">
                 <div>
-                  <p className="text-foreground/75 text-sm sm:text-base leading-relaxed mb-6">
-                    {combo.tagline}
-                  </p>
+                  <p className="text-foreground/75 text-sm sm:text-base leading-relaxed mb-6">{combo.tagline}</p>
 
                   {/* Highlights List */}
                   <div className="space-y-2 mb-6">
@@ -90,7 +98,9 @@ export function DestinationCombinations() {
                   {/* Transfer / Travel Style */}
                   <div className="p-3 bg-cream/70 rounded-xl border border-border/60 text-xs text-foreground/70 flex items-center gap-2 mb-6">
                     <Plane className="w-3.5 h-3.5 text-gold flex-shrink-0" />
-                    <span><strong>Connections:</strong> {combo.transferType}</span>
+                    <span>
+                      <strong>Connections:</strong> {combo.transferType}
+                    </span>
                   </div>
                 </div>
 
@@ -131,4 +141,3 @@ export function DestinationCombinations() {
     </section>
   );
 }
- 
