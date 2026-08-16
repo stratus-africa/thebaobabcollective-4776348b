@@ -43,6 +43,7 @@ export const Route = createFileRoute("/api/public/media/$")({
             imageDataUrl: `data:${mime};base64,${base64}`,
             watermarkImageUrl: policy.mode === "image" ? policy.imageUrl : undefined,
             opacity: policy.opacity,
+            scale: policy.scale,
           });
 
           return new Response(svg, {
@@ -56,7 +57,10 @@ export const Route = createFileRoute("/api/public/media/$")({
 
         const contentType = getMediaMimeType(safePath);
 
-        return new Response(fileBuffer, {
+        const bytes = new Uint8Array(fileBuffer);
+        const blob = new Blob([bytes], { type: contentType ?? "application/octet-stream" });
+
+        return new Response(blob, {
           status: 200,
           headers: {
             "Content-Type": contentType,
