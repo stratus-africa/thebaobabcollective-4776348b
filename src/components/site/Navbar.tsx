@@ -423,7 +423,7 @@ function AdminMenu({
         type="button"
         onMouseEnter={() => setAdminMenuOpen(true)}
         onFocus={() => setAdminMenuOpen(true)}
-        onClick={() => setAdminMenuOpen((o) => !o)}
+        onClick={() => setAdminMenuOpen(!adminMenuOpen)}
         aria-haspopup="menu"
         aria-expanded={adminMenuOpen}
         aria-label="Admin menu"
