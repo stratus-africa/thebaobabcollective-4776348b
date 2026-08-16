@@ -444,26 +444,68 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
   },
   destinations_index: {
     title: "Destinations — Landing",
-    description: "Hero copy, imagery and section toggles on the /destinations page.",
+    description: "All editable sections on the /destinations page. Toggle sections on/off and edit their copy.",
     preview: "/destinations",
     fields: [
-      // ── Section visibility ───────────────────────────────────────────────
+      // ── 1. Hero ─────────────────────────────────────────────────────────
       { name: "show_hero", label: "Show hero section", type: "boolean" },
-      { name: "show_finder", label: "Show Destination Finder (filter bar) section", type: "boolean" },
-      { name: "show_map", label: "Show Kenya Destinations Map", type: "boolean" },
-      { name: "show_grid", label: "Show destinations grid (Icons / Beyond / Ocean)", type: "boolean" },
-      { name: "show_journeys", label: "Show Featured Adventures section", type: "boolean" },
-      { name: "show_stay", label: "Show 'Where You'll Stay' lodges section", type: "boolean" },
-      { name: "show_combinations", label: "Show Destination Combinations section", type: "boolean" },
-      { name: "show_matcher", label: "Show 'Where Should Kenya Take You?' matcher", type: "boolean" },
-      { name: "show_final_cta", label: "Show final CTA section", type: "boolean" },
-      // ── Hero copy ────────────────────────────────────────────────────────
       { name: "eyebrow", label: "Hero — Eyebrow", type: "text" },
       { name: "title", label: "Hero — Title", type: "text" },
       { name: "subtitle", label: "Hero — Quote / Subhead", type: "textarea" },
       { name: "body", label: "Hero — Supporting Copy", type: "textarea" },
       { name: "hero_image", label: "Hero Background Image", type: "image" },
       { name: "cta_label", label: "Hero — Primary Button Label", type: "text" },
+
+      // ── 2. Destination Finder ───────────────────────────────────────────
+      { name: "show_finder", label: "Show Destination Finder (filter bar) section", type: "boolean" },
+      { name: "finder_eyebrow", label: "Destination Finder — Eyebrow", type: "text" },
+      { name: "finder_title", label: "Destination Finder — Title", type: "text" },
+      { name: "finder_body", label: "Destination Finder — Body", type: "textarea" },
+
+      // ── 3. Kenya Destinations Map ───────────────────────────────────────
+      { name: "show_map", label: "Show Kenya Destinations Map section", type: "boolean" },
+
+      // ── 4. Destinations Grid (Editorial Groupings) ──────────────────────
+      { name: "show_grid", label: "Show destinations grid section", type: "boolean" },
+      { name: "icons_eyebrow", label: "The Icons Group — Eyebrow", type: "text" },
+      { name: "icons_title", label: "The Icons Group — Title", type: "text" },
+      { name: "icons_body", label: "The Icons Group — Description", type: "textarea" },
+      { name: "beyond_eyebrow", label: "Beyond the Classics — Eyebrow", type: "text" },
+      { name: "beyond_title", label: "Beyond the Classics — Title", type: "text" },
+      { name: "beyond_body", label: "Beyond the Classics — Description", type: "textarea" },
+      { name: "ocean_eyebrow", label: "The Indian Ocean — Eyebrow", type: "text" },
+      { name: "ocean_title", label: "The Indian Ocean — Title", type: "text" },
+      { name: "ocean_body", label: "The Indian Ocean — Description", type: "textarea" },
+
+      // ── 5. Featured Adventures ──────────────────────────────────────────
+      { name: "show_journeys", label: "Show Featured Adventures section", type: "boolean" },
+      { name: "journeys_eyebrow", label: "Featured Adventures — Eyebrow", type: "text" },
+      { name: "journeys_title", label: "Featured Adventures — Title", type: "text" },
+      { name: "journeys_body", label: "Featured Adventures — Description", type: "textarea" },
+
+      // ── 6. Where You'll Stay ────────────────────────────────────────────
+      { name: "show_stay", label: "Show 'Where You'll Stay' lodges section", type: "boolean" },
+      { name: "stay_eyebrow", label: "Where You'll Stay — Eyebrow", type: "text" },
+      { name: "stay_title", label: "Where You'll Stay — Title", type: "text" },
+      { name: "stay_body", label: "Where You'll Stay — Description", type: "textarea" },
+
+      // ── 7. Destination Combinations ─────────────────────────────────────
+      { name: "show_combinations", label: "Show Destination Combinations section", type: "boolean" },
+      { name: "combinations_eyebrow", label: "Combinations — Eyebrow", type: "text" },
+      { name: "combinations_title", label: "Combinations — Title", type: "text" },
+      { name: "combinations_body", label: "Combinations — Description", type: "textarea" },
+
+      // ── 8. Matcher ──────────────────────────────────────────────────────
+      { name: "show_matcher", label: "Show 'Where Should Kenya Take You?' matcher", type: "boolean" },
+      { name: "matcher_eyebrow", label: "Destination Matcher — Eyebrow", type: "text" },
+      { name: "matcher_title", label: "Destination Matcher — Title", type: "text" },
+      { name: "matcher_body", label: "Destination Matcher — Description", type: "textarea" },
+
+      // ── 9. Final CTA ────────────────────────────────────────────────────
+      { name: "show_final_cta", label: "Show final CTA section", type: "boolean" },
+      { name: "final_cta_eyebrow", label: "Final CTA — Eyebrow", type: "text" },
+      { name: "final_cta_title", label: "Final CTA — Title", type: "text" },
+      { name: "final_cta_body", label: "Final CTA — Body", type: "textarea" },
     ],
   },
 
