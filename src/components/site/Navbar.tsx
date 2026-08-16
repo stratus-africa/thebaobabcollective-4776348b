@@ -175,22 +175,6 @@ export function Navbar() {
             </nav>
 
             <div className="hidden lg:flex items-center gap-4 shrink-0">
-              {user && isAdmin && (
-                <>
-                  <Link
-                    to="/admin"
-                    className="text-[11px] tracking-[0.2em] uppercase text-gold hover:underline rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
-                  >
-                    Admin
-                  </Link>
-                  <button
-                    onClick={signOut}
-                    className="text-[11px] tracking-[0.2em] uppercase text-foreground/70 hover:text-foreground rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
-                  >
-                    Sign out
-                  </button>
-                </>
-              )}
               <button
                 type="button"
                 aria-label="Search"
@@ -279,26 +263,6 @@ export function Navbar() {
                 );
               })}
               <div className="pt-3 mt-2 border-t border-border/40 flex flex-col gap-3">
-                {user && isAdmin && (
-                  <>
-                    <Link
-                      to="/admin"
-                      onClick={() => setOpen(false)}
-                      className="text-[13px] tracking-[0.2em] uppercase text-gold"
-                    >
-                      Admin
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setOpen(false);
-                        signOut();
-                      }}
-                      className="text-left text-[13px] tracking-[0.2em] uppercase text-foreground/80"
-                    >
-                      Sign out
-                    </button>
-                  </>
-                )}
                 {adminCta ? (
                   <Link
                     to="/admin"
