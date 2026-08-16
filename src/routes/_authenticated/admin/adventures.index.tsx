@@ -74,7 +74,7 @@ import {
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 
-export const Route = createFileRoute("/_authenticated/admin/adventures")({
+export const Route = createFileRoute("/_authenticated/admin/adventures/")({
   component: AdminAdventuresDashboard,
 });
 
