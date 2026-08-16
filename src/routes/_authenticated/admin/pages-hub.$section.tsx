@@ -210,13 +210,26 @@ const SECTIONS: Record<string, HubSection> = {
     ],
   },
   adventures: {
-    title: "Adventures Hub",
-    description: "Adventures section pages and homepage content.",
+    title: "Adventures Landing",
+    description: "Every section of the /adventures page — copy, imagery and section toggles.",
     tabs: [
       {
-        value: "adventures",
-        label: "Adventures",
+        value: "landing",
+        label: "Adventures Landing",
         icon: Compass,
+        editors: [
+          {
+            pageKey: "adventures_index",
+            label: "Adventures Landing Page",
+            icon: Compass,
+            description: "Hero, day-in-the-field, finder, signatures, experiences, catalogue and CTAs.",
+          },
+        ],
+      },
+      {
+        value: "home_strip",
+        label: "Home Strip",
+        icon: HomeIcon,
         editors: [
           {
             pageKey: "home_adventures",
@@ -224,24 +237,76 @@ const SECTIONS: Record<string, HubSection> = {
             icon: HomeIcon,
             description: "Adventures strip on the homepage.",
           },
-          {
-            pageKey: "adventures_index",
-            label: "Adventures Landing",
-            icon: Compass,
-            description: "The /adventures listing page.",
-          },
+        ],
+      },
+      {
+        value: "detail",
+        label: "Detail Pages",
+        icon: FileText,
+        editors: [
           {
             pageKey: "detail_journey",
-            label: "Adventures Detail Template",
+            label: "Adventure Detail",
             icon: FileText,
-            description: "Template used for each adventure detail page.",
+            description: "Shared copy across each adventure detail page.",
+          },
+        ],
+      },
+    ],
+  },
+  destinations: {
+    title: "Destinations Landing Page",
+    description: "Hero and content of the /destinations page.",
+    tabs: [
+      {
+        value: "landing",
+        label: "Destinations Landing",
+        icon: MapPin,
+        editors: [
+          {
+            pageKey: "destinations_index",
+            label: "Destinations Landing Page",
+            icon: Map,
+            description: "Hero copy, imagery and call to action on /destinations.",
           },
         ],
       },
       {
-        value: "lodges",
-        label: "Lodges",
+        value: "home_strip",
+        label: "Home Strip",
+        icon: HomeIcon,
+        editors: [
+          {
+            pageKey: "home_destinations",
+            label: "Home — Destinations Strip",
+            icon: HomeIcon,
+            description: "Destinations strip on the homepage.",
+          },
+        ],
+      },
+    ],
+  },
+  lodges: {
+    title: "Partner Lodges Landing Page",
+    description: "Hero and content of the /lodges page.",
+    tabs: [
+      {
+        value: "landing",
+        label: "Lodges Landing",
         icon: Building,
+        editors: [
+          {
+            pageKey: "lodges_index",
+            label: "Partner Lodges Landing Page",
+            icon: Hotel,
+            description: "Hero copy, imagery and section toggles on /lodges.",
+          },
+        ],
+      },
+      {
+        value: "home_strip",
+        label: "Home Strip",
+        icon: HomeIcon,
         editors: [
           {
             pageKey: "home_lodges",
@@ -249,49 +314,25 @@ const SECTIONS: Record<string, HubSection> = {
             icon: HomeIcon,
             description: "Lodges strip on the homepage.",
           },
-          { pageKey: "lodges_index", label: "Lodges Landing", icon: Hotel, description: "The /lodges listing page." },
-          {
-            pageKey: "detail_lodge",
-            label: "Lodge Detail Template",
-            icon: FileText,
-            description: "Template used for each lodge detail page.",
-          },
         ],
       },
-    ],
-  },
-  destinations: {
-    title: "Destinations Hub",
-    description: "Destinations section pages and related content.",
-    tabs: [
       {
-        value: "adventures",
-        label: "Adventures",
-        icon: Compass,
+        value: "detail",
+        label: "Detail Pages",
+        icon: FileText,
         editors: [
           {
-            pageKey: "home_adventures",
-            label: "Home — Adventures Strip",
-            icon: HomeIcon,
-            description: "Adventures strip on the homepage.",
-          },
-          {
-            pageKey: "adventures_index",
-            label: "Adventures Landing",
-            icon: Compass,
-            description: "The /adventures listing page.",
-          },
-          {
-            pageKey: "detail_journey",
-            label: "Adventures Detail Template",
+            pageKey: "detail_lodge",
+            label: "Lodge Detail",
             icon: FileText,
-            description: "Template used for each adventure detail page.",
+            description: "Shared copy across each lodge detail page.",
           },
         ],
       },
     ],
   },
 };
+
 
 export const Route = createFileRoute("/_authenticated/admin/pages-hub/$section")({
   beforeLoad: ({ params }) => {
