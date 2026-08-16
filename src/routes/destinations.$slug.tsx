@@ -69,7 +69,8 @@ export const Route = createFileRoute("/destinations/$slug")({
     const title = enriched
       ? `${enriched.name}, ${enriched.region} — The Baobab Collective`
       : "Destination — The Baobab Collective";
-    const desc = enriched?.shortDescription || "Discover this extraordinary destination in Kenya with The Baobab Collective.";
+    const desc =
+      enriched?.shortDescription || "Discover this extraordinary destination in Kenya with The Baobab Collective.";
     const url = `https://thebaobabcollective.co.uk/destinations/${params.slug}`;
 
     const ldDest = enriched
@@ -98,7 +99,12 @@ export const Route = createFileRoute("/destinations/$slug")({
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: "https://thebaobabcollective.co.uk/" },
-        { "@type": "ListItem", position: 2, name: "Destinations", item: "https://thebaobabcollective.co.uk/destinations" },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Destinations",
+          item: "https://thebaobabcollective.co.uk/destinations",
+        },
         { "@type": "ListItem", position: 3, name: enriched?.name ?? params.slug, item: url },
       ],
     };
@@ -130,7 +136,9 @@ export const Route = createFileRoute("/destinations/$slug")({
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-4xl mb-4">Destination not found</h1>
         <p className="text-foreground/70 mb-6">The requested Kenya destination could not be located.</p>
-        <Link to="/destinations" className="text-gold underline">Back to all destinations</Link>
+        <Link to="/destinations" className="text-gold underline">
+          Back to all destinations
+        </Link>
       </main>
       <Footer />
     </div>
@@ -223,12 +231,7 @@ function DestinationDetailPage() {
   return (
     <div className="bg-background min-h-screen selection:bg-gold selection:text-gold-foreground">
       <Navbar />
-      <Breadcrumbs
-        items={[
-          { label: "Destinations", to: "/destinations" },
-          { label: d.name },
-        ]}
-      />
+      <Breadcrumbs items={[{ label: "Destinations", to: "/destinations" }, { label: d.name }]} />
 
       <main id="main-content">
         {/* ── 1. CINEMATIC HERO ────────────────────────────────────────── */}
@@ -271,9 +274,7 @@ function DestinationDetailPage() {
             {/* Left Main Editorial Narrative */}
             <div className="lg:col-span-8 space-y-10">
               <div>
-                <p className="text-[11px] tracking-[0.35em] uppercase text-terracotta font-semibold mb-3">
-                  Why Visit
-                </p>
+                <p className="text-[11px] tracking-[0.35em] uppercase text-terracotta font-semibold mb-3">Why Visit</p>
                 <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground leading-[1.12] mb-6">
                   {d.shortDescription}
                 </h2>
@@ -333,9 +334,7 @@ function DestinationDetailPage() {
                         title={isPeak ? `${m}: Peak Season` : isGood ? `${m}: Good Season` : `${m}: Shoulder/Rainy`}
                       >
                         <div>{m}</div>
-                        <div className="text-[9px] mt-0.5 opacity-80">
-                          {isPeak ? "Peak" : isGood ? "Good" : "•"}
-                        </div>
+                        <div className="text-[9px] mt-0.5 opacity-80">{isPeak ? "Peak" : isGood ? "Good" : "•"}</div>
                       </div>
                     );
                   })}
@@ -370,9 +369,7 @@ function DestinationDetailPage() {
 
                 {d.bestSeason && (
                   <div>
-                    <p className="text-[10px] tracking-[0.25em] uppercase text-gold font-semibold mb-1">
-                      Best Months
-                    </p>
+                    <p className="text-[10px] tracking-[0.25em] uppercase text-gold font-semibold mb-1">Best Months</p>
                     <p className="font-medium text-foreground">{d.bestSeason}</p>
                   </div>
                 )}
@@ -413,7 +410,8 @@ function DestinationDetailPage() {
                 <div className="pt-4 border-t border-border flex items-start gap-3 text-xs text-foreground/70">
                   <HeartHandshake className="w-4 h-4 text-terracotta flex-shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
-                    Every journey to {d.name} supports local conservancy rangers, community leases, and habitat protection.
+                    Every journey to {d.name} supports local conservancy rangers, community leases, and habitat
+                    protection.
                   </p>
                 </div>
               </div>
@@ -422,7 +420,7 @@ function DestinationDetailPage() {
         </section>
 
         {/* ── 3. SIGNATURE EXPERIENCES ─────────────────────────────────── */}
-        {(d.highlights && d.highlights.length > 0) || relevantCombinations.length > 0 ? (
+        {((d.highlights && d.highlights.length > 0) || relevantCombinations.length > 0) && (
           <section className="py-20 bg-background border-b border-border/50">
             <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -435,9 +433,7 @@ function DestinationDetailPage() {
                       <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
                         Signature Experiences
                       </h2>
-                      <p className="text-foreground/70 text-sm mt-3">
-                        Unforgettable ways to live and breathe {d.name}
-                      </p>
+                      <p className="text-foreground/70 text-sm mt-3">Unforgettable ways to live and breathe {d.name}</p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -471,9 +467,7 @@ function DestinationDetailPage() {
                           key={combo.id}
                           className="p-6 sm:p-8 bg-cream/30 rounded-2xl border border-border space-y-4 shadow-sm"
                         >
-                          <p className="text-xs uppercase tracking-[0.2em] text-gold font-semibold">
-                            {combo.subtitle}
-                          </p>
+                          <p className="text-xs uppercase tracking-[0.2em] text-gold font-semibold">{combo.subtitle}</p>
                           <h3 className="font-serif text-2xl sm:text-3xl text-foreground">
                             {combo.destinationNames.join("  +  ")}
                           </h3>
@@ -559,9 +553,7 @@ function DestinationDetailPage() {
                             {lodge.name}
                           </Link>
                         </h3>
-                        <p className="text-foreground/75 text-xs sm:text-sm line-clamp-3 mb-4">
-                          {lodge.description}
-                        </p>
+                        <p className="text-foreground/75 text-xs sm:text-sm line-clamp-3 mb-4">{lodge.description}</p>
                       </div>
                       <div className="pt-4 border-t border-border flex items-center justify-between">
                         <Link
@@ -627,9 +619,7 @@ function DestinationDetailPage() {
                             {adv.name}
                           </Link>
                         </h3>
-                        <p className="text-foreground/75 text-xs sm:text-sm line-clamp-3 mb-4">
-                          {adv.description}
-                        </p>
+                        <p className="text-foreground/75 text-xs sm:text-sm line-clamp-3 mb-4">{adv.description}</p>
                       </div>
                       <div className="pt-4 border-t border-border flex items-center justify-between">
                         <Link
@@ -656,9 +646,7 @@ function DestinationDetailPage() {
                 <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
                   Continue Exploring
                 </p>
-                <h2 className="font-serif text-3xl sm:text-4xl text-foreground">
-                  Other Extraordinary Places
-                </h2>
+                <h2 className="font-serif text-3xl sm:text-4xl text-foreground">Other Extraordinary Places</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -673,9 +661,7 @@ function DestinationDetailPage() {
         {/* ── 8. FINAL CTA ─────────────────────────────────────────────── */}
         <section className="py-24 bg-forest text-forest-foreground text-center relative overflow-hidden">
           <div className="max-w-2xl mx-auto px-6 space-y-6 relative z-10">
-            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold">
-              Bespoke Journey Design
-            </p>
+            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold">Bespoke Journey Design</p>
             <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
               Ready to explore {d.name}?
             </h2>
