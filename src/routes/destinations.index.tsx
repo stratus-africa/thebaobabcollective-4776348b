@@ -278,6 +278,9 @@ function DestinationsDiscoveryPage() {
             onSearchChange={setSearchQuery}
             matchCount={filteredDestinations.length}
             totalCount={allDestinations.length}
+            eyebrow={content.finder_eyebrow}
+            title={content.finder_title}
+            body={content.finder_body}
           />
         )}
 
@@ -296,15 +299,15 @@ function DestinationsDiscoveryPage() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-border/60">
                   <div>
                     <p className="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
-                      Signature Kenya
+                      {content.icons_eyebrow || "Signature Kenya"}
                     </p>
                     <h2 id="icons-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
-                      The Icons
+                      {content.icons_title || "The Icons"}
                     </h2>
                   </div>
                   <p className="text-foreground/60 text-sm max-w-md">
-                    Kenya's world-famous wilderness heartlands — legendary predator density, great elephant herds, and
-                    dramatic arid frontiers.
+                    {content.icons_body ||
+                      "Kenya's world-famous wilderness heartlands — legendary predator density, great elephant herds, and dramatic arid frontiers."}
                   </p>
                 </div>
 
@@ -331,15 +334,15 @@ function DestinationsDiscoveryPage() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-border/60">
                   <div>
                     <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta font-semibold mb-2">
-                      Untamed & Extraordinary
+                      {content.beyond_eyebrow || "Untamed & Extraordinary"}
                     </p>
                     <h2 id="beyond-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
-                      Beyond the Classics
+                      {content.beyond_title || "Beyond the Classics"}
                     </h2>
                   </div>
                   <p className="text-foreground/60 text-sm max-w-md">
-                    Private conservancies, ancient volcanoes, and Great Rift Valley lakes where wildlife viewing is
-                    intimate, active, and conservation-focused.
+                    {content.beyond_body ||
+                      "Private conservancies, ancient volcanoes, and Great Rift Valley lakes where wildlife viewing is intimate, active, and conservation-focused."}
                   </p>
                 </div>
 
@@ -360,15 +363,15 @@ function DestinationsDiscoveryPage() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-border/60">
                   <div>
                     <p className="text-[11px] tracking-[0.3em] uppercase text-cyan-600 dark:text-cyan-400 font-semibold mb-2">
-                      Swahili Coast & Coral Reefs
+                      {content.ocean_eyebrow || "Swahili Coast & Coral Reefs"}
                     </p>
                     <h2 id="ocean-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">
-                      The Indian Ocean
+                      {content.ocean_title || "The Indian Ocean"}
                     </h2>
                   </div>
                   <p className="text-foreground/60 text-sm max-w-md">
-                    White sands, historic UNESCO Swahili ports, sunset dhow sailing, and marine national parks teeming
-                    with reef life.
+                    {content.ocean_body ||
+                      "White sands, historic UNESCO Swahili ports, sunset dhow sailing, and marine national parks teeming with reef life."}
                   </p>
                 </div>
 
@@ -405,17 +408,41 @@ function DestinationsDiscoveryPage() {
 
         {/* ── 5. FEATURED ADVENTURES ─────────────────────────────────────── */}
         {content.show_journeys !== false && (
-          <DestinationJourneysSection adventures={adventuresPage?.signatures ?? []} />
+          <DestinationJourneysSection
+            adventures={adventuresPage?.signatures ?? []}
+            eyebrow={content.journeys_eyebrow}
+            title={content.journeys_title}
+            body={content.journeys_body}
+          />
         )}
 
         {/* ── 6. WHERE YOU'LL STAY ───────────────────────────────────────── */}
-        {content.show_stay !== false && <DestinationStaySection lodges={lodges ?? []} />}
+        {content.show_stay !== false && (
+          <DestinationStaySection
+            lodges={lodges ?? []}
+            eyebrow={content.stay_eyebrow}
+            title={content.stay_title}
+            body={content.stay_body}
+          />
+        )}
 
         {/* ── 7. DESTINATION COMBINATIONS ────────────────────────────────── */}
-        {content.show_combinations !== false && <DestinationCombinations />}
+        {content.show_combinations !== false && (
+          <DestinationCombinations
+            eyebrow={content.combinations_eyebrow}
+            title={content.combinations_title}
+            body={content.combinations_body}
+          />
+        )}
 
         {/* ── 8. WHERE SHOULD KENYA TAKE YOU? (MATCHER) ─────────────────── */}
-        {content.show_matcher !== false && <DestinationMatcherSection />}
+        {content.show_matcher !== false && (
+          <DestinationMatcherSection
+            eyebrow={content.matcher_eyebrow}
+            title={content.matcher_title}
+            body={content.matcher_body}
+          />
+        )}
 
         {/* ── 9. FINAL CALL TO ACTION ────────────────────────────────────── */}
         {content.show_final_cta !== false && (
@@ -432,14 +459,14 @@ function DestinationsDiscoveryPage() {
 
             <div className="relative max-w-4xl mx-auto px-6 space-y-6">
               <p className="text-[11px] tracking-[0.4em] uppercase text-gold font-semibold">
-                Begin Your Kenyan Journey
+                {content.final_cta_eyebrow || "Begin Your Kenyan Journey"}
               </p>
               <h2 className="font-serif text-4xl sm:text-6xl md:text-7xl text-cream leading-[1.06]">
-                Your Kenya is waiting.
+                {content.final_cta_title || "Your Kenya is waiting."}
               </h2>
               <p className="text-forest-foreground/85 text-base sm:text-xl font-serif max-w-2xl mx-auto leading-relaxed">
-                Not sure where to start? Tell us what you love, and we'll help you find the places and rhythm that are
-                right for you.
+                {content.final_cta_body ||
+                  "Not sure where to start? Tell us what you love, and we'll help you find the places and rhythm that are right for you."}
               </p>
 
               <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
