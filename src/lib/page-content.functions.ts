@@ -26,6 +26,7 @@ const KEYS = [
   "contact",
   "lodges_index",
   "adventures_index",
+  "destinations_index",
   "testimonials_page",
   "detail_journey",
   "detail_lodge",
