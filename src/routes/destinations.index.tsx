@@ -333,15 +333,14 @@ function DestinationsDiscoveryPage() {
                   </p>
                 </div>
 
-                {/* Asymmetric Large Cards Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {icons.map((dest, idx) => (
-                    <DestinationCard
-                      key={dest.slug}
-                      destination={dest}
-                      variant={idx === 0 ? "feature" : "standard"}
-                      className={idx === 0 ? "md:col-span-2 lg:col-span-2" : ""}
-                    />
+                {/* Equal Size Cards Grid Layout */}
+                <div
+                  className={`grid grid-cols-1 sm:grid-cols-2 ${
+                    Number(content.grid_size) === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"
+                  } gap-6 md:gap-8`}
+                >
+                  {icons.map((dest) => (
+                    <DestinationCard key={dest.slug} destination={dest} variant="standard" />
                   ))}
                 </div>
               </section>
@@ -368,7 +367,11 @@ function DestinationsDiscoveryPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div
+                  className={`grid grid-cols-1 sm:grid-cols-2 ${
+                    Number(content.grid_size) === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"
+                  } gap-6 md:gap-8`}
+                >
                   {beyondClassics.map((dest) => (
                     <DestinationCard key={dest.slug} destination={dest} variant="standard" />
                   ))}
@@ -397,7 +400,11 @@ function DestinationsDiscoveryPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div
+                  className={`grid grid-cols-1 sm:grid-cols-2 ${
+                    Number(content.grid_size) === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"
+                  } gap-6 md:gap-8`}
+                >
                   {indianOcean.map((dest) => (
                     <DestinationCard key={dest.slug} destination={dest} variant="standard" />
                   ))}
