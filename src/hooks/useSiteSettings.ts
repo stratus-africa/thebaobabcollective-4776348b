@@ -1,6 +1,11 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { getSiteSettings, type SiteSettings } from "@/lib/site-settings.functions";
+import {
+  DEFAULT_CURRENCY,
+  getSiteSettings,
+  resolveCurrencySettings,
+  type SiteSettings,
+} from "@/lib/site-settings.functions";
 
 const FALLBACK_EMAIL = "info@thebaobabcollective.co.uk";
 const FALLBACK_PHONE = "+44 (0) 20 0000 0000";
@@ -18,8 +23,9 @@ export function useSiteSettings() {
   const email = s?.contact?.email || FALLBACK_EMAIL;
   const phone = s?.contact?.phone || FALLBACK_PHONE;
   const phoneTel = s?.contact?.phone_tel || phone.replace(/[^\d+]/g, "");
-  const currencyCode = s?.currency?.code || "USD";
-  const currencySymbol = s?.currency?.symbol || "$";
+  const currency = resolveCurrencySettings(s?.currency ?? DEFAULT_CURRENCY);
+  const currencyCode = currency.code;
+  const currencySymbol = currency.symbol;
   return {
     settings: s,
     email,
