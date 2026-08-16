@@ -1,5 +1,7 @@
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useState } from "react";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   LayoutDashboard,
   Compass,
@@ -31,6 +33,45 @@ import type { PageKey } from "@/lib/page-content.defaults";
 type SubEditor = { pageKey: PageKey; label: string; icon?: any; description?: string; fieldFilter?: string[] };
 type HubTab = { value: string; label: string; icon: any; editors: SubEditor[] };
 type HubSection = { title: string; description: string; tabs: HubTab[] };
+
+/** Stateful sub-section selector — keeps its own tab state and connects the Select to Tabs */
+function MultiEditorTabs({ editors, tabLabel }: { editors: SubEditor[]; tabLabel: string }) {
+  const [activeEditor, setActiveEditor] = useState(editors[0].pageKey);
+  return (
+    <Tabs value={activeEditor} onValueChange={(v) => setActiveEditor(v as PageKey)} className="space-y-4">
+      <div className="flex items-center gap-3">
+        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/60 shrink-0">
+          Sub-section
+        </label>
+        <Select value={activeEditor} onValueChange={(v) => setActiveEditor(v as PageKey)}>
+          <SelectTrigger className="w-full max-w-xs bg-background border border-border font-medium text-sm">
+            <SelectValue placeholder="Select sub-section…" />
+          </SelectTrigger>
+          <SelectContent>
+            {editors.map((ed) => {
+              const EdIcon = ed.icon;
+              return (
+                <SelectItem key={ed.pageKey} value={ed.pageKey}>
+                  <span className="flex items-center gap-2">
+                    {EdIcon && <EdIcon className="w-4 h-4 text-gold shrink-0" />}
+                    {ed.label}
+                  </span>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="min-w-0">
+        {editors.map((ed) => (
+          <TabsContent key={ed.pageKey} value={ed.pageKey} className="mt-0">
+            <PageEditor pageKey={ed.pageKey} fieldFilter={ed.fieldFilter} />
+          </TabsContent>
+        ))}
+      </div>
+    </Tabs>
+  );
+}
 
 const SECTIONS: Record<string, HubSection> = {
   home: {
@@ -663,72 +704,37 @@ function PagesHub() {
         <p className="text-sm text-foreground/65 mt-1">{cfg.description}</p>
       </header>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={handleTabChange}
-        orientation="vertical"
-        className="flex flex-col md:flex-row gap-8"
-      >
-        <TabsList
-          aria-label={`${cfg.title} sections`}
-          className="h-auto md:w-56 shrink-0 flex md:flex-col bg-transparent p-0 gap-1 justify-start"
-        >
-          {cfg.tabs.map((t) => {
-            const Icon = t.icon;
-            return (
-              <TabsTrigger
-                key={t.value}
-                value={t.value}
-                className="w-full justify-start gap-2 data-[state=active]:bg-cream data-[state=active]:text-foreground data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border px-4 py-2.5"
-              >
-                <Icon className="w-4 h-4" /> {t.label}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+        {/* Section Dropdown Selector */}
+        <div className="flex items-center gap-3">
+          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/60 shrink-0">
+            Section
+          </label>
+          <Select value={activeTab} onValueChange={handleTabChange}>
+            <SelectTrigger className="w-full max-w-xs bg-background border border-border font-medium text-sm">
+              <SelectValue placeholder="Select section…" />
+            </SelectTrigger>
+            <SelectContent>
+              {cfg.tabs.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <SelectItem key={t.value} value={t.value}>
+                    <span className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-gold shrink-0" />
+                      {t.label}
+                    </span>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0">
           {cfg.tabs.map((t) => (
             <TabsContent key={t.value} value={t.value} className="mt-0">
               {t.editors.length > 1 ? (
-                <Tabs defaultValue={t.editors[0].pageKey} className="flex flex-col gap-6">
-                  <TabsList
-                    aria-label={`${t.label} — editors`}
-                    className="h-auto w-full flex flex-col bg-transparent p-0 gap-2"
-                  >
-                    {t.editors.map((ed) => {
-                      const EdIcon = ed.icon;
-                      return (
-                        <TabsTrigger
-                          key={ed.pageKey}
-                          value={ed.pageKey}
-                          className="w-full justify-start gap-4 rounded-md border border-border bg-background px-4 py-3 text-left data-[state=active]:bg-cream data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:border-foreground/40"
-                        >
-                          {EdIcon ? (
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-cream/60 text-foreground/80">
-                              <EdIcon className="w-4 h-4" />
-                            </span>
-                          ) : null}
-                          <span className="flex flex-col items-start gap-0.5 min-w-0">
-                            <span className="text-sm font-medium leading-tight">{ed.label}</span>
-                            {ed.description ? (
-                              <span className="text-xs text-foreground/60 leading-tight whitespace-normal">
-                                {ed.description}
-                              </span>
-                            ) : null}
-                          </span>
-                        </TabsTrigger>
-                      );
-                    })}
-                  </TabsList>
-                  <div className="min-w-0">
-                    {t.editors.map((ed) => (
-                      <TabsContent key={ed.pageKey} value={ed.pageKey} className="mt-0">
-                        <PageEditor pageKey={ed.pageKey} fieldFilter={ed.fieldFilter} />
-                      </TabsContent>
-                    ))}
-                  </div>
-                </Tabs>
+                <MultiEditorTabs editors={t.editors} tabLabel={t.label} />
               ) : section === "destinations" && t.value === "map" ? (
                 <AdminDestinationsMapHub />
               ) : (

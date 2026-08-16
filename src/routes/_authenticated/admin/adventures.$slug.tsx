@@ -32,7 +32,7 @@ const adventuresQuery = queryOptions({
   queryFn: () => getAdventuresPage(),
 });
 
-export const Route = createFileRoute("/adventures/$slug")({
+export const Route = createFileRoute("/_authenticated/admin/adventures/$slug")({
   loader: async ({ params, context }) => {
     const page = await context.queryClient.ensureQueryData(adventuresQuery);
     const adv = page.signatures.find((s) => s.slug === params.slug);
