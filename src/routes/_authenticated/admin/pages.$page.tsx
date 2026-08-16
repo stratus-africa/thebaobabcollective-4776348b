@@ -881,6 +881,37 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                 />
               )}
             </div>
+          ) : page === "about" ? (
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+              <div className="xl:col-span-9">
+                <div className="bg-background border border-border p-6 space-y-5">
+                  {visibleFields
+                    .filter((f) => f.type !== "image")
+                    .map((f) => (
+                      <FieldRow
+                        key={f.name}
+                        field={f}
+                        value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
+                        onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                      />
+                    ))}
+                </div>
+              </div>
+              <div className="xl:col-span-3">
+                <div className="bg-background border border-border p-6 space-y-5 h-full">
+                  {visibleFields
+                    .filter((f) => f.type === "image")
+                    .map((f) => (
+                      <FieldRow
+                        key={f.name}
+                        field={f}
+                        value={draft[f.name] ?? ""}
+                        onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                      />
+                    ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="bg-background border border-border p-6 space-y-5">
               {visibleFields.map((f) => (
