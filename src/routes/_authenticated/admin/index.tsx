@@ -171,7 +171,7 @@ function Dashboard() {
   const attentionItems = data?.needsAttention ?? [];
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-6 w-full max-w-[1700px] xl:max-w-[1800px] mx-auto">
       {/* Welcome Banner */}
       <section className="bg-admin-panel border border-admin-panel-border p-6 md:p-7 rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] relative overflow-hidden">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between relative z-10">
