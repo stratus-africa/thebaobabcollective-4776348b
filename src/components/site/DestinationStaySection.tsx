@@ -4,9 +4,12 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface DestinationStaySectionProps {
   lodges: any[];
+  eyebrow?: string;
+  title?: string;
+  body?: string;
 }
 
-export function DestinationStaySection({ lodges }: DestinationStaySectionProps) {
+export function DestinationStaySection({ lodges, eyebrow, title, body }: DestinationStaySectionProps) {
   const { formatPrice } = useSiteSettings();
   if (!lodges || lodges.length === 0) return null;
 
@@ -17,13 +20,14 @@ export function DestinationStaySection({ lodges }: DestinationStaySectionProps) 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
           <div className="max-w-2xl">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5" /> Hand-Picked Accommodations
+              <Sparkles className="w-3.5 h-3.5" /> {eyebrow || "Hand-Picked Accommodations"}
             </p>
             <h2 id="stay-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
-              Where You'll Stay
+              {title || "Where You'll Stay"}
             </h2>
             <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">
-              We choose camps and lodges for their setting, character and the experiences they make possible.
+              {body ||
+                "We choose camps and lodges for their setting, character and the experiences they make possible."}
             </p>
           </div>
 
@@ -86,7 +90,8 @@ export function DestinationStaySection({ lodges }: DestinationStaySectionProps) 
                     params={{ slug: lodge.slug }}
                     className="inline-flex items-center gap-2 text-[11px] tracking-[0.24em] uppercase font-semibold text-forest hover:text-gold transition-colors"
                   >
-                    Discover Lodge <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                    Discover Lodge{" "}
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </div>
               </div>
