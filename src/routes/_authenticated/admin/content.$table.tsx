@@ -613,7 +613,7 @@ function ContentAdmin() {
                       size="sm"
                       onClick={() => {
                         if (table === "destinations") {
-                          navigate({ to: "/admin/destinations/$id", params: { id: row.id } });
+                          navigate({ to: "/admin/destinations/$id", params: { id: row.id || row.slug } });
                         } else {
                           startEdit(row);
                         }

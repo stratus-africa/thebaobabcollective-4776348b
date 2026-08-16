@@ -44,6 +44,7 @@ import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/em
 import { Route as AuthenticatedAdminAdventuresIndexRouteImport } from './routes/_authenticated/admin/adventures.index'
 import { Route as AuthenticatedAdminAdventuresSlugRouteImport } from './routes/_authenticated/admin/adventures.$slug'
 import { Route as AuthenticatedAdminContentTableRouteImport } from './routes/_authenticated/admin/content.$table'
+import { Route as AuthenticatedAdminDestinationsIdRouteImport } from './routes/_authenticated/admin/destinations.$id'
 import { Route as AuthenticatedAdminDestinationsMapRouteImport } from './routes/_authenticated/admin/destinations.map'
 import { Route as AuthenticatedAdminPagesHubSectionRouteImport } from './routes/_authenticated/admin/pages-hub.$section'
 import { Route as AuthenticatedAdminPagesPageRouteImport } from './routes/_authenticated/admin/pages.$page'
@@ -237,6 +238,12 @@ const AuthenticatedAdminContentTableRoute =
     path: '/content/$table',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminDestinationsIdRoute =
+  AuthenticatedAdminDestinationsIdRouteImport.update({
+    id: '/destinations/$id',
+    path: '/destinations/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminDestinationsMapRoute =
   AuthenticatedAdminDestinationsMapRouteImport.update({
     id: '/destinations/map',
@@ -329,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/admin/destinations/$id': typeof AuthenticatedAdminDestinationsIdRoute
   '/admin/destinations/map': typeof AuthenticatedAdminDestinationsMapRoute
   '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
@@ -373,6 +381,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/admin/destinations/$id': typeof AuthenticatedAdminDestinationsIdRoute
   '/admin/destinations/map': typeof AuthenticatedAdminDestinationsMapRoute
   '/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
@@ -421,6 +430,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/_authenticated/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
+  '/_authenticated/admin/destinations/$id': typeof AuthenticatedAdminDestinationsIdRoute
   '/_authenticated/admin/destinations/map': typeof AuthenticatedAdminDestinationsMapRoute
   '/_authenticated/admin/pages-hub/$section': typeof AuthenticatedAdminPagesHubSectionRoute
   '/_authenticated/admin/pages/$page': typeof AuthenticatedAdminPagesPageRoute
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/adventures/$slug'
     | '/admin/content/$table'
+    | '/admin/destinations/$id'
     | '/admin/destinations/map'
     | '/admin/pages-hub/$section'
     | '/admin/pages/$page'
@@ -513,6 +524,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/adventures/$slug'
     | '/admin/content/$table'
+    | '/admin/destinations/$id'
     | '/admin/destinations/map'
     | '/admin/pages-hub/$section'
     | '/admin/pages/$page'
@@ -560,6 +572,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/adventures/$slug'
     | '/_authenticated/admin/content/$table'
+    | '/_authenticated/admin/destinations/$id'
     | '/_authenticated/admin/destinations/map'
     | '/_authenticated/admin/pages-hub/$section'
     | '/_authenticated/admin/pages/$page'
@@ -850,6 +863,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContentTableRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/destinations/$id': {
+      id: '/_authenticated/admin/destinations/$id'
+      path: '/destinations/$id'
+      fullPath: '/admin/destinations/$id'
+      preLoaderRoute: typeof AuthenticatedAdminDestinationsIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/destinations/map': {
       id: '/_authenticated/admin/destinations/map'
       path: '/destinations/map'
@@ -934,6 +954,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminAdventuresSlugRoute: typeof AuthenticatedAdminAdventuresSlugRoute
   AuthenticatedAdminContentTableRoute: typeof AuthenticatedAdminContentTableRoute
+  AuthenticatedAdminDestinationsIdRoute: typeof AuthenticatedAdminDestinationsIdRoute
   AuthenticatedAdminDestinationsMapRoute: typeof AuthenticatedAdminDestinationsMapRoute
   AuthenticatedAdminPagesHubSectionRoute: typeof AuthenticatedAdminPagesHubSectionRoute
   AuthenticatedAdminPagesPageRoute: typeof AuthenticatedAdminPagesPageRoute
@@ -953,6 +974,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminAdventuresSlugRoute:
       AuthenticatedAdminAdventuresSlugRoute,
     AuthenticatedAdminContentTableRoute: AuthenticatedAdminContentTableRoute,
+    AuthenticatedAdminDestinationsIdRoute:
+      AuthenticatedAdminDestinationsIdRoute,
     AuthenticatedAdminDestinationsMapRoute:
       AuthenticatedAdminDestinationsMapRoute,
     AuthenticatedAdminPagesHubSectionRoute:
