@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isSafePublicMediaPath } from "@/lib/public-media-path";
-import { getSiteSettings } from "@/lib/site-settings.functions";
-import { buildWatermarkSvg, resolveWatermarkPolicy } from "@/lib/watermark";
 
 // Public media proxy — streams files from the private `journal-images`
 // Supabase Storage bucket using the admin client. Keeps the bucket private
@@ -20,30 +18,6 @@ export const Route = createFileRoute("/api/public/media/$")({
         if (error || !data) return new Response("Not found", { status: 404 });
 
         const buf = await data.arrayBuffer();
-        const settings = await getSiteSettings();
-        const policy = resolveWatermarkPolicy(settings.branding, path);
-
-        if (policy.enabled) {
-          const mime = data.type || "image/jpeg";
-          const base64 = Buffer.from(buf).toString("base64");
-          const svg = buildWatermarkSvg({
-            mode: policy.mode,
-            text: policy.text,
-            position: policy.position,
-            imageDataUrl: `data:${mime};base64,${base64}`,
-            watermarkImageUrl: policy.mode === "image" ? policy.imageUrl : undefined,
-            opacity: policy.opacity,
-          });
-
-          return new Response(svg, {
-            status: 200,
-            headers: {
-              "Content-Type": "image/svg+xml",
-              "Cache-Control": "public, max-age=31536000, immutable",
-            },
-          });
-        }
-
         return new Response(buf, {
           status: 200,
           headers: {
