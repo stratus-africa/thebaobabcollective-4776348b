@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { resolveImageSource } from "./image-resolution";
-import { getMediaMimeType, resolveLocalMediaPath, toPublicMediaUrl } from "./local-media";
+import { getMediaMimeType, resolveMediaObjectKey, toPublicMediaUrl } from "./local-media";
 
 describe("local media helpers", () => {
-  it("resolves CMS files under public/uploads", () => {
-    const result = resolveLocalMediaPath("cms/1786292097632-pexels-sam-kim1-11811982.jpg");
-    expect(result).not.toBeNull();
-    expect(result).toMatch(/public[\\/]uploads[\\/]cms[\\/]1786292097632-pexels-sam-kim1-11811982\.jpg$/i);
-    expect(resolveLocalMediaPath("../secret.jpg")).toBeNull();
-    expect(resolveLocalMediaPath("/etc/passwd")).toBeNull();
+  it("resolves CMS media paths to their Supabase Storage object key", () => {
+    const result = resolveMediaObjectKey("cms/1786292097632-pexels-sam-kim1-11811982.jpg");
+    expect(result).toBe("1786292097632-pexels-sam-kim1-11811982.jpg");
+    expect(resolveMediaObjectKey("../secret.jpg")).toBeNull();
+    expect(resolveMediaObjectKey("/etc/passwd")).toBeNull();
   });
 
   it("returns the expected MIME type for supported file types", () => {
