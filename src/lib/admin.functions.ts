@@ -1,14 +1,6 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  ensureLocalMediaDirectory,
-  getMediaMimeType,
-  listLocalMediaRecords,
-  resolveLocalMediaPath,
-  toPublicMediaUrl,
-} from "@/lib/local-media";
+import { deleteCmsMedia, listCmsMedia, uploadCmsMedia } from "@/lib/media-storage";
 import { z } from "zod";
 
 type Ctx = { supabase: any; userId: string };
@@ -89,25 +81,14 @@ export const adminUploadImage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
-    const cleanName = data.filename
-      .toLowerCase()
-      .replace(/[^a-z0-9.]+/g, "-")
-      .replace(/^-|-$/g, "");
-    const storedPath = `cms/${Date.now()}-${cleanName}`;
-
     const binary = atob(data.base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
     if (bytes.length > 8 * 1024 * 1024) throw new Error("Image exceeds 8MB limit");
 
-    const uploadDir = await ensureLocalMediaDirectory();
-    const fullPath = path.join(uploadDir, storedPath.replace(/^cms\//, ""));
-    await fs.mkdir(path.dirname(fullPath), { recursive: true });
-    await fs.writeFile(fullPath, Buffer.from(bytes));
-
-    const url = toPublicMediaUrl(storedPath);
-    return { url, path: storedPath, size: bytes.length };
+    const result = await uploadCmsMedia(context.supabase, data.filename, bytes, data.contentType);
+    return result;
   });
 
 // Delete a previously-uploaded media file so the storage stays in sync with
@@ -131,15 +112,10 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
       if (m) mediaPath = m[1];
     }
 
-    const resolvedPath = mediaPath ? resolveLocalMediaPath(mediaPath) : null;
-    if (!resolvedPath) return { ok: false as const };
+    if (!mediaPath) return { ok: false as const };
 
-    try {
-      await fs.unlink(resolvedPath);
-      return { ok: true as const };
-    } catch {
-      return { ok: false as const };
-    }
+    const ok = await deleteCmsMedia(context.supabase, mediaPath);
+    return { ok };
   });
 
 // List previously-uploaded media so the admin can reuse images without
@@ -159,10 +135,9 @@ export const adminListMedia = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
-    await ensureLocalMediaDirectory();
-    const files = await listLocalMediaRecords("cms");
+    const files = await listCmsMedia(context.supabase, data.limit);
 
-    let filtered = files.filter((f) => /\.(png|jpe?g|webp|gif|avif)$/i.test(f.name));
+    let filtered = files;
     if (data.search) {
       const s = data.search.toLowerCase();
       filtered = filtered.filter((f) => f.name.toLowerCase().includes(s));
@@ -187,14 +162,7 @@ export const adminListMedia = createServerFn({ method: "POST" })
       }
     });
 
-    return filtered.slice(0, data.limit).map((f) => ({
-      name: f.name,
-      path: f.path,
-      size: f.size,
-      contentType: f.contentType,
-      updated_at: f.updated_at,
-      url: toPublicMediaUrl(f.path),
-    }));
+    return filtered.slice(0, data.limit);
   });
 
 export const adminUpsert = createServerFn({ method: "POST" })
