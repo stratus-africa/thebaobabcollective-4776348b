@@ -1,6 +1,5 @@
-import { promises as fs } from "node:fs";
 import { createFileRoute } from "@tanstack/react-router";
-import { getMediaMimeType, resolveLocalMediaPath } from "@/lib/local-media";
+import { downloadCmsMedia } from "@/lib/media-storage";
 import { getSiteSettings } from "@/lib/site-settings.functions";
 import { buildWatermarkSvg, resolveWatermarkPolicy } from "@/lib/watermark";
 
@@ -18,23 +17,18 @@ export const Route = createFileRoute("/api/public/media/$")({
           return new Response("Invalid path", { status: 400 });
         }
 
-        const localPath = resolveLocalMediaPath(safePath);
-        if (!localPath) {
-          return new Response("Invalid path", { status: 400 });
-        }
-
-        let fileBuffer: Buffer;
-        try {
-          fileBuffer = await fs.readFile(localPath);
-        } catch {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const downloaded = await downloadCmsMedia(supabaseAdmin, safePath);
+        if (!downloaded) {
           return new Response("Not found", { status: 404 });
         }
+        const fileBuffer = downloaded.bytes;
 
         const settings = await getSiteSettings();
         const policy = resolveWatermarkPolicy(settings.branding, safePath);
 
         if (policy.enabled) {
-          const mime = getMediaMimeType(safePath) || "image/jpeg";
+          const mime = downloaded.contentType || "image/jpeg";
           const base64 = fileBuffer.toString("base64");
           const svg = buildWatermarkSvg({
             mode: policy.mode,
@@ -55,7 +49,7 @@ export const Route = createFileRoute("/api/public/media/$")({
           });
         }
 
-        const contentType = getMediaMimeType(safePath);
+        const contentType = downloaded.contentType;
 
         const bytes = new Uint8Array(fileBuffer);
         const blob = new Blob([bytes], { type: contentType ?? "application/octet-stream" });
