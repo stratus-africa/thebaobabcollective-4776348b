@@ -1,24 +1,9 @@
-import { promises as fs, constants as fsConstants } from "node:fs";
-import os from "node:os";
-import path from "node:path";
+// Pure helpers for media path/URL handling. The actual bytes now live in
+// Supabase Storage (see media-storage.ts) rather than on local disk — local
+// disk isn't persistent across the multiple instances/regions that serve
+// SSR requests on Lovable's hosting, which caused uploads to "disappear"
+// from the Media Library.
 import { isSafePublicMediaPath } from "./public-media-path";
-
-const DEFAULT_MEDIA_ROOT = path.resolve(process.cwd(), "public", "uploads");
-const FALLBACK_MEDIA_ROOT = path.join(os.tmpdir(), "baobab-collective-media");
-let activeMediaRoot: string | null = null;
-
-export function getLocalMediaRoot(): string {
-  const configuredRoot = process.env.MEDIA_UPLOAD_ROOT?.trim();
-  if (configuredRoot) return path.resolve(configuredRoot);
-
-  if (activeMediaRoot) return activeMediaRoot;
-
-  return DEFAULT_MEDIA_ROOT;
-}
-
-export function getLocalCmsMediaDir(): string {
-  return path.join(getLocalMediaRoot(), "cms");
-}
 
 export function getMediaMimeType(fileName: string): string {
   const lower = fileName.toLowerCase();
@@ -44,7 +29,10 @@ export function toPublicMediaUrl(mediaPath: string): string {
   return `/api/public/media/${clean}`;
 }
 
-export function resolveLocalMediaPath(rawPath: string | null | undefined): string | null {
+// Validates a media path of the form `cms/<filename>` and, if safe, returns
+// the storage object key (filename only) used inside the Supabase Storage
+// bucket. Returns null for anything unsafe or not under the `cms/` prefix.
+export function resolveMediaObjectKey(rawPath: string | null | undefined): string | null {
   if (typeof rawPath !== "string") return null;
 
   let normalized = rawPath.trim();
@@ -58,72 +46,10 @@ export function resolveLocalMediaPath(rawPath: string | null | undefined): strin
 
   if (!isSafePublicMediaPath(normalized)) return null;
 
-  const root = getLocalMediaRoot();
-  const resolved = path.resolve(root, normalized);
-  if (resolved !== root && !resolved.startsWith(root + path.sep)) return null;
+  // Strip a leading `cms/` prefix — that's a path-namespacing convention
+  // kept for URL/back-compat, not part of the actual storage object key.
+  const key = normalized.startsWith("cms/") ? normalized.slice(4) : normalized;
+  if (!key || key.includes("/")) return null;
 
-  return resolved;
-}
-
-export async function ensureLocalMediaDirectory(): Promise<string> {
-  const candidates = [
-    process.env.MEDIA_UPLOAD_ROOT?.trim() ? path.resolve(process.env.MEDIA_UPLOAD_ROOT.trim()) : null,
-    DEFAULT_MEDIA_ROOT,
-    FALLBACK_MEDIA_ROOT,
-  ].filter((value): value is string => Boolean(value));
-
-  const uniqueCandidates = [...new Set(candidates)];
-
-  for (const root of uniqueCandidates) {
-    try {
-      await fs.mkdir(root, { recursive: true });
-      await fs.access(root, fsConstants.W_OK);
-      activeMediaRoot = root;
-      if (root !== DEFAULT_MEDIA_ROOT) {
-        process.env.MEDIA_UPLOAD_ROOT = root;
-      }
-      return path.join(root, "cms");
-    } catch {
-      continue;
-    }
-  }
-
-  throw new Error("No writable media upload directory is available.");
-}
-
-export async function listLocalMediaRecords(prefix = "cms") {
-  const baseDir = path.resolve(getLocalMediaRoot(), prefix);
-  await fs.mkdir(baseDir, { recursive: true });
-
-  const entries = await fs.readdir(baseDir, { withFileTypes: true });
-  const items: Array<{
-    name: string;
-    path: string;
-    size: number;
-    contentType: string;
-    updated_at: string;
-    fullPath: string;
-  }> = [];
-
-  for (const entry of entries) {
-    if (!entry.isFile()) continue;
-    const name = entry.name;
-    if (!/\.(png|jpe?g|webp|gif|avif)$/i.test(name)) continue;
-
-    const fullPath = path.join(baseDir, name);
-    const stat = await fs.stat(fullPath);
-    const relativePath = prefix ? `${prefix}/${name}` : name;
-
-    items.push({
-      name,
-      path: relativePath,
-      size: Number(stat.size ?? 0),
-      contentType: getMediaMimeType(name),
-      updated_at: new Date(stat.mtimeMs).toISOString(),
-      fullPath,
-    });
-  }
-
-  items.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-  return items;
+  return key;
 }
