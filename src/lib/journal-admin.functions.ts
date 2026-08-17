@@ -1,8 +1,6 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { ensureLocalMediaDirectory, toPublicMediaUrl } from "@/lib/local-media";
+import { uploadCmsMedia } from "@/lib/media-storage";
 import { z } from "zod";
 
 type Ctx = { supabase: any; userId: string };
@@ -99,21 +97,10 @@ export const adminUploadJournalImage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
-    const cleanName = data.filename
-      .toLowerCase()
-      .replace(/[^a-z0-9.]+/g, "-")
-      .replace(/^-|-$/g, "");
-    const mediaPath = `cms/${Date.now()}-${cleanName}`;
-
     const binary = atob(data.base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-    const dir = await ensureLocalMediaDirectory();
-    const fullPath = path.join(dir, mediaPath.replace(/^cms\//, ""));
-    await fs.mkdir(path.dirname(fullPath), { recursive: true });
-    await fs.writeFile(fullPath, Buffer.from(bytes));
-
-    const url = toPublicMediaUrl(mediaPath);
+    const { path: mediaPath, url } = await uploadCmsMedia(context.supabase, data.filename, bytes, data.contentType);
     return { url, path: mediaPath };
   });
