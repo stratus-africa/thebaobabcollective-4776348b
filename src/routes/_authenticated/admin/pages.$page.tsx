@@ -858,6 +858,11 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
         <div>
           <h1 className="font-serif text-2xl md:text-3xl">{schema.title}</h1>
           <p className="text-sm text-foreground/60 mt-1">{schema.description}</p>
+          {hasDraft && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-sm bg-amber-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-amber-900">
+              <FileEdit className="w-3 h-3" /> Unpublished draft
+            </p>
+          )}
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => setShowPreview((v) => !v)}>
@@ -872,16 +877,36 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
           <Button variant="outline" onClick={reset}>
             <RefreshCw className="w-4 h-4 mr-1" /> Reset
           </Button>
+          {hasDraft && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (confirm("Discard the unpublished draft and go back to the live version?")) mDiscard.mutate();
+              }}
+              disabled={busy || isLoading}
+            >
+              <Trash2 className="w-4 h-4 mr-1" /> Discard draft
+            </Button>
+          )}
+          <Button variant="outline" onClick={() => mSaveDraft.mutate()} disabled={busy || isLoading}>
+            {mSaveDraft.isPending ? (
+              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-1" />
+            )}
+            Save draft
+          </Button>
           <Button
-            onClick={() => mSave.mutate()}
-            disabled={mSave.isPending || isLoading}
+            onClick={() => mPublish.mutate()}
+            disabled={busy || isLoading}
             className="bg-gold text-gold-foreground hover:bg-gold/90"
           >
-            {mSave.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-            Save
+            {mPublish.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Rocket className="w-4 h-4 mr-1" />}
+            Publish
           </Button>
         </div>
       </div>
+
 
       <div className={showPreview ? "grid grid-cols-1 xl:grid-cols-[minmax(0,480px)_1fr] gap-6" : ""}>
         <div>
