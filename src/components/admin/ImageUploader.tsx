@@ -222,6 +222,13 @@ export function ImageUploader({
           {label}
         </Label>
       )}
+      {recommended && (
+        <p className="-mt-1 mb-2 text-[11px] text-foreground/50">
+          Recommended: {recommended.width}×{recommended.height}px, under {maxSizeMB}MB
+          {recommended.note ? ` — ${recommended.note}` : ""}
+        </p>
+      )}
+
 
       {displayed ? (
         <div className="border-2 border-border rounded-md overflow-hidden bg-background">
