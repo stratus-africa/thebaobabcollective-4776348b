@@ -37,7 +37,12 @@ import {
   ArrowDown,
   GripVertical,
   Images,
+  Globe,
+  Rocket,
+  Trash2,
+  FileEdit,
 } from "lucide-react";
+
 import {
   DndContext,
   closestCenter,
