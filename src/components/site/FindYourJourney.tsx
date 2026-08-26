@@ -8,6 +8,7 @@ import g3Img from "@/assets/gallery-3.jpg";
 import g4Img from "@/assets/gallery-4.jpg";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
+import { SiteImage } from "@/components/site/SiteImage";
 
 type FindJourneyContent = Partial<typeof PAGE_DEFAULTS.home_find_journey>;
 
@@ -16,7 +17,7 @@ export type JourneyTypeCard = {
   tagline: string;
   description: string;
   fallbackImage: string;
-  imageKey: keyof typeof PAGE_DEFAULTS.home_find_journey;
+  imageKey: "card_1_image" | "card_2_image" | "card_3_image" | "card_4_image" | "card_5_image" | "card_6_image";
   to: string;
   badge?: string;
 };
@@ -97,8 +98,8 @@ export function FindYourJourney({ content }: { content?: FindJourneyContent | nu
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {JOURNEY_STYLES.map((style, idx) => {
-            // Use CMS image if uploaded, otherwise fall back to bundled asset
-            const imageSrc = (c[style.imageKey] as string) || style.fallbackImage;
+            // Do not paint the bundled fallback until the CMS value has been resolved.
+            const imageSrc = typeof c[style.imageKey] === "string" ? c[style.imageKey] : null;
 
             return (
               <Link
@@ -107,8 +108,9 @@ export function FindYourJourney({ content }: { content?: FindJourneyContent | nu
                 className="group relative flex flex-col justify-end overflow-hidden rounded-xl border border-border/80 bg-forest min-h-[380px] sm:min-h-[420px] p-6 sm:p-8 transition-all duration-500 hover:shadow-luxury-hover hover:border-gold/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
                 {/* Background Image */}
-                <img
+                <SiteImage
                   src={imageSrc}
+                  fallback={style.fallbackImage}
                   alt={style.title}
                   loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Instagram as IgIcon, Loader2, RefreshCw, ImageOff, ChevronDown } from "lucide-react";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { SiteImage } from "@/components/site/SiteImage";
 
 type Photo = { src: string; caption: string };
 
@@ -10,13 +11,7 @@ const PAGE_SIZE = 4;
 const MAX_SLOTS = 7;
 const STORAGE_KEY = "ig-timeline-visible";
 
-export function InstagramTimeline({
-  fallbackPhotos,
-  initialData,
-}: {
-  fallbackPhotos: Photo[];
-  initialData?: unknown;
-}) {
+export function InstagramTimeline({ fallbackPhotos, initialData }: { fallbackPhotos: Photo[]; initialData?: unknown }) {
   // Restore last "View more" page from sessionStorage on mount.
   const [visible, setVisible] = useState<number>(() => {
     if (typeof window === "undefined") return PAGE_SIZE;
@@ -89,8 +84,9 @@ export function InstagramTimeline({
                   aria-label={p.caption || `Instagram post ${i + 1}`}
                 >
                   <div className="w-20 h-20 shrink-0 overflow-hidden bg-cream">
-                    <img
+                    <SiteImage
                       src={p.src}
+                      sourceReady={!isLoading}
                       alt={p.caption || ""}
                       loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -161,9 +157,7 @@ function ErrorState({ onRetry, loading }: { onRetry: () => void; loading: boolea
   return (
     <div className="p-8 text-center" role="alert">
       <ImageOff className="w-8 h-8 mx-auto text-foreground/40 mb-3" />
-      <p className="text-sm text-foreground/70 mb-4">
-        We couldn't load the Instagram feed right now.
-      </p>
+      <p className="text-sm text-foreground/70 mb-4">We couldn't load the Instagram feed right now.</p>
       <button
         type="button"
         onClick={onRetry}

@@ -19,7 +19,7 @@ import {
   DESTINATION_LABEL_OFFSETS,
   getDestinationMapPosition,
 } from "@/lib/destinations.data";
-import kenyaMapAsset from "@/assets/kenya-destinations-map.jpg";
+import kenyaMapAsset from "@/assets/kenya-destinations-map.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -439,7 +439,7 @@ export function KenyaDestinationsMap({
             >
               {/* Reference Map Image Layer */}
               <img
-                src={mapImage || "/maps/kenya-destinations-map.gif"}
+                src={mapImage || "/maps/kenya-destinations-map.webp"}
                 alt="Map of Kenya showing major destinations and geographic regions"
                 className="absolute inset-0 w-full h-full object-cover select-none rounded-xl pointer-events-none"
                 onError={(e) => {

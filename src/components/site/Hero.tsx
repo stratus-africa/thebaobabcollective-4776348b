@@ -9,7 +9,7 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { useMenuConfig } from "@/hooks/useMenuConfig";
-import { resolveImageSource } from "@/lib/image-resolution";
+import { SiteImage } from "@/components/site/SiteImage";
 
 type HeroContent = Partial<typeof PAGE_DEFAULTS.home>;
 
@@ -18,7 +18,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
   const c = usePreviewMerge("home", base);
   const asBackground = Boolean(c.hero_image_as_background);
   const hideSearch = Boolean(c.hero_hide_search);
-  const heroSrc = resolveImageSource(c.hero_image_url, heroImg) ?? heroImg;
+  const heroSrc = c.hero_image_url || null;
   const navigate = useNavigate();
   const menu = useMenuConfig();
   const overlay = !!menu.transparentOverHero;
@@ -53,8 +53,9 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
         }`}
       >
         {asBackground && (
-          <img
+          <SiteImage
             src={heroSrc}
+            fallback={heroImg}
             alt="Baobab safari hero"
             className="absolute inset-0 h-full w-full"
             decoding="async"
@@ -167,8 +168,9 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
           {!asBackground && (
             <div className="relative min-h-[280px] sm:min-h-[380px] lg:min-h-[560px]">
               <div className="absolute inset-0 flex items-end justify-center lg:justify-end">
-                <img
+                <SiteImage
                   src={heroSrc}
+                  fallback={heroImg}
                   alt="Baobab safari hero"
                   className="w-full h-full max-h-[600px] rounded-[18px] md:rounded-[24px] shadow-2xl"
                   decoding="async"

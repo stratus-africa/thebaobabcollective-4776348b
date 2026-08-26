@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, Calendar, Compass, Sparkles } from "lucide-react";
 import { getAdventuresPage, type AdventuresSignature } from "@/lib/adventures.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
+import { SiteImage } from "@/components/site/SiteImage";
 
 type Content = Partial<typeof PAGE_DEFAULTS.home_adventures>;
 
@@ -13,7 +14,7 @@ export function HomeAdventures({ content }: { content?: Content | null } = {}) {
   const c = usePreviewMerge("home_adventures", base);
 
   const fetchAdventures = useServerFn(getAdventuresPage);
-  const { data: page } = useQuery({
+  const { data: page, isLoading } = useQuery({
     queryKey: ["adventures-page"],
     queryFn: () => fetchAdventures(),
     staleTime: 60_000,

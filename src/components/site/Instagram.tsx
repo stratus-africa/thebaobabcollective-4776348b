@@ -1,3 +1,4 @@
+import { SiteImage } from "@/components/site/SiteImage";
 import { Instagram as IgIcon } from "lucide-react";
 import g1 from "@/assets/gallery-1.jpg";
 import g2 from "@/assets/gallery-2.jpg";
@@ -18,7 +19,8 @@ export function InstagramStrip({ content }: { content?: Content | null } = {}) {
   const base = { ...PAGE_DEFAULTS.home_instagram, ...(content ?? {}) };
   const c: any = usePreviewMerge("home_instagram", base);
   const photos = defaultImgs.map((d, i) => ({
-    src: (c[`image_${i + 1}_url`] as string) || d,
+    src: (c[`image_${i + 1}_url`] as string) || null,
+    fallback: d,
     caption: (c[`image_${i + 1}_caption`] as string) || "",
   }));
   return (
@@ -28,7 +30,12 @@ export function InstagramStrip({ content }: { content?: Content | null } = {}) {
           <IgIcon className="w-8 h-8" strokeWidth={1.2} />
           <div>
             <p className="text-[11px] tracking-[0.25em] uppercase">{c.heading}</p>
-            <a href={c.url} target="_blank" rel="noreferrer" className="text-sm text-forest-foreground/80 hover:text-gold">
+            <a
+              href={c.url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-forest-foreground/80 hover:text-gold"
+            >
               {c.handle}
             </a>
           </div>
@@ -44,8 +51,9 @@ export function InstagramStrip({ content }: { content?: Content | null } = {}) {
               aria-label={p.caption || `Instagram photo ${i + 1}`}
               className="shrink-0 w-20 h-20 md:w-24 md:h-24 overflow-hidden block"
             >
-              <img
+              <SiteImage
                 src={p.src}
+                fallback={p.fallback}
                 alt={p.caption || ""}
                 loading="lazy"
                 className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
@@ -54,8 +62,6 @@ export function InstagramStrip({ content }: { content?: Content | null } = {}) {
           ))}
         </div>
       </div>
-
-
     </section>
   );
 }

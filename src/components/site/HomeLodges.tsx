@@ -6,6 +6,7 @@ import { getLodges } from "@/lib/cms.functions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
+import { SiteImage } from "@/components/site/SiteImage";
 
 type Content = Partial<typeof PAGE_DEFAULTS.home_lodges>;
 
@@ -14,7 +15,7 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
   const c = usePreviewMerge("home_lodges", base);
 
   const fetchLodges = useServerFn(getLodges);
-  const { data: lodges = [] } = useQuery({
+  const { data: lodges = [], isLoading } = useQuery({
     queryKey: ["lodges"],
     queryFn: () => fetchLodges(),
     staleTime: 60_000,
@@ -34,9 +35,7 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
             <h2 id="lodges-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]">
               {c.title}
             </h2>
-            <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">
-              {c.body}
-            </p>
+            <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">{c.body}</p>
           </div>
           <Link
             to="/lodges"
@@ -59,14 +58,15 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
                   params={{ slug: lodge.slug }}
                   className="relative aspect-[16/10] overflow-hidden block"
                 >
-                  <img
+                  <SiteImage
                     src={lodge.hero_image}
+                    sourceReady={!isLoading}
                     alt={`${lodge.name}, ${lodge.location}`}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
-                  
+
                   {lodge.location && (
                     <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] uppercase font-medium bg-background/90 backdrop-blur text-foreground px-3 py-1 rounded-full">
                       <MapPin className="w-3 h-3 text-gold" /> {lodge.location}
@@ -97,7 +97,8 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
                       params={{ slug: lodge.slug }}
                       className="inline-flex items-center gap-2 text-[11px] tracking-[0.24em] uppercase font-semibold text-forest hover:text-gold transition-colors"
                     >
-                      Discover Lodge <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                      Discover Lodge{" "}
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                   </div>
                 </div>
