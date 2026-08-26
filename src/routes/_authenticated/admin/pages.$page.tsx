@@ -1174,6 +1174,8 @@ function ReorderableGroups({
   draft,
   setDraft,
   onReorderCommit,
+  collapsible = false,
+  innerSplit = false,
 }: {
   page: PageKey;
   group: { count: number; suffixes: string[]; label: (i: number) => string };
@@ -1181,7 +1183,10 @@ function ReorderableGroups({
   draft: Record<string, any>;
   setDraft: (fn: (d: Record<string, any>) => Record<string, any>) => void;
   onReorderCommit: (next: Record<string, any>) => void;
+  collapsible?: boolean;
+  innerSplit?: boolean;
 }) {
+
   const ids = Array.from({ length: group.count }, (_, k) => `slot-${k + 1}`);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
