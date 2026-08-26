@@ -1,41 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Hero } from "@/components/site/Hero";
 import { FoundersStrip } from "@/components/site/FoundersStrip";
 import { TrustStrip } from "@/components/site/TrustStrip";
 import { WhyBaobab } from "@/components/site/WhyBaobab";
-import { FindYourJourney } from "@/components/site/FindYourJourney";
+const FindYourJourney = lazy(() => import("@/components/site/FindYourJourney").then((m) => ({ default: m.FindYourJourney })));
 import { JourneyImpact } from "@/components/site/JourneyImpact";
 import { HowItWorks } from "@/components/site/HowItWorks";
-import { InstagramStrip } from "@/components/site/Instagram";
-import { TestimonialsStrip } from "@/components/site/TestimonialsStrip";
-import { getPageContent } from "@/lib/page-content.functions";
+const InstagramStrip = lazy(() => import("@/components/site/Instagram").then((m) => ({ default: m.InstagramStrip })));
+const TestimonialsStrip = lazy(() => import("@/components/site/TestimonialsStrip").then((m) => ({ default: m.TestimonialsStrip })));
+import { getPageContents } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import heroBaobab from "@/assets/hero-baobab.jpg";
 
-const pageContentQuery = (key: keyof typeof PAGE_DEFAULTS) =>
-  queryOptions({
-    queryKey: ["page-content", key],
-    queryFn: () => getPageContent({ data: { key } }),
-    staleTime: 60_000,
-  });
+const HOME_CONTENT_KEYS = [
+  "home",
+  "home_founders",
+  "home_trust",
+  "home_why_baobab",
+  "home_final_cta",
+  "home_find_journey",
+  "home_impact",
+  "home_how_it_works",
+  "home_instagram",
+] as const;
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(pageContentQuery("home")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_founders")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_trust")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_why_baobab")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_final_cta")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_find_journey")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_impact")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_how_it_works")),
-      context.queryClient.ensureQueryData(pageContentQuery("home_instagram")),
-    ]);
+    await context.queryClient.ensureQueryData({
+      queryKey: ["page-content-batch", "home"],
+      queryFn: () => getPageContents({ data: { keys: [...HOME_CONTENT_KEYS] } }),
+      staleTime: 10 * 60_000,
+    });
   },
   head: () => ({
     meta: [
@@ -57,28 +56,22 @@ export const Route = createFileRoute("/")({
   }),
   component: HomePage,
 });
-
 function HomePage() {
-  const pageContentFn = useServerFn(getPageContent);
+  const { data: content } = useSuspenseQuery({
+    queryKey: ["page-content-batch", "home"],
+    queryFn: () => getPageContents({ data: { keys: [...HOME_CONTENT_KEYS] } }),
+    staleTime: 10 * 60_000,
+  });
 
-  const { data: heroData } = useSuspenseQuery(pageContentQuery("home"));
-  const heroContent = { ...PAGE_DEFAULTS.home, ...(heroData ?? {}) };
-
-  const { data: foundersData } = useSuspenseQuery(pageContentQuery("home_founders"));
-
-  const { data: trustData } = useSuspenseQuery(pageContentQuery("home_trust"));
-
-  const { data: whyBaobabData } = useSuspenseQuery(pageContentQuery("home_why_baobab"));
-
-  const { data: finalCtaData } = useSuspenseQuery(pageContentQuery("home_final_cta"));
-
-  const { data: findJourneyData } = useSuspenseQuery(pageContentQuery("home_find_journey"));
-
-  const { data: impactData } = useSuspenseQuery(pageContentQuery("home_impact"));
-
-  const { data: howItWorksData } = useSuspenseQuery(pageContentQuery("home_how_it_works"));
-
-  const { data: instagramData } = useSuspenseQuery(pageContentQuery("home_instagram"));
+  const heroContent = { ...PAGE_DEFAULTS.home, ...(content.home ?? {}) };
+  const foundersData = content.home_founders;
+  const trustData = content.home_trust;
+  const whyBaobabData = content.home_why_baobab;
+  const finalCtaData = content.home_final_cta;
+  const findJourneyData = content.home_find_journey;
+  const impactData = content.home_impact;
+  const howItWorksData = content.home_how_it_works;
+  const instagramData = content.home_instagram;
 
   return (
     <div className="bg-background min-h-screen">
@@ -97,10 +90,14 @@ function HomePage() {
         <FoundersStrip content={foundersData} />
 
         {/* 05. Find Your Journey */}
-        <FindYourJourney content={findJourneyData} />
+        <Suspense fallback={<div className="min-h-[520px]" aria-hidden="true" />}>
+          <FindYourJourney content={findJourneyData} />
+        </Suspense>
 
         {/* 06. Guest Stories */}
-        <TestimonialsStrip />
+        <Suspense fallback={<div className="min-h-[520px]" aria-hidden="true" />}>
+          <TestimonialsStrip />
+        </Suspense>
 
         {/* 07. Journey Impact */}
         <JourneyImpact content={impactData} />
@@ -109,7 +106,9 @@ function HomePage() {
         <HowItWorks content={howItWorksData} />
 
         {/* 09. Instagram */}
-        <InstagramStrip content={instagramData} />
+        <Suspense fallback={<div className="min-h-[320px]" aria-hidden="true" />}>
+          <InstagramStrip content={instagramData} />
+        </Suspense>
       </main>
       <Footer />
     </div>
