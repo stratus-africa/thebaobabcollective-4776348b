@@ -1,6 +1,9 @@
 // Default content for editable pages, used as fallback if no override is saved.
 export const PAGE_DEFAULTS = {
   home: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     hero_title_line1: "KENYA,",
     hero_title_line2: "CURATED PERSONALLY.",
     hero_subtitle: "Private safaris, wild landscapes and meaningful encounters — thoughtfully designed around you.",
@@ -13,6 +16,9 @@ export const PAGE_DEFAULTS = {
     hero_bg_size: "cover" as "cover" | "contain",
   },
   about: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "The feeling of Kenya",
     title_line1: "KENYA ISN'T JUST",
     title_line2: "A DESTINATION.",
@@ -229,6 +235,9 @@ export const PAGE_DEFAULTS = {
     enabled: true,
   },
   contact: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "We'd love to hear from you",
     title_line1: "Let's Plan",
     title_line2: "Your Journey",
@@ -247,6 +256,9 @@ export const PAGE_DEFAULTS = {
     facebook_handle: "/thebaobabcollective",
   },
   lodges_index: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "Where you'll stay",
     title: "Partner Lodges",
     subtitle: "Every camp and lodge we work with has been walked, slept in, and chosen for soul as much as setting.",
@@ -257,6 +269,9 @@ export const PAGE_DEFAULTS = {
   },
 
   destinations_index: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     // 1. Hero
     show_hero: true as boolean,
     eyebrow: "Destination Discovery",
@@ -339,6 +354,10 @@ export const PAGE_DEFAULTS = {
       "Not sure where to start? Tell us what you love, and we'll help you find the places and rhythm that are right for you.",
   },
   adventures_index: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
+    section_order: ["hero","rhythm","finder","signature","explore","spotlight","catalogue","combinations","enquiry_cta","final_cta"] as string[],
     eyebrow: "Signature Adventures",
     title: "Wild Africa, Deeply Lived",
     subtitle: "Walking safaris, mokoro expeditions, desert traverses, gorilla treks and migration chases.",
@@ -435,6 +454,9 @@ export const PAGE_DEFAULTS = {
   },
 
   testimonials_page: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "Guest Stories",
     title: "In their words",
     subtitle: "The clearest measure of a journey is how it stays with you afterwards.",
