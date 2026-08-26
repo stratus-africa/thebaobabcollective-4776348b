@@ -94,6 +94,56 @@ function reorderGroup(draft: Record<string, any>, suffixes: string[], order: num
   return next;
 }
 
+/* Two-column editor layouts. Left = copy/settings, right = image selectors. */
+const SPLIT_CLASS: Record<string, string> = {
+  "85/15": "xl:grid-cols-[minmax(0,85fr)_minmax(0,15fr)]",
+  "60/40": "xl:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
+  "40/60": "xl:grid-cols-[minmax(0,40fr)_minmax(0,60fr)]",
+};
+
+type PageLayout = {
+  split?: keyof typeof SPLIT_CLASS;
+  /** Repeating item group turned into collapsible tabs (e.g. card_1_*, pillar_2_*). */
+  group?: { prefix: (i: number) => string; count: number };
+  /** Render the collapsible group in the right-hand column. */
+  groupsInSide?: boolean;
+  /** Arrow-shaped step markers on the collapsible headers. */
+  arrows?: boolean;
+};
+
+const PAGE_LAYOUTS: Partial<Record<PageKey, PageLayout>> = {
+  home_find_journey: {
+    split: "60/40",
+    group: { prefix: (i) => `card_${i}_`, count: 6 },
+    groupsInSide: true,
+  },
+  home_why_baobab: { group: { prefix: (i) => `pillar_${i}_`, count: 4 } },
+  home_founders: { group: { prefix: (i) => `founder_${i}_`, count: 2 } },
+  home_impact: { group: { prefix: (i) => `pillar_${i}_`, count: 3 } },
+  home_how_it_works: { group: { prefix: (i) => `step_${i}_`, count: 4 }, arrows: true },
+  home_instagram: { split: "40/60" },
+  about: { split: "60/40" },
+  about_team: { split: "60/40" },
+  adventures_index: { split: "60/40", group: { prefix: (i) => `explore_${i}_`, count: 8 } },
+};
+
+type FieldGroup = { key: string; label: string; index: number; fields: FieldDef[] };
+
+/** Build collapsible groups from the visible fields of a page. */
+function buildGroups(layout: PageLayout | undefined, fields: FieldDef[]): FieldGroup[] {
+  if (!layout?.group) return [];
+  const out: FieldGroup[] = [];
+  for (let i = 1; i <= layout.group.count; i++) {
+    const prefix = layout.group.prefix(i);
+    const groupFields = fields.filter((f) => f.name.startsWith(prefix));
+    if (!groupFields.length) continue;
+    const raw = groupFields[0].label;
+    const label = raw.split("—")[0].trim() || `Item ${i}`;
+    out.push({ key: prefix, label, index: i, fields: groupFields });
+  }
+  return out;
+}
+
 type FieldDef = {
   name: string;
   label: string;
