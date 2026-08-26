@@ -901,6 +901,14 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   const previewablePath = schema.preview.startsWith("/__") ? "/does-not-exist-preview" : schema.preview;
   const drafts = { [page]: draft };
 
+  const layout = PAGE_LAYOUTS[page] ?? {};
+  const groups = buildGroups(layout, visibleFields);
+  const groupedNames = new Set(groups.flatMap((g) => g.fields.map((f) => f.name)));
+  const ungrouped = visibleFields.filter((f) => !groupedNames.has(f.name));
+  const mainFields = ungrouped.filter((f) => f.type !== "image");
+  const sideFields = ungrouped.filter((f) => f.type === "image");
+  const sideContent = sideFields.length > 0 || (layout.groupsInSide && groups.length > 0);
+
 
   return (
     <div>
