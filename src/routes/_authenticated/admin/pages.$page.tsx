@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode, type Dispatch, type SetStateAction } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -911,7 +919,6 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   const sideFields = ungrouped.filter((f) => f.type === "image");
   const sideContent = sideFields.length > 0 || (layout.groupsInSide && groups.length > 0);
 
-
   return (
     <div>
       <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
@@ -961,12 +968,15 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
             disabled={busy || isLoading}
             className="bg-gold text-gold-foreground hover:bg-gold/90"
           >
-            {mPublish.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Rocket className="w-4 h-4 mr-1" />}
+            {mPublish.isPending ? (
+              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+            ) : (
+              <Rocket className="w-4 h-4 mr-1" />
+            )}
             Publish
           </Button>
         </div>
       </div>
-
 
       <div className={showPreview ? "grid grid-cols-1 xl:grid-cols-[minmax(0,480px)_1fr] gap-6" : ""}>
         <div>
@@ -975,7 +985,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
               <Loader2 className="w-5 h-5 animate-spin inline mr-2" /> Loading…
             </div>
           ) : REORDER_GROUPS[page] ? (
-            <div className={`grid grid-cols-1 gap-6 ${SPLIT_CLASS[layout.split ?? "85/15"]}`}>
+            <div className={`grid grid-cols-1 gap-6 ${SPLIT_CLASS[layout.split ?? "60/40"]}`}>
               <div className="bg-background border border-border rounded-lg p-6 space-y-5">
                 {visibleFields
                   .filter((f) => !/^image_\d+_/.test(f.name))
@@ -1001,7 +1011,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                       saveFn({ data: { key: page, value: next } })
                         .then(() => {
                           qc.invalidateQueries({ queryKey: ["page-content", page] });
-    qc.invalidateQueries({ queryKey: ["page-content-batch"] });
+                          qc.invalidateQueries({ queryKey: ["page-content-batch"] });
                           toast.success("Order saved");
                         })
                         .catch((e: any) => toast.error(e?.message ?? "Could not save order"));
@@ -1019,7 +1029,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                       saveFn({ data: { key: page, value: next } })
                         .then(() => {
                           qc.invalidateQueries({ queryKey: ["page-content", page] });
-    qc.invalidateQueries({ queryKey: ["page-content-batch"] });
+                          qc.invalidateQueries({ queryKey: ["page-content-batch"] });
                           toast.success("Gallery updated");
                         })
                         .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
@@ -1029,7 +1039,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
               )}
             </div>
           ) : (
-            <div className={`grid grid-cols-1 gap-6 ${sideContent ? SPLIT_CLASS[layout.split ?? "85/15"] : ""}`}>
+            <div className={`grid grid-cols-1 gap-6 ${sideContent ? SPLIT_CLASS[layout.split ?? "60/40"] : ""}`}>
               <div className="bg-background border border-border rounded-lg p-6 space-y-5">
                 {mainFields.map((f) => (
                   <FieldRow
@@ -1074,7 +1084,6 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
               )}
             </div>
           )}
-
 
           {!isLoading && page === "adventures_index" && !fieldFilter && (
             <SectionOrderEditor
@@ -1190,7 +1199,6 @@ function ReorderableGroups({
   collapsible?: boolean;
   innerSplit?: boolean;
 }) {
-
   const ids = Array.from({ length: group.count }, (_, k) => `slot-${k + 1}`);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1275,7 +1283,6 @@ function ReorderableGroups({
           </div>
         </SortableContext>
       </DndContext>
-
     </div>
   );
 }
@@ -1390,8 +1397,7 @@ function GroupAccordion({
   return (
     <div className="space-y-2 pt-2">
       {groups.map((g) => {
-        const heading =
-          String(draft[`${g.key}title`] || draft[`${g.key}name`] || "").trim() || g.label;
+        const heading = String(draft[`${g.key}title`] || draft[`${g.key}name`] || "").trim() || g.label;
         const isOpen = open.includes(g.key);
         const textFields = g.fields.filter((f) => f.type !== "image");
         const imageFields = g.fields.filter((f) => f.type === "image");
@@ -1444,7 +1450,6 @@ function GroupAccordion({
     </div>
   );
 }
-
 
 function InstagramGallerySelector({
   count,
