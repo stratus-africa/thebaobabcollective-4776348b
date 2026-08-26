@@ -704,12 +704,7 @@ function PagesHub() {
         <p className="text-sm text-foreground/65 mt-1">{cfg.description}</p>
       </header>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={handleTabChange}
-        orientation="vertical"
-        className="flex flex-col md:flex-row gap-8"
-      >
+      <Tabs value={activeTab} onValueChange={handleTabChange} orientation="horizontal" className="flex flex-col gap-6">
         {/* Mobile Dropdown Selector (hidden on desktop) */}
         <div className="md:hidden flex items-center gap-3">
           <label className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/60 shrink-0">
@@ -735,15 +730,15 @@ function PagesHub() {
           </Select>
         </div>
 
-        {/* Desktop Tabs Sidebar (hidden on mobile) */}
-        <TabsList className="hidden md:flex h-auto md:w-56 shrink-0 md:flex-col bg-transparent p-0 gap-1 justify-start">
+        {/* Horizontal section tabs */}
+        <TabsList className="flex w-full h-auto overflow-x-auto bg-transparent p-0 gap-1 justify-start border-b border-border rounded-none">
           {cfg.tabs.map((t) => {
             const Icon = t.icon;
             return (
               <TabsTrigger
                 key={t.value}
                 value={t.value}
-                className="w-full justify-start gap-2 data-[state=active]:bg-cream data-[state=active]:text-foreground data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border px-4 py-2.5"
+                className="shrink-0 justify-start gap-2 data-[state=active]:bg-cream data-[state=active]:text-foreground data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border border-b-2 data-[state=active]:border-b-foreground px-4 py-2.5 rounded-none"
               >
                 <Icon className="w-4 h-4" />
                 {t.label}
