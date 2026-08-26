@@ -145,7 +145,28 @@ export function ImageUploader({
       setError(`Image must be under ${maxSizeMB}MB. This file is ${humanSize(file.size)}.`);
       return;
     }
+    if (recommended) {
+      const size = await readImageSize(file);
+      if (size) {
+        const minWidth = Math.round(recommended.width * 0.6);
+        const minHeight = Math.round(recommended.height * 0.6);
+        if (size.width < minWidth || size.height < minHeight) {
+          setError(
+            `This image is ${size.width}×${size.height}px — too small. Use at least ${minWidth}×${minHeight}px (recommended ${recommended.width}×${recommended.height}px) to avoid a blurry, broken layout.`,
+          );
+          return;
+        }
+        const targetRatio = recommended.width / recommended.height;
+        const ratio = size.width / size.height;
+        if (Math.abs(ratio - targetRatio) / targetRatio > 0.2) {
+          toast.warning(
+            `Aspect ratio mismatch: ${size.width}×${size.height}px will be cropped. Recommended ${recommended.width}×${recommended.height}px.`,
+          );
+        }
+      }
+    }
     setLocalPreview(file);
+
     setMeta({ name: file.name, size: file.size });
     setUploading(true);
     setProgress(0);
