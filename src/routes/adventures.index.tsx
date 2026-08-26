@@ -56,32 +56,44 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/adventures/")({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({
-    meta: [
-      { title: "Kenya Safari Adventures & Tailor-Made Journeys | The Baobab Collective" },
-      {
-        name: "description",
-        content:
-          "Explore thoughtfully curated Kenya safari adventures, from wildlife and wilderness to beach escapes and cultural journeys. Designed personally by The Baobab Collective.",
-      },
-      { property: "og:title", content: "Kenya Safari Adventures — The Baobab Collective" },
-      {
-        property: "og:description",
-        content:
-          "Bespoke wild adventures across Kenya — walking safaris, private conservancies, deltas and coastal escapes.",
-      },
-      { property: "og:image", content: heroBaobab },
-      { property: "og:url", content: "/adventures" },
-    ],
-    links: [{ rel: "canonical", href: "/adventures" }],
-  }),
-  loader: async ({ context }) => {
-    return context.queryClient.ensureQueryData({
-      queryKey: ["adventures-page"],
-      queryFn: () => getAdventuresPage(),
-      staleTime: 60_000,
-    });
+  head: ({ loaderData }) => {
+    const seo = (loaderData as any)?.content ?? {};
+    const title = seo.seo_title || "Kenya Safari Adventures & Tailor-Made Journeys | The Baobab Collective";
+    const description =
+      seo.seo_description ||
+      "Explore thoughtfully curated Kenya safari adventures, from wildlife and wilderness to beach escapes and cultural journeys. Designed personally by The Baobab Collective.";
+    const image = seo.seo_og_image || heroBaobab;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:image", content: image },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
+        { property: "og:url", content: "/adventures" },
+      ],
+      links: [{ rel: "canonical", href: "/adventures" }],
+    };
   },
+  loader: async ({ context }) => {
+    const [page, content] = await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["adventures-page"],
+        queryFn: () => getAdventuresPage(),
+        staleTime: 60_000,
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["page-content", "adventures_index"],
+        queryFn: () => getPageContent({ data: { key: "adventures_index" } }),
+        staleTime: 60_000,
+      }),
+    ]);
+    return { page, content };
+  },
+
   errorComponent: ({ error }) => (
     <div className="bg-background min-h-screen">
       <Navbar />
