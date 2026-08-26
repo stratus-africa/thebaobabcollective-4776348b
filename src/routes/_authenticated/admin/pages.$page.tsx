@@ -1017,7 +1017,21 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
               )}
             </div>
           )}
+
+          {!isLoading && page === "adventures_index" && !fieldFilter && (
+            <SectionOrderEditor
+              order={adventuresSectionOrder(draft.section_order)}
+              isEnabled={(toggle) => draft[toggle] !== false}
+              onToggle={(toggle, on) => setDraft((d) => ({ ...d, [toggle]: on }))}
+              onReorder={(next) => setDraft((d) => ({ ...d, section_order: next }))}
+            />
+          )}
+
+          {!isLoading && !fieldFilter && SEO_EDITABLE_PAGES.includes(page) && (
+            <SeoFieldsCard draft={draft} setDraft={setDraft} />
+          )}
         </div>
+
         {showPreview && (
           <div className="min-h-[600px]">
             <PageLivePreview path={previewablePath} drafts={drafts} />
