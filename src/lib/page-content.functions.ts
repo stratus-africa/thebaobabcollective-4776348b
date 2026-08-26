@@ -91,6 +91,69 @@ async function readPageRow(key: string): Promise<Record<string, any> | null> {
   }
 }
 
+
+
+const GetManySchema = z.object({
+  keys: z.array(z.enum(KEYS)).min(1).max(KEYS.length),
+});
+
+async function readPageRows(keys: readonly string[]): Promise<Record<string, Record<string, any> | null>> {
+  const result: Record<string, Record<string, any> | null> = Object.fromEntries(keys.map((key) => [key, null]));
+  if (keys.length === 0) return result;
+
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("site_settings")
+      .select("key,value")
+      .in("key", keys.map((key) => `page_${key}`));
+
+    if (error) {
+      console.error("[page-content] error fetching page batch:", error);
+      return result;
+    }
+
+    for (const row of data ?? []) {
+      const key = typeof row.key === "string" ? row.key.replace(/^page_/, "") : "";
+      if (key && key in result) {
+        result[key] = (row.value as Record<string, any> | null) ?? null;
+      }
+    }
+    return result;
+  } catch {
+    const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    });
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key,value")
+      .in("key", keys.map((key) => `page_${key}`));
+
+    for (const row of data ?? []) {
+      const key = typeof row.key === "string" ? row.key.replace(/^page_/, "") : "";
+      if (key && key in result) {
+        result[key] = (row.value as Record<string, any> | null) ?? null;
+      }
+    }
+    return result;
+  }
+}
+
+/** Public read for multiple page sections in one database request. */
+export const getPageContents = createServerFn({ method: "POST" })
+  .validator((d: unknown) => GetManySchema.parse(d))
+  .handler(async ({ data }) => {
+    const rows = await readPageRows(data.keys);
+    return Object.fromEntries(
+      data.keys.map((key) => {
+        const value = rows[key];
+        if (!value) return [key, null];
+        const { [DRAFT_FIELD]: _draft, ...published } = value;
+        return [key, published as Record<string, any>];
+      }),
+    ) as Record<PageKey, Record<string, any> | null>;
+  });
+
 /** Public read — never exposes unpublished draft content. */
 export const getPageContent = createServerFn({ method: "POST" })
   .validator((d: unknown) => GetSchema.parse(d))

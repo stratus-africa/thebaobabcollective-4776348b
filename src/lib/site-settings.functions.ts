@@ -85,7 +85,14 @@ function publicClient() {
   });
 }
 
+let siteSettingsCache: { value: SiteSettings; expiresAt: number } | null = null;
+const SITE_SETTINGS_CACHE_TTL_MS = 60_000;
+
 export const getSiteSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const now = Date.now();
+  if (siteSettingsCache && siteSettingsCache.expiresAt > now) {
+    return siteSettingsCache.value;
+  }
   let data: any[] | null = null;
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -100,11 +107,14 @@ export const getSiteSettings = createServerFn({ method: "GET" }).handler(async (
     data = res.data;
   }
   const map = new Map<string, any>((data ?? []).map((r: any) => [r.key, r.value]));
-  return {
+  const value = {
     contact: (map.get("contact") ?? {}) as ContactSettings,
     branding: (map.get("branding") ?? {}) as BrandingSettings,
     currency: resolveCurrencySettings(map.get("currency") as CurrencySettings | null),
   } satisfies SiteSettings;
+
+  siteSettingsCache = { value, expiresAt: now + SITE_SETTINGS_CACHE_TTL_MS };
+  return value;
 });
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -130,5 +140,6 @@ export const saveSiteSettings = createServerFn({ method: "POST" })
     rows.push({ key: "currency", value: nextCurrency, updated_at: now });
     const { error } = await supabaseAdmin.from("site_settings").upsert(rows);
     if (error) throw new Error(error.message);
+    siteSettingsCache = null;
     return { ok: true };
   });

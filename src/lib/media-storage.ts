@@ -71,15 +71,16 @@ export async function listCmsMedia(supabase: SupabaseClient, limit = 500): Promi
 export async function downloadCmsMedia(
   supabase: SupabaseClient,
   mediaPath: string,
-): Promise<{ bytes: Buffer; contentType: string } | null> {
+): Promise<{ body: Blob; contentType: string } | null> {
   const key = resolveMediaObjectKey(mediaPath);
   if (!key) return null;
 
   const { data, error } = await supabase.storage.from(CMS_MEDIA_BUCKET).download(key);
   if (error || !data) return null;
 
-  const arrayBuffer = await data.arrayBuffer();
-  return { bytes: Buffer.from(arrayBuffer), contentType: getMediaMimeType(key) };
+  // Supabase already returns a Blob. Keep it intact so the API response does
+  // not allocate Buffer -> Uint8Array -> Blob copies for normal image requests.
+  return { body: data, contentType: getMediaMimeType(key) };
 }
 
 export async function deleteCmsMedia(
