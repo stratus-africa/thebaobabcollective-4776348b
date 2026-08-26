@@ -2,10 +2,18 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPageContent, savePageContent } from "@/lib/page-content.functions";
+import { getPageDraft, savePageContent, discardPageDraft } from "@/lib/page-content.functions";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { PageLivePreview } from "@/components/admin/PageLivePreview";
-import { PAGE_DEFAULTS, mergePageContent, type PageKey } from "@/lib/page-content.defaults";
+import {
+  PAGE_DEFAULTS,
+  mergePageContent,
+  ADVENTURES_SECTIONS,
+  adventuresSectionOrder,
+  SEO_EDITABLE_PAGES,
+  type PageKey,
+} from "@/lib/page-content.defaults";
+
 import { getDestinations } from "@/lib/cms.functions";
 import { mergeDestinationsWithDefaults } from "@/lib/destinations.data";
 import { KenyaDestinationsMap } from "@/components/site/KenyaDestinationsMap";
