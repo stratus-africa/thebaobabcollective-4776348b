@@ -22,13 +22,14 @@ export const Route = createFileRoute("/api/public/media/$")({
         if (!downloaded) {
           return new Response("Not found", { status: 404 });
         }
-        const fileBuffer = downloaded.bytes;
+        const fileBlob = downloaded.body;
 
         const settings = await getSiteSettings();
         const policy = resolveWatermarkPolicy(settings.branding, safePath);
 
         if (policy.enabled) {
           const mime = downloaded.contentType || "image/jpeg";
+          const fileBuffer = Buffer.from(await fileBlob.arrayBuffer());
           const base64 = fileBuffer.toString("base64");
           const svg = buildWatermarkSvg({
             mode: policy.mode,
@@ -51,10 +52,7 @@ export const Route = createFileRoute("/api/public/media/$")({
 
         const contentType = downloaded.contentType;
 
-        const bytes = new Uint8Array(fileBuffer);
-        const blob = new Blob([bytes], { type: contentType ?? "application/octet-stream" });
-
-        return new Response(blob, {
+        return new Response(fileBlob, {
           status: 200,
           headers: {
             "Content-Type": contentType,
