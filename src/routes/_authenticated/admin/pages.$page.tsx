@@ -782,8 +782,9 @@ function PageEditorRoute() {
 }
 
 export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; fieldFilter?: string[] }) {
-  const fetchFn = useServerFn(getPageContent);
+  const fetchFn = useServerFn(getPageDraft);
   const saveFn = useServerFn(savePageContent);
+  const discardFn = useServerFn(discardPageDraft);
   const qc = useQueryClient();
   const schema = SCHEMAS[page];
   // When a fieldFilter is provided, only render those fields.
@@ -791,29 +792,56 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   const [showPreview, setShowPreview] = useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["page-content", page],
+    queryKey: ["page-draft", page],
     queryFn: () => fetchFn({ data: { key: page } }),
   });
+
+  const hasDraft = !!data?.hasDraft;
 
   const [draft, setDraft] = useState<Record<string, any>>(() => mergePageContent(page, null));
 
   useEffect(() => {
-    setDraft(mergePageContent(page, data ?? null));
+    setDraft(mergePageContent(page, (data?.draft ?? data?.published ?? null) as Record<string, any> | null));
   }, [page, data]);
 
-  const mSave = useMutation({
-    mutationFn: () => saveFn({ data: { key: page, value: draft } }),
+  function invalidate() {
+    qc.invalidateQueries({ queryKey: ["page-draft", page] });
+    qc.invalidateQueries({ queryKey: ["page-content", page] });
+  }
+
+  const mSaveDraft = useMutation({
+    mutationFn: () => saveFn({ data: { key: page, value: draft, mode: "draft" } }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["page-content", page] });
-      toast.success("Page content saved");
+      invalidate();
+      toast.success("Draft saved — not yet visible on the public site");
     },
-    onError: (e: any) => toast.error(e.message ?? "Could not save"),
+    onError: (e: any) => toast.error(e.message ?? "Could not save draft"),
   });
+
+  const mPublish = useMutation({
+    mutationFn: () => saveFn({ data: { key: page, value: draft, mode: "publish" } }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Published — changes are live");
+    },
+    onError: (e: any) => toast.error(e.message ?? "Could not publish"),
+  });
+
+  const mDiscard = useMutation({
+    mutationFn: () => discardFn({ data: { key: page } }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Draft discarded");
+    },
+    onError: (e: any) => toast.error(e.message ?? "Could not discard draft"),
+  });
+
+  const busy = mSaveDraft.isPending || mPublish.isPending || mDiscard.isPending;
 
   function reset() {
     if (
       !confirm(
-        "Reset all fields on this page to defaults? This will overwrite the current saved version when you click Save.",
+        "Reset all fields on this page to defaults? This will overwrite the current saved version when you publish.",
       )
     )
       return;
@@ -822,6 +850,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
 
   const previewablePath = schema.preview.startsWith("/__") ? "/does-not-exist-preview" : schema.preview;
   const drafts = { [page]: draft };
+
 
   return (
     <div>
