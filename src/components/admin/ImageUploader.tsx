@@ -85,7 +85,9 @@ export function ImageUploader({
   accept = DEFAULT_ACCEPT,
   compact = false,
   hideUrlInput = false,
+  recommended,
   className,
+
 }: ImageUploaderProps) {
   const defaultUpload = useServerFn(adminUploadImage) as unknown as UploadFn;
   const deleteMedia = useServerFn(adminDeleteMedia);
