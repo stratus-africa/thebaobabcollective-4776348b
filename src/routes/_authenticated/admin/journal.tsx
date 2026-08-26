@@ -349,6 +349,8 @@ function JournalAdmin() {
           {editing && (
             <form onSubmit={save} className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-cream/20 p-4 sm:p-6">
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,85fr)_minmax(0,15fr)]">
+                  <div className="space-y-4 min-w-0">
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="md:col-span-2">
                     <Label>Title</Label>
@@ -412,16 +414,6 @@ function JournalAdmin() {
                 </div>
 
                 <div>
-                  <Label>Hero image</Label>
-                  <ImageUploader
-                    value={editing.image ?? ""}
-                    onChange={(v: string) => onChange("image", v)}
-                    uploadFn={upload as any}
-                    maxSizeMB={5}
-                  />
-                </div>
-
-                <div>
                   <Label>Excerpt</Label>
                   <Textarea
                     rows={2}
@@ -470,6 +462,19 @@ function JournalAdmin() {
                     <p className="text-xs text-foreground/50 mt-1">
                       When this time arrives, the article auto-publishes on the next view.
                     </p>
+                  </div>
+                </div>
+                  </div>
+                  <div className="min-w-0">
+                <div>
+                  <Label>Hero image</Label>
+                  <ImageUploader
+                    value={editing.image ?? ""}
+                    onChange={(v: string) => onChange("image", v)}
+                    uploadFn={upload as any}
+                    maxSizeMB={5}
+                  />
+                </div>
                   </div>
                 </div>
               </div>
