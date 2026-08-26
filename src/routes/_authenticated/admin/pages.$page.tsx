@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode, type Dispatch, type SetStateAction } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -1410,7 +1410,7 @@ function SeoFieldsCard({
   setDraft,
 }: {
   draft: Record<string, any>;
-  setDraft: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  setDraft: Dispatch<SetStateAction<Record<string, any>>>;
 }) {
   const title = String(draft.seo_title ?? "");
   const description = String(draft.seo_description ?? "");
