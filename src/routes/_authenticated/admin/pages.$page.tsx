@@ -1042,10 +1042,28 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   );
 }
 
+/** Recommended upload dimensions per image field, so uploads don't break the layout. */
+function recommendedFor(name: string): { width: number; height: number; note?: string } {
+  if (/hero|background|banner|cover/i.test(name))
+    return { width: 2400, height: 1350, note: "wide 16:9 landscape, centred subject" };
+  if (/(^|_)(image_\d+_url|avatar|portrait|member)/i.test(name))
+    return { width: 1000, height: 1250, note: "portrait 4:5" };
+  if (/og_image/i.test(name)) return { width: 1200, height: 630, note: "social share preview" };
+  return { width: 1600, height: 1067, note: "landscape 3:2 card image" };
+}
+
 function FieldRow({ field, value, onChange }: { field: FieldDef; value: any; onChange: (v: any) => void }) {
   if (field.type === "image") {
-    return <ImageUploader label={field.label} value={value ?? ""} onChange={onChange} />;
+    return (
+      <ImageUploader
+        label={field.label}
+        value={value ?? ""}
+        onChange={onChange}
+        recommended={recommendedFor(field.name)}
+      />
+    );
   }
+
   if (field.type === "boolean") {
     return (
       <div className="flex items-center justify-between gap-4 py-2">
