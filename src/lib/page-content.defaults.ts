@@ -525,3 +525,38 @@ export function mergePageContent<K extends PageKey>(
 ): PageDefaults[K] {
   return { ...PAGE_DEFAULTS[key], ...(override ?? {}) } as PageDefaults[K];
 }
+
+/** Sections of the /adventures landing page, in their default flow order. */
+export const ADVENTURES_SECTIONS = [
+  { key: "hero", label: "Hero", toggle: "show_hero" },
+  { key: "rhythm", label: "A Day in the Field", toggle: "show_rhythm" },
+  { key: "finder", label: "Adventure Finder", toggle: "show_finder" },
+  { key: "signature", label: "Signature Selection", toggle: "show_signature" },
+  { key: "explore", label: "Explore by Experience", toggle: "show_explore" },
+  { key: "spotlight", label: "Featured Journey Spotlight", toggle: "show_spotlight" },
+  { key: "catalogue", label: "Full Catalogue", toggle: "show_catalogue" },
+  { key: "combinations", label: "Journey Combinations", toggle: "show_combinations" },
+  { key: "enquiry_cta", label: "Bespoke Banner", toggle: "show_enquiry_cta" },
+  { key: "final_cta", label: "Final CTA", toggle: "show_final_cta" },
+] as const;
+
+export type AdventuresSectionKey = (typeof ADVENTURES_SECTIONS)[number]["key"];
+
+/** Normalise a saved section order: keeps known keys, drops unknown, appends missing. */
+export function adventuresSectionOrder(order: unknown): AdventuresSectionKey[] {
+  const all = ADVENTURES_SECTIONS.map((s) => s.key) as AdventuresSectionKey[];
+  const saved = Array.isArray(order) ? (order.filter((k) => all.includes(k as AdventuresSectionKey)) as AdventuresSectionKey[]) : [];
+  const seen = new Set(saved);
+  return [...saved, ...all.filter((k) => !seen.has(k))];
+}
+
+/** Landing pages that expose search / social preview fields in the admin editor. */
+export const SEO_EDITABLE_PAGES: PageKey[] = [
+  "home",
+  "about",
+  "contact",
+  "adventures_index",
+  "destinations_index",
+  "lodges_index",
+  "testimonials_page",
+];
