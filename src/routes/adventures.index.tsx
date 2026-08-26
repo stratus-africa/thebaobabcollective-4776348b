@@ -40,7 +40,7 @@ import {
   type AdventuresSignature,
 } from "@/lib/adventures.functions";
 import { getPageContent } from "@/lib/page-content.functions";
-import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { PAGE_DEFAULTS, ADVENTURES_SECTIONS, adventuresSectionOrder } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { DESTINATION_COMBINATIONS } from "@/lib/destinations.data";
 
