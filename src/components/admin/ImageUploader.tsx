@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
-import { FolderOpen, Loader2, RefreshCw, Upload, X, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { FolderOpen, Loader2, X, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -349,37 +349,5 @@ export function ImageUploader({
         }}
       />
     </div>
-  );
-}
-
-function UploadButton({
-  onPick,
-  disabled,
-  accept,
-  variant,
-}: {
-  onPick: (f: File | undefined) => void;
-  disabled?: boolean;
-  accept: string;
-  variant: "upload" | "replace";
-}) {
-  return (
-    <label
-      className={`inline-flex items-center gap-1 text-xs cursor-pointer px-3 py-1.5 rounded-md border ${
-        variant === "replace"
-          ? "bg-background/95 border-border hover:bg-cream"
-          : "bg-gold text-gold-foreground border-gold hover:bg-gold/90"
-      } ${disabled ? "opacity-50 cursor-wait" : ""}`}
-    >
-      {variant === "replace" ? <RefreshCw className="w-3.5 h-3.5" /> : <Upload className="w-3.5 h-3.5" />}
-      {variant === "replace" ? "Replace" : "Choose image"}
-      <input
-        type="file"
-        accept={accept}
-        className="hidden"
-        disabled={disabled}
-        onChange={(e) => onPick(e.target.files?.[0])}
-      />
-    </label>
   );
 }
