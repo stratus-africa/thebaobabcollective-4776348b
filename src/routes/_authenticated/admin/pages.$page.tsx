@@ -1235,30 +1235,43 @@ function ReorderableGroups({
               const fields = group.suffixes
                 .map((s) => schema.fields.find((f) => f.name === `image_${i}_${s}`))
                 .filter(Boolean) as FieldDef[];
+              const textFields = fields.filter((f) => f.type !== "image");
+              const imageFields = fields.filter((f) => f.type === "image");
+              const heading = String(draft[`image_${i}_name`] || "").trim() || group.label(i);
+              const render = (f: FieldDef) => (
+                <FieldRow
+                  key={f.name}
+                  field={f}
+                  value={draft[f.name] ?? ""}
+                  onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                />
+              );
               return (
                 <SortableItem
                   key={id}
                   id={id}
-                  label={group.label(i)}
+                  label={heading}
                   canUp={i > 1}
                   canDown={i < group.count}
                   onUp={() => move(i, -1)}
                   onDown={() => move(i, 1)}
+                  collapsible={collapsible}
                 >
-                  {fields.map((f) => (
-                    <FieldRow
-                      key={f.name}
-                      field={f}
-                      value={draft[f.name] ?? ""}
-                      onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                    />
-                  ))}
+                  {innerSplit ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]">
+                      <div className="space-y-4">{textFields.map(render)}</div>
+                      <div className="space-y-4">{imageFields.map(render)}</div>
+                    </div>
+                  ) : (
+                    fields.map(render)
+                  )}
                 </SortableItem>
               );
             })}
           </div>
         </SortableContext>
       </DndContext>
+
     </div>
   );
 }
