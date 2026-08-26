@@ -997,7 +997,26 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                       onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
                     />
                   ))}
-                {page !== "home_instagram" && (
+                {page === "home_instagram" && (
+                  <InstagramGallerySelector
+                    count={REORDER_GROUPS[page]!.count}
+                    draft={draft}
+                    onCommit={(next) => {
+                      setDraft(() => next);
+                      saveFn({ data: { key: page, value: next } })
+                        .then(() => {
+                          qc.invalidateQueries({ queryKey: ["page-content", page] });
+                          qc.invalidateQueries({ queryKey: ["page-content-batch"] });
+                          toast.success("Gallery updated");
+                        })
+                        .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
+                    }}
+                  />
+                )}
+                {page === "about_team" && (
+                  <p className="text-xs text-foreground/60">Team members are managed in the right column.</p>
+                )}
+                {page !== "home_instagram" && page !== "about_team" && (
                   <ReorderableGroups
                     page={page}
                     group={REORDER_GROUPS[page]!}
@@ -1019,24 +1038,34 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                   />
                 )}
               </div>
-              {page === "home_instagram" && (
-                <div className="bg-background border border-border rounded-lg p-6 space-y-5">
-                  <InstagramGallerySelector
-                    count={REORDER_GROUPS[page]!.count}
+              {page === "about_team" && (
+                <div className="bg-background border border-border rounded-lg p-6 space-y-5 h-full">
+                  <div>
+                    <h3 className="font-serif text-lg font-semibold">Team Members</h3>
+                    <p className="text-xs text-foreground/60 mt-1">Add, edit and reorder team members.</p>
+                  </div>
+                  <ReorderableGroups
+                    page={page}
+                    group={REORDER_GROUPS[page]!}
+                    schema={schema}
                     draft={draft}
-                    onCommit={(next) => {
-                      setDraft(() => next);
+                    setDraft={setDraft}
+                    collapsible
+                    innerSplit
+                    onReorderCommit={(next) => {
+                      // Persist immediately so the public page updates without a manual Save.
                       saveFn({ data: { key: page, value: next } })
                         .then(() => {
                           qc.invalidateQueries({ queryKey: ["page-content", page] });
                           qc.invalidateQueries({ queryKey: ["page-content-batch"] });
-                          toast.success("Gallery updated");
+                          toast.success("Order saved");
                         })
-                        .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
+                        .catch((e: any) => toast.error(e?.message ?? "Could not save order"));
                     }}
                   />
                 </div>
               )}
+              {page === "home_instagram" && <div className="hidden" aria-hidden="true" />}
             </div>
           ) : (
             <div className={`grid grid-cols-1 gap-6 ${sideContent ? SPLIT_CLASS[layout.split ?? "60/40"] : ""}`}>
