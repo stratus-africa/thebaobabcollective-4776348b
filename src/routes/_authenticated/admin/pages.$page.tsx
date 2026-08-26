@@ -1284,6 +1284,7 @@ function SortableItem({
   onUp,
   onDown,
   children,
+  collapsible = false,
 }: {
   id: string;
   label: string;
@@ -1292,32 +1293,48 @@ function SortableItem({
   onUp: () => void;
   onDown: () => void;
   children: ReactNode;
+  collapsible?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
+  const [open, setOpen] = useState(!collapsible);
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.6 : 1,
     zIndex: isDragging ? 10 : "auto",
   };
+  const panelId = `${id}-panel`;
   return (
-    <div ref={setNodeRef} style={style} className="border border-border rounded-md p-4 bg-cream/30 space-y-3">
+    <div ref={setNodeRef} style={style} className="border border-border rounded-lg p-4 bg-cream/30 space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <button
             type="button"
-            className="cursor-grab active:cursor-grabbing touch-none select-none text-foreground/60 hover:text-foreground bg-background border border-border rounded-md h-10 w-10 md:h-9 md:w-9 flex items-center justify-center"
+            className="cursor-grab active:cursor-grabbing touch-none select-none text-foreground/60 hover:text-foreground bg-background border border-border rounded-lg h-10 w-10 md:h-9 md:w-9 flex items-center justify-center shrink-0"
             aria-label={`Drag ${label} to reorder`}
             {...attributes}
             {...listeners}
           >
             <GripVertical className="w-5 h-5" />
           </button>
-          <p className="font-medium text-sm">{label}</p>
+          {collapsible ? (
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls={panelId}
+              className="flex min-w-0 items-center gap-2 text-left font-medium text-sm hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-md px-1 py-1"
+            >
+              <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+              <span className="truncate">{label}</span>
+            </button>
+          ) : (
+            <p className="font-medium text-sm truncate">{label}</p>
+          )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <Button
             type="button"
             size="icon"
@@ -1325,7 +1342,7 @@ function SortableItem({
             onClick={onUp}
             disabled={!canUp}
             aria-label="Move up"
-            className="h-10 w-10 md:h-9 md:w-9"
+            className="h-10 w-10 md:h-9 md:w-9 rounded-lg"
           >
             <ArrowUp className="w-4 h-4" />
           </Button>
@@ -1336,16 +1353,94 @@ function SortableItem({
             onClick={onDown}
             disabled={!canDown}
             aria-label="Move down"
-            className="h-10 w-10 md:h-9 md:w-9"
+            className="h-10 w-10 md:h-9 md:w-9 rounded-lg"
           >
             <ArrowDown className="w-4 h-4" />
           </Button>
         </div>
       </div>
-      {children}
+      {(!collapsible || open) && (
+        <div id={panelId} className="space-y-3">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
+
+/** Repeating item fields rendered as collapsible tabs (pillars, steps, cards, founders). */
+function GroupAccordion({
+  groups,
+  draft,
+  setDraft,
+  arrows,
+}: {
+  groups: FieldGroup[];
+  draft: Record<string, any>;
+  setDraft: Dispatch<SetStateAction<Record<string, any>>>;
+  arrows?: boolean;
+}) {
+  const [open, setOpen] = useState<string[]>([]);
+  const toggle = (key: string) => setOpen((o) => (o.includes(key) ? o.filter((k) => k !== key) : [...o, key]));
+
+  return (
+    <div className="space-y-2 pt-2">
+      {groups.map((g) => {
+        const heading =
+          String(draft[`${g.key}title`] || draft[`${g.key}name`] || "").trim() || g.label;
+        const isOpen = open.includes(g.key);
+        const textFields = g.fields.filter((f) => f.type !== "image");
+        const imageFields = g.fields.filter((f) => f.type === "image");
+        const render = (f: FieldDef) => (
+          <FieldRow
+            key={f.name}
+            field={f}
+            value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
+            onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+          />
+        );
+        return (
+          <div key={g.key} className="border border-border rounded-lg bg-cream/30 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggle(g.key)}
+              aria-expanded={isOpen}
+              className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-cream/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              {arrows ? (
+                <span
+                  className="shrink-0 grid place-items-center h-7 w-10 bg-gold/15 text-gold text-xs font-semibold"
+                  style={{ clipPath: "polygon(0 0, 72% 0, 100% 50%, 72% 100%, 0 100%, 22% 50%)" }}
+                >
+                  {g.index}
+                </span>
+              ) : (
+                <span className="shrink-0 grid place-items-center h-7 w-7 rounded-lg bg-gold/15 text-gold text-xs font-semibold">
+                  {g.index}
+                </span>
+              )}
+              <span className="flex-1 min-w-0 truncate text-sm font-medium">{heading}</span>
+              <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+            {isOpen && (
+              <div className="px-3 pb-4 pt-1">
+                {imageFields.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]">
+                    <div className="space-y-4">{textFields.map(render)}</div>
+                    <div className="space-y-4">{imageFields.map(render)}</div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">{textFields.map(render)}</div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 
 function InstagramGallerySelector({
   count,
