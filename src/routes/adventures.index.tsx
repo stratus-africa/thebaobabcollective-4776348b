@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { resolveImageSource } from "@/lib/image-resolution";
@@ -40,7 +40,7 @@ import {
   type AdventuresSignature,
 } from "@/lib/adventures.functions";
 import { getPageContent } from "@/lib/page-content.functions";
-import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { PAGE_DEFAULTS, ADVENTURES_SECTIONS, adventuresSectionOrder } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { DESTINATION_COMBINATIONS } from "@/lib/destinations.data";
 
@@ -56,32 +56,44 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/adventures/")({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({
-    meta: [
-      { title: "Kenya Safari Adventures & Tailor-Made Journeys | The Baobab Collective" },
-      {
-        name: "description",
-        content:
-          "Explore thoughtfully curated Kenya safari adventures, from wildlife and wilderness to beach escapes and cultural journeys. Designed personally by The Baobab Collective.",
-      },
-      { property: "og:title", content: "Kenya Safari Adventures — The Baobab Collective" },
-      {
-        property: "og:description",
-        content:
-          "Bespoke wild adventures across Kenya — walking safaris, private conservancies, deltas and coastal escapes.",
-      },
-      { property: "og:image", content: heroBaobab },
-      { property: "og:url", content: "/adventures" },
-    ],
-    links: [{ rel: "canonical", href: "/adventures" }],
-  }),
-  loader: async ({ context }) => {
-    return context.queryClient.ensureQueryData({
-      queryKey: ["adventures-page"],
-      queryFn: () => getAdventuresPage(),
-      staleTime: 60_000,
-    });
+  head: ({ loaderData }) => {
+    const seo = (loaderData as any)?.content ?? {};
+    const title = seo.seo_title || "Kenya Safari Adventures & Tailor-Made Journeys | The Baobab Collective";
+    const description =
+      seo.seo_description ||
+      "Explore thoughtfully curated Kenya safari adventures, from wildlife and wilderness to beach escapes and cultural journeys. Designed personally by The Baobab Collective.";
+    const image = seo.seo_og_image || heroBaobab;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:image", content: image },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
+        { property: "og:url", content: "/adventures" },
+      ],
+      links: [{ rel: "canonical", href: "/adventures" }],
+    };
   },
+  loader: async ({ context }) => {
+    const [page, content] = await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["adventures-page"],
+        queryFn: () => getAdventuresPage(),
+        staleTime: 60_000,
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["page-content", "adventures_index"],
+        queryFn: () => getPageContent({ data: { key: "adventures_index" } }),
+        staleTime: 60_000,
+      }),
+    ]);
+    return { page, content };
+  },
+
   errorComponent: ({ error }) => (
     <div className="bg-background min-h-screen">
       <Navbar />
@@ -179,36 +191,39 @@ function AdventuresPage() {
     <div className="bg-background min-h-screen">
       <Navbar />
       <main>
-        {/* 01. Hero Section */}
-        {content.show_hero !== false && <HeroSection hero={page.hero} content={content} />}
-
-        {/* 02. A Day in the Field (Timeline) */}
-        {content.show_rhythm !== false && <DayInTheFieldSection content={content} />}
-
-        {/* 03. Adventure Finder / Filter UI */}
-        {content.show_finder !== false && <AdventureFinderSection signatures={page.signatures} content={content} />}
-
-        {/* 04. Journeys We'd Take Ourselves (Featured Signatures) */}
-        {content.show_signature !== false && <SignatureSection signatures={page.signatures} content={content} />}
-
-        {/* 05. Explore by Experience */}
-        {content.show_explore !== false && <ExploreByExperienceSection content={content} />}
-
-        {/* 06. Featured Journey (Spotlight) */}
-        {content.show_spotlight !== false && <FeaturedJourneySpotlight signatures={page.signatures} />}
-
-        {/* 07. Main Adventure Catalogue */}
-        {content.show_catalogue !== false && <MainCatalogueSection signatures={page.signatures} content={content} />}
-
-        {/* 08. Journey Combinations / Related Destinations */}
-        {content.show_combinations !== false && <JourneyCombinationsSection content={content} />}
-
-        {/* 09. "Not Quite Right?" Bespoke Banner */}
-        {content.show_enquiry_cta !== false && <BespokeConversionBanner content={content} />}
-
-        {/* 10. Final CTA */}
-        {content.show_final_cta !== false && <FinalCtaSection cta={page.cta} />}
+        {adventuresSectionOrder(content.section_order).map((key) => {
+          const meta = ADVENTURES_SECTIONS.find((s) => s.key === key);
+          if (!meta || content[meta.toggle] === false) return null;
+          const node = (() => {
+            switch (key) {
+              case "hero":
+                return <HeroSection hero={page.hero} content={content} />;
+              case "rhythm":
+                return <DayInTheFieldSection content={content} />;
+              case "finder":
+                return <AdventureFinderSection signatures={page.signatures} content={content} />;
+              case "signature":
+                return <SignatureSection signatures={page.signatures} content={content} />;
+              case "explore":
+                return <ExploreByExperienceSection content={content} />;
+              case "spotlight":
+                return <FeaturedJourneySpotlight signatures={page.signatures} />;
+              case "catalogue":
+                return <MainCatalogueSection signatures={page.signatures} content={content} />;
+              case "combinations":
+                return <JourneyCombinationsSection content={content} />;
+              case "enquiry_cta":
+                return <BespokeConversionBanner content={content} />;
+              case "final_cta":
+                return <FinalCtaSection cta={page.cta} />;
+              default:
+                return null;
+            }
+          })();
+          return node ? <Fragment key={key}>{node}</Fragment> : null;
+        })}
       </main>
+
       <Footer />
     </div>
   );

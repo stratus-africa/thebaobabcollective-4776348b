@@ -1,11 +1,19 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode, type Dispatch, type SetStateAction } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPageContent, savePageContent } from "@/lib/page-content.functions";
+import { getPageDraft, savePageContent, discardPageDraft } from "@/lib/page-content.functions";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { PageLivePreview } from "@/components/admin/PageLivePreview";
-import { PAGE_DEFAULTS, mergePageContent, type PageKey } from "@/lib/page-content.defaults";
+import {
+  PAGE_DEFAULTS,
+  mergePageContent,
+  ADVENTURES_SECTIONS,
+  adventuresSectionOrder,
+  SEO_EDITABLE_PAGES,
+  type PageKey,
+} from "@/lib/page-content.defaults";
+
 import { getDestinations } from "@/lib/cms.functions";
 import { mergeDestinationsWithDefaults } from "@/lib/destinations.data";
 import { KenyaDestinationsMap } from "@/components/site/KenyaDestinationsMap";
@@ -29,7 +37,12 @@ import {
   ArrowDown,
   GripVertical,
   Images,
+  Globe,
+  Rocket,
+  Trash2,
+  FileEdit,
 } from "lucide-react";
+
 import {
   DndContext,
   closestCenter,
@@ -769,8 +782,9 @@ function PageEditorRoute() {
 }
 
 export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; fieldFilter?: string[] }) {
-  const fetchFn = useServerFn(getPageContent);
+  const fetchFn = useServerFn(getPageDraft);
   const saveFn = useServerFn(savePageContent);
+  const discardFn = useServerFn(discardPageDraft);
   const qc = useQueryClient();
   const schema = SCHEMAS[page];
   // When a fieldFilter is provided, only render those fields.
@@ -778,29 +792,56 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   const [showPreview, setShowPreview] = useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["page-content", page],
+    queryKey: ["page-draft", page],
     queryFn: () => fetchFn({ data: { key: page } }),
   });
+
+  const hasDraft = !!data?.hasDraft;
 
   const [draft, setDraft] = useState<Record<string, any>>(() => mergePageContent(page, null));
 
   useEffect(() => {
-    setDraft(mergePageContent(page, data ?? null));
+    setDraft(mergePageContent(page, (data?.draft ?? data?.published ?? null) as Record<string, any> | null));
   }, [page, data]);
 
-  const mSave = useMutation({
-    mutationFn: () => saveFn({ data: { key: page, value: draft } }),
+  function invalidate() {
+    qc.invalidateQueries({ queryKey: ["page-draft", page] });
+    qc.invalidateQueries({ queryKey: ["page-content", page] });
+  }
+
+  const mSaveDraft = useMutation({
+    mutationFn: () => saveFn({ data: { key: page, value: draft, mode: "draft" } }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["page-content", page] });
-      toast.success("Page content saved");
+      invalidate();
+      toast.success("Draft saved — not yet visible on the public site");
     },
-    onError: (e: any) => toast.error(e.message ?? "Could not save"),
+    onError: (e: any) => toast.error(e.message ?? "Could not save draft"),
   });
+
+  const mPublish = useMutation({
+    mutationFn: () => saveFn({ data: { key: page, value: draft, mode: "publish" } }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Published — changes are live");
+    },
+    onError: (e: any) => toast.error(e.message ?? "Could not publish"),
+  });
+
+  const mDiscard = useMutation({
+    mutationFn: () => discardFn({ data: { key: page } }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Draft discarded");
+    },
+    onError: (e: any) => toast.error(e.message ?? "Could not discard draft"),
+  });
+
+  const busy = mSaveDraft.isPending || mPublish.isPending || mDiscard.isPending;
 
   function reset() {
     if (
       !confirm(
-        "Reset all fields on this page to defaults? This will overwrite the current saved version when you click Save.",
+        "Reset all fields on this page to defaults? This will overwrite the current saved version when you publish.",
       )
     )
       return;
@@ -810,12 +851,18 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   const previewablePath = schema.preview.startsWith("/__") ? "/does-not-exist-preview" : schema.preview;
   const drafts = { [page]: draft };
 
+
   return (
     <div>
       <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl">{schema.title}</h1>
           <p className="text-sm text-foreground/60 mt-1">{schema.description}</p>
+          {hasDraft && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-sm bg-amber-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-amber-900">
+              <FileEdit className="w-3 h-3" /> Unpublished draft
+            </p>
+          )}
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => setShowPreview((v) => !v)}>
@@ -830,16 +877,36 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
           <Button variant="outline" onClick={reset}>
             <RefreshCw className="w-4 h-4 mr-1" /> Reset
           </Button>
+          {hasDraft && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (confirm("Discard the unpublished draft and go back to the live version?")) mDiscard.mutate();
+              }}
+              disabled={busy || isLoading}
+            >
+              <Trash2 className="w-4 h-4 mr-1" /> Discard draft
+            </Button>
+          )}
+          <Button variant="outline" onClick={() => mSaveDraft.mutate()} disabled={busy || isLoading}>
+            {mSaveDraft.isPending ? (
+              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-1" />
+            )}
+            Save draft
+          </Button>
           <Button
-            onClick={() => mSave.mutate()}
-            disabled={mSave.isPending || isLoading}
+            onClick={() => mPublish.mutate()}
+            disabled={busy || isLoading}
             className="bg-gold text-gold-foreground hover:bg-gold/90"
           >
-            {mSave.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-            Save
+            {mPublish.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Rocket className="w-4 h-4 mr-1" />}
+            Publish
           </Button>
         </div>
       </div>
+
 
       <div className={showPreview ? "grid grid-cols-1 xl:grid-cols-[minmax(0,480px)_1fr] gap-6" : ""}>
         <div>
@@ -950,7 +1017,21 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
               )}
             </div>
           )}
+
+          {!isLoading && page === "adventures_index" && !fieldFilter && (
+            <SectionOrderEditor
+              order={adventuresSectionOrder(draft.section_order)}
+              isEnabled={(toggle) => draft[toggle] !== false}
+              onToggle={(toggle, on) => setDraft((d) => ({ ...d, [toggle]: on }))}
+              onReorder={(next) => setDraft((d) => ({ ...d, section_order: next }))}
+            />
+          )}
+
+          {!isLoading && !fieldFilter && SEO_EDITABLE_PAGES.includes(page) && (
+            <SeoFieldsCard draft={draft} setDraft={setDraft} />
+          )}
         </div>
+
         {showPreview && (
           <div className="min-h-[600px]">
             <PageLivePreview path={previewablePath} drafts={drafts} />
@@ -961,10 +1042,28 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   );
 }
 
+/** Recommended upload dimensions per image field, so uploads don't break the layout. */
+function recommendedFor(name: string): { width: number; height: number; note?: string } {
+  if (/hero|background|banner|cover/i.test(name))
+    return { width: 2400, height: 1350, note: "wide 16:9 landscape, centred subject" };
+  if (/(^|_)(image_\d+_url|avatar|portrait|member)/i.test(name))
+    return { width: 1000, height: 1250, note: "portrait 4:5" };
+  if (/og_image/i.test(name)) return { width: 1200, height: 630, note: "social share preview" };
+  return { width: 1600, height: 1067, note: "landscape 3:2 card image" };
+}
+
 function FieldRow({ field, value, onChange }: { field: FieldDef; value: any; onChange: (v: any) => void }) {
   if (field.type === "image") {
-    return <ImageUploader label={field.label} value={value ?? ""} onChange={onChange} />;
+    return (
+      <ImageUploader
+        label={field.label}
+        value={value ?? ""}
+        onChange={onChange}
+        recommended={recommendedFor(field.name)}
+      />
+    );
   }
+
   if (field.type === "boolean") {
     return (
       <div className="flex items-center justify-between gap-4 py-2">
@@ -1297,5 +1396,217 @@ function AdminDestinationsMapField({
         embeddedAdminView={true}
       />
     </div>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Search & social preview fields (landing pages)
+|--------------------------------------------------------------------------
+*/
+
+function SeoFieldsCard({
+  draft,
+  setDraft,
+}: {
+  draft: Record<string, any>;
+  setDraft: Dispatch<SetStateAction<Record<string, any>>>;
+}) {
+  const title = String(draft.seo_title ?? "");
+  const description = String(draft.seo_description ?? "");
+  return (
+    <div className="bg-background border border-border p-6 space-y-5 mt-6">
+      <div className="flex items-start gap-2">
+        <Globe className="w-4 h-4 text-gold mt-0.5" />
+        <div>
+          <h3 className="font-serif text-base font-bold text-foreground">Search &amp; Social Preview</h3>
+          <p className="text-xs text-foreground/60">
+            Overrides the default title, description and share image for this page. Leave blank to use the sitewide
+            defaults.
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <Label className="mb-1.5 block">Title tag</Label>
+        <Input
+          value={title}
+          maxLength={70}
+          placeholder="Page title shown in Google results"
+          onChange={(e) => setDraft((d) => ({ ...d, seo_title: e.target.value }))}
+        />
+        <p className={`mt-1 text-[11px] ${title.length > 60 ? "text-destructive" : "text-foreground/50"}`}>
+          {title.length}/60 characters recommended
+        </p>
+      </div>
+
+      <div>
+        <Label className="mb-1.5 block">Meta description</Label>
+        <Textarea
+          value={description}
+          maxLength={200}
+          rows={3}
+          placeholder="Short summary shown under the title in search results"
+          onChange={(e) => setDraft((d) => ({ ...d, seo_description: e.target.value }))}
+        />
+        <p className={`mt-1 text-[11px] ${description.length > 160 ? "text-destructive" : "text-foreground/50"}`}>
+          {description.length}/160 characters recommended
+        </p>
+      </div>
+
+      <ImageUploader
+        label="Open Graph / social share image"
+        value={String(draft.seo_og_image ?? "")}
+        onChange={(v) => setDraft((d) => ({ ...d, seo_og_image: v }))}
+        recommended={{ width: 1200, height: 630, note: "shown when the page is shared on social apps" }}
+      />
+    </div>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Section flow ordering (Adventures landing)
+|--------------------------------------------------------------------------
+*/
+
+function SectionOrderEditor({
+  order,
+  isEnabled,
+  onToggle,
+  onReorder,
+}: {
+  order: string[];
+  isEnabled: (toggle: string) => boolean;
+  onToggle: (toggle: string, on: boolean) => void;
+  onReorder: (next: string[]) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const meta = (key: string) => ADVENTURES_SECTIONS.find((s) => s.key === key)!;
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = order.indexOf(String(active.id));
+    const to = order.indexOf(String(over.id));
+    if (from < 0 || to < 0) return;
+    onReorder(arrayMove(order, from, to));
+  }
+
+  function move(key: string, delta: number) {
+    const from = order.indexOf(key);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= order.length) return;
+    onReorder(arrayMove(order, from, to));
+  }
+
+  return (
+    <div className="bg-background border border-border p-6 mt-6">
+      <div className="mb-4">
+        <h3 className="font-serif text-base font-bold text-foreground">Section Flow</h3>
+        <p className="text-xs text-foreground/60">
+          Drag sections to change the order they appear on the public Adventures page. Disabled sections stay in the
+          list but are hidden from visitors.
+        </p>
+      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          <ul className="space-y-2">
+            {order.map((key, index) => {
+              const section = meta(key);
+              const enabled = isEnabled(section.toggle);
+              return (
+                <SortableSectionRow
+                  key={key}
+                  id={key}
+                  index={index}
+                  total={order.length}
+                  label={section.label}
+                  enabled={enabled}
+                  onToggle={(on) => onToggle(section.toggle, on)}
+                  onMove={(delta) => move(key, delta)}
+                />
+              );
+            })}
+          </ul>
+        </SortableContext>
+      </DndContext>
+    </div>
+  );
+}
+
+function SortableSectionRow({
+  id,
+  index,
+  total,
+  label,
+  enabled,
+  onToggle,
+  onMove,
+}: {
+  id: string;
+  index: number;
+  total: number;
+  label: string;
+  enabled: boolean;
+  onToggle: (on: boolean) => void;
+  onMove: (delta: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-3 border border-border bg-card px-3 py-2 ${enabled ? "" : "opacity-60"}`}
+    >
+      <button
+        type="button"
+        className="cursor-grab text-foreground/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        aria-label={`Reorder ${label}`}
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="w-4 h-4" />
+      </button>
+      <span className="w-6 text-xs tabular-nums text-foreground/40">{index + 1}</span>
+      <span className="flex-1 text-sm font-medium">{label}</span>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        aria-label={`Move ${label} up`}
+        disabled={index === 0}
+        onClick={() => onMove(-1)}
+      >
+        <ArrowUp className="w-4 h-4" />
+      </Button>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        aria-label={`Move ${label} down`}
+        disabled={index === total - 1}
+        onClick={() => onMove(1)}
+      >
+        <ArrowDown className="w-4 h-4" />
+      </Button>
+      <Switch checked={enabled} onCheckedChange={onToggle} aria-label={`Show ${label} section`} />
+    </li>
   );
 }

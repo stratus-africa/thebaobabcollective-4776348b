@@ -1,6 +1,9 @@
 // Default content for editable pages, used as fallback if no override is saved.
 export const PAGE_DEFAULTS = {
   home: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     hero_title_line1: "KENYA,",
     hero_title_line2: "CURATED PERSONALLY.",
     hero_subtitle: "Private safaris, wild landscapes and meaningful encounters — thoughtfully designed around you.",
@@ -13,6 +16,9 @@ export const PAGE_DEFAULTS = {
     hero_bg_size: "cover" as "cover" | "contain",
   },
   about: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "The feeling of Kenya",
     title_line1: "KENYA ISN'T JUST",
     title_line2: "A DESTINATION.",
@@ -229,6 +235,9 @@ export const PAGE_DEFAULTS = {
     enabled: true,
   },
   contact: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "We'd love to hear from you",
     title_line1: "Let's Plan",
     title_line2: "Your Journey",
@@ -247,6 +256,9 @@ export const PAGE_DEFAULTS = {
     facebook_handle: "/thebaobabcollective",
   },
   lodges_index: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "Where you'll stay",
     title: "Partner Lodges",
     subtitle: "Every camp and lodge we work with has been walked, slept in, and chosen for soul as much as setting.",
@@ -257,6 +269,9 @@ export const PAGE_DEFAULTS = {
   },
 
   destinations_index: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     // 1. Hero
     show_hero: true as boolean,
     eyebrow: "Destination Discovery",
@@ -339,6 +354,10 @@ export const PAGE_DEFAULTS = {
       "Not sure where to start? Tell us what you love, and we'll help you find the places and rhythm that are right for you.",
   },
   adventures_index: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
+    section_order: ["hero","rhythm","finder","signature","explore","spotlight","catalogue","combinations","enquiry_cta","final_cta"] as string[],
     eyebrow: "Signature Adventures",
     title: "Wild Africa, Deeply Lived",
     subtitle: "Walking safaris, mokoro expeditions, desert traverses, gorilla treks and migration chases.",
@@ -435,6 +454,9 @@ export const PAGE_DEFAULTS = {
   },
 
   testimonials_page: {
+    seo_title: "",
+    seo_description: "",
+    seo_og_image: "",
     eyebrow: "Guest Stories",
     title: "In their words",
     subtitle: "The clearest measure of a journey is how it stays with you afterwards.",
@@ -503,3 +525,38 @@ export function mergePageContent<K extends PageKey>(
 ): PageDefaults[K] {
   return { ...PAGE_DEFAULTS[key], ...(override ?? {}) } as PageDefaults[K];
 }
+
+/** Sections of the /adventures landing page, in their default flow order. */
+export const ADVENTURES_SECTIONS = [
+  { key: "hero", label: "Hero", toggle: "show_hero" },
+  { key: "rhythm", label: "A Day in the Field", toggle: "show_rhythm" },
+  { key: "finder", label: "Adventure Finder", toggle: "show_finder" },
+  { key: "signature", label: "Signature Selection", toggle: "show_signature" },
+  { key: "explore", label: "Explore by Experience", toggle: "show_explore" },
+  { key: "spotlight", label: "Featured Journey Spotlight", toggle: "show_spotlight" },
+  { key: "catalogue", label: "Full Catalogue", toggle: "show_catalogue" },
+  { key: "combinations", label: "Journey Combinations", toggle: "show_combinations" },
+  { key: "enquiry_cta", label: "Bespoke Banner", toggle: "show_enquiry_cta" },
+  { key: "final_cta", label: "Final CTA", toggle: "show_final_cta" },
+] as const;
+
+export type AdventuresSectionKey = (typeof ADVENTURES_SECTIONS)[number]["key"];
+
+/** Normalise a saved section order: keeps known keys, drops unknown, appends missing. */
+export function adventuresSectionOrder(order: unknown): AdventuresSectionKey[] {
+  const all = ADVENTURES_SECTIONS.map((s) => s.key) as AdventuresSectionKey[];
+  const saved = Array.isArray(order) ? (order.filter((k) => all.includes(k as AdventuresSectionKey)) as AdventuresSectionKey[]) : [];
+  const seen = new Set(saved);
+  return [...saved, ...all.filter((k) => !seen.has(k))];
+}
+
+/** Landing pages that expose search / social preview fields in the admin editor. */
+export const SEO_EDITABLE_PAGES: PageKey[] = [
+  "home",
+  "about",
+  "contact",
+  "adventures_index",
+  "destinations_index",
+  "lodges_index",
+  "testimonials_page",
+];
