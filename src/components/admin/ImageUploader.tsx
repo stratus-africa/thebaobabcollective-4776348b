@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
-import { FolderOpen, Loader2, RefreshCw, Upload, X, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { FolderOpen, Loader2, X, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -231,13 +231,23 @@ export function ImageUploader({
 
 
       {displayed ? (
-        <div className="border-2 border-border rounded-md overflow-hidden bg-background">
-          <div className={`relative bg-cream ${compact ? "" : ""}`}>
+        <div className="border-2 border-border rounded-lg overflow-hidden bg-background">
+          <div className="relative bg-cream group">
             <img
               src={displayed}
               alt="Preview"
               className={`w-full ${compact ? "max-h-40" : "max-h-80"} object-contain mx-auto`}
             />
+            <button
+              type="button"
+              onClick={handleRemove}
+              disabled={uploading}
+              aria-label="Remove image"
+              title="Remove image"
+              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-background/90 border border-border text-foreground/70 shadow-sm flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground hover:border-destructive disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              <X className="w-4 h-4" />
+            </button>
             {uploading && (
               <div className="absolute inset-x-0 bottom-0 bg-background/90 backdrop-blur p-3 space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] text-foreground/70">
@@ -250,30 +260,9 @@ export function ImageUploader({
               </div>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-2 p-3 border-t border-border bg-cream/40">
-            <UploadButton onPick={handleFile} disabled={uploading} accept={accept} variant="replace" />
-            <button
-              type="button"
-              onClick={() => setPickerOpen(true)}
-              disabled={uploading}
-              className="inline-flex items-center gap-1 text-xs px-3 py-2 border border-border rounded-md hover:bg-cream disabled:opacity-50"
-            >
-              <FolderOpen className="w-3.5 h-3.5" /> Library
-            </button>
-            <button
-              type="button"
-              onClick={handleRemove}
-              disabled={uploading}
-              className="inline-flex items-center gap-1 text-xs px-3 py-2 border border-border rounded-md hover:bg-destructive hover:text-destructive-foreground hover:border-destructive disabled:opacity-50"
-            >
-              <X className="w-3.5 h-3.5" /> Remove
-            </button>
-            <span className="ml-auto text-[11px] text-foreground/50 truncate max-w-[60%]" title={meta?.name ?? value}>
-              {meta ? `${meta.name} · ${humanSize(meta.size)}` : value.split("/").pop()}
-            </span>
-          </div>
         </div>
       ) : (
+
         <label
           onDragOver={(e) => {
             e.preventDefault();
@@ -360,37 +349,5 @@ export function ImageUploader({
         }}
       />
     </div>
-  );
-}
-
-function UploadButton({
-  onPick,
-  disabled,
-  accept,
-  variant,
-}: {
-  onPick: (f: File | undefined) => void;
-  disabled?: boolean;
-  accept: string;
-  variant: "upload" | "replace";
-}) {
-  return (
-    <label
-      className={`inline-flex items-center gap-1 text-xs cursor-pointer px-3 py-1.5 rounded-md border ${
-        variant === "replace"
-          ? "bg-background/95 border-border hover:bg-cream"
-          : "bg-gold text-gold-foreground border-gold hover:bg-gold/90"
-      } ${disabled ? "opacity-50 cursor-wait" : ""}`}
-    >
-      {variant === "replace" ? <RefreshCw className="w-3.5 h-3.5" /> : <Upload className="w-3.5 h-3.5" />}
-      {variant === "replace" ? "Replace" : "Choose image"}
-      <input
-        type="file"
-        accept={accept}
-        className="hidden"
-        disabled={disabled}
-        onChange={(e) => onPick(e.target.files?.[0])}
-      />
-    </label>
   );
 }

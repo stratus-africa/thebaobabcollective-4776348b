@@ -184,6 +184,19 @@ const SECTIONS: Record<string, HubSection> = {
         ],
       },
       {
+        value: "destinations",
+        label: "Destinations",
+        icon: MapPin,
+        editors: [
+          {
+            pageKey: "home_destinations",
+            label: "Home — Destinations Strip",
+            icon: Map,
+            description: "Destinations strip on the homepage.",
+          },
+        ],
+      },
+      {
         value: "instagram",
         label: "Instagram",
         icon: Globe,
@@ -242,19 +255,6 @@ const SECTIONS: Record<string, HubSection> = {
         icon: UsersIcon,
         editors: [
           { pageKey: "about_team", label: "About — Team", icon: UsersIcon, description: "Team members section." },
-        ],
-      },
-      {
-        value: "destinations",
-        label: "Destinations",
-        icon: MapPin,
-        editors: [
-          {
-            pageKey: "home_destinations",
-            label: "Home — Destinations Strip",
-            icon: Map,
-            description: "Destinations strip on the homepage.",
-          },
         ],
       },
     ],

@@ -41,6 +41,7 @@ import {
   Rocket,
   Trash2,
   FileEdit,
+  ChevronDown,
 } from "lucide-react";
 
 import {
@@ -92,6 +93,56 @@ function reorderGroup(draft: Record<string, any>, suffixes: string[], order: num
     }
   }
   return next;
+}
+
+/* Two-column editor layouts. Left = copy/settings, right = image selectors. */
+const SPLIT_CLASS: Record<string, string> = {
+  "85/15": "xl:grid-cols-[minmax(0,85fr)_minmax(0,15fr)]",
+  "60/40": "xl:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
+  "40/60": "xl:grid-cols-[minmax(0,40fr)_minmax(0,60fr)]",
+};
+
+type PageLayout = {
+  split?: keyof typeof SPLIT_CLASS;
+  /** Repeating item group turned into collapsible tabs (e.g. card_1_*, pillar_2_*). */
+  group?: { prefix: (i: number) => string; count: number };
+  /** Render the collapsible group in the right-hand column. */
+  groupsInSide?: boolean;
+  /** Arrow-shaped step markers on the collapsible headers. */
+  arrows?: boolean;
+};
+
+const PAGE_LAYOUTS: Partial<Record<PageKey, PageLayout>> = {
+  home_find_journey: {
+    split: "60/40",
+    group: { prefix: (i) => `card_${i}_`, count: 6 },
+    groupsInSide: true,
+  },
+  home_why_baobab: { group: { prefix: (i) => `pillar_${i}_`, count: 4 } },
+  home_founders: { group: { prefix: (i) => `founder_${i}_`, count: 2 } },
+  home_impact: { group: { prefix: (i) => `pillar_${i}_`, count: 3 } },
+  home_how_it_works: { group: { prefix: (i) => `step_${i}_`, count: 4 }, arrows: true },
+  home_instagram: { split: "40/60" },
+  about: { split: "60/40" },
+  about_team: { split: "60/40" },
+  adventures_index: { split: "60/40", group: { prefix: (i) => `explore_${i}_`, count: 8 } },
+};
+
+type FieldGroup = { key: string; label: string; index: number; fields: FieldDef[] };
+
+/** Build collapsible groups from the visible fields of a page. */
+function buildGroups(layout: PageLayout | undefined, fields: FieldDef[]): FieldGroup[] {
+  if (!layout?.group) return [];
+  const out: FieldGroup[] = [];
+  for (let i = 1; i <= layout.group.count; i++) {
+    const prefix = layout.group.prefix(i);
+    const groupFields = fields.filter((f) => f.name.startsWith(prefix));
+    if (!groupFields.length) continue;
+    const raw = groupFields[0].label;
+    const label = raw.split("—")[0].trim() || `Item ${i}`;
+    out.push({ key: prefix, label, index: i, fields: groupFields });
+  }
+  return out;
 }
 
 type FieldDef = {
@@ -851,6 +902,14 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   const previewablePath = schema.preview.startsWith("/__") ? "/does-not-exist-preview" : schema.preview;
   const drafts = { [page]: draft };
 
+  const layout = PAGE_LAYOUTS[page] ?? {};
+  const groups = buildGroups(layout, visibleFields);
+  const groupedNames = new Set(groups.flatMap((g) => g.fields.map((f) => f.name)));
+  const ungrouped = visibleFields.filter((f) => !groupedNames.has(f.name));
+  const mainFields = ungrouped.filter((f) => f.type !== "image");
+  const sideFields = ungrouped.filter((f) => f.type === "image");
+  const sideContent = sideFields.length > 0 || (layout.groupsInSide && groups.length > 0);
+
 
   return (
     <div>
@@ -911,14 +970,65 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
       <div className={showPreview ? "grid grid-cols-1 xl:grid-cols-[minmax(0,480px)_1fr] gap-6" : ""}>
         <div>
           {isLoading ? (
-            <div className="bg-background border border-border p-10 text-center text-foreground/60">
+            <div className="bg-background border border-border rounded-lg p-10 text-center text-foreground/60">
               <Loader2 className="w-5 h-5 animate-spin inline mr-2" /> Loading…
             </div>
           ) : REORDER_GROUPS[page] ? (
-            <div className="bg-background border border-border p-6 space-y-5">
-              {schema.fields
-                .filter((f) => !/^image_\d+_/.test(f.name))
-                .map((f) => (
+            <div className={`grid grid-cols-1 gap-6 ${SPLIT_CLASS[layout.split ?? "85/15"]}`}>
+              <div className="bg-background border border-border rounded-lg p-6 space-y-5">
+                {visibleFields
+                  .filter((f) => !/^image_\d+_/.test(f.name))
+                  .map((f) => (
+                    <FieldRow
+                      key={f.name}
+                      field={f}
+                      value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
+                      onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                    />
+                  ))}
+                {page !== "home_instagram" && (
+                  <ReorderableGroups
+                    page={page}
+                    group={REORDER_GROUPS[page]!}
+                    schema={schema}
+                    draft={draft}
+                    setDraft={setDraft}
+                    collapsible
+                    innerSplit
+                    onReorderCommit={(next) => {
+                      // Persist immediately so the public page updates without a manual Save.
+                      saveFn({ data: { key: page, value: next } })
+                        .then(() => {
+                          qc.invalidateQueries({ queryKey: ["page-content", page] });
+                          toast.success("Order saved");
+                        })
+                        .catch((e: any) => toast.error(e?.message ?? "Could not save order"));
+                    }}
+                  />
+                )}
+              </div>
+              {page === "home_instagram" && (
+                <div className="bg-background border border-border rounded-lg p-6 space-y-5">
+                  <InstagramGallerySelector
+                    count={REORDER_GROUPS[page]!.count}
+                    draft={draft}
+                    onCommit={(next) => {
+                      setDraft(() => next);
+                      saveFn({ data: { key: page, value: next } })
+                        .then(() => {
+                          qc.invalidateQueries({ queryKey: ["page-content", page] });
+                          toast.success("Gallery updated");
+                        })
+                        .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={`grid grid-cols-1 gap-6 ${sideContent ? SPLIT_CLASS[layout.split ?? "85/15"] : ""}`}>
+              <div className="bg-background border border-border rounded-lg p-6 space-y-5">
+                {mainFields.map((f) => (
                   <FieldRow
                     key={f.name}
                     field={f}
@@ -926,97 +1036,42 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                     onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
                   />
                 ))}
-              {page === "home_instagram" && (
-                <InstagramGallerySelector
-                  count={REORDER_GROUPS[page]!.count}
-                  draft={draft}
-                  onCommit={(next) => {
-                    setDraft(() => next);
-                    saveFn({ data: { key: page, value: next } })
-                      .then(() => {
-                        qc.invalidateQueries({ queryKey: ["page-content", page] });
-                        toast.success("Gallery updated");
-                      })
-                      .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
-                  }}
-                />
-              )}
-              {page !== "home_instagram" && (
-                <ReorderableGroups
-                  page={page}
-                  group={REORDER_GROUPS[page]!}
-                  schema={schema}
-                  draft={draft}
-                  setDraft={setDraft}
-                  onReorderCommit={(next) => {
-                    // Persist immediately so the public page updates without a manual Save.
-                    saveFn({ data: { key: page, value: next } })
-                      .then(() => {
-                        qc.invalidateQueries({ queryKey: ["page-content", page] });
-                        toast.success("Order saved");
-                      })
-                      .catch((e: any) => toast.error(e?.message ?? "Could not save order"));
-                  }}
-                />
-              )}
-            </div>
-          ) : page === "about" ? (
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-              <div className="xl:col-span-9">
-                <div className="bg-background border border-border p-6 space-y-5">
-                  {visibleFields
-                    .filter((f) => f.type !== "image")
-                    .map((f) => (
-                      <FieldRow
-                        key={f.name}
-                        field={f}
-                        value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
-                        onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                      />
-                    ))}
-                </div>
-              </div>
-              <div className="xl:col-span-3">
-                <div className="bg-background border border-border p-6 space-y-5 h-full">
-                  {visibleFields
-                    .filter((f) => f.type === "image")
-                    .map((f) => (
-                      <FieldRow
-                        key={f.name}
-                        field={f}
-                        value={draft[f.name] ?? ""}
-                        onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                      />
-                    ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-background border border-border p-6 space-y-5">
-              {visibleFields.map((f) => (
-                <FieldRow
-                  key={f.name}
-                  field={f}
-                  value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
-                  onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                />
-              ))}
-              {page === "destinations_index" && visibleFields.some((f) => f.name === "show_map") && (
-                <div className="pt-4 border-t border-border">
-                  <div className="mb-3">
-                    <h3 className="font-serif text-base font-bold text-foreground">Interactive Pin Placement Map</h3>
-                    <p className="text-xs text-foreground/60">
-                      Drag and drop pins directly on the map below to position each destination visually across Kenya.
-                    </p>
+                {!layout.groupsInSide && groups.length > 0 && (
+                  <GroupAccordion groups={groups} draft={draft} setDraft={setDraft} arrows={!!layout.arrows} />
+                )}
+                {page === "destinations_index" && visibleFields.some((f) => f.name === "show_map") && (
+                  <div className="pt-4 border-t border-border">
+                    <div className="mb-3">
+                      <h3 className="font-serif text-base font-bold text-foreground">Interactive Pin Placement Map</h3>
+                      <p className="text-xs text-foreground/60">
+                        Drag and drop pins directly on the map below to position each destination visually across Kenya.
+                      </p>
+                    </div>
+                    <AdminDestinationsMapField
+                      customPositions={draft.map_positions}
+                      onUpdatePositions={(next) => setDraft((d) => ({ ...d, map_positions: next }))}
+                    />
                   </div>
-                  <AdminDestinationsMapField
-                    customPositions={draft.map_positions}
-                    onUpdatePositions={(next) => setDraft((d) => ({ ...d, map_positions: next }))}
-                  />
+                )}
+              </div>
+              {sideContent && (
+                <div className="bg-background border border-border rounded-lg p-6 space-y-5 h-full">
+                  {sideFields.map((f) => (
+                    <FieldRow
+                      key={f.name}
+                      field={f}
+                      value={draft[f.name] ?? ""}
+                      onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                    />
+                  ))}
+                  {layout.groupsInSide && groups.length > 0 && (
+                    <GroupAccordion groups={groups} draft={draft} setDraft={setDraft} arrows={!!layout.arrows} />
+                  )}
                 </div>
               )}
             </div>
           )}
+
 
           {!isLoading && page === "adventures_index" && !fieldFilter && (
             <SectionOrderEditor
@@ -1120,6 +1175,8 @@ function ReorderableGroups({
   draft,
   setDraft,
   onReorderCommit,
+  collapsible = false,
+  innerSplit = false,
 }: {
   page: PageKey;
   group: { count: number; suffixes: string[]; label: (i: number) => string };
@@ -1127,7 +1184,10 @@ function ReorderableGroups({
   draft: Record<string, any>;
   setDraft: (fn: (d: Record<string, any>) => Record<string, any>) => void;
   onReorderCommit: (next: Record<string, any>) => void;
+  collapsible?: boolean;
+  innerSplit?: boolean;
 }) {
+
   const ids = Array.from({ length: group.count }, (_, k) => `slot-${k + 1}`);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1176,30 +1236,43 @@ function ReorderableGroups({
               const fields = group.suffixes
                 .map((s) => schema.fields.find((f) => f.name === `image_${i}_${s}`))
                 .filter(Boolean) as FieldDef[];
+              const textFields = fields.filter((f) => f.type !== "image");
+              const imageFields = fields.filter((f) => f.type === "image");
+              const heading = String(draft[`image_${i}_name`] || "").trim() || group.label(i);
+              const render = (f: FieldDef) => (
+                <FieldRow
+                  key={f.name}
+                  field={f}
+                  value={draft[f.name] ?? ""}
+                  onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                />
+              );
               return (
                 <SortableItem
                   key={id}
                   id={id}
-                  label={group.label(i)}
+                  label={heading}
                   canUp={i > 1}
                   canDown={i < group.count}
                   onUp={() => move(i, -1)}
                   onDown={() => move(i, 1)}
+                  collapsible={collapsible}
                 >
-                  {fields.map((f) => (
-                    <FieldRow
-                      key={f.name}
-                      field={f}
-                      value={draft[f.name] ?? ""}
-                      onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                    />
-                  ))}
+                  {innerSplit ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]">
+                      <div className="space-y-4">{textFields.map(render)}</div>
+                      <div className="space-y-4">{imageFields.map(render)}</div>
+                    </div>
+                  ) : (
+                    fields.map(render)
+                  )}
                 </SortableItem>
               );
             })}
           </div>
         </SortableContext>
       </DndContext>
+
     </div>
   );
 }
@@ -1212,6 +1285,7 @@ function SortableItem({
   onUp,
   onDown,
   children,
+  collapsible = false,
 }: {
   id: string;
   label: string;
@@ -1220,32 +1294,48 @@ function SortableItem({
   onUp: () => void;
   onDown: () => void;
   children: ReactNode;
+  collapsible?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
+  const [open, setOpen] = useState(!collapsible);
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.6 : 1,
     zIndex: isDragging ? 10 : "auto",
   };
+  const panelId = `${id}-panel`;
   return (
-    <div ref={setNodeRef} style={style} className="border border-border rounded-md p-4 bg-cream/30 space-y-3">
+    <div ref={setNodeRef} style={style} className="border border-border rounded-lg p-4 bg-cream/30 space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <button
             type="button"
-            className="cursor-grab active:cursor-grabbing touch-none select-none text-foreground/60 hover:text-foreground bg-background border border-border rounded-md h-10 w-10 md:h-9 md:w-9 flex items-center justify-center"
+            className="cursor-grab active:cursor-grabbing touch-none select-none text-foreground/60 hover:text-foreground bg-background border border-border rounded-lg h-10 w-10 md:h-9 md:w-9 flex items-center justify-center shrink-0"
             aria-label={`Drag ${label} to reorder`}
             {...attributes}
             {...listeners}
           >
             <GripVertical className="w-5 h-5" />
           </button>
-          <p className="font-medium text-sm">{label}</p>
+          {collapsible ? (
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls={panelId}
+              className="flex min-w-0 items-center gap-2 text-left font-medium text-sm hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-md px-1 py-1"
+            >
+              <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+              <span className="truncate">{label}</span>
+            </button>
+          ) : (
+            <p className="font-medium text-sm truncate">{label}</p>
+          )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <Button
             type="button"
             size="icon"
@@ -1253,7 +1343,7 @@ function SortableItem({
             onClick={onUp}
             disabled={!canUp}
             aria-label="Move up"
-            className="h-10 w-10 md:h-9 md:w-9"
+            className="h-10 w-10 md:h-9 md:w-9 rounded-lg"
           >
             <ArrowUp className="w-4 h-4" />
           </Button>
@@ -1264,16 +1354,94 @@ function SortableItem({
             onClick={onDown}
             disabled={!canDown}
             aria-label="Move down"
-            className="h-10 w-10 md:h-9 md:w-9"
+            className="h-10 w-10 md:h-9 md:w-9 rounded-lg"
           >
             <ArrowDown className="w-4 h-4" />
           </Button>
         </div>
       </div>
-      {children}
+      {(!collapsible || open) && (
+        <div id={panelId} className="space-y-3">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
+
+/** Repeating item fields rendered as collapsible tabs (pillars, steps, cards, founders). */
+function GroupAccordion({
+  groups,
+  draft,
+  setDraft,
+  arrows,
+}: {
+  groups: FieldGroup[];
+  draft: Record<string, any>;
+  setDraft: Dispatch<SetStateAction<Record<string, any>>>;
+  arrows?: boolean;
+}) {
+  const [open, setOpen] = useState<string[]>([]);
+  const toggle = (key: string) => setOpen((o) => (o.includes(key) ? o.filter((k) => k !== key) : [...o, key]));
+
+  return (
+    <div className="space-y-2 pt-2">
+      {groups.map((g) => {
+        const heading =
+          String(draft[`${g.key}title`] || draft[`${g.key}name`] || "").trim() || g.label;
+        const isOpen = open.includes(g.key);
+        const textFields = g.fields.filter((f) => f.type !== "image");
+        const imageFields = g.fields.filter((f) => f.type === "image");
+        const render = (f: FieldDef) => (
+          <FieldRow
+            key={f.name}
+            field={f}
+            value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
+            onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+          />
+        );
+        return (
+          <div key={g.key} className="border border-border rounded-lg bg-cream/30 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggle(g.key)}
+              aria-expanded={isOpen}
+              className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-cream/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              {arrows ? (
+                <span
+                  className="shrink-0 grid place-items-center h-7 w-10 bg-gold/15 text-gold text-xs font-semibold"
+                  style={{ clipPath: "polygon(0 0, 72% 0, 100% 50%, 72% 100%, 0 100%, 22% 50%)" }}
+                >
+                  {g.index}
+                </span>
+              ) : (
+                <span className="shrink-0 grid place-items-center h-7 w-7 rounded-lg bg-gold/15 text-gold text-xs font-semibold">
+                  {g.index}
+                </span>
+              )}
+              <span className="flex-1 min-w-0 truncate text-sm font-medium">{heading}</span>
+              <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+            {isOpen && (
+              <div className="px-3 pb-4 pt-1">
+                {imageFields.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]">
+                    <div className="space-y-4">{textFields.map(render)}</div>
+                    <div className="space-y-4">{imageFields.map(render)}</div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">{textFields.map(render)}</div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 
 function InstagramGallerySelector({
   count,
@@ -1317,7 +1485,7 @@ function InstagramGallerySelector({
   }
 
   return (
-    <div className="border border-border rounded-md bg-cream/30 p-4 space-y-3">
+    <div className="border border-border rounded-lg bg-cream/30 p-4 space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <p className="text-[11px] tracking-[0.2em] uppercase text-foreground/60">Instagram Gallery</p>
@@ -1415,7 +1583,7 @@ function SeoFieldsCard({
   const title = String(draft.seo_title ?? "");
   const description = String(draft.seo_description ?? "");
   return (
-    <div className="bg-background border border-border p-6 space-y-5 mt-6">
+    <div className="bg-background border border-border rounded-lg p-6 space-y-5 mt-6">
       <div className="flex items-start gap-2">
         <Globe className="w-4 h-4 text-gold mt-0.5" />
         <div>
@@ -1506,7 +1674,7 @@ function SectionOrderEditor({
   }
 
   return (
-    <div className="bg-background border border-border p-6 mt-6">
+    <div className="bg-background border border-border rounded-lg p-6 mt-6">
       <div className="mb-4">
         <h3 className="font-serif text-base font-bold text-foreground">Section Flow</h3>
         <p className="text-xs text-foreground/60">
@@ -1573,7 +1741,7 @@ function SortableSectionRow({
     <li
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 border border-border bg-card px-3 py-2 ${enabled ? "" : "opacity-60"}`}
+      className={`flex items-center gap-3 border border-border rounded-lg bg-card px-3 py-2 ${enabled ? "" : "opacity-60"}`}
     >
       <button
         type="button"
