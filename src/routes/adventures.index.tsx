@@ -191,36 +191,39 @@ function AdventuresPage() {
     <div className="bg-background min-h-screen">
       <Navbar />
       <main>
-        {/* 01. Hero Section */}
-        {content.show_hero !== false && <HeroSection hero={page.hero} content={content} />}
-
-        {/* 02. A Day in the Field (Timeline) */}
-        {content.show_rhythm !== false && <DayInTheFieldSection content={content} />}
-
-        {/* 03. Adventure Finder / Filter UI */}
-        {content.show_finder !== false && <AdventureFinderSection signatures={page.signatures} content={content} />}
-
-        {/* 04. Journeys We'd Take Ourselves (Featured Signatures) */}
-        {content.show_signature !== false && <SignatureSection signatures={page.signatures} content={content} />}
-
-        {/* 05. Explore by Experience */}
-        {content.show_explore !== false && <ExploreByExperienceSection content={content} />}
-
-        {/* 06. Featured Journey (Spotlight) */}
-        {content.show_spotlight !== false && <FeaturedJourneySpotlight signatures={page.signatures} />}
-
-        {/* 07. Main Adventure Catalogue */}
-        {content.show_catalogue !== false && <MainCatalogueSection signatures={page.signatures} content={content} />}
-
-        {/* 08. Journey Combinations / Related Destinations */}
-        {content.show_combinations !== false && <JourneyCombinationsSection content={content} />}
-
-        {/* 09. "Not Quite Right?" Bespoke Banner */}
-        {content.show_enquiry_cta !== false && <BespokeConversionBanner content={content} />}
-
-        {/* 10. Final CTA */}
-        {content.show_final_cta !== false && <FinalCtaSection cta={page.cta} />}
+        {adventuresSectionOrder(content.section_order).map((key) => {
+          const meta = ADVENTURES_SECTIONS.find((s) => s.key === key);
+          if (!meta || content[meta.toggle] === false) return null;
+          const node = (() => {
+            switch (key) {
+              case "hero":
+                return <HeroSection hero={page.hero} content={content} />;
+              case "rhythm":
+                return <DayInTheFieldSection content={content} />;
+              case "finder":
+                return <AdventureFinderSection signatures={page.signatures} content={content} />;
+              case "signature":
+                return <SignatureSection signatures={page.signatures} content={content} />;
+              case "explore":
+                return <ExploreByExperienceSection content={content} />;
+              case "spotlight":
+                return <FeaturedJourneySpotlight signatures={page.signatures} />;
+              case "catalogue":
+                return <MainCatalogueSection signatures={page.signatures} content={content} />;
+              case "combinations":
+                return <JourneyCombinationsSection content={content} />;
+              case "enquiry_cta":
+                return <BespokeConversionBanner content={content} />;
+              case "final_cta":
+                return <FinalCtaSection cta={page.cta} />;
+              default:
+                return null;
+            }
+          })();
+          return node ? <Fragment key={key}>{node}</Fragment> : null;
+        })}
       </main>
+
       <Footer />
     </div>
   );
