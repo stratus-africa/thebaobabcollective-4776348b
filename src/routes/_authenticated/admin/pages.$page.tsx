@@ -911,14 +911,65 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
       <div className={showPreview ? "grid grid-cols-1 xl:grid-cols-[minmax(0,480px)_1fr] gap-6" : ""}>
         <div>
           {isLoading ? (
-            <div className="bg-background border border-border p-10 text-center text-foreground/60">
+            <div className="bg-background border border-border rounded-lg p-10 text-center text-foreground/60">
               <Loader2 className="w-5 h-5 animate-spin inline mr-2" /> Loading…
             </div>
           ) : REORDER_GROUPS[page] ? (
-            <div className="bg-background border border-border p-6 space-y-5">
-              {schema.fields
-                .filter((f) => !/^image_\d+_/.test(f.name))
-                .map((f) => (
+            <div className={`grid grid-cols-1 gap-6 ${SPLIT_CLASS[layout.split ?? "85/15"]}`}>
+              <div className="bg-background border border-border rounded-lg p-6 space-y-5">
+                {visibleFields
+                  .filter((f) => !/^image_\d+_/.test(f.name))
+                  .map((f) => (
+                    <FieldRow
+                      key={f.name}
+                      field={f}
+                      value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
+                      onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                    />
+                  ))}
+                {page !== "home_instagram" && (
+                  <ReorderableGroups
+                    page={page}
+                    group={REORDER_GROUPS[page]!}
+                    schema={schema}
+                    draft={draft}
+                    setDraft={setDraft}
+                    collapsible
+                    innerSplit
+                    onReorderCommit={(next) => {
+                      // Persist immediately so the public page updates without a manual Save.
+                      saveFn({ data: { key: page, value: next } })
+                        .then(() => {
+                          qc.invalidateQueries({ queryKey: ["page-content", page] });
+                          toast.success("Order saved");
+                        })
+                        .catch((e: any) => toast.error(e?.message ?? "Could not save order"));
+                    }}
+                  />
+                )}
+              </div>
+              {page === "home_instagram" && (
+                <div className="bg-background border border-border rounded-lg p-6 space-y-5">
+                  <InstagramGallerySelector
+                    count={REORDER_GROUPS[page]!.count}
+                    draft={draft}
+                    onCommit={(next) => {
+                      setDraft(() => next);
+                      saveFn({ data: { key: page, value: next } })
+                        .then(() => {
+                          qc.invalidateQueries({ queryKey: ["page-content", page] });
+                          toast.success("Gallery updated");
+                        })
+                        .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={`grid grid-cols-1 gap-6 ${sideContent ? SPLIT_CLASS[layout.split ?? "85/15"] : ""}`}>
+              <div className="bg-background border border-border rounded-lg p-6 space-y-5">
+                {mainFields.map((f) => (
                   <FieldRow
                     key={f.name}
                     field={f}
@@ -926,97 +977,42 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                     onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
                   />
                 ))}
-              {page === "home_instagram" && (
-                <InstagramGallerySelector
-                  count={REORDER_GROUPS[page]!.count}
-                  draft={draft}
-                  onCommit={(next) => {
-                    setDraft(() => next);
-                    saveFn({ data: { key: page, value: next } })
-                      .then(() => {
-                        qc.invalidateQueries({ queryKey: ["page-content", page] });
-                        toast.success("Gallery updated");
-                      })
-                      .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
-                  }}
-                />
-              )}
-              {page !== "home_instagram" && (
-                <ReorderableGroups
-                  page={page}
-                  group={REORDER_GROUPS[page]!}
-                  schema={schema}
-                  draft={draft}
-                  setDraft={setDraft}
-                  onReorderCommit={(next) => {
-                    // Persist immediately so the public page updates without a manual Save.
-                    saveFn({ data: { key: page, value: next } })
-                      .then(() => {
-                        qc.invalidateQueries({ queryKey: ["page-content", page] });
-                        toast.success("Order saved");
-                      })
-                      .catch((e: any) => toast.error(e?.message ?? "Could not save order"));
-                  }}
-                />
-              )}
-            </div>
-          ) : page === "about" ? (
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-              <div className="xl:col-span-9">
-                <div className="bg-background border border-border p-6 space-y-5">
-                  {visibleFields
-                    .filter((f) => f.type !== "image")
-                    .map((f) => (
-                      <FieldRow
-                        key={f.name}
-                        field={f}
-                        value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
-                        onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                      />
-                    ))}
-                </div>
-              </div>
-              <div className="xl:col-span-3">
-                <div className="bg-background border border-border p-6 space-y-5 h-full">
-                  {visibleFields
-                    .filter((f) => f.type === "image")
-                    .map((f) => (
-                      <FieldRow
-                        key={f.name}
-                        field={f}
-                        value={draft[f.name] ?? ""}
-                        onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                      />
-                    ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-background border border-border p-6 space-y-5">
-              {visibleFields.map((f) => (
-                <FieldRow
-                  key={f.name}
-                  field={f}
-                  value={draft[f.name] ?? (f.type === "boolean" ? false : "")}
-                  onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
-                />
-              ))}
-              {page === "destinations_index" && visibleFields.some((f) => f.name === "show_map") && (
-                <div className="pt-4 border-t border-border">
-                  <div className="mb-3">
-                    <h3 className="font-serif text-base font-bold text-foreground">Interactive Pin Placement Map</h3>
-                    <p className="text-xs text-foreground/60">
-                      Drag and drop pins directly on the map below to position each destination visually across Kenya.
-                    </p>
+                {!layout.groupsInSide && groups.length > 0 && (
+                  <GroupAccordion groups={groups} draft={draft} setDraft={setDraft} arrows={!!layout.arrows} />
+                )}
+                {page === "destinations_index" && visibleFields.some((f) => f.name === "show_map") && (
+                  <div className="pt-4 border-t border-border">
+                    <div className="mb-3">
+                      <h3 className="font-serif text-base font-bold text-foreground">Interactive Pin Placement Map</h3>
+                      <p className="text-xs text-foreground/60">
+                        Drag and drop pins directly on the map below to position each destination visually across Kenya.
+                      </p>
+                    </div>
+                    <AdminDestinationsMapField
+                      customPositions={draft.map_positions}
+                      onUpdatePositions={(next) => setDraft((d) => ({ ...d, map_positions: next }))}
+                    />
                   </div>
-                  <AdminDestinationsMapField
-                    customPositions={draft.map_positions}
-                    onUpdatePositions={(next) => setDraft((d) => ({ ...d, map_positions: next }))}
-                  />
+                )}
+              </div>
+              {sideContent && (
+                <div className="bg-background border border-border rounded-lg p-6 space-y-5 h-full">
+                  {sideFields.map((f) => (
+                    <FieldRow
+                      key={f.name}
+                      field={f}
+                      value={draft[f.name] ?? ""}
+                      onChange={(v) => setDraft((d) => ({ ...d, [f.name]: v }))}
+                    />
+                  ))}
+                  {layout.groupsInSide && groups.length > 0 && (
+                    <GroupAccordion groups={groups} draft={draft} setDraft={setDraft} arrows={!!layout.arrows} />
+                  )}
                 </div>
               )}
             </div>
           )}
+
 
           {!isLoading && page === "adventures_index" && !fieldFilter && (
             <SectionOrderEditor
