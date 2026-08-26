@@ -41,6 +41,7 @@ import {
   Rocket,
   Trash2,
   FileEdit,
+  ChevronDown,
 } from "lucide-react";
 
 import {
@@ -1484,7 +1485,7 @@ function InstagramGallerySelector({
   }
 
   return (
-    <div className="border border-border rounded-md bg-cream/30 p-4 space-y-3">
+    <div className="border border-border rounded-lg bg-cream/30 p-4 space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <p className="text-[11px] tracking-[0.2em] uppercase text-foreground/60">Instagram Gallery</p>
@@ -1582,7 +1583,7 @@ function SeoFieldsCard({
   const title = String(draft.seo_title ?? "");
   const description = String(draft.seo_description ?? "");
   return (
-    <div className="bg-background border border-border p-6 space-y-5 mt-6">
+    <div className="bg-background border border-border rounded-lg p-6 space-y-5 mt-6">
       <div className="flex items-start gap-2">
         <Globe className="w-4 h-4 text-gold mt-0.5" />
         <div>
@@ -1673,7 +1674,7 @@ function SectionOrderEditor({
   }
 
   return (
-    <div className="bg-background border border-border p-6 mt-6">
+    <div className="bg-background border border-border rounded-lg p-6 mt-6">
       <div className="mb-4">
         <h3 className="font-serif text-base font-bold text-foreground">Section Flow</h3>
         <p className="text-xs text-foreground/60">
@@ -1740,7 +1741,7 @@ function SortableSectionRow({
     <li
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 border border-border bg-card px-3 py-2 ${enabled ? "" : "opacity-60"}`}
+      className={`flex items-center gap-3 border border-border rounded-lg bg-card px-3 py-2 ${enabled ? "" : "opacity-60"}`}
     >
       <button
         type="button"
