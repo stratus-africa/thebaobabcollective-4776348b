@@ -26,11 +26,30 @@ export type ImageUploaderProps = {
   compact?: boolean;
   /** Hide the "or paste a URL" fallback input */
   hideUrlInput?: boolean;
+  /** Recommended pixel dimensions — shown as a hint and validated on upload. */
+  recommended?: { width: number; height: number; note?: string };
   className?: string;
 };
 
 const DEFAULT_ACCEPT = "image/png,image/jpeg,image/webp,image/gif,image/avif";
 const ACCEPT_REGEX = /^image\/(png|jpe?g|webp|gif|avif|svg\+xml)$/i;
+
+/** Read intrinsic pixel dimensions of a selected image (null for SVG / unreadable files). */
+async function readImageSize(file: File): Promise<{ width: number; height: number } | null> {
+  if (file.type === "image/svg+xml") return null;
+  const url = URL.createObjectURL(file);
+  try {
+    return await new Promise((resolve) => {
+      const img = new window.Image();
+      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+
 
 function humanSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
