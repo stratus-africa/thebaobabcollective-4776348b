@@ -33,7 +33,7 @@ import {
   type DestinationMetadata,
   KENYA_REGIONS,
 } from "@/lib/destinations.data";
-import kenyaMapAsset from "@/assets/kenya-destinations-map.jpg";
+import kenyaMapAsset from "@/assets/kenya-destinations-map.webp";
 import { MediaLibraryPicker } from "@/components/admin/MediaLibraryPicker";
 import { PageLivePreview } from "@/components/admin/PageLivePreview";
 import { Button } from "@/components/ui/button";
@@ -577,7 +577,7 @@ export function AdminDestinationsMapHub() {
               >
                 {/* Map Image Layer */}
                 <img
-                  src={mapImage || "/maps/kenya-destinations-map.gif"}
+                  src={mapImage || "/maps/kenya-destinations-map.webp"}
                   alt="Kenya Destinations Map"
                   className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
                   onError={(e) => {

@@ -19,7 +19,7 @@ import {
   Move,
   RotateCcw,
 } from "lucide-react";
-import kenyaMapAsset from "@/assets/kenya-destinations-map.jpg";
+import kenyaMapAsset from "@/assets/kenya-destinations-map.webp";
 import { adminGet, adminUpsert, adminDelete } from "@/lib/admin.functions";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -917,7 +917,7 @@ function DestinationPinLocator({
       >
         {/* Map Background */}
         <img
-          src="/maps/kenya-destinations-map.gif"
+          src="/maps/kenya-destinations-map.webp"
           alt="Kenya Pin Locator Map"
           className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-90"
           onError={(e) => {

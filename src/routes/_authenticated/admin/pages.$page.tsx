@@ -858,6 +858,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
   function invalidate() {
     qc.invalidateQueries({ queryKey: ["page-draft", page] });
     qc.invalidateQueries({ queryKey: ["page-content", page] });
+    qc.invalidateQueries({ queryKey: ["page-content-batch"] });
   }
 
   const mSaveDraft = useMutation({
@@ -1000,6 +1001,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                       saveFn({ data: { key: page, value: next } })
                         .then(() => {
                           qc.invalidateQueries({ queryKey: ["page-content", page] });
+    qc.invalidateQueries({ queryKey: ["page-content-batch"] });
                           toast.success("Order saved");
                         })
                         .catch((e: any) => toast.error(e?.message ?? "Could not save order"));
@@ -1017,6 +1019,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
                       saveFn({ data: { key: page, value: next } })
                         .then(() => {
                           qc.invalidateQueries({ queryKey: ["page-content", page] });
+    qc.invalidateQueries({ queryKey: ["page-content-batch"] });
                           toast.success("Gallery updated");
                         })
                         .catch((e: any) => toast.error(e?.message ?? "Could not save gallery"));
