@@ -1398,3 +1398,215 @@ function AdminDestinationsMapField({
     </div>
   );
 }
+
+/*
+|--------------------------------------------------------------------------
+| Search & social preview fields (landing pages)
+|--------------------------------------------------------------------------
+*/
+
+function SeoFieldsCard({
+  draft,
+  setDraft,
+}: {
+  draft: Record<string, any>;
+  setDraft: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+}) {
+  const title = String(draft.seo_title ?? "");
+  const description = String(draft.seo_description ?? "");
+  return (
+    <div className="bg-background border border-border p-6 space-y-5 mt-6">
+      <div className="flex items-start gap-2">
+        <Globe className="w-4 h-4 text-gold mt-0.5" />
+        <div>
+          <h3 className="font-serif text-base font-bold text-foreground">Search &amp; Social Preview</h3>
+          <p className="text-xs text-foreground/60">
+            Overrides the default title, description and share image for this page. Leave blank to use the sitewide
+            defaults.
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <Label className="mb-1.5 block">Title tag</Label>
+        <Input
+          value={title}
+          maxLength={70}
+          placeholder="Page title shown in Google results"
+          onChange={(e) => setDraft((d) => ({ ...d, seo_title: e.target.value }))}
+        />
+        <p className={`mt-1 text-[11px] ${title.length > 60 ? "text-destructive" : "text-foreground/50"}`}>
+          {title.length}/60 characters recommended
+        </p>
+      </div>
+
+      <div>
+        <Label className="mb-1.5 block">Meta description</Label>
+        <Textarea
+          value={description}
+          maxLength={200}
+          rows={3}
+          placeholder="Short summary shown under the title in search results"
+          onChange={(e) => setDraft((d) => ({ ...d, seo_description: e.target.value }))}
+        />
+        <p className={`mt-1 text-[11px] ${description.length > 160 ? "text-destructive" : "text-foreground/50"}`}>
+          {description.length}/160 characters recommended
+        </p>
+      </div>
+
+      <ImageUploader
+        label="Open Graph / social share image"
+        value={String(draft.seo_og_image ?? "")}
+        onChange={(v) => setDraft((d) => ({ ...d, seo_og_image: v }))}
+        recommended={{ width: 1200, height: 630, note: "shown when the page is shared on social apps" }}
+      />
+    </div>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Section flow ordering (Adventures landing)
+|--------------------------------------------------------------------------
+*/
+
+function SectionOrderEditor({
+  order,
+  isEnabled,
+  onToggle,
+  onReorder,
+}: {
+  order: string[];
+  isEnabled: (toggle: string) => boolean;
+  onToggle: (toggle: string, on: boolean) => void;
+  onReorder: (next: string[]) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const meta = (key: string) => ADVENTURES_SECTIONS.find((s) => s.key === key)!;
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = order.indexOf(String(active.id));
+    const to = order.indexOf(String(over.id));
+    if (from < 0 || to < 0) return;
+    onReorder(arrayMove(order, from, to));
+  }
+
+  function move(key: string, delta: number) {
+    const from = order.indexOf(key);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= order.length) return;
+    onReorder(arrayMove(order, from, to));
+  }
+
+  return (
+    <div className="bg-background border border-border p-6 mt-6">
+      <div className="mb-4">
+        <h3 className="font-serif text-base font-bold text-foreground">Section Flow</h3>
+        <p className="text-xs text-foreground/60">
+          Drag sections to change the order they appear on the public Adventures page. Disabled sections stay in the
+          list but are hidden from visitors.
+        </p>
+      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          <ul className="space-y-2">
+            {order.map((key, index) => {
+              const section = meta(key);
+              const enabled = isEnabled(section.toggle);
+              return (
+                <SortableSectionRow
+                  key={key}
+                  id={key}
+                  index={index}
+                  total={order.length}
+                  label={section.label}
+                  enabled={enabled}
+                  onToggle={(on) => onToggle(section.toggle, on)}
+                  onMove={(delta) => move(key, delta)}
+                />
+              );
+            })}
+          </ul>
+        </SortableContext>
+      </DndContext>
+    </div>
+  );
+}
+
+function SortableSectionRow({
+  id,
+  index,
+  total,
+  label,
+  enabled,
+  onToggle,
+  onMove,
+}: {
+  id: string;
+  index: number;
+  total: number;
+  label: string;
+  enabled: boolean;
+  onToggle: (on: boolean) => void;
+  onMove: (delta: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-3 border border-border bg-card px-3 py-2 ${enabled ? "" : "opacity-60"}`}
+    >
+      <button
+        type="button"
+        className="cursor-grab text-foreground/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        aria-label={`Reorder ${label}`}
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="w-4 h-4" />
+      </button>
+      <span className="w-6 text-xs tabular-nums text-foreground/40">{index + 1}</span>
+      <span className="flex-1 text-sm font-medium">{label}</span>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        aria-label={`Move ${label} up`}
+        disabled={index === 0}
+        onClick={() => onMove(-1)}
+      >
+        <ArrowUp className="w-4 h-4" />
+      </Button>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        aria-label={`Move ${label} down`}
+        disabled={index === total - 1}
+        onClick={() => onMove(1)}
+      >
+        <ArrowDown className="w-4 h-4" />
+      </Button>
+      <Switch checked={enabled} onCheckedChange={onToggle} aria-label={`Show ${label} section`} />
+    </li>
+  );
+}
