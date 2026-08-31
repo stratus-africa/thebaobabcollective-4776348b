@@ -28,6 +28,16 @@ export const Route = createFileRoute("/api/public/media/$")({
           return new Response("Invalid path", { status: 400 });
         }
 
+        // Object keys are timestamp-prefixed and never reused, so the path is a
+        // valid strong validator. Short-circuit revalidation without any I/O.
+        const etag = `"${encodeURIComponent(safePath)}"`;
+        if (request.headers.get("if-none-match") === etag) {
+          return new Response(null, {
+            status: 304,
+            headers: { ETag: etag, "Cache-Control": "public, max-age=31536000, immutable" },
+          });
+        }
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const downloaded = await downloadCmsMedia(supabaseAdmin, safePath);
         if (!downloaded) {
