@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { ArrowRight, MapPin, Sparkles, Compass } from "lucide-react";
@@ -6,7 +6,9 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { DestinationCard } from "@/components/site/DestinationCard";
-import { KenyaDestinationsMap } from "@/components/site/KenyaDestinationsMap";
+const KenyaDestinationsMap = lazy(() =>
+  import("@/components/site/KenyaDestinationsMap").then((m) => ({ default: m.KenyaDestinationsMap })),
+);
 import { DestinationFinderSection } from "@/components/site/DestinationFinderSection";
 import { DestinationCombinations } from "@/components/site/DestinationCombinations";
 import { DestinationJourneysSection } from "@/components/site/DestinationJourneysSection";
@@ -280,12 +282,14 @@ function DestinationsDiscoveryPage() {
 
         {/* ── 3. KENYA DESTINATION MAP ────────────────────────────────────── */}
         {content.show_map !== false && (
+          <Suspense fallback={<div className="min-h-[480px]" aria-hidden="true" />}>
           <KenyaDestinationsMap
             destinations={allDestinations}
             mapImage={content.map_image}
             customPositions={content.map_positions}
             onSavePositions={handleSaveMapPositions}
           />
+          </Suspense>
         )}
 
         {/* ── 4. EDITORIAL GROUPINGS GRID ────────────────────────────────── */}

@@ -64,10 +64,12 @@ export function HomeAdventures({ content }: { content?: Content | null } = {}) {
                   params={{ slug: adv.slug }}
                   className="relative aspect-[16/10] overflow-hidden block"
                 >
-                  <img
+                  <SiteImage
                     src={adv.image}
+                    sourceReady={!isLoading}
                     alt={adv.imageAlt || adv.name}
                     loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-70" />

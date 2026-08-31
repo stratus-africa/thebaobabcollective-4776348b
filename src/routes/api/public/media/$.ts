@@ -3,10 +3,21 @@ import { downloadCmsMedia } from "@/lib/media-storage";
 import { getSiteSettings } from "@/lib/site-settings.functions";
 import { buildWatermarkSvg, resolveWatermarkPolicy } from "@/lib/watermark";
 
+// Site settings rarely change but are needed on every media request to decide
+// watermarking. Cache them briefly to avoid a DB round trip per image.
+let settingsCache: { value: Awaited<ReturnType<typeof getSiteSettings>>; expires: number } | null = null;
+async function getCachedSiteSettings() {
+  const now = Date.now();
+  if (settingsCache && settingsCache.expires > now) return settingsCache.value;
+  const value = await getSiteSettings();
+  settingsCache = { value, expires: now + 60_000 };
+  return value;
+}
+
 export const Route = createFileRoute("/api/public/media/$")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, request }) => {
         const rawPath = (params as any)._splat as string | undefined;
         if (!rawPath) {
           return new Response("Not found", { status: 404 });
@@ -17,6 +28,16 @@ export const Route = createFileRoute("/api/public/media/$")({
           return new Response("Invalid path", { status: 400 });
         }
 
+        // Object keys are timestamp-prefixed and never reused, so the path is a
+        // valid strong validator. Short-circuit revalidation without any I/O.
+        const etag = `"${encodeURIComponent(safePath)}"`;
+        if (request.headers.get("if-none-match") === etag) {
+          return new Response(null, {
+            status: 304,
+            headers: { ETag: etag, "Cache-Control": "public, max-age=31536000, immutable" },
+          });
+        }
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const downloaded = await downloadCmsMedia(supabaseAdmin, safePath);
         if (!downloaded) {
@@ -24,7 +45,7 @@ export const Route = createFileRoute("/api/public/media/$")({
         }
         const fileBlob = downloaded.body;
 
-        const settings = await getSiteSettings();
+        const settings = await getCachedSiteSettings();
         const policy = resolveWatermarkPolicy(settings.branding, safePath);
 
         if (policy.enabled) {
@@ -46,6 +67,7 @@ export const Route = createFileRoute("/api/public/media/$")({
             headers: {
               "Content-Type": "image/svg+xml",
               "Cache-Control": "public, max-age=31536000, immutable",
+              ETag: etag,
             },
           });
         }
@@ -57,6 +79,7 @@ export const Route = createFileRoute("/api/public/media/$")({
           headers: {
             "Content-Type": contentType,
             "Cache-Control": "public, max-age=31536000, immutable",
+            ETag: etag,
           },
         });
       },

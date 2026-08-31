@@ -917,15 +917,9 @@ function DestinationPinLocator({
       >
         {/* Map Background */}
         <img
-          src="/maps/kenya-destinations-map.webp"
+          src={kenyaMapAsset}
           alt="Kenya Pin Locator Map"
           className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-90"
-          onError={(e) => {
-            const target = e.currentTarget as HTMLImageElement;
-            if (target.src !== kenyaMapAsset) {
-              target.src = kenyaMapAsset;
-            }
-          }}
         />
 
         <div className="absolute inset-0 pointer-events-none bg-black/10" />
