@@ -45,7 +45,7 @@ export const Route = createFileRoute("/api/public/media/$")({
         }
         const fileBlob = downloaded.body;
 
-        const settings = await getSiteSettings();
+        const settings = await getCachedSiteSettings();
         const policy = resolveWatermarkPolicy(settings.branding, safePath);
 
         if (policy.enabled) {
@@ -67,6 +67,7 @@ export const Route = createFileRoute("/api/public/media/$")({
             headers: {
               "Content-Type": "image/svg+xml",
               "Cache-Control": "public, max-age=31536000, immutable",
+              ETag: etag,
             },
           });
         }
@@ -78,6 +79,7 @@ export const Route = createFileRoute("/api/public/media/$")({
           headers: {
             "Content-Type": contentType,
             "Cache-Control": "public, max-age=31536000, immutable",
+            ETag: etag,
           },
         });
       },
