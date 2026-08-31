@@ -3,10 +3,21 @@ import { downloadCmsMedia } from "@/lib/media-storage";
 import { getSiteSettings } from "@/lib/site-settings.functions";
 import { buildWatermarkSvg, resolveWatermarkPolicy } from "@/lib/watermark";
 
+// Site settings rarely change but are needed on every media request to decide
+// watermarking. Cache them briefly to avoid a DB round trip per image.
+let settingsCache: { value: Awaited<ReturnType<typeof getSiteSettings>>; expires: number } | null = null;
+async function getCachedSiteSettings() {
+  const now = Date.now();
+  if (settingsCache && settingsCache.expires > now) return settingsCache.value;
+  const value = await getSiteSettings();
+  settingsCache = { value, expires: now + 60_000 };
+  return value;
+}
+
 export const Route = createFileRoute("/api/public/media/$")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, request }) => {
         const rawPath = (params as any)._splat as string | undefined;
         if (!rawPath) {
           return new Response("Not found", { status: 404 });
