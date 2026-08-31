@@ -6,7 +6,9 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { DestinationCard } from "@/components/site/DestinationCard";
-import { KenyaDestinationsMap } from "@/components/site/KenyaDestinationsMap";
+const KenyaDestinationsMap = lazy(() =>
+  import("@/components/site/KenyaDestinationsMap").then((m) => ({ default: m.KenyaDestinationsMap })),
+);
 import { DestinationFinderSection } from "@/components/site/DestinationFinderSection";
 import { DestinationCombinations } from "@/components/site/DestinationCombinations";
 import { DestinationJourneysSection } from "@/components/site/DestinationJourneysSection";
