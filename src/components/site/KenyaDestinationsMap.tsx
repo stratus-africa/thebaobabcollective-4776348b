@@ -439,15 +439,9 @@ export function KenyaDestinationsMap({
             >
               {/* Reference Map Image Layer */}
               <img
-                src={mapImage || "/maps/kenya-destinations-map.webp"}
+                src={mapImage || kenyaMapAsset}
                 alt="Map of Kenya showing major destinations and geographic regions"
                 className="absolute inset-0 w-full h-full object-cover select-none rounded-xl pointer-events-none"
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  if (target.src !== kenyaMapAsset) {
-                    target.src = kenyaMapAsset;
-                  }
-                }}
               />
 
               {/* Overlay Glass Vignette */}

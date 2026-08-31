@@ -577,15 +577,9 @@ export function AdminDestinationsMapHub() {
               >
                 {/* Map Image Layer */}
                 <img
-                  src={mapImage || "/maps/kenya-destinations-map.webp"}
+                  src={mapImage || kenyaMapAsset}
                   alt="Kenya Destinations Map"
                   className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    if (target.src !== kenyaMapAsset) {
-                      target.src = kenyaMapAsset;
-                    }
-                  }}
                 />
 
                 {/* Glass Vignette & Subtle Alignment Grid */}
