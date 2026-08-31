@@ -191,6 +191,16 @@ function RootComponent() {
           console.warn("Visit recording error:", err);
         }
       })();
+
+      const idle = (window as any).requestIdleCallback as
+        | ((cb: () => void, opts?: { timeout: number }) => number)
+        | undefined;
+      const handle = idle ? idle(run, { timeout: 4000 }) : window.setTimeout(run, 2000);
+      return () => {
+        const cancel = (window as any).cancelIdleCallback as ((id: number) => void) | undefined;
+        if (idle && cancel) cancel(handle);
+        else window.clearTimeout(handle);
+      };
     }
   }, [record]);
 
