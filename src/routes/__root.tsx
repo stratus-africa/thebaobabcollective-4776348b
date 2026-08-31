@@ -163,8 +163,9 @@ function RootComponent() {
 
   useEffect(() => {
     // Record one visit per browser session for public visitors only.
+    // Deferred to idle time so analytics never competes with first render.
     if (typeof sessionStorage !== "undefined" && !sessionStorage.getItem("visitor_recorded")) {
-      void (async () => {
+      const run = () => void (async () => {
         try {
           const { data } = await supabase.auth.getUser();
           const user = data.user;
