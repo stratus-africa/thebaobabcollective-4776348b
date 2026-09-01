@@ -236,7 +236,7 @@ function StatusBadge({ value }: { value: string | null }) {
   const v = value ?? "new";
   const styles: Record<string, string> = {
     new: "bg-gold/15 text-gold border-gold/40",
-    handled: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+    handled: "bg-success/10 text-success border-success/30",
     spam: "bg-destructive/10 text-destructive border-destructive/30",
   };
   return (
@@ -255,8 +255,8 @@ function EmailBadge({ value }: { value: { status: string; error_message: string 
     );
   }
   const map: Record<string, { label: string; cls: string; icon: any }> = {
-    pending: { label: "queued", cls: "border-amber-500/40 text-amber-700 bg-amber-500/10", icon: Loader2 },
-    sent: { label: "sent", cls: "border-emerald-500/40 text-emerald-700 bg-emerald-500/10", icon: CheckCircle2 },
+    pending: { label: "queued", cls: "border-warning/40 text-warning bg-warning/10", icon: Loader2 },
+    sent: { label: "sent", cls: "border-success/40 text-success bg-success/10", icon: CheckCircle2 },
     dlq: { label: "failed", cls: "border-destructive/40 text-destructive bg-destructive/10", icon: AlertCircle },
     failed: { label: "failed", cls: "border-destructive/40 text-destructive bg-destructive/10", icon: AlertCircle },
     suppressed: { label: "suppressed", cls: "border-border text-foreground/60", icon: Ban },
