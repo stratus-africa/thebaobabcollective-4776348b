@@ -70,7 +70,7 @@
 }
 
 :root {
-  --radius: 0.25rem;
+  --radius: 0.5rem;
   /* Cream ivory */
   --background: oklch(0.97 0.015 85);
   --foreground: oklch(0.25 0.02 60);
