@@ -434,7 +434,7 @@ export function AdminDestinationsMapHub() {
             {hasUnsavedChanges && (
               <Badge
                 variant="outline"
-                className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[10px] font-semibold uppercase tracking-wider"
+                className="bg-warning/10 text-warning border-warning/30 text-[10px] font-semibold uppercase tracking-wider"
               >
                 Unsaved Changes
               </Badge>
