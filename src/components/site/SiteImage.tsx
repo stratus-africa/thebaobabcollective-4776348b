@@ -31,6 +31,8 @@ export function SiteImage({
   src,
   fallback,
   sourceReady = true,
+  responsiveWidths = WIDTH_LADDER,
+  srcSet,
   onError,
   ...props
 }: SiteImageProps) {
