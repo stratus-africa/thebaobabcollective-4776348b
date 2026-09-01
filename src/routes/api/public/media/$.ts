@@ -50,6 +50,37 @@ export const Route = createFileRoute("/api/public/media/$")({
           });
         }
 
+        const settingsEarly = await getCachedSiteSettings();
+        const policyEarly = resolveWatermarkPolicy(settingsEarly.branding, safePath);
+
+        // Fast path: no watermark + a requested width → let Storage render a
+        // resized (and, when the browser accepts it, WebP) derivative instead of
+        // shipping the full-size original.
+        if (!policyEarly.enabled && width) {
+          const objectKey = resolveMediaObjectKey(safePath);
+          const baseUrl = process.env["VITE_SUPABASE_URL"] || import.meta.env["VITE_SUPABASE_URL"];
+          if (objectKey && baseUrl) {
+            const renderUrl = `${baseUrl}/storage/v1/render/image/public/${CMS_MEDIA_BUCKET}/${encodeURIComponent(
+              objectKey,
+            )}?width=${width}&quality=78&resize=contain`;
+            const rendered = await fetch(renderUrl, {
+              headers: { accept: request.headers.get("accept") ?? "image/webp,image/*" },
+            });
+            if (rendered.ok) {
+              return new Response(rendered.body, {
+                status: 200,
+                headers: {
+                  "Content-Type": rendered.headers.get("content-type") ?? "image/webp",
+                  "Cache-Control": "public, max-age=31536000, immutable",
+                  Vary: "Accept",
+                  ETag: etag,
+                },
+              });
+            }
+          }
+          // fall through to the untransformed original on any failure
+        }
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const downloaded = await downloadCmsMedia(supabaseAdmin, safePath);
         if (!downloaded) {
