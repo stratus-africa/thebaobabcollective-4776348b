@@ -53,46 +53,58 @@ export const Route = createFileRoute("/api/public/media/$")({
         const settingsEarly = await getCachedSiteSettings();
         const policyEarly = resolveWatermarkPolicy(settingsEarly.branding, safePath);
 
-        // Fast path: no watermark + a requested width → let Storage render a
-        // resized (and, when the browser accepts it, WebP) derivative instead of
-        // shipping the full-size original.
-        if (!policyEarly.enabled && width) {
+        // Ask Supabase Storage for a resized (and, when the browser accepts it,
+        // WebP) derivative instead of shipping the full-size original.
+        const renderDerivative = async () => {
+          if (!width) return null;
           const objectKey = resolveMediaObjectKey(safePath);
           const baseUrl = process.env["VITE_SUPABASE_URL"] || import.meta.env["VITE_SUPABASE_URL"];
-          if (objectKey && baseUrl) {
-            const renderUrl = `${baseUrl}/storage/v1/render/image/public/${CMS_MEDIA_BUCKET}/${encodeURIComponent(
-              objectKey,
-            )}?width=${width}&quality=78&resize=contain`;
-            const rendered = await fetch(renderUrl, {
-              headers: { accept: request.headers.get("accept") ?? "image/webp,image/*" },
+          if (!objectKey || !baseUrl) return null;
+          const renderUrl = `${baseUrl}/storage/v1/render/image/public/${CMS_MEDIA_BUCKET}/${encodeURIComponent(
+            objectKey,
+          )}?width=${width}&quality=78&resize=contain`;
+          const rendered = await fetch(renderUrl, {
+            headers: { accept: request.headers.get("accept") ?? "image/webp,image/*" },
+          });
+          if (!rendered.ok) return null;
+          return rendered;
+        };
+
+        // Fast path: no watermark → stream the derivative straight through.
+        if (!policyEarly.enabled) {
+          const rendered = await renderDerivative();
+          if (rendered) {
+            return new Response(rendered.body, {
+              status: 200,
+              headers: {
+                "Content-Type": rendered.headers.get("content-type") ?? "image/webp",
+                "Cache-Control": "public, max-age=31536000, immutable",
+                Vary: "Accept",
+                ETag: etag,
+              },
             });
-            if (rendered.ok) {
-              return new Response(rendered.body, {
-                status: 200,
-                headers: {
-                  "Content-Type": rendered.headers.get("content-type") ?? "image/webp",
-                  "Cache-Control": "public, max-age=31536000, immutable",
-                  Vary: "Accept",
-                  ETag: etag,
-                },
-              });
-            }
           }
           // fall through to the untransformed original on any failure
         }
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const downloaded = await downloadCmsMedia(supabaseAdmin, safePath);
-        if (!downloaded) {
-          return new Response("Not found", { status: 404 });
-        }
-        const fileBlob = downloaded.body;
-
         const policy = policyEarly;
 
         if (policy.enabled) {
-          const mime = downloaded.contentType || "image/jpeg";
-          const fileBuffer = Buffer.from(await fileBlob.arrayBuffer());
+          // Watermarking inlines the image into an SVG, so embed the resized
+          // derivative when one is available to keep the payload small.
+          const rendered = await renderDerivative();
+          let mime: string;
+          let fileBuffer: Buffer;
+          if (rendered) {
+            mime = rendered.headers.get("content-type") ?? "image/webp";
+            fileBuffer = Buffer.from(await rendered.arrayBuffer());
+          } else {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const original = await downloadCmsMedia(supabaseAdmin, safePath);
+            if (!original) return new Response("Not found", { status: 404 });
+            mime = original.contentType || "image/jpeg";
+            fileBuffer = Buffer.from(await original.body.arrayBuffer());
+          }
           const base64 = fileBuffer.toString("base64");
           const svg = buildWatermarkSvg({
             mode: policy.mode,
