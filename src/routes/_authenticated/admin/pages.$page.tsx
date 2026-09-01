@@ -926,7 +926,7 @@ export function PageEditor({ pageKey: page, fieldFilter }: { pageKey: PageKey; f
           <h1 className="font-serif text-2xl md:text-3xl">{schema.title}</h1>
           <p className="text-sm text-foreground/60 mt-1">{schema.description}</p>
           {hasDraft && (
-            <p className="mt-2 inline-flex items-center gap-1.5 rounded-sm bg-amber-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-amber-900">
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-sm bg-warning/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-warning">
               <FileEdit className="w-3 h-3" /> Unpublished draft
             </p>
           )}
