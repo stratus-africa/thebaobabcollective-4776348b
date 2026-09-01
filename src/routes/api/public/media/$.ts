@@ -126,12 +126,17 @@ export const Route = createFileRoute("/api/public/media/$")({
           });
         }
 
-        const contentType = downloaded.contentType;
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const downloaded = await downloadCmsMedia(supabaseAdmin, safePath);
+        if (!downloaded) {
+          return new Response("Not found", { status: 404 });
+        }
 
-        return new Response(fileBlob, {
+        return new Response(downloaded.body, {
           status: 200,
           headers: {
-            "Content-Type": contentType,
+            "Content-Type": downloaded.contentType,
+            Vary: "Accept",
             "Cache-Control": "public, max-age=31536000, immutable",
             ETag: etag,
           },
