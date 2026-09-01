@@ -28,9 +28,15 @@ export const Route = createFileRoute("/api/public/media/$")({
           return new Response("Invalid path", { status: 400 });
         }
 
+        // Optional responsive width. Clamped to a small ladder so the CDN cache
+        // stays warm and arbitrary values can't be used to hammer the resizer.
+        const requestedWidth = Number(new URL(request.url).searchParams.get("w"));
+        const width = WIDTH_LADDER.includes(requestedWidth) ? requestedWidth : null;
+
         // Object keys are timestamp-prefixed and never reused, so the path is a
         // valid strong validator. Short-circuit revalidation without any I/O.
-        const etag = `"${encodeURIComponent(safePath)}"`;
+        const acceptsWebp = (request.headers.get("accept") ?? "").includes("image/webp");
+        const etag = `"${encodeURIComponent(safePath)}${width ? `-w${width}` : ""}${acceptsWebp ? "-webp" : ""}"`;
         if (request.headers.get("if-none-match") === etag) {
           return new Response(null, {
             status: 304,
