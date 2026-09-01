@@ -7,6 +7,8 @@ type SiteImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   fallback?: string | null;
   /** Set false while the CMS source is still being resolved. */
   sourceReady?: boolean;
+  /** Candidate widths used to build a srcSet for CMS media URLs. */
+  responsiveWidths?: number[];
 };
 
 function normalize(value?: string | null) {
