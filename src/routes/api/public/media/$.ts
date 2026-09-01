@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { downloadCmsMedia } from "@/lib/media-storage";
 import { getSiteSettings } from "@/lib/site-settings.functions";
 import { buildWatermarkSvg, resolveWatermarkPolicy } from "@/lib/watermark";
-import { resolveMediaObjectKey, CMS_MEDIA_BUCKET } from "@/lib/media-storage";
+import { CMS_MEDIA_BUCKET } from "@/lib/media-storage";
+import { resolveMediaObjectKey } from "@/lib/local-media";
 
 // Allowed responsive widths (matches the srcSet ladder used by SiteImage).
 export const WIDTH_LADDER = [320, 640, 960, 1280, 1920];
