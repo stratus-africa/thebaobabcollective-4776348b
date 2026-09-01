@@ -62,15 +62,10 @@ function EnquiriesAdmin() {
   });
 
   const mutate = useMutation({
-    mutationFn: (vars: { id: string; status: "new" | "handled" | "spam" }) =>
-      update({ data: vars }),
+    mutationFn: (vars: { id: string; status: "new" | "handled" | "spam" }) => update({ data: vars }),
     onSuccess: (_d, vars) => {
       toast.success(
-        vars.status === "handled"
-          ? "Marked as handled"
-          : vars.status === "spam"
-            ? "Marked as spam"
-            : "Reopened",
+        vars.status === "handled" ? "Marked as handled" : vars.status === "spam" ? "Marked as spam" : "Reopened",
       );
       qc.invalidateQueries({ queryKey: ["admin-enquiries"] });
     },
@@ -96,7 +91,7 @@ function EnquiriesAdmin() {
               setDebounced(e.target.value);
             }}
             placeholder="Search name, email, message…"
-            className="w-full pl-9 pr-3 py-2 text-sm border border-border bg-background outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-border bg-background rounded-md outline-none focus-visible:ring-2 focus-visible:ring-gold"
           />
         </div>
       </div>
@@ -125,7 +120,7 @@ function EnquiriesAdmin() {
       {isLoading ? (
         <p className="text-foreground/60">Loading…</p>
       ) : !data || data.length === 0 ? (
-        <p className="text-foreground/60 border border-dashed border-border p-8 text-center">
+        <p className="text-foreground/60 border border-dashed border-border p-8 text-center rounded-lg">
           No enquiries in this view.
         </p>
       ) : (
@@ -133,7 +128,7 @@ function EnquiriesAdmin() {
           {data.map((e: any) => {
             const isOpen = expanded === e.id;
             return (
-              <li key={e.id} className="border border-border bg-background">
+              <li key={e.id} className="border border-border bg-background rounded-lg overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setExpanded(isOpen ? null : e.id)}
@@ -156,7 +151,11 @@ function EnquiriesAdmin() {
                     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/55">
                       {e.destination && <span>📍 {e.destination}</span>}
                       {e.travel_dates && <span>🗓 {e.travel_dates}</span>}
-                      {e.adults != null && <span>{e.adults} adults{e.children ? ` · ${e.children} children` : ""}</span>}
+                      {e.adults != null && (
+                        <span>
+                          {e.adults} adults{e.children ? ` · ${e.children} children` : ""}
+                        </span>
+                      )}
                       <span className="ml-auto">{new Date(e.created_at).toLocaleString()}</span>
                     </div>
                   </div>
@@ -177,7 +176,7 @@ function EnquiriesAdmin() {
                       <p className="whitespace-pre-wrap text-sm text-foreground/85">{e.message}</p>
                     </div>
                     {e.email_status && (
-                      <div className="border border-border p-3 text-xs">
+                      <div className="border border-border p-3 text-xs rounded-md">
                         <p className="text-foreground/60">
                           Notification email · <strong>{e.email_status.status}</strong> ·{" "}
                           {new Date(e.email_status.created_at).toLocaleString()}
@@ -190,7 +189,7 @@ function EnquiriesAdmin() {
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
                       <a
                         href={`mailto:${e.email}?subject=${encodeURIComponent("Re: your enquiry")}`}
-                        className="inline-flex items-center gap-2 text-xs px-3 py-2 border border-border hover:bg-accent"
+                        className="inline-flex items-center gap-2 text-xs px-3 py-2 border border-border rounded-md hover:bg-accent"
                       >
                         <Mail className="w-3 h-3" /> Reply
                       </a>
@@ -198,7 +197,7 @@ function EnquiriesAdmin() {
                         <button
                           onClick={() => mutate.mutate({ id: e.id, status: "handled" })}
                           disabled={mutate.isPending}
-                          className="inline-flex items-center gap-2 text-xs px-3 py-2 bg-gold text-gold-foreground hover:bg-gold/90"
+                          className="inline-flex items-center gap-2 text-xs px-3 py-2 bg-gold text-gold-foreground rounded-md hover:bg-gold/90"
                         >
                           <CheckCircle2 className="w-3 h-3" /> Mark handled
                         </button>
@@ -207,7 +206,7 @@ function EnquiriesAdmin() {
                         <button
                           onClick={() => mutate.mutate({ id: e.id, status: "spam" })}
                           disabled={mutate.isPending}
-                          className="inline-flex items-center gap-2 text-xs px-3 py-2 border border-destructive/40 text-destructive hover:bg-destructive/10"
+                          className="inline-flex items-center gap-2 text-xs px-3 py-2 border border-destructive/40 text-destructive rounded-md hover:bg-destructive/10"
                         >
                           <Ban className="w-3 h-3" /> Spam
                         </button>
@@ -216,7 +215,7 @@ function EnquiriesAdmin() {
                         <button
                           onClick={() => mutate.mutate({ id: e.id, status: "new" })}
                           disabled={mutate.isPending}
-                          className="inline-flex items-center gap-2 text-xs px-3 py-2 border border-border hover:bg-accent"
+                          className="inline-flex items-center gap-2 text-xs px-3 py-2 border border-border rounded-md hover:bg-accent"
                         >
                           <RotateCcw className="w-3 h-3" /> Reopen
                         </button>
@@ -241,22 +240,16 @@ function StatusBadge({ value }: { value: string | null }) {
     spam: "bg-destructive/10 text-destructive border-destructive/30",
   };
   return (
-    <span
-      className={`text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 border ${styles[v] ?? styles.new}`}
-    >
+    <span className={`text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 border rounded-md ${styles[v] ?? styles.new}`}>
       {v}
     </span>
   );
 }
 
-function EmailBadge({
-  value,
-}: {
-  value: { status: string; error_message: string | null; created_at: string } | null;
-}) {
+function EmailBadge({ value }: { value: { status: string; error_message: string | null; created_at: string } | null }) {
   if (!value) {
     return (
-      <span className="text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 border border-border text-foreground/55">
+      <span className="text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 border border-border rounded-md text-foreground/55">
         no email
       </span>
     );
@@ -273,7 +266,7 @@ function EmailBadge({
   return (
     <span
       title={value.error_message ?? `Email ${m.label} · ${new Date(value.created_at).toLocaleString()}`}
-      className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 border ${m.cls}`}
+      className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 border rounded-md ${m.cls}`}
     >
       <Icon className={`w-3 h-3 ${value.status === "pending" ? "animate-spin" : ""}`} /> {m.label}
     </span>
