@@ -88,8 +88,7 @@ export const Route = createFileRoute("/api/public/media/$")({
         }
         const fileBlob = downloaded.body;
 
-        const settings = await getCachedSiteSettings();
-        const policy = resolveWatermarkPolicy(settings.branding, safePath);
+        const policy = policyEarly;
 
         if (policy.enabled) {
           const mime = downloaded.contentType || "image/jpeg";
