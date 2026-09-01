@@ -489,8 +489,8 @@ function AdminAdventuresDashboard() {
                 <span>{publishedCount} Published</span>
               </div>
 
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3.5 py-1 font-medium text-amber-700">
-                <span className="h-2 w-2 rounded-full bg-amber-500" />
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 border border-warning/25 px-3.5 py-1 font-medium text-warning">
+                <span className="h-2 w-2 rounded-full bg-warning" />
                 <span>{draftCount} Drafts</span>
               </div>
 
@@ -513,8 +513,8 @@ function AdminAdventuresDashboard() {
             {/* Unsaved changes indicator & save button */}
             {hasUnsavedChanges ? (
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 font-semibold animate-pulse">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
+                <span className="inline-flex items-center gap-1.5 text-xs text-warning font-semibold animate-pulse">
+                  <span className="h-2 w-2 rounded-full bg-warning" />
                   Unsaved changes
                 </span>
                 <Button
@@ -812,8 +812,8 @@ function AdminAdventuresDashboard() {
                         status === "published"
                           ? "bg-forest text-forest-foreground"
                           : status === "draft"
-                            ? "bg-amber-600 text-white"
-                            : "bg-slate-700 text-white"
+                            ? "bg-warning text-warning-foreground"
+                            : "bg-foreground/50 text-background"
                       }`}
                     >
                       {status}
@@ -837,13 +837,13 @@ function AdminAdventuresDashboard() {
                   {/* Bottom Image Warnings */}
                   <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-1.5 z-10">
                     {missingImage && (
-                      <span className="inline-flex items-center gap-1 bg-rose-900/90 text-rose-100 backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-rose-400/30">
-                        <AlertTriangle className="w-3 h-3 text-rose-300" /> Missing image
+                      <span className="inline-flex items-center gap-1 bg-destructive/90 text-destructive-foreground backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-destructive/30">
+                        <AlertTriangle className="w-3 h-3 text-destructive-foreground" /> Missing image
                       </span>
                     )}
                     {missingAlt && (
-                      <span className="inline-flex items-center gap-1 bg-amber-900/90 text-amber-100 backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-amber-400/30">
-                        <AlertTriangle className="w-3 h-3 text-amber-300" /> Alt text missing
+                      <span className="inline-flex items-center gap-1 bg-warning/90 text-warning-foreground backdrop-blur px-2.5 py-0.5 rounded text-[10px] font-medium border border-warning/30">
+                        <AlertTriangle className="w-3 h-3 text-warning-foreground" /> Alt text missing
                       </span>
                     )}
                   </div>
@@ -917,7 +917,7 @@ function AdminAdventuresDashboard() {
                             ? "text-forest"
                             : completeness.percent >= 60
                               ? "text-gold"
-                              : "text-amber-700"
+                              : "text-warning"
                         }`}
                       >
                         {completeness.percent}%
@@ -931,7 +931,7 @@ function AdminAdventuresDashboard() {
                             ? "bg-forest"
                             : completeness.percent >= 60
                               ? "bg-gold"
-                              : "bg-amber-600"
+                              : "bg-warning"
                         }`}
                         style={{ width: `${completeness.percent}%` }}
                       />
@@ -1196,7 +1196,7 @@ function AdminAdventuresDashboard() {
       {hasUnsavedChanges && (
         <div className="sticky bottom-0 -mx-4 md:-mx-8 lg:-mx-10 px-4 md:px-8 lg:px-10 py-3.5 bg-background/95 backdrop-blur border-t border-border flex items-center justify-between shadow-lg z-30">
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="h-2.5 w-2.5 rounded-full bg-warning animate-pulse" />
             <span className="text-xs font-semibold text-foreground">You have unsaved changes</span>
           </div>
 
@@ -1327,16 +1327,16 @@ function AdventureCardDropdown({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onChangeStatus("draft")}
-              className={`cursor-pointer ${currentStatus === "draft" ? "font-semibold text-amber-600" : ""}`}
+              className={`cursor-pointer ${currentStatus === "draft" ? "font-semibold text-warning" : ""}`}
             >
-              <span className="h-2 w-2 rounded-full bg-amber-500 mr-2" />
+              <span className="h-2 w-2 rounded-full bg-warning mr-2" />
               <span>Draft</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onChangeStatus("archived")}
               className={`cursor-pointer ${currentStatus === "archived" ? "font-semibold text-foreground/60" : ""}`}
             >
-              <span className="h-2 w-2 rounded-full bg-slate-400 mr-2" />
+              <span className="h-2 w-2 rounded-full bg-foreground/40 mr-2" />
               <span>Archived</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
