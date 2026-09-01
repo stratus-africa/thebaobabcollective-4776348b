@@ -60,7 +60,9 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
             className="absolute inset-0 h-full w-full"
             decoding="async"
             fetchPriority="high"
+            loading="eager"
             sizes="100vw"
+            responsiveWidths={[640, 960, 1280, 1920]}
             style={{
               objectFit: bgSize,
             }}
@@ -175,7 +177,9 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
                   className="w-full h-full max-h-[600px] rounded-[18px] md:rounded-[24px] shadow-2xl"
                   decoding="async"
                   fetchPriority="high"
+                  loading="eager"
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  responsiveWidths={[640, 960, 1280]}
                   style={{ objectFit: "cover" }}
                 />
               </div>

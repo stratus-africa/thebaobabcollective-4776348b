@@ -7,6 +7,8 @@ type SiteImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   fallback?: string | null;
   /** Set false while the CMS source is still being resolved. */
   sourceReady?: boolean;
+  /** Candidate widths used to build a srcSet for CMS media URLs. */
+  responsiveWidths?: number[];
 };
 
 function normalize(value?: string | null) {
@@ -14,10 +16,25 @@ function normalize(value?: string | null) {
   return normalized || null;
 }
 
+const WIDTH_LADDER = [320, 640, 960, 1280, 1920];
+
+/**
+ * CMS media is served by /api/public/media/*, which can render resized WebP
+ * derivatives via `?w=`. Build a srcSet for those URLs only — bundled assets
+ * and remote URLs are left untouched.
+ */
+function buildMediaSrcSet(src: string, widths: number[]): string | undefined {
+  if (!src.startsWith("/api/public/media/")) return undefined;
+  const sep = src.includes("?") ? "&" : "?";
+  return widths.map((w) => `${src}${sep}w=${w} ${w}w`).join(", ");
+}
+
 export function SiteImage({
   src,
   fallback,
   sourceReady = true,
+  responsiveWidths = WIDTH_LADDER,
+  srcSet,
   onError,
   ...props
 }: SiteImageProps) {
@@ -51,6 +68,7 @@ export function SiteImage({
     <img
       {...props}
       src={displaySrc}
+      srcSet={srcSet ?? buildMediaSrcSet(displaySrc, responsiveWidths)}
       onError={(event) => {
         if (source && displaySrc === source) {
           setFailedSource(source);

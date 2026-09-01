@@ -71,6 +71,9 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
                     fallback={founder.fallback}
                     alt={founder.name}
                     loading="lazy"
+                    decoding="async"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw"
+                    responsiveWidths={[320, 640, 960]}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
