@@ -484,7 +484,7 @@ function ContentAdmin() {
       </div>
 
       {/* Filter bar */}
-      <div className="bg-background border border-border p-4 mb-6">
+      <div className="bg-background border border-border p-4 mb-6 rounded-lg">
         <div className="grid gap-3 md:grid-cols-[1fr_200px_200px_auto]">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
@@ -550,7 +550,7 @@ function ContentAdmin() {
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="border border-border bg-background overflow-hidden">
+            <div key={i} className="border border-border bg-background overflow-hidden rounded-lg">
               <Skeleton className="h-48 w-full" />
               <div className="p-4 space-y-2">
                 <Skeleton className="h-5 w-2/3" />
@@ -560,7 +560,7 @@ function ContentAdmin() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="border border-border bg-background p-16 text-center text-foreground/60">
+        <div className="border border-border bg-background p-16 text-center text-foreground/60 rounded-lg">
           No {label.toLowerCase()} match your filters.
         </div>
       ) : (
@@ -574,7 +574,7 @@ function ContentAdmin() {
             return (
               <article
                 key={row.id}
-                className="group border border-border bg-background overflow-hidden flex flex-col transition-shadow hover:shadow-lg"
+                className="group border border-border bg-background overflow-hidden flex flex-col transition-shadow hover:shadow-lg rounded-lg"
               >
                 <div className="relative aspect-[16/10] bg-cream overflow-hidden">
                   {img ? (
@@ -678,7 +678,7 @@ function ContentAdmin() {
 
           {editing && layout && (
             <form onSubmit={save} className="space-y-5 pt-2">
-              <div className="bg-cream/40 border border-border p-5 space-y-4">
+              <div className="bg-cream/40 border border-border p-5 space-y-4 rounded-lg">
                 {layout.rows.map((row, ri) => (
                   <div key={ri} className={row.length > 1 ? "grid gap-4 sm:grid-cols-2" : ""}>
                     {row.map((f) => (
