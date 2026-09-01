@@ -6,22 +6,26 @@ import type { AdventuresSignature } from "@/lib/adventures.functions";
 export const DIFFICULTY_HUMAN_MAP: Record<string, { label: string; tone: string; description: string }> = {
   Easy: {
     label: "RELAXED",
-    tone: "text-emerald-800 bg-emerald-50 border-emerald-200/80",
+    // Savannah green — calm, accessible
+    tone: "text-savannah bg-savannah/10 border-savannah/25",
     description: "Mostly game drives and easy experiences.",
   },
   Moderate: {
     label: "BALANCED",
-    tone: "text-amber-800 bg-amber-50 border-amber-200/80",
+    // Muted gold — premium mid-tier
+    tone: "text-gold bg-gold/10 border-gold/30",
     description: "A mix of game drives, walking and activities.",
   },
   Active: {
     label: "ACTIVE",
+    // Terracotta — earthy energy
     tone: "text-terracotta bg-terracotta/10 border-terracotta/20",
     description: "Walking, hiking and more physically demanding experiences.",
   },
   Challenging: {
     label: "CHALLENGING",
-    tone: "text-rose-800 bg-rose-50 border-rose-200/80",
+    // Forest — deep, serious intensity
+    tone: "text-forest bg-forest/8 border-forest/20",
     description: "Multi-day trekking, rugged wilderness & active exploration.",
   },
 };
