@@ -36,7 +36,7 @@ function formatRelative(iso: string) {
 }
 
 function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`bg-muted/60 animate-pulse rounded-sm ${className}`} />;
+  return <div className={`bg-muted/60 animate-pulse rounded-md ${className}`} />;
 }
 
 function Panel({
@@ -51,7 +51,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-admin-panel border border-admin-panel-border shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-sm overflow-hidden">
+    <section className="bg-admin-panel border border-admin-panel-border shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-xl overflow-hidden">
       <header className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-admin-panel-border bg-admin-canvas/40">
         <div>
           <h2 className="text-[14px] font-semibold text-foreground tracking-tight">{title}</h2>
@@ -173,7 +173,7 @@ function Dashboard() {
   return (
     <div className="space-y-6 w-full max-w-[1700px] xl:max-w-[1800px] mx-auto">
       {/* Welcome Banner */}
-      <section className="bg-admin-panel border border-admin-panel-border p-6 md:p-7 rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] relative overflow-hidden">
+      <section className="bg-admin-panel border border-admin-panel-border p-6 md:p-7 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.04)] relative overflow-hidden">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-admin-accent/15 text-admin-accent text-[11px] font-semibold tracking-wider uppercase mb-2">
@@ -213,7 +213,7 @@ function Dashboard() {
               <Link
                 key={s.label}
                 to={s.to as any}
-                className={`group flex flex-col justify-between p-4 rounded-sm border bg-admin-panel transition-all hover:shadow-md hover:border-admin-accent/50 ${
+                className={`group flex flex-col justify-between p-4 rounded-lg border bg-admin-panel transition-all hover:shadow-md hover:border-admin-accent/50 ${
                   s.highlight
                     ? "border-amber-500/40 bg-amber-500/5 ring-1 ring-amber-500/20"
                     : "border-admin-panel-border"
