@@ -214,16 +214,14 @@ function Dashboard() {
                 key={s.label}
                 to={s.to as any}
                 className={`group flex flex-col justify-between p-4 rounded-lg border bg-admin-panel transition-all hover:shadow-md hover:border-admin-accent/50 ${
-                  s.highlight
-                    ? "border-amber-500/40 bg-amber-500/5 ring-1 ring-amber-500/20"
-                    : "border-admin-panel-border"
+                  s.highlight ? "border-warning/40 bg-warning/5 ring-1 ring-warning/20" : "border-admin-panel-border"
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="h-8 w-8 rounded bg-admin-canvas text-admin-accent flex items-center justify-center group-hover:bg-admin-accent group-hover:text-admin-accent-fg transition-colors">
                     <Icon className="w-4 h-4" strokeWidth={1.8} />
                   </span>
-                  {s.highlight && <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
+                  {s.highlight && <span className="inline-block w-2 h-2 rounded-full bg-warning animate-pulse" />}
                 </div>
                 <div>
                   {isLoading || s.value === undefined ? (
@@ -250,7 +248,7 @@ function Dashboard() {
             subtitle="Actionable items and content completeness"
             action={
               attentionItems.length > 0 ? (
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 font-semibold">
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-warning/15 text-warning-foreground font-semibold">
                   {attentionItems.length} {attentionItems.length === 1 ? "item" : "items"}
                 </span>
               ) : null
@@ -263,7 +261,7 @@ function Dashboard() {
               </div>
             ) : attentionItems.length === 0 ? (
               <div className="p-6 text-center text-foreground/70 flex flex-col items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-2">
+                <div className="w-10 h-10 rounded-full bg-success/10 text-success flex items-center justify-center mb-2">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <p className="text-sm font-medium text-foreground">Everything is up to date.</p>
@@ -282,10 +280,10 @@ function Dashboard() {
                       <span
                         className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${
                           item.tone === "rose"
-                            ? "bg-rose-500/15 text-rose-600"
+                            ? "bg-destructive/15 text-destructive"
                             : item.tone === "blue"
-                              ? "bg-sky-500/15 text-sky-600"
-                              : "bg-amber-500/15 text-amber-700"
+                              ? "bg-savannah/15 text-savannah"
+                              : "bg-warning/15 text-warning"
                         }`}
                       >
                         <AlertTriangle className="w-3.5 h-3.5" />
