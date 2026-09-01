@@ -14,6 +14,19 @@ function normalize(value?: string | null) {
   return normalized || null;
 }
 
+const WIDTH_LADDER = [320, 640, 960, 1280, 1920];
+
+/**
+ * CMS media is served by /api/public/media/*, which can render resized WebP
+ * derivatives via `?w=`. Build a srcSet for those URLs only — bundled assets
+ * and remote URLs are left untouched.
+ */
+function buildMediaSrcSet(src: string, widths: number[]): string | undefined {
+  if (!src.startsWith("/api/public/media/")) return undefined;
+  const sep = src.includes("?") ? "&" : "?";
+  return widths.map((w) => `${src}${sep}w=${w} ${w}w`).join(", ");
+}
+
 export function SiteImage({
   src,
   fallback,
