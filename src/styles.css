@@ -41,13 +41,24 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-gold: var(--gold);
-  --color-gold-foreground: var(--gold-foreground);
+
+  /* ── Baobab brand palette ── */
   --color-forest: var(--forest);
   --color-forest-foreground: var(--forest-foreground);
+  --color-forest-dark: var(--forest-dark);
+  --color-savannah: var(--savannah);
+  --color-savannah-foreground: var(--savannah-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
   --color-cream: var(--cream);
+  --color-ivory: var(--ivory);
   --color-sand: var(--sand);
   --color-terracotta: var(--terracotta);
+  --color-terracotta-foreground: var(--terracotta-foreground);
+  --color-charcoal: var(--charcoal);
+  --color-stone: var(--stone);
+
+  /* ── Semantic UI tokens ── */
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -55,8 +66,12 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
 
-  /* WordPress-style admin chrome */
+  /* ── Admin chrome ── */
   --color-admin-bar: var(--admin-bar);
   --color-admin-menu: var(--admin-menu);
   --color-admin-menu-hover: var(--admin-menu-hover);
@@ -69,53 +84,191 @@
   --color-admin-panel-border: var(--admin-panel-border);
 }
 
+/* ============================================================
+   LIGHT MODE — Baobab Collective Premium Safari Palette
+   ============================================================
+   Primary Forest    #263A2A  oklch(0.30 0.055 145)
+   Night Forest      #18251B  oklch(0.20 0.040 145)
+   Savannah Green    #536B4A  oklch(0.46 0.065 142)
+   Cream / Ivory     #F7F3E8  oklch(0.96 0.018 88)
+   Soft White        #FFFDF8  oklch(0.99 0.008 90)
+   Warm Sand         #DCCBA7  oklch(0.84 0.040 82)
+   Muted Safari Gold #B8944F  oklch(0.64 0.100 68)
+   African Terracotta#A65D3F  oklch(0.52 0.115 46)
+   Warm Charcoal     #292923  oklch(0.23 0.008 95)
+   Natural Stone     #DED7C7  oklch(0.86 0.018 84)
+   ============================================================ */
 :root {
   --radius: 0.5rem;
-  /* Cream ivory */
-  --background: oklch(0.97 0.015 85);
-  --foreground: oklch(0.25 0.02 60);
 
-  --cream: oklch(0.95 0.02 80);
-  --sand: oklch(0.88 0.04 75);
-  --forest: oklch(0.32 0.04 130);
-  --forest-foreground: oklch(0.96 0.02 80);
-  --gold: oklch(0.65 0.13 65);
-  --gold-foreground: oklch(0.99 0 0);
-  --terracotta: oklch(0.55 0.13 45);
+  /* ── Raw palette tokens ── */
+  /* Primary forest green — #263A2A */
+  --forest: oklch(0.3 0.055 145);
+  --forest-foreground: oklch(0.99 0.008 90); /* ivory text on forest */
+  /* Deep night forest — #18251B */
+  --forest-dark: oklch(0.2 0.04 145);
+  /* Secondary savannah green — #536B4A */
+  --savannah: oklch(0.46 0.065 142);
+  --savannah-foreground: oklch(0.99 0.008 90);
+  /* Cream — #F7F3E8 */
+  --cream: oklch(0.96 0.018 88);
+  /* Soft white / ivory — #FFFDF8 */
+  --ivory: oklch(0.99 0.008 90);
+  /* Warm savannah sand — #DCCBA7 */
+  --sand: oklch(0.84 0.04 82);
+  /* Muted safari gold — #B8944F */
+  --gold: oklch(0.64 0.1 68);
+  --gold-foreground: oklch(0.2 0.04 145); /* night forest on gold */
+  /* African earth / terracotta — #A65D3F */
+  --terracotta: oklch(0.52 0.115 46);
+  --terracotta-foreground: oklch(0.99 0.008 90);
+  /* Warm charcoal — #292923 */
+  --charcoal: oklch(0.23 0.008 95);
+  /* Natural stone / border — #DED7C7 */
+  --stone: oklch(0.86 0.018 84);
 
-  --card: oklch(0.97 0.015 85);
-  --card-foreground: oklch(0.25 0.02 60);
-  --popover: oklch(0.97 0.015 85);
-  --popover-foreground: oklch(0.25 0.02 60);
-  --primary: oklch(0.32 0.04 130);
-  --primary-foreground: oklch(0.96 0.02 80);
-  --secondary: oklch(0.92 0.025 80);
-  --secondary-foreground: oklch(0.25 0.02 60);
-  --muted: oklch(0.93 0.02 80);
-  --muted-foreground: oklch(0.45 0.02 60);
-  --accent: oklch(0.65 0.13 65);
-  --accent-foreground: oklch(0.99 0 0);
-  --destructive: oklch(0.55 0.22 27);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.85 0.02 75);
-  --input: oklch(0.85 0.02 75);
-  --ring: oklch(0.65 0.13 65);
+  /* ── Semantic UI tokens mapped to palette ── */
+  /* Page background: cream — #F7F3E8 */
+  --background: oklch(0.96 0.018 88);
+  /* Primary body text: warm charcoal — #292923 */
+  --foreground: oklch(0.23 0.008 95);
 
-  /* WordPress-style admin chrome */
-  --admin-bar: oklch(0.24 0.025 130);
-  --admin-menu: oklch(0.29 0.035 130);
-  --admin-menu-hover: oklch(0.35 0.04 130);
-  --admin-menu-fg: oklch(0.95 0.015 85);
-  --admin-menu-muted: oklch(0.75 0.02 90);
-  --admin-accent: oklch(0.65 0.13 65);
-  --admin-accent-fg: oklch(0.99 0 0);
-  --admin-canvas: oklch(0.95 0.008 85);
-  --admin-panel: oklch(1 0 0);
-  --admin-panel-border: oklch(0.87 0.012 80);
+  /* Cards & popovers: soft white — #FFFDF8 */
+  --card: oklch(0.99 0.008 90);
+  --card-foreground: oklch(0.23 0.008 95);
+  --popover: oklch(0.99 0.008 90);
+  --popover-foreground: oklch(0.23 0.008 95);
+
+  /* Primary action: forest green — #263A2A */
+  --primary: oklch(0.3 0.055 145);
+  --primary-foreground: oklch(0.99 0.008 90);
+
+  /* Secondary: warm sand — #DCCBA7 */
+  --secondary: oklch(0.84 0.04 82);
+  --secondary-foreground: oklch(0.23 0.008 95);
+
+  /* Muted surfaces: slightly lighter cream */
+  --muted: oklch(0.93 0.018 86);
+  --muted-foreground: oklch(0.48 0.02 95);
+
+  /* Accent: muted gold — #B8944F */
+  --accent: oklch(0.64 0.1 68);
+  --accent-foreground: oklch(0.2 0.04 145);
+
+  /* Destructive: accessible warm red */
+  --destructive: oklch(0.54 0.2 27);
+  --destructive-foreground: oklch(0.99 0.008 90);
+
+  /* Success: natural green */
+  --success: oklch(0.46 0.12 152);
+  --success-foreground: oklch(0.99 0.008 90);
+
+  /* Warning: warm amber (close to gold but brighter) */
+  --warning: oklch(0.72 0.13 72);
+  --warning-foreground: oklch(0.2 0.04 145);
+
+  /* Borders & inputs: natural stone — #DED7C7 */
+  --border: oklch(0.86 0.018 84);
+  --input: oklch(0.86 0.018 84);
+  /* Focus ring: muted gold */
+  --ring: oklch(0.64 0.1 68);
+
+  /* ── Admin chrome — forest-family darks with gold accent ── */
+  /* Top bar: night forest — #18251B */
+  --admin-bar: oklch(0.2 0.04 145);
+  /* Sidebar: primary forest — #263A2A */
+  --admin-menu: oklch(0.27 0.05 145);
+  /* Sidebar hover: savannah green — slightly lighter */
+  --admin-menu-hover: oklch(0.34 0.058 145);
+  /* Sidebar text: ivory */
+  --admin-menu-fg: oklch(0.96 0.018 88);
+  /* Sidebar muted text: warm sand */
+  --admin-menu-muted: oklch(0.76 0.028 86);
+  /* Admin accent: muted gold — #B8944F */
+  --admin-accent: oklch(0.64 0.1 68);
+  --admin-accent-fg: oklch(0.2 0.04 145);
+  /* Admin canvas: very pale cream */
+  --admin-canvas: oklch(0.95 0.012 87);
+  /* Admin panel (cards/tables): soft white */
+  --admin-panel: oklch(0.99 0.008 90);
+  /* Admin panel borders: stone */
+  --admin-panel-border: oklch(0.88 0.016 84);
 }
 
+/* ============================================================
+   DARK MODE — Baobab night palette
+   Uses forest-family darks as surfaces, ivory text, gold accents
+   ============================================================ */
 .dark {
   color-scheme: dark;
+
+  /* Surfaces */
+  --background: oklch(0.2 0.04 145); /* night forest */
+  --foreground: oklch(0.96 0.018 88); /* cream text */
+
+  --card: oklch(0.27 0.05 145); /* primary forest */
+  --card-foreground: oklch(0.96 0.018 88);
+  --popover: oklch(0.27 0.05 145);
+  --popover-foreground: oklch(0.96 0.018 88);
+
+  /* Primary: savannah green (lighter on dark bg) */
+  --primary: oklch(0.46 0.065 142);
+  --primary-foreground: oklch(0.99 0.008 90);
+
+  /* Secondary: dark forest surface */
+  --secondary: oklch(0.3 0.055 145);
+  --secondary-foreground: oklch(0.84 0.04 82);
+
+  /* Muted */
+  --muted: oklch(0.3 0.055 145);
+  --muted-foreground: oklch(0.76 0.028 86); /* sand */
+
+  /* Accent: gold stays gold */
+  --accent: oklch(0.64 0.1 68);
+  --accent-foreground: oklch(0.2 0.04 145);
+
+  /* Destructive stays red */
+  --destructive: oklch(0.58 0.21 27);
+  --destructive-foreground: oklch(0.99 0.008 90);
+
+  /* Success & warning */
+  --success: oklch(0.52 0.13 152);
+  --success-foreground: oklch(0.2 0.04 145);
+  --warning: oklch(0.72 0.13 72);
+  --warning-foreground: oklch(0.2 0.04 145);
+
+  /* Borders: darker translucent stone */
+  --border: oklch(0.38 0.042 145);
+  --input: oklch(0.38 0.042 145);
+  --ring: oklch(0.64 0.1 68);
+
+  /* Brand palette tokens (dark mode shifts) */
+  --cream: oklch(0.96 0.018 88);
+  --ivory: oklch(0.99 0.008 90);
+  --sand: oklch(0.84 0.04 82);
+  --stone: oklch(0.38 0.042 145);
+  --forest: oklch(0.3 0.055 145);
+  --forest-foreground: oklch(0.99 0.008 90);
+  --forest-dark: oklch(0.2 0.04 145);
+  --savannah: oklch(0.46 0.065 142);
+  --savannah-foreground: oklch(0.99 0.008 90);
+  --gold: oklch(0.64 0.1 68);
+  --gold-foreground: oklch(0.2 0.04 145);
+  --terracotta: oklch(0.56 0.12 46);
+  --terracotta-foreground: oklch(0.99 0.008 90);
+  --charcoal: oklch(0.84 0.04 82); /* inverted to sand for dark readability */
+
+  /* Admin chrome — same family, slightly adjusted for dark */
+  --admin-bar: oklch(0.16 0.032 145);
+  --admin-menu: oklch(0.2 0.04 145);
+  --admin-menu-hover: oklch(0.27 0.05 145);
+  --admin-menu-fg: oklch(0.96 0.018 88);
+  --admin-menu-muted: oklch(0.72 0.026 86);
+  --admin-accent: oklch(0.64 0.1 68);
+  --admin-accent-fg: oklch(0.2 0.04 145);
+  --admin-canvas: oklch(0.23 0.042 145);
+  --admin-panel: oklch(0.27 0.05 145);
+  --admin-panel-border: oklch(0.34 0.052 145);
 }
 
 @layer base {
@@ -181,15 +334,16 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+  /* Forest-tinted shadows for depth without pure black */
   .shadow-luxury {
     box-shadow:
-      0 16px 36px -8px rgba(35, 45, 30, 0.1),
-      0 4px 12px -2px rgba(35, 45, 30, 0.05);
+      0 16px 36px -8px color-mix(in srgb, var(--forest-dark) 12%, transparent),
+      0 4px 12px -2px color-mix(in srgb, var(--forest-dark) 6%, transparent);
   }
   .shadow-luxury-hover {
     box-shadow:
-      0 24px 48px -12px rgba(35, 45, 30, 0.18),
-      0 8px 24px -4px rgba(35, 45, 30, 0.08);
+      0 24px 48px -12px color-mix(in srgb, var(--forest-dark) 20%, transparent),
+      0 8px 24px -4px color-mix(in srgb, var(--forest-dark) 10%, transparent);
   }
   @keyframes fade-up {
     from {
