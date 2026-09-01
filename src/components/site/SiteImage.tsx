@@ -66,6 +66,7 @@ export function SiteImage({
     <img
       {...props}
       src={displaySrc}
+      srcSet={srcSet ?? buildMediaSrcSet(displaySrc, responsiveWidths)}
       onError={(event) => {
         if (source && displaySrc === source) {
           setFailedSource(source);
