@@ -54,7 +54,9 @@ export const Route = createFileRoute("/lodges/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-4xl mb-4">Lodge not found</h1>
-        <Link to="/lodges" className="text-gold underline">Back to all lodges</Link>
+        <Link to="/lodges" className="text-gold underline">
+          Back to all lodges
+        </Link>
       </main>
       <Footer />
     </div>
@@ -86,9 +88,7 @@ function LodgePage() {
     alt: `${l.name} — image ${i + 1}`,
     caption: `${l.name} · ${l.location}`,
   }));
-  const url = typeof window !== "undefined"
-    ? window.location.href
-    : `https://thebaobabcollective.co.uk/lodges/${slug}`;
+  const url = typeof window !== "undefined" ? window.location.href : `https://thebaobabcollective.co.uk/lodges/${slug}`;
 
   return (
     <div className="bg-background min-h-screen">
@@ -99,7 +99,7 @@ function LodgePage() {
           {l.hero_image && (
             <img src={l.hero_image} alt={l.name} className="absolute inset-0 w-full h-full object-cover" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/82 via-forest-dark/40 to-transparent" />
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-10 pb-16 text-background w-full">
             <Link
               to="/lodges"
@@ -107,28 +107,24 @@ function LodgePage() {
             >
               ← All Lodges
             </Link>
-            <h1 className="font-serif text-5xl md:text-7xl leading-[1.05] mb-4 max-w-3xl">
-              {l.name}
-            </h1>
+            <h1 className="font-serif text-5xl md:text-7xl leading-[1.05] mb-4 max-w-3xl">{l.name}</h1>
             <div className="flex flex-wrap gap-6 text-sm text-background/90">
               {l.location && (
-                <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gold" /> {l.location}</span>
+                <span className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gold" /> {l.location}
+                </span>
               )}
               {l.amenities?.length ? (
-                <span className="flex items-center gap-2"><BedDouble className="w-4 h-4 text-gold" /> {l.amenities.length} amenities</span>
+                <span className="flex items-center gap-2">
+                  <BedDouble className="w-4 h-4 text-gold" /> {l.amenities.length} amenities
+                </span>
               ) : null}
             </div>
           </div>
         </section>
 
         <div className="max-w-[1920px] mx-auto px-6 lg:px-10 pt-6">
-          <Breadcrumbs
-            items={[
-              { label: "Home", to: "/" },
-              { label: "Lodges", to: "/lodges" },
-              { label: l.name },
-            ]}
-          />
+          <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Lodges", to: "/lodges" }, { label: l.name }]} />
         </div>
 
         {/* Overview + sticky Enquire sidebar */}
@@ -228,9 +224,7 @@ function LodgePage() {
         {/* Share */}
         <section className="border-t border-border/40 py-10">
           <div className="max-w-[1920px] mx-auto px-6 lg:px-10 flex flex-wrap items-center justify-between gap-6">
-            <p className="font-serif text-xl text-foreground">
-              Loved {l.name}? Share with a fellow traveller.
-            </p>
+            <p className="font-serif text-xl text-foreground">Loved {l.name}? Share with a fellow traveller.</p>
             <ShareButtons
               title={`${l.name}, ${l.location} — The Baobab Collective`}
               url={url}
@@ -244,9 +238,7 @@ function LodgePage() {
         <section className="bg-cream py-20 md:py-24">
           <div className="max-w-3xl mx-auto px-6 text-center">
             <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-4">Enquire</p>
-            <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
-              Speak with a Journey Designer
-            </h2>
+            <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-4">Speak with a Journey Designer</h2>
             <p className="text-foreground/70 mb-8">
               Share a few details about your dream stay at {l.name} — we'll respond within 24 hours.
             </p>
@@ -278,12 +270,7 @@ function LodgePage() {
               <h2 className="font-serif text-3xl text-foreground mb-10 text-center">Similar Lodges</h2>
               <div className="grid md:grid-cols-3 gap-8">
                 {others.map((o: any) => (
-                  <Link
-                    key={o.slug}
-                    to="/lodges/$slug"
-                    params={{ slug: o.slug }}
-                    className="group block"
-                  >
+                  <Link key={o.slug} to="/lodges/$slug" params={{ slug: o.slug }} className="group block">
                     <div className="overflow-hidden aspect-[4/3] mb-4">
                       <img
                         src={o.hero_image}
