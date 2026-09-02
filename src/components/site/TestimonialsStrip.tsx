@@ -2,6 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Star, Quote, Sparkles } from "lucide-react";
 import { getTestimonials } from "@/lib/cms.functions";
+import { useReveal, useRevealChildren } from "@/hooks/useReveal";
 
 export function TestimonialsStrip() {
   const fetchTestimonials = useServerFn(getTestimonials);
@@ -42,11 +43,13 @@ export function TestimonialsStrip() {
   ];
 
   const list = dbTestimonials.length > 0 ? dbTestimonials : fallbackTestimonials;
+  const headingRef = useReveal<HTMLDivElement>();
+  const cardsRef = useRevealChildren<HTMLDivElement>();
 
   return (
     <section aria-labelledby="testimonials-heading" className="bg-background py-16 md:py-24 border-t border-border/40">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
-        <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+        <div ref={headingRef} className="reveal text-center max-w-3xl mx-auto mb-12 md:mb-16">
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center justify-center gap-2">
             <Sparkles className="w-3.5 h-3.5" /> Guest Stories
           </p>
@@ -61,11 +64,11 @@ export function TestimonialsStrip() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {list.slice(0, 3).map((item) => (
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {list.slice(0, 3).map((item, idx) => (
             <div
               key={item.id}
-              className="group flex flex-col justify-between bg-cream/50 rounded-xl p-8 border border-border transition-all duration-300 hover:shadow-luxury hover:border-gold/40 hover:bg-cream"
+              className={`reveal reveal-delay-${idx + 1} group flex flex-col justify-between bg-cream/50 rounded-xl p-8 border border-border transition-all duration-300 hover:shadow-luxury hover:border-gold/40 hover:bg-cream`}
             >
               <div>
                 <div className="flex items-center gap-1 text-gold mb-6">

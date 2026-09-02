@@ -116,7 +116,7 @@ export function FindYourJourney({ content }: { content?: FindJourneyContent | nu
                   decoding="async"
                   sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
                   responsiveWidths={[320, 640, 960]}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                 />
 
                 {/* Gradient Overlay */}

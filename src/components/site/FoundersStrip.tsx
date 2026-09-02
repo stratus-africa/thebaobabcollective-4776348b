@@ -5,6 +5,7 @@ import g4 from "@/assets/gallery-4.jpg";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { SiteImage } from "@/components/site/SiteImage";
+import { useReveal, useRevealChildren } from "@/hooks/useReveal";
 
 type FoundersContent = Partial<typeof PAGE_DEFAULTS.home_founders>;
 
@@ -31,12 +32,15 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
     },
   ];
 
+  const leftRef = useReveal<HTMLDivElement>();
+  const cardsRef = useRevealChildren<HTMLDivElement>();
+
   return (
     <section aria-labelledby="founders-heading" className="bg-cream py-16 md:py-24 border-y border-border/40">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-16 items-center">
           {/* Left Column — Narrative */}
-          <div className="space-y-6">
+          <div ref={leftRef} className="reveal space-y-6">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
             </p>
@@ -59,11 +63,11 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
           </div>
 
           {/* Right Column — Founder Cards */}
-          <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
+          <div ref={cardsRef} className="grid sm:grid-cols-2 gap-6 md:gap-8">
             {founders.map((founder, idx) => (
               <div
                 key={idx}
-                className="group flex flex-col bg-background rounded-xl overflow-hidden border border-border transition-all duration-500 hover:shadow-luxury-hover hover:border-gold/40"
+                className={`reveal reveal-delay-${idx + 1} group flex flex-col bg-background rounded-xl overflow-hidden border border-border transition-all duration-500 hover:shadow-luxury-hover hover:border-gold/40`}
               >
                 <div className="relative aspect-[4/5] overflow-hidden bg-cream">
                   <SiteImage
@@ -74,7 +78,7 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
                     decoding="async"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw"
                     responsiveWidths={[320, 640, 960]}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/75 via-forest-dark/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 text-cream">

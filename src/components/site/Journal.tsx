@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { articles as staticArticles } from "@/lib/content";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
+import { useReveal } from "@/hooks/useReveal";
 
 type Content = Partial<typeof PAGE_DEFAULTS.home_journal>;
 type Article = {
@@ -22,11 +23,13 @@ export function Journal({
   const c = usePreviewMerge("home_journal", base);
   const list = (articles && articles.length > 0 ? articles : staticArticles).slice(0, 3);
   const [featured, ...supporting] = list;
+  const leftRef = useReveal<HTMLDivElement>();
+  const rightRef = useReveal<HTMLDivElement>(0.08);
 
   return (
     <section className="bg-sand/40 py-20 md:py-28">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-[0.8fr_1.6fr] gap-12 lg:gap-16">
-        <div>
+        <div ref={leftRef} className="reveal">
           <p className="text-[11px] tracking-[0.3em] uppercase text-terracotta mb-5">{c.eyebrow}</p>
           <h2 className="font-serif text-4xl md:text-6xl text-foreground leading-[1.02] mb-6">
             {c.title_line1}
@@ -44,7 +47,7 @@ export function Journal({
             <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
-        <div className="grid gap-6 lg:grid-cols-[1.35fr_0.85fr]">
+        <div ref={rightRef} className="reveal reveal-delay-2 grid gap-6 lg:grid-cols-[1.35fr_0.85fr]">
           {featured && (
             <article className="group">
               <Link

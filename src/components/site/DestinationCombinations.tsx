@@ -53,7 +53,7 @@ export function DestinationCombinations({ eyebrow, title, body }: DestinationCom
                   src={combo.image}
                   alt={combo.title}
                   loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/75 via-forest-dark/20 to-transparent" />
 

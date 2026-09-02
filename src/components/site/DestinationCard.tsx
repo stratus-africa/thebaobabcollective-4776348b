@@ -26,7 +26,7 @@ export function DestinationCard({ destination: d, variant = "standard", classNam
           src={d.fallbackImage}
           alt={`${d.name} — ${d.region}, ${d.country}`}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-75 group-hover:opacity-85 transition-opacity" />
 
