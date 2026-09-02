@@ -43,6 +43,9 @@ function AdminAdventureEditor() {
   const [saving, setSaving] = useState(false);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
   const { data: page } = useQuery({
     queryKey: ["admin-adventures-page"],
     queryFn: () => fetchPage(),
