@@ -112,7 +112,7 @@ export function DestinationMatcherSection({ eyebrow, title, body }: DestinationM
               loading="lazy"
               className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/82 via-forest-dark/28 to-transparent" />
 
             <div className="absolute bottom-8 left-8 right-8 text-cream">
               <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-semibold mb-2">
