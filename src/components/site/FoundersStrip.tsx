@@ -76,7 +76,7 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
                     responsiveWidths={[320, 640, 960]}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/75 via-forest-dark/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 text-cream">
                     <span className="text-[9px] uppercase tracking-[0.25em] font-semibold text-gold block mb-1">
                       {founder.tag}

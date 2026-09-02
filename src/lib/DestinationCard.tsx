@@ -28,7 +28,7 @@ export function DestinationCard({ destination: d, variant = "standard", classNam
           loading="lazy"
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75 group-hover:opacity-85 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-75 group-hover:opacity-85 transition-opacity" />
 
         {/* Top Badges */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
@@ -56,7 +56,9 @@ export function DestinationCard({ destination: d, variant = "standard", classNam
       {/* ── Content Details ── */}
       <div className="p-6 sm:p-7 flex flex-col flex-1">
         {/* Title */}
-        <h3 className={`font-serif ${isFeature ? "text-2xl sm:text-3xl lg:text-4xl" : "text-2xl sm:text-3xl"} text-foreground mb-2.5 leading-tight group-hover:text-gold transition-colors`}>
+        <h3
+          className={`font-serif ${isFeature ? "text-2xl sm:text-3xl lg:text-4xl" : "text-2xl sm:text-3xl"} text-foreground mb-2.5 leading-tight group-hover:text-gold transition-colors`}
+        >
           <Link to="/destinations/$slug" params={{ slug: d.slug }}>
             {d.name}
           </Link>
@@ -97,9 +99,7 @@ export function DestinationCard({ destination: d, variant = "standard", classNam
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
 
-          <span className="text-[11px] font-mono text-foreground/40 uppercase tracking-widest">
-            {d.country}
-          </span>
+          <span className="text-[11px] font-mono text-foreground/40 uppercase tracking-widest">{d.country}</span>
         </div>
       </div>
     </article>
