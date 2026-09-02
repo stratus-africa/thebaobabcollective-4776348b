@@ -25,7 +25,7 @@ export const DIFFICULTY_HUMAN_MAP: Record<string, { label: string; tone: string;
   Challenging: {
     label: "CHALLENGING",
     // Forest — deep, serious intensity
-    tone: "text-forest bg-forest/8 border-forest/20",
+    tone: "text-forest bg-forest/[0.08] border-forest/20",
     description: "Multi-day trekking, rugged wilderness & active exploration.",
   },
 };
@@ -66,7 +66,7 @@ export function AdventureCard({ adventure, className = "", featured = false }: A
           loading="lazy"
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-80" />
 
         {/* Top Badges */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-2 z-10">
