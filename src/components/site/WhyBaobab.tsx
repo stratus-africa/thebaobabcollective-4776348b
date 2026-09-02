@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { useReveal, useRevealChildren } from "@/hooks/useReveal";
 
 type WhyBaobabContent = Partial<typeof PAGE_DEFAULTS.home_why_baobab>;
 type FinalCtaContent = Partial<typeof PAGE_DEFAULTS.home_final_cta>;
@@ -23,11 +24,14 @@ export function WhyBaobab({
     { num: c.pillar_4_num, title: c.pillar_4_title, body: c.pillar_4_body },
   ];
 
+  const stickyRef = useReveal<HTMLDivElement>();
+  const pillarsRef = useRevealChildren<HTMLDivElement>();
+
   return (
     <section aria-labelledby="why-baobab-heading" className="bg-background py-16 md:py-24">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 xl:gap-28 items-start">
-          <div className="max-w-2xl lg:sticky lg:top-28">
+          <div ref={stickyRef} className="reveal max-w-2xl lg:sticky lg:top-28">
             <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
             </p>
@@ -49,9 +53,9 @@ export function WhyBaobab({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10">
-            {pillars.map((pillar) => (
-              <article key={pillar.num} className="border-t border-border pt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10" ref={pillarsRef}>
+            {pillars.map((pillar, idx) => (
+              <article key={pillar.num} className={`reveal reveal-delay-${idx + 1} border-t border-border pt-5`}>
                 <p className="font-serif text-3xl text-gold leading-none mb-4">{pillar.num}</p>
                 <h3 className="font-serif text-2xl text-foreground leading-snug mb-3">{pillar.title}</h3>
                 <p className="text-sm text-foreground/70 leading-relaxed">{pillar.body}</p>

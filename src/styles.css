@@ -327,9 +327,65 @@
   .tracking-luxury {
     letter-spacing: 0.25em;
   }
+
+  /* ── Existing hero entry ─────────────────────────────────── */
   .animate-fade-up {
     animation: fade-up 0.8s ease-out both;
   }
+
+  /* ── Scroll-reveal primitives ────────────────────────────── */
+  /*
+   * Usage: add `reveal` (+ optional `reveal-delay-*`) to any element.
+   * The useReveal hook sets data-revealed="true" when the element
+   * enters the viewport; at that point the element animates in.
+   * Before reveal the element is invisible, so there is no flash of
+   * unstyled content — it simply starts hidden and fades/rises in.
+   */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal[data-revealed="true"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Fade-only variant — for elements that should not move */
+  .reveal-fade {
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  .reveal-fade[data-revealed="true"] {
+    opacity: 1;
+  }
+
+  /* Stagger helpers — add to siblings inside a revealed parent */
+  .reveal-delay-1 {
+    transition-delay: 80ms;
+  }
+  .reveal-delay-2 {
+    transition-delay: 160ms;
+  }
+  .reveal-delay-3 {
+    transition-delay: 240ms;
+  }
+  .reveal-delay-4 {
+    transition-delay: 320ms;
+  }
+  .reveal-delay-5 {
+    transition-delay: 400ms;
+  }
+
+  /* ── Ken Burns — very subtle slow drift for hero/cta images ── */
+  .animate-ken-burns {
+    animation: ken-burns 18s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+
+  /* ── Luxury shadows ──────────────────────────────────────── */
   .glass-forest {
     background: color-mix(in oklch, var(--forest) 85%, transparent);
     backdrop-filter: blur(12px);
@@ -351,6 +407,8 @@
       0 24px 48px -12px color-mix(in srgb, var(--forest-dark) 20%, transparent),
       0 8px 24px -4px color-mix(in srgb, var(--forest-dark) 10%, transparent);
   }
+
+  /* ── Keyframes ───────────────────────────────────────────── */
   @keyframes fade-up {
     from {
       opacity: 0;
@@ -360,5 +418,39 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+  @keyframes ken-burns {
+    from {
+      transform: scale(1) translate(0%, 0%);
+    }
+    to {
+      transform: scale(1.04) translate(-0.6%, 0.4%);
+    }
+  }
+}
+
+/*
+ * ── Accessibility: prefers-reduced-motion ──────────────────
+ * Collapse all non-essential motion for users who opt out.
+ * Transitions are kept at 1ms (not 0) so JS state-change
+ * callbacks still fire synchronously if anything relies on them.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-ken-burns {
+    animation: none;
+  }
+  .reveal,
+  .reveal-fade {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .reveal-delay-1,
+  .reveal-delay-2,
+  .reveal-delay-3,
+  .reveal-delay-4,
+  .reveal-delay-5 {
+    transition-delay: 0ms;
   }
 }

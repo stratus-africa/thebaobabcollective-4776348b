@@ -3,6 +3,7 @@ import elephant from "@/assets/elephant.jpg";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { RichText } from "@/components/site/RichText";
+import { useReveal, useRevealChildren } from "@/hooks/useReveal";
 
 type AboutContent = Partial<typeof PAGE_DEFAULTS.about>;
 
@@ -11,6 +12,9 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
   const c = usePreviewMerge("about", base);
   const leftSrc = c.image_left_url || lodge;
   const rightSrc = c.image_right_url || elephant;
+
+  const headingRef = useReveal<HTMLDivElement>();
+  const pillarsRef = useRevealChildren<HTMLDivElement>();
   const pillars = [
     {
       label: "Authentic",
@@ -32,7 +36,7 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
   return (
     <section className="bg-cream py-14 md:py-20 lg:py-24">
       <div className="max-w-[1920px] mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 grid md:grid-cols-2 gap-10 lg:gap-16 xl:gap-20 items-center">
-        <div>
+        <div ref={headingRef} className="reveal">
           <p className="text-[11px] tracking-[0.3em] uppercase text-foreground/70 mb-4">{c.eyebrow}</p>
           <div className="w-12 h-px bg-gold mb-6" />
           <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.02] text-foreground mb-6">
@@ -67,11 +71,11 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
         </div>
       </div>
       <div className="mx-auto mt-14 max-w-[1920px] px-6 sm:px-8 lg:px-12 xl:px-16 md:mt-20">
-        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
+        <div className="grid gap-6 md:grid-cols-3 md:gap-8" ref={pillarsRef}>
           {pillars.map((pillar, index) => (
             <article
               key={pillar.label}
-              className="group bg-forest p-7 text-cream transition-all duration-500 hover:shadow-lg md:p-8 lg:p-10"
+              className={`reveal reveal-delay-${index + 1} group bg-forest p-7 text-cream transition-all duration-500 hover:shadow-lg md:p-8 lg:p-10`}
             >
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-[11px] uppercase tracking-[0.3em] text-gold">{pillar.label}</p>

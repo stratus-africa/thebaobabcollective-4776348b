@@ -17,15 +17,16 @@ export function FinalCta({ content }: { content?: FinalCtaContent | null } = {})
           src={ctaImg}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-forest/95 via-forest/80 to-forest/60" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-forest/95 via-forest/80 to-forest/60"
+          aria-hidden="true"
+        />
 
         <div className="relative max-w-[1920px] mx-auto w-full px-5 sm:px-8 lg:px-12 xl:px-16 py-16 sm:py-20 text-center">
           <div className="max-w-2xl mx-auto">
-            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-4">
-              {c.eyebrow}
-            </p>
+            <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-4">{c.eyebrow}</p>
             <h2
               id="final-cta-heading"
               className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.08]"
@@ -34,9 +35,7 @@ export function FinalCta({ content }: { content?: FinalCtaContent | null } = {})
               <span className="block">{c.title_line1}</span>
               <span className="block text-gold">{c.title_line2}</span>
             </h2>
-            <p className="mt-5 text-cream/90 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
-              {c.body}
-            </p>
+            <p className="mt-5 text-cream/90 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">{c.body}</p>
             <div className="mt-8 flex justify-center">
               <EnquireDialog
                 sourceUrl="/"
