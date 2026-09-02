@@ -251,7 +251,7 @@ function HeroSection({
         fetchPriority="high"
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-forest/90 via-black/40 to-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-forest/90 via-forest-dark/35 to-transparent" />
 
       <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-20 text-cream w-full">
         <p className="text-[11px] tracking-[0.35em] uppercase text-gold mb-5 font-semibold">
@@ -734,7 +734,7 @@ function FeaturedJourneySpotlight({ signatures }: { signatures: AdventuresSignat
           <div className="lg:col-span-7">
             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-gold/30 shadow-2xl">
               <img src={spotlight.image} alt={spotlight.name} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent" />
               <div className="absolute top-6 left-6">
                 <span className="px-4 py-1.5 rounded-full text-[11px] tracking-[0.25em] uppercase font-semibold bg-gold text-gold-foreground shadow">
                   FEATURED JOURNEY

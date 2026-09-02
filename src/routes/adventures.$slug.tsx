@@ -201,11 +201,11 @@ function AdventureDetailPage() {
             />
           ) : (
             <div
-              className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(216,174,88,0.34),_transparent_45%),linear-gradient(135deg,_#1f2b1d,_#0f1a12)]"
+              className="absolute inset-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--color-gold)_34%,transparent),transparent_45%),linear-gradient(135deg,var(--color-forest),var(--color-forest-dark))]"
               aria-hidden="true"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/88 via-forest-dark/40 to-transparent" />
 
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-14 text-cream w-full flex flex-wrap items-end justify-between gap-6">
             <div className="max-w-3xl">

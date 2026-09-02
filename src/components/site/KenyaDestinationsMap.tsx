@@ -568,7 +568,7 @@ export function KenyaDestinationsMap({
                     alt={activeDestination.name}
                     className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/75 via-transparent to-transparent" />
 
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                     <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] uppercase font-semibold bg-background/95 backdrop-blur-md text-foreground px-3 py-1 rounded-full shadow-sm">
