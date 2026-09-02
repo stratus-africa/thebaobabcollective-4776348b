@@ -241,7 +241,7 @@ function DestinationsDiscoveryPage() {
             />
 
             {/* Gradients */}
-            <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/60 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/60 to-forest-dark/35" />
             <div className="absolute inset-0 bg-radial-gradient from-transparent via-forest/40 to-forest/80" />
 
             {/* Hero Content */}
@@ -283,12 +283,12 @@ function DestinationsDiscoveryPage() {
         {/* ── 3. KENYA DESTINATION MAP ────────────────────────────────────── */}
         {content.show_map !== false && (
           <Suspense fallback={<div className="min-h-[480px]" aria-hidden="true" />}>
-          <KenyaDestinationsMap
-            destinations={allDestinations}
-            mapImage={content.map_image}
-            customPositions={content.map_positions}
-            onSavePositions={handleSaveMapPositions}
-          />
+            <KenyaDestinationsMap
+              destinations={allDestinations}
+              mapImage={content.map_image}
+              customPositions={content.map_positions}
+              onSavePositions={handleSaveMapPositions}
+            />
           </Suspense>
         )}
 
@@ -370,7 +370,7 @@ function DestinationsDiscoveryPage() {
               >
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-border/60">
                   <div>
-                    <p className="text-[11px] tracking-[0.3em] uppercase text-cyan-600 dark:text-cyan-400 font-semibold mb-2">
+                    <p className="text-[11px] tracking-[0.3em] uppercase text-savannah font-semibold mb-2">
                       {content.ocean_eyebrow || "Swahili Coast & Coral Reefs"}
                     </p>
                     <h2 id="ocean-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground">

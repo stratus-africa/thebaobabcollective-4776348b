@@ -38,7 +38,7 @@ export function Journal({
           <p className="text-foreground/75 leading-relaxed mb-8 max-w-sm">{c.body}</p>
           <Link
             to="/journal"
-            className="group inline-flex items-center gap-3 border border-terracotta text-terracotta uppercase tracking-[0.25em] text-[11px] px-7 py-4 hover:bg-terracotta hover:text-gold-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            className="group inline-flex items-center gap-3 border border-terracotta text-terracotta uppercase tracking-[0.25em] text-[11px] px-7 py-4 hover:bg-terracotta hover:text-terracotta-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
           >
             {c.cta_label}
             <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
