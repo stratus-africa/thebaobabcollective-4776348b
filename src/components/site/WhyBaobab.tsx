@@ -24,7 +24,7 @@ export function WhyBaobab({
   ];
 
   return (
-    <section aria-labelledby="why-baobab-heading" className="bg-background py-18 md:py-24">
+    <section aria-labelledby="why-baobab-heading" className="bg-background py-16 md:py-24">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 xl:gap-28 items-start">
           <div className="max-w-2xl lg:sticky lg:top-28">

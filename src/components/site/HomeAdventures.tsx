@@ -25,7 +25,7 @@ export function HomeAdventures({ content }: { content?: Content | null } = {}) {
   return (
     <section
       aria-labelledby="signature-adventures-heading"
-      className="bg-cream/40 py-18 md:py-24 border-t border-border/40"
+      className="bg-cream/40 py-16 md:py-24 border-t border-border/40"
     >
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">

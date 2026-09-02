@@ -32,7 +32,7 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
   ];
 
   return (
-    <section aria-labelledby="founders-heading" className="bg-cream py-18 md:py-24 border-y border-border/40">
+    <section aria-labelledby="founders-heading" className="bg-cream py-16 md:py-24 border-y border-border/40">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-16 items-center">
           {/* Left Column — Narrative */}
@@ -78,7 +78,7 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/75 via-forest-dark/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 text-cream">
-                    <span className="text-[9px] uppercase tracking-[0.25em] font-semibold text-gold block mb-1">
+                    <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-gold block mb-1">
                       {founder.tag}
                     </span>
                     <h3 className="font-serif text-2xl text-cream leading-tight">{founder.name}</h3>

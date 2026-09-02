@@ -44,13 +44,16 @@ export function TestimonialsStrip() {
   const list = dbTestimonials.length > 0 ? dbTestimonials : fallbackTestimonials;
 
   return (
-    <section aria-labelledby="testimonials-heading" className="bg-background py-18 md:py-24 border-t border-border/40">
+    <section aria-labelledby="testimonials-heading" className="bg-background py-16 md:py-24 border-t border-border/40">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center justify-center gap-2">
             <Sparkles className="w-3.5 h-3.5" /> Guest Stories
           </p>
-          <h2 id="testimonials-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
+          <h2
+            id="testimonials-heading"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+          >
             What Our Travellers Say
           </h2>
           <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed">
@@ -71,15 +74,11 @@ export function TestimonialsStrip() {
                   ))}
                 </div>
                 <Quote className="w-8 h-8 text-gold/30 mb-3" />
-                <p className="font-serif text-lg text-foreground leading-relaxed italic mb-6">
-                  "{item.quote}"
-                </p>
+                <p className="font-serif text-lg text-foreground leading-relaxed italic mb-6">"{item.quote}"</p>
               </div>
 
               <div className="pt-4 border-t border-foreground/10">
-                <p className="font-serif text-base font-medium text-foreground">
-                  {item.name}
-                </p>
+                <p className="font-serif text-base font-medium text-foreground">{item.name}</p>
                 <p className="text-[11px] tracking-wider uppercase text-foreground/60 mt-0.5">
                   {item.location} {item.trip_taken ? `• ${item.trip_taken}` : ""}
                 </p>

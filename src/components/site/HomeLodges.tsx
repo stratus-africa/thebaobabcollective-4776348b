@@ -25,7 +25,7 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
   const featuredLodges = lodges.slice(0, 3);
 
   return (
-    <section aria-labelledby="lodges-heading" className="bg-forest text-forest-foreground py-18 md:py-24">
+    <section aria-labelledby="lodges-heading" className="bg-forest text-forest-foreground py-16 md:py-24">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
           <div className="max-w-2xl">

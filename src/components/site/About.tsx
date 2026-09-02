@@ -47,21 +47,21 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
             className="max-w-2xl lg:max-w-3xl text-foreground/75 text-base md:text-lg leading-relaxed space-y-4"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
           <div className="overflow-hidden shadow-sm">
             <img
               src={leftSrc}
               alt="Luxury safari lodge tent at sunset"
               loading="lazy"
-              className="w-full h-[380px] md:h-[440px] lg:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
+              className="w-full h-[260px] sm:h-[380px] md:h-[440px] lg:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
             />
           </div>
-          <div className="overflow-hidden shadow-sm mt-12 lg:mt-16">
+          <div className="overflow-hidden shadow-sm sm:mt-12 lg:mt-16">
             <img
               src={rightSrc}
               alt="African elephant in savannah"
               loading="lazy"
-              className="w-full h-[380px] md:h-[440px] lg:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
+              className="w-full h-[260px] sm:h-[380px] md:h-[440px] lg:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
             />
           </div>
         </div>
