@@ -47,6 +47,7 @@
   --color-forest-foreground: var(--forest-foreground);
   --color-forest-dark: var(--forest-dark);
   --color-savannah: var(--savannah);
+  --color-savannah-green: var(--savannah); /* alias — matches design spec name */
   --color-savannah-foreground: var(--savannah-foreground);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
@@ -274,6 +275,11 @@
 @layer base {
   * {
     border-color: var(--color-border);
+  }
+  /* Global text selection — gold highlight, forest text */
+  ::selection {
+    background-color: color-mix(in srgb, var(--gold) 28%, transparent);
+    color: var(--forest-dark);
   }
   body {
     background-color: var(--color-background);
