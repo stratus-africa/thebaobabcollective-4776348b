@@ -116,7 +116,7 @@ function ItineraryPage() {
         {/* Hero */}
         <section className="relative h-[70vh] min-h-[480px] flex items-end">
           <img src={itinerary.image} alt={itinerary.name} className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/82 via-forest-dark/40 to-transparent" />
           <div className="relative max-w-[1920px] mx-auto px-6 lg:px-10 pb-16 text-background w-full">
             {cat && (
               <Link
