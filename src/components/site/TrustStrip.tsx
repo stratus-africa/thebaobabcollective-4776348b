@@ -28,7 +28,7 @@ export function TrustStrip({ content }: { content?: TrustContent | null } = {}) 
                 key={idx}
                 className="flex items-start sm:items-center gap-3.5 sm:gap-4 group transition-transform duration-300 hover:translate-y-[-2px]"
               >
-                <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-forest/8 text-forest grid place-items-center shrink-0 border border-forest/10 group-hover:bg-forest group-hover:text-forest-foreground transition-colors duration-300">
+                <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-forest/[0.08] text-forest grid place-items-center shrink-0 border border-forest/10 group-hover:bg-forest group-hover:text-forest-foreground transition-colors duration-300">
                   <Icon
                     className="h-4 w-4 sm:h-5 sm:w-5 text-gold group-hover:text-gold transition-colors"
                     strokeWidth={1.5}
