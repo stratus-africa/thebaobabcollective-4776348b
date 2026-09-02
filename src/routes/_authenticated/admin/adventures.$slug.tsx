@@ -1,5 +1,6 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, notFound, useNavigate, useRouter } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Save, Upload, X, Image as ImageIcon } from "lucide-react";
@@ -42,6 +43,9 @@ function AdminAdventureEditor() {
   const [saving, setSaving] = useState(false);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
   const { data: page } = useQuery({
     queryKey: ["admin-adventures-page"],
     queryFn: () => fetchPage(),
@@ -63,28 +67,53 @@ function AdminAdventureEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const currentPage = page ?? {
-        hero: { eyebrow: "", headline: "", subhead: "", image: "", imageAlt: "" },
-        cta: { eyebrow: "", headline: "", body: "", buttonLabel: "" },
-        signatures: [],
-      };
-      const nextPage = {
-        ...currentPage,
-        signatures: [
-          ...currentPage.signatures.filter((item) => item.slug !== draft.slug && item.slug !== "new"),
-          {
-            ...draft,
-            slug: draft.slug || (isNew ? "new" : initialAdventure.slug),
-            status: draft.status ?? "draft",
-            highlights: draft.highlights ?? [],
-            included: draft.included ?? [],
-            notIncluded: draft.notIncluded ?? [],
+      // Always merge into the latest server state so we never overwrite other adventures
+      const currentPage = await fetchPage().catch(
+        () =>
+          page ?? {
+            hero: { eyebrow: "", headline: "", subhead: "", image: "", imageAlt: "" },
+            cta: { eyebrow: "", headline: "", body: "", buttonLabel: "" },
+            signatures: [],
           },
-        ],
+      );
+
+      const targetSlug =
+        (draft.slug || "").trim() ||
+        (isNew
+          ? (draft.name || "untitled-adventure")
+              .trim()
+              .toLowerCase()
+              .replace(/&/g, "and")
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")
+          : initialAdventure.slug);
+
+      const entry = {
+        ...draft,
+        slug: targetSlug,
+        status: draft.status ?? "draft",
+        highlights: draft.highlights ?? [],
+        included: draft.included ?? [],
+        notIncluded: draft.notIncluded ?? [],
       };
 
+      const existing = currentPage.signatures ?? [];
+      const index = existing.findIndex((item) => item.slug === initialAdventure.slug || item.slug === targetSlug);
+      const signatures =
+        index >= 0
+          ? existing.map((item, i) => (i === index ? entry : item))
+          : [...existing.filter((item) => item.slug !== "new"), entry];
+
+      const nextPage = { ...currentPage, signatures };
+
       await savePage({ data: nextPage });
+      await queryClient.invalidateQueries({ queryKey: ["admin-adventures-page"] });
+      await router.invalidate();
+      toast.success(isNew ? "Adventure created" : "Adventure saved");
       navigate({ to: "/admin/adventures" });
+    } catch (error) {
+      console.error("Failed to save adventure", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save adventure");
     } finally {
       setSaving(false);
     }
