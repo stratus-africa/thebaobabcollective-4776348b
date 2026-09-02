@@ -65,7 +65,7 @@ export function HomeLodges({ content }: { content?: Content | null } = {}) {
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-60" />
 
                   {lodge.location && (
                     <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] uppercase font-medium bg-background/90 backdrop-blur text-foreground px-3 py-1 rounded-full">
