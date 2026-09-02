@@ -1,12 +1,6 @@
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type FilterOption = { value: string; label: string };
 
@@ -137,14 +131,13 @@ export function FilterBar({
 
       <div className="mt-3 flex items-center justify-between gap-3 text-xs text-muted-foreground">
         <p aria-live="polite">
-          Showing <span className="text-foreground font-medium">{resultCount}</span> of{" "}
-          {totalCount}
+          Showing <span className="text-foreground font-medium">{resultCount}</span> of {totalCount}
         </p>
         {hasFilters && onReset ? (
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-1 text-[11px] tracking-[0.2em] uppercase text-foreground hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-sm px-1"
+            className="inline-flex items-center gap-1 text-[11px] tracking-[0.2em] uppercase text-foreground hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-sm px-3 py-2.5 min-h-[44px]"
           >
             <X className="w-3 h-3" aria-hidden="true" /> Clear filters
           </button>
