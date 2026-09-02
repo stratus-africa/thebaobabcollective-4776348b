@@ -245,13 +245,13 @@ function DestinationsDiscoveryPage() {
             <div className="absolute inset-0 bg-radial-gradient from-transparent via-forest/40 to-forest/80" />
 
             {/* Hero Content */}
-            <div className="relative max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 text-center py-24 sm:py-32 w-full">
+            <div className="relative max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 text-center py-16 sm:py-24 md:py-32 w-full">
               <div className="max-w-4xl mx-auto space-y-6">
                 <p className="text-[11px] sm:text-xs tracking-[0.4em] uppercase text-gold font-semibold flex items-center justify-center gap-2">
                   <Sparkles className="w-3.5 h-3.5" /> {content.eyebrow || "Destination Discovery"}
                 </p>
 
-                <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight text-cream leading-[1.02]">
+                <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight text-cream leading-[1.04]">
                   {content.title || "DISCOVER KENYA"}
                 </h1>
 
@@ -473,7 +473,7 @@ function DestinationsDiscoveryPage() {
               <p className="text-[11px] tracking-[0.4em] uppercase text-gold font-semibold">
                 {content.final_cta_eyebrow || "Begin Your Kenyan Journey"}
               </p>
-              <h2 className="font-serif text-4xl sm:text-6xl md:text-7xl text-cream leading-[1.06]">
+              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-[1.06]">
                 {content.final_cta_title || "Your Kenya is waiting."}
               </h2>
               <p className="text-forest-foreground/85 text-base sm:text-xl font-serif max-w-2xl mx-auto leading-relaxed">

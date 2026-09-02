@@ -296,7 +296,7 @@ export function Navbar() {
             {/* Mobile menu button */}
             <button
               type="button"
-              className="lg:hidden p-2 ml-auto rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+              className="lg:hidden p-2.5 ml-auto rounded-sm min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
               onClick={() => setOpen((o) => !o)}
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
@@ -512,7 +512,7 @@ function MobileMenu({
                     key={c.to}
                     to={resolveNavTo(c.to) as any}
                     onClick={() => onClose()}
-                    className="text-[13px] tracking-[0.2em] uppercase text-foreground/60 hover:text-foreground py-1.5 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+                    className="text-[13px] tracking-[0.2em] uppercase text-foreground/60 hover:text-foreground py-2.5 block rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
                   >
                     {c.label}
                   </Link>
@@ -528,7 +528,7 @@ function MobileMenu({
             <Link
               to="/admin"
               onClick={() => onClose()}
-              className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-2.5 mt-2 gap-2"
+              className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-3 mt-2 gap-2"
             >
               <Settings className="w-3.5 h-3.5" aria-hidden="true" />
               Dashboard
@@ -539,7 +539,7 @@ function MobileMenu({
                 signOut();
                 onClose();
               }}
-              className="inline-flex items-center justify-center rounded-full border border-foreground/20 text-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-2.5 gap-2 hover:bg-cream transition-colors"
+              className="inline-flex items-center justify-center rounded-full border border-foreground/20 text-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-3 gap-2 hover:bg-cream transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
               Sign Out
@@ -549,7 +549,7 @@ function MobileMenu({
           <Link
             to={menu.ctaTo as any}
             onClick={() => onClose()}
-            className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-2.5 mt-2"
+            className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-3 mt-2"
           >
             {menu.ctaLabel}
           </Link>
@@ -560,7 +560,7 @@ function MobileMenu({
               <button
                 type="button"
                 onClick={() => onClose()}
-                className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-2.5 mt-2 w-full"
+                className="inline-flex items-center justify-center rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[13px] px-6 py-3 mt-2 w-full"
               >
                 {menu.ctaLabel}
               </button>

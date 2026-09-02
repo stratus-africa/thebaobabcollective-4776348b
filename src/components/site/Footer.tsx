@@ -80,7 +80,7 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
                 <li key={`${l.to}-${i}`}>
                   <Link
                     to={l.to as any}
-                    className="text-[11px] tracking-wider uppercase text-foreground/75 hover:text-gold rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
+                    className="text-[11px] tracking-wider uppercase text-foreground/75 hover:text-gold rounded py-1 block focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
                   >
                     {l.label}
                   </Link>
@@ -111,7 +111,7 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`${label} (opens in new tab)`}
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-full hover:text-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
+                  className="inline-flex items-center justify-center h-11 w-11 rounded-full hover:text-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
                 >
                   <Icon className="w-4 h-4" aria-hidden="true" />
                 </a>
@@ -139,7 +139,7 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
             <button
               type="submit"
               disabled={loading}
-              className="bg-forest text-forest-foreground px-4 disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-inset"
+              className="bg-forest text-forest-foreground px-4 min-h-[44px] disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-inset"
               aria-label={loading ? "Subscribing to newsletter" : "Subscribe to newsletter"}
             >
               {loading ? (

@@ -253,11 +253,11 @@ function HeroSection({
       />
       <div className="absolute inset-0 bg-gradient-to-t from-forest/90 via-forest-dark/35 to-transparent" />
 
-      <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-20 text-cream w-full">
+      <div className="relative max-w-[1920px] mx-auto px-6 lg:px-12 xl:px-16 pb-12 sm:pb-20 text-cream w-full">
         <p className="text-[11px] tracking-[0.35em] uppercase text-gold mb-5 font-semibold">
           {hero.eyebrow || content.eyebrow || "Adventures"}
         </p>
-        <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.05] mb-6 max-w-5xl">
+        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 max-w-5xl">
           {hero.headline || content.title || "EXPERIENCE KENYA BEYOND THE ORDINARY."}
         </h1>
         <p className="text-lg md:text-xl text-cream/90 max-w-2xl leading-relaxed mb-10 font-sans">
@@ -1059,7 +1059,7 @@ function FinalCtaSection({ cta }: { cta: AdventuresPage["cta"] }) {
         <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold">
           {cta.eyebrow || "YOUR ADVENTURE. OUR CRAFT."}
         </p>
-        <h2 className="font-serif text-4xl sm:text-6xl text-cream leading-tight">
+        <h2 className="font-serif text-4xl sm:text-5xl text-cream leading-tight">
           {cta.headline || "Ready to experience Kenya differently?"}
         </h2>
         <p className="text-forest-foreground/85 text-lg leading-relaxed max-w-xl mx-auto font-sans">

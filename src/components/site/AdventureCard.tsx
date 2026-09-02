@@ -69,7 +69,7 @@ export function AdventureCard({ adventure, className = "", featured = false }: A
         <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-80" />
 
         {/* Top Badges */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-2 z-10">
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between flex-wrap gap-2 z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-medium uppercase bg-background/90 text-foreground backdrop-blur border border-border/50 shadow-sm">
             <MapPin className="w-3 h-3 text-gold" />
             {adventure.region}
@@ -149,7 +149,7 @@ export function AdventureCard({ adventure, className = "", featured = false }: A
             trigger={
               <button
                 type="button"
-                className="inline-flex items-center text-[10px] uppercase tracking-[0.2em] text-foreground/60 hover:text-gold transition-colors underline underline-offset-4"
+                className="inline-flex items-center py-2.5 px-2 text-[10px] uppercase tracking-[0.2em] text-foreground/60 hover:text-gold transition-colors underline underline-offset-4 touch-manipulation"
               >
                 Plan Journey
               </button>

@@ -103,13 +103,13 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
           {/* LEFT — copy */}
           <div
             className={`max-w-2xl animate-fade-up ${
-              asBackground ? "min-h-[580px] md:min-h-[660px] flex flex-col justify-center py-8" : ""
+              asBackground ? "min-h-[420px] sm:min-h-[500px] md:min-h-[660px] flex flex-col justify-center py-8" : ""
             }`}
             style={asBackground ? { textShadow: "0 2px 24px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4)" } : undefined}
           >
             <p className="text-[11px] tracking-[0.38em] uppercase text-cream/85 mb-5">The Baobab Collective</p>
 
-            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-wide text-cream max-w-4xl">
+            <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[0.9] tracking-wide text-cream max-w-4xl">
               <span className="block">{c.hero_title_line1}</span>
               <span className="block text-gold">{c.hero_title_line2}</span>
             </h1>
@@ -121,7 +121,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
             <div className="mt-7 md:mt-9 flex flex-wrap items-center gap-3 md:gap-4">
               <Link
                 to="/adventures"
-                className="group inline-flex items-center gap-3 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:bg-gold/90 transition-colors shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
+                className="group inline-flex items-center gap-3 rounded-full bg-gold text-gold-foreground uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3.5 sm:py-3.5 md:py-4 hover:bg-gold/90 transition-colors shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
               >
                 {c.hero_cta_secondary}
                 <ArrowRight
@@ -135,7 +135,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
                 trigger={
                   <button
                     type="button"
-                    className="group inline-flex items-center gap-3 rounded-full border border-cream/60 text-cream uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 hover:border-gold hover:text-gold transition-colors backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
+                    className="group inline-flex items-center gap-3 rounded-full border border-cream/60 text-cream uppercase tracking-[0.2em] text-[11px] px-6 sm:px-7 md:px-8 py-3.5 sm:py-3.5 md:py-4 hover:border-gold hover:text-gold transition-colors backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
                   >
                     {c.hero_cta_primary}
                     <ArrowRight
@@ -262,7 +262,7 @@ function SearchCapsule({
               type="button"
               aria-label="Fewer travellers"
               onClick={() => setTravellers((n) => Math.max(1, n - 1))}
-              className="h-5 w-5 rounded-full border border-forest/25 grid place-items-center hover:bg-forest/5"
+              className="h-8 w-8 rounded-full border border-forest/25 grid place-items-center hover:bg-forest/5 touch-manipulation shrink-0"
             >
               <Minus className="h-3 w-3" />
             </button>
@@ -272,7 +272,7 @@ function SearchCapsule({
               type="button"
               aria-label="More travellers"
               onClick={() => setTravellers((n) => n + 1)}
-              className="h-5 w-5 rounded-full border border-forest/25 grid place-items-center hover:bg-forest/5"
+              className="h-8 w-8 rounded-full border border-forest/25 grid place-items-center hover:bg-forest/5 touch-manipulation shrink-0"
             >
               <Plus className="h-3 w-3" />
             </button>

@@ -58,7 +58,7 @@ export function DestinationFinderSection({
             <button
               type="button"
               onClick={() => onSelectCategory("All")}
-              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all ${
+              className={`flex-shrink-0 px-5 py-3 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all ${
                 selectedCategory === "All"
                   ? "bg-forest text-forest-foreground shadow-sm ring-2 ring-forest ring-offset-2 ring-offset-background"
                   : "bg-background text-foreground/75 hover:border-gold hover:text-gold border border-border shadow-xs"
@@ -74,7 +74,7 @@ export function DestinationFinderSection({
                   key={cat.id}
                   type="button"
                   onClick={() => onSelectCategory(isSelected ? "All" : cat.id)}
-                  className={`flex-shrink-0 px-4 sm:px-5 py-2.5 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all ${
+                  className={`flex-shrink-0 px-4 sm:px-5 py-3 rounded-full text-[11px] tracking-[0.2em] uppercase font-semibold transition-all ${
                     isSelected
                       ? "bg-forest text-forest-foreground shadow-sm ring-2 ring-forest ring-offset-2 ring-offset-background"
                       : "bg-background text-foreground/75 hover:border-gold hover:text-gold border border-border shadow-xs"
@@ -102,7 +102,7 @@ export function DestinationFinderSection({
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground p-2"
                   aria-label="Clear search query"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -117,7 +117,7 @@ export function DestinationFinderSection({
                   onSelectCategory("All");
                   onSearchChange("");
                 }}
-                className="inline-flex items-center gap-1.5 text-xs text-terracotta hover:underline font-semibold whitespace-nowrap px-3 py-2"
+                className="inline-flex items-center gap-1.5 text-xs text-terracotta hover:underline font-semibold whitespace-nowrap px-3 py-3 min-h-[44px]"
               >
                 <X className="w-3.5 h-3.5" /> Reset Filters
               </button>

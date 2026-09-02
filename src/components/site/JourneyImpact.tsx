@@ -17,18 +17,19 @@ export function JourneyImpact({ content }: { content?: ImpactContent | null } = 
   ];
 
   return (
-    <section aria-labelledby="impact-heading" className="bg-cream/60 py-18 md:py-24 border-t border-border/40">
+    <section aria-labelledby="impact-heading" className="bg-cream/60 py-16 md:py-24 border-t border-border/40">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
         <div className="max-w-3xl mb-12 md:mb-16">
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center gap-2">
             <HeartHandshake className="w-3.5 h-3.5" /> {c.eyebrow}
           </p>
-          <h2 id="impact-heading" className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]">
+          <h2
+            id="impact-heading"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08]"
+          >
             {c.title}
           </h2>
-          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">
-            {c.body}
-          </p>
+          <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed max-w-2xl">{c.body}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -46,12 +47,8 @@ export function JourneyImpact({ content }: { content?: ImpactContent | null } = 
                   <p className="text-[10px] tracking-[0.25em] uppercase text-terracotta font-semibold mb-1.5">
                     {pillar.subtitle}
                   </p>
-                  <h3 className="font-serif text-2xl text-foreground mb-3 leading-snug">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-foreground/70 text-sm leading-relaxed">
-                    {pillar.description}
-                  </p>
+                  <h3 className="font-serif text-2xl text-foreground mb-3 leading-snug">{pillar.title}</h3>
+                  <p className="text-foreground/70 text-sm leading-relaxed">{pillar.description}</p>
                 </div>
               </div>
             );
