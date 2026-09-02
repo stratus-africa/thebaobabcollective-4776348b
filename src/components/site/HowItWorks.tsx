@@ -2,6 +2,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
+import { useReveal, useRevealChildren } from "@/hooks/useReveal";
 
 type HowItWorksContent = Partial<typeof PAGE_DEFAULTS.home_how_it_works>;
 
@@ -16,10 +17,13 @@ export function HowItWorks({ content }: { content?: HowItWorksContent | null } =
     { num: c.step_4_num, title: c.step_4_title, body: c.step_4_body },
   ];
 
+  const headingRef = useReveal<HTMLDivElement>();
+  const stepsRef = useRevealChildren<HTMLDivElement>();
+
   return (
     <section aria-labelledby="how-it-works-heading" className="bg-forest text-forest-foreground py-16 md:py-24">
       <div className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
-        <div className="text-center max-w-3xl mx-auto mb-14 md:mb-18">
+        <div ref={headingRef} className="reveal text-center max-w-3xl mx-auto mb-14 md:mb-18">
           <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold mb-3 flex items-center justify-center gap-2">
             <Sparkles className="w-3.5 h-3.5" /> {c.eyebrow}
           </p>
@@ -32,11 +36,11 @@ export function HowItWorks({ content }: { content?: HowItWorksContent | null } =
           <p className="mt-4 text-forest-foreground/80 text-base sm:text-lg leading-relaxed">{c.body}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-14">
+        <div ref={stepsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-14">
           {steps.map((step, idx) => (
             <div
               key={idx}
-              className="relative flex flex-col justify-between bg-forest/60 border border-forest-foreground/15 rounded-xl p-7 transition-all duration-300 hover:border-gold/50 hover:bg-forest/80"
+              className={`reveal reveal-delay-${idx + 1} relative flex flex-col justify-between bg-forest/60 border border-forest-foreground/15 rounded-xl p-7 transition-all duration-300 hover:border-gold/50 hover:bg-forest/80`}
             >
               <div>
                 <span className="font-serif text-4xl sm:text-5xl text-gold/80 block mb-4">{step.num}</span>
