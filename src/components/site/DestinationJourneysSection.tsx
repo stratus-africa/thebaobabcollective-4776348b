@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin, Calendar, Compass } from "lucide-react";
 import type { AdventuresSignature } from "@/lib/adventures.functions";
+import { SiteImage } from "@/components/site/SiteImage";
 
 interface DestinationJourneysSectionProps {
   adventures: AdventuresSignature[];

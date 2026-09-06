@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin, Sparkles } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { SiteImage } from "@/components/site/SiteImage";
 
 interface DestinationStaySectionProps {
   lodges: any[];
