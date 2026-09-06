@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Calendar, ArrowRight, Sparkles } from "lucide-react";
 import type { DestinationMetadata } from "@/lib/destinations.data";
+import { SiteImage } from "@/components/site/SiteImage";
 
 interface DestinationCardProps {
   destination: DestinationMetadata;
