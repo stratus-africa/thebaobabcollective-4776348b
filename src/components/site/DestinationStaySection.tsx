@@ -52,10 +52,13 @@ export function DestinationStaySection({ lodges, eyebrow, title, body }: Destina
                 params={{ slug: lodge.slug }}
                 className="relative aspect-[16/10] overflow-hidden block"
               >
-                <img
+                <SiteImage
                   src={lodge.hero_image}
                   alt={`${lodge.name}, ${lodge.location}`}
                   loading="lazy"
+                  responsiveWidths={[320, 640, 960]}
+                  baseWidth={960}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-60" />
