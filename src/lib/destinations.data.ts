@@ -548,6 +548,7 @@ export function enrichDestination(dbDest: any): DestinationMetadata {
     longitude: dbDest.longitude ?? meta?.longitude ?? 36.817223,
     featured: dbDest.featured ?? meta?.featured ?? false,
     fallbackImage,
+    cmsImage: resolveImageSource(dbDest.image),
     highlights,
     relatedDestinations:
       Array.isArray(dbDest.related_destinations) && dbDest.related_destinations.length > 0
