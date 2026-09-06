@@ -86,6 +86,8 @@ export function buildWatermarkSvg({
   watermarkImageUrl,
   opacity,
   scale,
+  width,
+  height,
 }: {
   mode: WatermarkMode;
   text: string;
@@ -94,6 +96,9 @@ export function buildWatermarkSvg({
   watermarkImageUrl?: string;
   opacity?: number;
   scale?: number;
+  /** Intrinsic pixel size of the wrapped photo, when known. */
+  width?: number;
+  height?: number;
 }) {
   const safeText = (text || "The Baobab Collective").replace(/[<>&"']/g, "");
   const waterOpacity = opacity ?? 0.7;
