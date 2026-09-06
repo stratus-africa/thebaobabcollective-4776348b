@@ -133,10 +133,10 @@ export function buildWatermarkSvg({
         : "";
 
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+    <svg xmlns="http://www.w3.org/2000/svg" ${svgSizeAttrs} viewBox="0 0 ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet">
       <defs>
         <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="0" stdDeviation="0.5" flood-color="rgba(0,0,0,0.35)"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="${shadowDeviation}" flood-color="rgba(0,0,0,0.35)"/>
         </filter>
       </defs>
       <g filter="url(#softShadow)">${baseMarkup}${waterMarkup}</g>
