@@ -50,6 +50,8 @@ export interface DestinationMetadata {
   longitude: number;
   featured: boolean;
   fallbackImage: string;
+  /** Image uploaded through the media library, when the record has one. */
+  cmsImage?: string | null;
   highlights: string[];
   relatedDestinations: string[];
 }
