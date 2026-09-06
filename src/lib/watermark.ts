@@ -114,8 +114,17 @@ export function buildWatermarkSvg({
   const baseMarkup = imageDataUrl
     ? `<image href="${escapeXml(imageDataUrl)}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" />`
     : "";
+  // When the photo's true pixel size is known, the SVG adopts it so the browser
+  // gets a real intrinsic size and the original aspect ratio (a fixed 100x100
+  // viewBox letterboxes every photo into a square).
+  const hasSize = Number.isFinite(width) && Number.isFinite(height) && (width ?? 0) > 0 && (height ?? 0) > 0;
+  const vbW = hasSize ? Math.round(width!) : 100;
+  const vbH = hasSize ? Math.round(height!) : 100;
+  const svgSizeAttrs = hasSize ? `width="${vbW}" height="${vbH}"` : `width="100%" height="100%"`;
+  const shadowDeviation = hasSize ? Math.max(1, Math.round(vbH * 0.005)) : 0.5;
+
   const imageSizePct = 18 * waterScale;
-  const textSize = 24 * waterScale;
+  const textSize = (hasSize ? vbH * 0.05 : 24) * waterScale;
   const waterMarkup =
     mode === "text"
       ? `<text x="${placement.x}%" y="${placement.y}%" text-anchor="${placement.anchor}" dominant-baseline="${placement.baseline}" fill="rgba(255,255,255,${waterOpacity})" font-size="${textSize}" font-weight="700" font-family="Georgia, serif" letter-spacing="1.2">${safeText}</text>`
