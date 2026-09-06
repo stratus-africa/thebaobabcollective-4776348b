@@ -13,6 +13,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { SiteImage } from "@/components/site/SiteImage";
 
 const lodgesQuery = queryOptions({
   queryKey: ["lodges"],
@@ -58,7 +59,13 @@ function LodgesPage() {
           <section className="relative bg-forest text-forest-foreground py-24 text-center px-6 overflow-hidden">
             {content.hero_image ? (
               <>
-                <img src={content.hero_image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <SiteImage
+                  src={content.hero_image}
+                  alt=""
+                  fetchPriority="high"
+                  sizes="100vw"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
                 <div className="absolute inset-0 bg-forest/70" />
               </>
             ) : null}

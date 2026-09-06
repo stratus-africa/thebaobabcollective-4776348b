@@ -464,9 +464,10 @@ function DestinationsDiscoveryPage() {
             aria-label="Final Journey Planning CTA"
             className="relative py-24 md:py-32 bg-forest text-cream overflow-hidden text-center"
           >
-            <img
+            <SiteImage
               src={g4Img}
               alt="Majestic baobab tree and giraffe silhouetted at dusk"
+              loading="lazy"
               className="absolute inset-0 w-full h-full object-cover opacity-25"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/80 to-forest/60" />
