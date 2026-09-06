@@ -6,6 +6,7 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { DestinationCard } from "@/components/site/DestinationCard";
+import { SiteImage } from "@/components/site/SiteImage";
 const KenyaDestinationsMap = lazy(() =>
   import("@/components/site/KenyaDestinationsMap").then((m) => ({ default: m.KenyaDestinationsMap })),
 );
@@ -231,8 +232,9 @@ function DestinationsDiscoveryPage() {
             className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center bg-forest text-cream overflow-hidden"
           >
             {/* Background Image */}
-            <img
-              src={resolveImageSource(content.hero_image, heroBaobab) ?? heroBaobab}
+            <SiteImage
+              src={resolveImageSource(content.hero_image) ?? heroBaobab}
+              fallback={heroBaobab}
               alt="Golden sunrise across Kenya's wild savannah and acacia trees"
               className="absolute inset-0 w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
               decoding="async"

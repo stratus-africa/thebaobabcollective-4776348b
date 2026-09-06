@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin, Calendar, Compass, Sparkles } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import type { AdventuresSignature } from "@/lib/adventures.functions";
+import { SiteImage } from "@/components/site/SiteImage";
 
 export const DIFFICULTY_HUMAN_MAP: Record<string, { label: string; tone: string; description: string }> = {
   Easy: {
