@@ -4,6 +4,7 @@ import { getSiteSettings } from "@/lib/site-settings.functions";
 import { buildWatermarkSvg, resolveWatermarkPolicy } from "@/lib/watermark";
 import { CMS_MEDIA_BUCKET } from "@/lib/media-storage";
 import { resolveMediaObjectKey } from "@/lib/local-media";
+import { getImageDimensions } from "@/lib/image-dimensions";
 
 // Allowed responsive widths (matches the srcSet ladder used by SiteImage).
 export const WIDTH_LADDER = [320, 640, 960, 1280, 1920];
@@ -106,6 +107,7 @@ export const Route = createFileRoute("/api/public/media/$")({
             fileBuffer = Buffer.from(await original.body.arrayBuffer());
           }
           const base64 = fileBuffer.toString("base64");
+          const dimensions = getImageDimensions(new Uint8Array(fileBuffer));
           const svg = buildWatermarkSvg({
             mode: policy.mode,
             text: policy.text,
@@ -114,6 +116,8 @@ export const Route = createFileRoute("/api/public/media/$")({
             watermarkImageUrl: policy.mode === "image" ? policy.imageUrl : undefined,
             opacity: policy.opacity,
             scale: policy.scale,
+            width: dimensions?.width,
+            height: dimensions?.height,
           });
 
           return new Response(svg, {

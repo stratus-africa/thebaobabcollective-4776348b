@@ -13,6 +13,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
+import { SiteImage } from "@/components/site/SiteImage";
 
 const lodgesQuery = queryOptions({
   queryKey: ["lodges"],
@@ -58,7 +59,13 @@ function LodgesPage() {
           <section className="relative bg-forest text-forest-foreground py-24 text-center px-6 overflow-hidden">
             {content.hero_image ? (
               <>
-                <img src={content.hero_image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <SiteImage
+                  src={content.hero_image}
+                  alt=""
+                  fetchPriority="high"
+                  sizes="100vw"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
                 <div className="absolute inset-0 bg-forest/70" />
               </>
             ) : null}
@@ -121,10 +128,13 @@ function LodgesGrid({ content }: { content: typeof PAGE_DEFAULTS.lodges_index })
                 aria-label={`View ${l.name}`}
                 className="relative aspect-[4/3] overflow-hidden block"
               >
-                <img
+                <SiteImage
                   src={l.hero_image}
                   alt={`${l.name}, ${l.location ?? "lodge"}`}
                   loading="lazy"
+                  responsiveWidths={[320, 640, 960]}
+                  baseWidth={960}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="w-full h-full object-cover motion-safe:transition-transform motion-safe:duration-700 ease-out motion-safe:group-hover:scale-110"
                 />
                 <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 bg-background/90 backdrop-blur text-[10px] tracking-[0.2em] uppercase px-3 py-1.5 text-foreground rounded-full">

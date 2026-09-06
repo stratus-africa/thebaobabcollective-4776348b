@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Calendar, ArrowRight, Sparkles } from "lucide-react";
 import type { DestinationMetadata } from "@/lib/destinations.data";
+import { SiteImage } from "@/components/site/SiteImage";
 
 interface DestinationCardProps {
   destination: DestinationMetadata;
@@ -22,10 +23,14 @@ export function DestinationCard({ destination: d, variant = "standard", classNam
         className={`relative block overflow-hidden ${isFeature ? "aspect-[16/10] sm:aspect-[16/9]" : "aspect-[4/3]"} bg-cream/30 focus:outline-none`}
         aria-label={`Explore ${d.name}, ${d.region}`}
       >
-        <img
-          src={d.fallbackImage}
+        <SiteImage
+          src={d.cmsImage ?? d.fallbackImage}
+          fallback={d.fallbackImage}
           alt={`${d.name} — ${d.region}, ${d.country}`}
           loading="lazy"
+          responsiveWidths={[320, 640, 960]}
+          baseWidth={960}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-75 group-hover:opacity-85 transition-opacity" />

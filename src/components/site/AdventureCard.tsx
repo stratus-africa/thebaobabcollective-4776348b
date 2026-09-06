@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin, Calendar, Compass, Sparkles } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import type { AdventuresSignature } from "@/lib/adventures.functions";
+import { SiteImage } from "@/components/site/SiteImage";
 
 export const DIFFICULTY_HUMAN_MAP: Record<string, { label: string; tone: string; description: string }> = {
   Easy: {
@@ -60,10 +61,13 @@ export function AdventureCard({ adventure, className = "", featured = false }: A
     >
       {/* Media Header */}
       <div className="relative aspect-[16/10] overflow-hidden bg-cream">
-        <img
+        <SiteImage
           src={adventure.image}
           alt={`${adventure.name} — ${adventure.region}`}
           loading="lazy"
+          responsiveWidths={[320, 640, 960]}
+          baseWidth={960}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent opacity-80" />

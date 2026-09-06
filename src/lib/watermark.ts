@@ -86,6 +86,8 @@ export function buildWatermarkSvg({
   watermarkImageUrl,
   opacity,
   scale,
+  width,
+  height,
 }: {
   mode: WatermarkMode;
   text: string;
@@ -94,6 +96,9 @@ export function buildWatermarkSvg({
   watermarkImageUrl?: string;
   opacity?: number;
   scale?: number;
+  /** Intrinsic pixel size of the wrapped photo, when known. */
+  width?: number;
+  height?: number;
 }) {
   const safeText = (text || "The Baobab Collective").replace(/[<>&"']/g, "");
   const waterOpacity = opacity ?? 0.7;
@@ -109,8 +114,17 @@ export function buildWatermarkSvg({
   const baseMarkup = imageDataUrl
     ? `<image href="${escapeXml(imageDataUrl)}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" />`
     : "";
+  // When the photo's true pixel size is known, the SVG adopts it so the browser
+  // gets a real intrinsic size and the original aspect ratio (a fixed 100x100
+  // viewBox letterboxes every photo into a square).
+  const hasSize = Number.isFinite(width) && Number.isFinite(height) && (width ?? 0) > 0 && (height ?? 0) > 0;
+  const vbW = hasSize ? Math.round(width!) : 100;
+  const vbH = hasSize ? Math.round(height!) : 100;
+  const svgSizeAttrs = hasSize ? `width="${vbW}" height="${vbH}"` : `width="100%" height="100%"`;
+  const shadowDeviation = hasSize ? Math.max(1, Math.round(vbH * 0.005)) : 0.5;
+
   const imageSizePct = 18 * waterScale;
-  const textSize = 24 * waterScale;
+  const textSize = (hasSize ? vbH * 0.05 : 24) * waterScale;
   const waterMarkup =
     mode === "text"
       ? `<text x="${placement.x}%" y="${placement.y}%" text-anchor="${placement.anchor}" dominant-baseline="${placement.baseline}" fill="rgba(255,255,255,${waterOpacity})" font-size="${textSize}" font-weight="700" font-family="Georgia, serif" letter-spacing="1.2">${safeText}</text>`
@@ -119,10 +133,10 @@ export function buildWatermarkSvg({
         : "";
 
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+    <svg xmlns="http://www.w3.org/2000/svg" ${svgSizeAttrs} viewBox="0 0 ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet">
       <defs>
         <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="0" stdDeviation="0.5" flood-color="rgba(0,0,0,0.35)"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="${shadowDeviation}" flood-color="rgba(0,0,0,0.35)"/>
         </filter>
       </defs>
       <g filter="url(#softShadow)">${baseMarkup}${waterMarkup}</g>
