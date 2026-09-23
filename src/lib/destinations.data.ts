@@ -1,15 +1,19 @@
-import elephantImg from "@/assets/elephant.jpg";
-import lodgeTentImg from "@/assets/lodge-tent.jpg";
-import heroBaobabImg from "@/assets/hero-baobab.jpg";
 import { resolveImageSource } from "@/lib/image-resolution";
-import journalLionImg from "@/assets/journal-lion.jpg";
-import g1Img from "@/assets/gallery-1.jpg";
-import g2Img from "@/assets/gallery-2.jpg";
-import g3Img from "@/assets/gallery-3.jpg";
-import g4Img from "@/assets/gallery-4.jpg";
-import g5Img from "@/assets/gallery-5.jpg";
-import g6Img from "@/assets/gallery-6.jpg";
-import g7Img from "@/assets/gallery-7.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
+
+const {
+  elephant: elephantImg,
+  lodgeTent: lodgeTentImg,
+  heroBaobab: heroBaobabImg,
+  journalLion: journalLionImg,
+  gallery1: g1Img,
+  gallery2: g2Img,
+  gallery3: g3Img,
+  gallery4: g4Img,
+  gallery5: g5Img,
+  gallery6: g6Img,
+  gallery7: g7Img,
+} = MEDIA_ASSETS;
 
 export type DestinationCategory = "The Icons" | "Beyond the Classics" | "The Indian Ocean";
 

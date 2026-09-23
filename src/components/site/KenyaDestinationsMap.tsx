@@ -19,7 +19,8 @@ import {
   DESTINATION_LABEL_OFFSETS,
   getDestinationMapPosition,
 } from "@/lib/destinations.data";
-import kenyaMapAsset from "@/assets/kenya-destinations-map.webp";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
+import { SiteImage } from "@/components/site/SiteImage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -438,9 +439,11 @@ export function KenyaDestinationsMap({
               style={{ aspectRatio: "1 / 1.18" }}
             >
               {/* Reference Map Image Layer */}
-              <img
-                src={mapImage || kenyaMapAsset}
+              <SiteImage
+                src={mapImage || MEDIA_ASSETS.kenyaDestinationsMap}
                 alt="Map of Kenya showing major destinations and geographic regions"
+                sizes="(max-width: 1024px) 100vw, 42vw"
+                responsiveWidths={[640, 960]}
                 className="absolute inset-0 w-full h-full object-cover select-none rounded-xl pointer-events-none"
               />
 
@@ -563,9 +566,12 @@ export function KenyaDestinationsMap({
               <div className="bg-background text-foreground rounded-2xl overflow-hidden border border-border flex flex-col h-full shadow-2xl transition-all duration-500">
                 {/* Image Showcase */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-cream">
-                  <img
+                  <SiteImage
                     src={activeDestination.fallbackImage}
                     alt={activeDestination.name}
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 58vw"
+                    responsiveWidths={[640, 960, 1280]}
                     className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/75 via-transparent to-transparent" />
