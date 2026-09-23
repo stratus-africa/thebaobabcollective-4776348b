@@ -1,52 +1,36 @@
-## 1. Admin Sidebar Restructure (`src/routes/_authenticated/admin/route.tsx`)
+# Clean and optimise site imagery
 
-**Pages section** — collapse the current three "Pages · Home / About / Contact" groups plus "Pages · Landings" into **three sidebar entries** that open new hub pages:
+## Goal
+Keep all destination content, remove every broken image reference, and move the remaining bundled fallback photography into the Media Library as WebP so the shared image system can request appropriately sized versions.
 
-- `Pages → Home` → `/admin/pages-hub/home`
-- `Pages → About` → `/admin/pages-hub/about`
-- `Pages → Contact` → `/admin/pages/contact` (single editor, no hub needed)
+## Changes
 
-Remove: Home—Hero, Adventures, Destinations, Lodges, Journal, Instagram, Top Bar, About—Hero, Mission, Values, Team, and the entire "Pages · Landings" group (Lodges Landing, Adventures Landing, Adventure Detail, Lodge Detail, Footer) as flat sidebar links — they become tabs inside the hubs / Settings.
+### 1. Replace broken CMS image references
+- Cross-check every image field in Adventures, Destinations, Journeys, Lodges, Journal, Testimonials, and page settings against the actual files in the Media Library.
+- Replace the ten confirmed missing destination image links with matching, valid images rather than deleting the destination records.
+- Use each destination’s existing curated fallback image as the source when no destination-specific Media Library image exists.
+- Re-run the cross-check after replacement and confirm there are no remaining CMS image URLs pointing to absent files.
 
-**Management section** — rename:
-- Adventures → **Manage Adventures**
-- Lodges → **Manage Lodges**
-- Destinations → **Manage Destinations**
+### 2. Move bundled fallback images into the Media Library
+- Re-encode the remaining bundled JPEG photography to WebP at visually equivalent quality.
+- Include homepage, Adventures, Destinations, Lodges, Testimonials, and shared section fallbacks; also move the bundled Kenya map through the same Media Library delivery path.
+- Upload the WebP files to the Media Library using stable, unique filenames.
+- Remove superseded bundled raster files after all references have moved.
 
-**System / Settings** — Footer moves out of the sidebar and becomes a tab inside Settings (see §3).
+### 3. Route every fallback through the shared image pipeline
+- Replace static asset imports with central Media Library URLs.
+- Keep `SiteImage` as the single rendering path for these photos.
+- Preserve the current design, crops, focal points, lazy-loading choices, eager hero loading, and accessible alternative text.
+- Ensure the Media Library endpoint produces responsive width candidates, WebP delivery, immutable caching, and watermark behavior where configured.
+- Correct homepage social-preview metadata so it never advertises a relative bundled image URL.
 
-## 2. New Page Hub Route (`src/routes/_authenticated/admin/pages-hub.$section.tsx`)
+### 4. Verify
+- Confirm every referenced Media Library object exists.
+- Check Home, Adventures, Destinations, Partner Lodges, Testimonials, Journal, Gallery, and Contact on desktop and mobile.
+- Verify no broken images, no fallback flash, responsive `srcset` values, and successful resized responses from the media endpoint.
+- Run focused tests and confirm the latest production build passes.
 
-One route file handling `home` and `about` sections. Renders horizontal tabs; each tab body mounts the existing per-page editor from `pages.$page.tsx` (extracted into a shared `<PageEditor pageKey=... />` component).
-
-**Home tabs** (in order):
-1. Home Hero → `home`
-2. Adventures → `home_adventures` + sub-tabs `adventures_index` (Landing) + `detail_journey` (Detail)
-3. Destinations → `home_destinations` + sub-tab `destinations_index` if it exists, else just `home_destinations` + "Destination Landing" placeholder
-4. Lodges → `home_lodges` + sub-tabs `lodges_index` (Landing) + `detail_lodge` (Detail)
-5. Journal → `home_journal`
-6. Instagram → `home_instagram`
-
-**About tabs**: About Hero (`about`), Mission (`about_mission`), Values (`about_values`), Team (`about_team`).
-
-The current `/admin/pages/$page` editor route stays intact so deep links keep working. The hub simply re-uses the same editor component.
-
-## 3. Settings — Footer Tab (`src/routes/_authenticated/admin/settings.tsx`)
-
-Add a **Footer** tab that reuses the same `PageEditorLink` pattern already used for Sign-in / 404, pointing at `/admin/pages/footer`.
-
-## 4. Enquiry Form Fix (`src/components/site/EnquireForm.tsx`)
-
-- Remove default `adults: "2"` and `children: "0"` from `EMPTY_DRAFT` (set both to `""`).
-- Drop the unused Draft fields that never render as inputs: `destination`, `travel_dates`, `adults`, `children`, `budget`, `trip_type`, `accommodation_style`, `experiences`. Keep only `name`, `email`, `phone`, `message`, `subscribe`.
-- Update the `submit()` payload to stop sending the removed fields (pass empty strings/undefined where the server function requires them).
-- Email + phone are already `required` and validated — confirm validation runs on submit and inline errors render (already wired via `validateField` / `blurValidate`). Keep the existing success state.
-- Fix the misleading "Phone (required)" label → just "Phone number".
-
-## 5. Verification
-
-- `bunx tsgo --noEmit` to confirm the new route + edited files typecheck.
-- Load `/admin` and click through Pages → Home / About to verify tabs mount the correct editors.
-- Submit `/contact` form with missing email/phone to confirm inline errors, then with valid data to confirm success state.
-
-No backend / schema changes. All work is admin UI + one shared frontend form.
+## Technical details
+- The Media Library is backed directly by stored objects, not a separate media-record table. The cleanup therefore updates broken CMS content references; it does not remove valid files merely because they are duplicated.
+- Simply renaming a bundled file to `.webp` does not enable server-side resizing. Images must be uploaded and served through `/api/public/media/...`, which is what `SiteImage` recognizes for responsive derivatives.
+- Current audit found ten missing destination image references: Amboseli, Lake Naivasha, Lamu, Maasai Mara, Malindi, Mombasa, Mt. Kenya, Samburu, Tsavo East, and Tsavo West.
