@@ -89,6 +89,9 @@ export function InstagramTimeline({ fallbackPhotos, initialData }: { fallbackPho
                       sourceReady={!isLoading}
                       alt={p.caption || ""}
                       loading="lazy"
+                      baseWidth={320}
+                      responsiveWidths={[320]}
+                      sizes="80px"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).style.display = "none";

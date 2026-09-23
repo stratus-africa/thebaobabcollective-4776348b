@@ -1,13 +1,14 @@
 import heroBaobab from "@/assets/hero-baobab.jpg";
 import lodgeTent from "@/assets/lodge-tent.jpg";
 import elephant from "@/assets/elephant.jpg";
-import journalBaobab from "@/assets/journal-baobab.jpg";
-import journalLion from "@/assets/journal-lion.jpg";
-import journalLodge from "@/assets/journal-lodge.jpg";
 import g1 from "@/assets/gallery-1.jpg";
 import g2 from "@/assets/gallery-2.jpg";
 import g3 from "@/assets/gallery-3.jpg";
 import g4 from "@/assets/gallery-4.jpg";
+
+const journalBaobab = "/api/public/media/1786937361601-journal-baobab.jpg";
+const journalLion = "/api/public/media/1786937362836-journal-lion.jpg";
+const journalLodge = "/api/public/media/1786937363764-journal-lodge.jpg";
 
 export type Itinerary = {
   name: string;

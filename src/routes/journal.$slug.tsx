@@ -3,6 +3,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
+import { SiteImage } from "@/components/site/SiteImage";
 import { articles as staticArticles, getArticle as getStaticArticle } from "@/lib/content";
 import { getArticleBySlug, getArticles } from "@/lib/cms.functions";
 
@@ -55,7 +56,7 @@ export const Route = createFileRoute("/journal/$slug")({
     } else {
       relatedPool = staticArticles.map((a) => ({ ...a }));
     }
-    const related = relatedPool.filter((a) => a.slug !== article!.slug).slice(0, 2);
+    const related = relatedPool.filter((a) => a.slug !== article.slug).slice(0, 2);
 
     return { article, related };
   },
@@ -71,7 +72,9 @@ export const Route = createFileRoute("/journal/$slug")({
         { property: "og:description", content: desc },
         { property: "og:type", content: "article" },
         { property: "og:url", content: a ? `/journal/${a.slug}` : "/journal" },
-        ...(a?.image ? [{ property: "og:image", content: a.image }] : []),
+        ...(a?.image?.startsWith("https://") ? [{ property: "og:image", content: a.image }] : []),
+        { name: "twitter:card", content: "summary_large_image" },
+        ...(a?.image?.startsWith("https://") ? [{ name: "twitter:image", content: a.image }] : []),
       ],
       links: a ? [{ rel: "canonical", href: `/journal/${a.slug}` }] : [],
     };
@@ -125,7 +128,15 @@ function ArticlePage() {
           {article.image && (
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 -mt-8 md:-mt-12">
               <div className="aspect-[16/9] overflow-hidden">
-                <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+                <SiteImage
+                  src={article.image}
+                  alt={article.title}
+                  fetchPriority="high"
+                  baseWidth={1280}
+                  responsiveWidths={[640, 960, 1280, 1920]}
+                  sizes="(min-width: 1024px) 960px, 100vw"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           )}
@@ -181,7 +192,15 @@ function ArticlePage() {
                   >
                     <div className="overflow-hidden aspect-square">
                       {a.image ? (
-                        <img src={a.image} alt={a.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        <SiteImage
+                          src={a.image}
+                          alt={a.title}
+                          loading="lazy"
+                          baseWidth={320}
+                          responsiveWidths={[320, 640]}
+                          sizes="140px"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
                       ) : <div className="w-full h-full bg-background" />}
                     </div>
                     <div>

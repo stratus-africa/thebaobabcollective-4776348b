@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { submitEnquiry } from "@/lib/submissions.functions";
 import { useFormAutosave } from "@/hooks/use-form-autosave";
+import { SiteImage } from "@/components/site/SiteImage";
 
 export type EnquireFormProps = {
   defaultSubject?: string;
@@ -277,9 +278,12 @@ export function EnquireForm({
       {context && (
         <div className="flex items-center gap-4 border border-gold/30 bg-gold/5 p-4 rounded-xl">
           {context.image && (
-            <img
+            <SiteImage
               src={context.image}
               alt=""
+              baseWidth={320}
+              responsiveWidths={[320]}
+              sizes="80px"
               className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-border shrink-0"
             />
           )}
