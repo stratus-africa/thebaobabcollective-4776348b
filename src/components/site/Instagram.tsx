@@ -56,6 +56,9 @@ export function InstagramStrip({ content }: { content?: Content | null } = {}) {
                 fallback={p.fallback}
                 alt={p.caption || ""}
                 loading="lazy"
+                baseWidth={320}
+                responsiveWidths={[320]}
+                sizes="96px"
                 className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
               />
             </a>

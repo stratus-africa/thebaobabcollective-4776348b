@@ -8,6 +8,7 @@ import { ShareButtons } from "@/components/site/ShareButtons";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { Lightbox } from "@/components/site/Lightbox";
+import { SiteImage } from "@/components/site/SiteImage";
 import { getLodgeBySlug, getLodges } from "@/lib/cms.functions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -167,10 +168,13 @@ function LodgePage() {
                         className="aspect-[4/3] overflow-hidden group block"
                         aria-label={`Open image ${i + 1} in lightbox`}
                       >
-                        <img
+                        <SiteImage
                           src={g.src}
                           alt={g.alt}
                           loading="lazy"
+                          baseWidth={640}
+                          responsiveWidths={[320, 640, 960]}
+                          sizes="(min-width: 768px) 25vw, 50vw"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
                       </button>

@@ -4,6 +4,7 @@ import { articles as staticArticles } from "@/lib/content";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { useReveal } from "@/hooks/useReveal";
+import { SiteImage } from "@/components/site/SiteImage";
 
 type Content = Partial<typeof PAGE_DEFAULTS.home_journal>;
 type Article = {
@@ -57,10 +58,13 @@ export function Journal({
               >
                 <div className="overflow-hidden mb-6 aspect-[4/5] md:aspect-[5/4]">
                   {featured.image ? (
-                    <img
+                    <SiteImage
                       src={featured.image}
                       alt={featured.title}
                       loading="lazy"
+                      baseWidth={960}
+                      responsiveWidths={[320, 640, 960, 1280]}
+                      sizes="(min-width: 1024px) 40vw, 100vw"
                       className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-1000 ease-out"
                     />
                   ) : (
@@ -87,10 +91,13 @@ export function Journal({
                 >
                   <div className="overflow-hidden mb-4 aspect-[4/3]">
                     {p.image ? (
-                      <img
+                      <SiteImage
                         src={p.image}
                         alt={p.title}
                         loading="lazy"
+                        baseWidth={640}
+                        responsiveWidths={[320, 640, 960]}
+                        sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw"
                         className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-1000 ease-out"
                       />
                     ) : (

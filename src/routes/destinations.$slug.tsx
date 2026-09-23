@@ -20,6 +20,7 @@ import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { Lightbox } from "@/components/site/Lightbox";
 import { TheBaobabPick } from "@/components/site/TheBaobabPick";
 import { DestinationCard } from "@/components/site/DestinationCard";
+import { SiteImage } from "@/components/site/SiteImage";
 import { getDestinationBySlug, getDestinations, getLodges } from "@/lib/cms.functions";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { resolveImageSource } from "@/lib/image-resolution";
@@ -244,12 +245,14 @@ function DestinationDetailPage() {
         {/* ── 1. CINEMATIC HERO ────────────────────────────────────────── */}
         <section className="relative h-[65vh] min-h-[460px] max-h-[720px] flex items-end bg-forest text-cream overflow-hidden">
           {heroImage ? (
-            <img
+            <SiteImage
               src={heroImage}
               alt={`${d.name}, ${d.region}`}
               className="absolute inset-0 w-full h-full object-cover"
               decoding="async"
               fetchPriority="high"
+              baseWidth={1920}
+              responsiveWidths={[640, 960, 1280, 1920]}
               sizes="100vw"
             />
           ) : (

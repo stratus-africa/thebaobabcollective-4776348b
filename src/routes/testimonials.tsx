@@ -33,6 +33,10 @@ export const Route = createFileRoute("/testimonials")({
     meta: [
       { title: "Guest Stories — The Baobab Collective" },
       { name: "description", content: "Hear from travellers who have journeyed with The Baobab Collective." },
+      { property: "og:title", content: "Guest Stories — The Baobab Collective" },
+      { property: "og:description", content: "Hear from travellers who have journeyed with The Baobab Collective." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   errorComponent: ({ error }) => <div className="p-10 text-center">{error.message}</div>,

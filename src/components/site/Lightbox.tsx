@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { SiteImage } from "@/components/site/SiteImage";
 
 export type LightboxImage = { src: string; caption?: string; alt?: string };
 
@@ -113,10 +114,13 @@ export function Lightbox({
               <ChevronLeft className="w-6 h-6" aria-hidden="true" />
             </button>
           )}
-          <img
+          <SiteImage
             src={current.src}
             alt={current.alt ?? current.caption ?? `Image ${index + 1} of ${count}`}
             aria-describedby={current.caption ? captionId : undefined}
+            baseWidth={1920}
+            responsiveWidths={[640, 960, 1280, 1920]}
+            sizes="100vw"
             className="max-h-[85vh] max-w-full object-contain select-none"
             draggable={false}
           />

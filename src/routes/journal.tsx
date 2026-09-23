@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { SiteImage } from "@/components/site/SiteImage";
 import { articles as staticArticles } from "@/lib/content";
 import { getArticles } from "@/lib/cms.functions";
 
@@ -42,7 +43,9 @@ export const Route = createFileRoute("/journal")({
       { name: "description", content: "Travel inspiration, destination guides and stories from the road less travelled." },
       { property: "og:title", content: "Journal — The Baobab Collective" },
       { property: "og:description", content: "Stories. Guidance. Inspiration." },
+      { property: "og:type", content: "website" },
       { property: "og:url", content: "/journal" },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [{ rel: "canonical", href: "/journal" }],
   }),
@@ -75,10 +78,13 @@ function JournalIndex() {
                 <article>
                   <div className="overflow-hidden aspect-[4/3] mb-5">
                     {a.image ? (
-                      <img
+                      <SiteImage
                         src={a.image}
                         alt={a.title}
                         loading="lazy"
+                        baseWidth={640}
+                        responsiveWidths={[320, 640, 960]}
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                     ) : <div className="w-full h-full bg-cream" />}
