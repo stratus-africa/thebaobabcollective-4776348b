@@ -56,7 +56,7 @@ export const Route = createFileRoute("/journal/$slug")({
     } else {
       relatedPool = staticArticles.map((a) => ({ ...a }));
     }
-    const related = relatedPool.filter((a) => a.slug !== article!.slug).slice(0, 2);
+    const related = relatedPool.filter((a) => a.slug !== article.slug).slice(0, 2);
 
     return { article, related };
   },
