@@ -71,8 +71,11 @@ export const Route = createFileRoute("/api/public/media/$")({
           return rendered;
         };
 
-        // Fast path: no watermark → stream the derivative straight through.
-        if (!policyEarly.enabled) {
+        // Responsive derivatives must remain real raster images. Wrapping a
+        // derivative in a base64 SVG defeats WebP delivery, increases payloads,
+        // and can leave lazy images decoding long after the page is visible.
+        // Full-size media requests continue to honour the watermark policy.
+        if (width || !policyEarly.enabled) {
           const rendered = await renderDerivative();
           if (rendered) {
             return new Response(rendered.body, {

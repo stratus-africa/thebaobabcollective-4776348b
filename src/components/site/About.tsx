@@ -1,5 +1,5 @@
-import lodge from "@/assets/lodge-tent.jpg";
-import elephant from "@/assets/elephant.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
+import { SiteImage } from "@/components/site/SiteImage";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { RichText } from "@/components/site/RichText";
@@ -10,8 +10,8 @@ type AboutContent = Partial<typeof PAGE_DEFAULTS.about>;
 export function About({ content }: { content?: AboutContent | null } = {}) {
   const base = { ...PAGE_DEFAULTS.about, ...(content ?? {}) };
   const c = usePreviewMerge("about", base);
-  const leftSrc = c.image_left_url || lodge;
-  const rightSrc = c.image_right_url || elephant;
+  const leftSrc = c.image_left_url || null;
+  const rightSrc = c.image_right_url || null;
 
   const headingRef = useReveal<HTMLDivElement>();
   const pillarsRef = useRevealChildren<HTMLDivElement>();
@@ -53,18 +53,24 @@ export function About({ content }: { content?: AboutContent | null } = {}) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
           <div className="overflow-hidden shadow-sm">
-            <img
+            <SiteImage
               src={leftSrc}
+              fallback={MEDIA_ASSETS.lodgeTent}
               alt="Luxury safari lodge tent at sunset"
               loading="lazy"
+              sizes="(max-width: 640px) 100vw, 50vw"
+              responsiveWidths={[320, 640, 960]}
               className="w-full h-[260px] sm:h-[380px] md:h-[440px] lg:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
             />
           </div>
           <div className="overflow-hidden shadow-sm sm:mt-12 lg:mt-16">
-            <img
+            <SiteImage
               src={rightSrc}
+              fallback={MEDIA_ASSETS.elephant}
               alt="African elephant in savannah"
               loading="lazy"
+              sizes="(max-width: 640px) 100vw, 50vw"
+              responsiveWidths={[320, 640, 960]}
               className="w-full h-[260px] sm:h-[380px] md:h-[440px] lg:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
             />
           </div>

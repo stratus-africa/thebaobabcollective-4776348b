@@ -23,8 +23,10 @@ import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { mergeDestinationsWithDefaults, type DestinationMetadata } from "@/lib/destinations.data";
 import { resolveImageSource } from "@/lib/image-resolution";
-import heroBaobab from "@/assets/hero-baobab.jpg";
-import g4Img from "@/assets/gallery-4.jpg";
+import { ABSOLUTE_MEDIA_ASSETS, MEDIA_ASSETS } from "@/lib/media-assets";
+
+const heroBaobab = MEDIA_ASSETS.heroBaobab;
+const g4Img = MEDIA_ASSETS.gallery4;
 
 const destinationsQuery = queryOptions({
   queryKey: ["destinations"],
@@ -66,7 +68,7 @@ export const Route = createFileRoute("/destinations/")({
         content:
           "From the wild northern frontier to the Indian Ocean, explore the places that make Kenya extraordinary.",
       },
-      { property: "og:image", content: heroBaobab },
+      { property: "og:image", content: ABSOLUTE_MEDIA_ASSETS.heroBaobab },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://thebaobabcollective.co.uk/destinations" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -79,7 +81,7 @@ export const Route = createFileRoute("/destinations/")({
         content:
           "Discover Kenya's most extraordinary safari, wilderness and coastal destinations. Explore tailor-made journeys with The Baobab Collective.",
       },
-      { name: "twitter:image", content: heroBaobab },
+      { name: "twitter:image", content: ABSOLUTE_MEDIA_ASSETS.heroBaobab },
     ],
     links: [{ rel: "canonical", href: "https://thebaobabcollective.co.uk/destinations" }],
     scripts: [

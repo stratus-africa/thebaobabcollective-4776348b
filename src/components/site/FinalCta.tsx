@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
-import ctaImg from "@/assets/elephant.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
+import { SiteImage } from "@/components/site/SiteImage";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
@@ -13,10 +14,13 @@ export function FinalCta({ content }: { content?: FinalCtaContent | null } = {})
   return (
     <section aria-labelledby="final-cta-heading" className="relative overflow-hidden">
       <div className="relative min-h-[420px] sm:min-h-[480px] flex items-center">
-        <img
-          src={ctaImg}
+        <SiteImage
+          src={MEDIA_ASSETS.elephant}
           alt=""
           aria-hidden="true"
+          loading="lazy"
+          sizes="100vw"
+          responsiveWidths={[640, 960, 1280, 1920]}
           className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
         />
         <div

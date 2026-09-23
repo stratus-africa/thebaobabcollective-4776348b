@@ -1,11 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
-import elephantImg from "@/assets/elephant.jpg";
-import lodgeTentImg from "@/assets/lodge-tent.jpg";
-import g1Img from "@/assets/gallery-1.jpg";
-import g2Img from "@/assets/gallery-2.jpg";
-import g3Img from "@/assets/gallery-3.jpg";
-import g4Img from "@/assets/gallery-4.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { SiteImage } from "@/components/site/SiteImage";
@@ -27,7 +22,7 @@ const JOURNEY_STYLES: JourneyTypeCard[] = [
     title: "Safari & Wildlife",
     tagline: "Wild Heart",
     description: "Experience Kenya's iconic wilderness — from the Mara plains to the red elephants of Tsavo.",
-    fallbackImage: elephantImg,
+    fallbackImage: MEDIA_ASSETS.elephant,
     imageKey: "card_1_image",
     to: "/adventures",
     badge: "Signature",
@@ -36,7 +31,7 @@ const JOURNEY_STYLES: JourneyTypeCard[] = [
     title: "The Great Migration",
     tagline: "Nature's Wonder",
     description: "Witness millions of wildebeest and zebra braving river crossings in an epic natural spectacle.",
-    fallbackImage: g3Img,
+    fallbackImage: MEDIA_ASSETS.gallery3,
     imageKey: "card_2_image",
     to: "/adventures",
     badge: "Seasonal",
@@ -45,7 +40,7 @@ const JOURNEY_STYLES: JourneyTypeCard[] = [
     title: "Honeymoon & Romance",
     tagline: "Private Sanctuary",
     description: "Intimate star-bed sleep-outs, private bush dinners and secluded luxury camps under African skies.",
-    fallbackImage: lodgeTentImg,
+    fallbackImage: MEDIA_ASSETS.lodgeTent,
     imageKey: "card_3_image",
     to: "/private-travel",
     badge: "Bespoke",
@@ -54,7 +49,7 @@ const JOURNEY_STYLES: JourneyTypeCard[] = [
     title: "Family Adventure",
     tagline: "All Generations",
     description: "A safari thoughtfully paced for curious travellers of all ages, with dedicated family guides.",
-    fallbackImage: g1Img,
+    fallbackImage: MEDIA_ASSETS.gallery1,
     imageKey: "card_4_image",
     to: "/adventures",
   },
@@ -62,7 +57,7 @@ const JOURNEY_STYLES: JourneyTypeCard[] = [
     title: "Beach & Safari",
     tagline: "Savannah to Sea",
     description: "Seamlessly combine exhilarating game drives with the turquoise waters of the Swahili Coast.",
-    fallbackImage: g2Img,
+    fallbackImage: MEDIA_ASSETS.gallery2,
     imageKey: "card_5_image",
     to: "/destinations",
   },
@@ -70,7 +65,7 @@ const JOURNEY_STYLES: JourneyTypeCard[] = [
     title: "Culture & Connection",
     tagline: "People & Stories",
     description: "Meet the people and communities that make Kenya extraordinary — guided by local elders.",
-    fallbackImage: g4Img,
+    fallbackImage: MEDIA_ASSETS.gallery4,
     imageKey: "card_6_image",
     to: "/about",
   },

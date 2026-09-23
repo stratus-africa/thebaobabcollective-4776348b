@@ -14,7 +14,7 @@ const InstagramStrip = lazy(() => import("@/components/site/Instagram").then((m)
 const TestimonialsStrip = lazy(() => import("@/components/site/TestimonialsStrip").then((m) => ({ default: m.TestimonialsStrip })));
 import { getPageContents } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
-import heroBaobab from "@/assets/hero-baobab.jpg";
+import { ABSOLUTE_MEDIA_ASSETS } from "@/lib/media-assets";
 
 const HOME_CONTENT_KEYS = [
   "home",
@@ -49,7 +49,9 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Bespoke wild adventures across Kenya — crafted personally by the Baobab Collective.",
       },
-      { property: "og:image", content: heroBaobab },
+      { property: "og:image", content: ABSOLUTE_MEDIA_ASSETS.heroBaobab },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ABSOLUTE_MEDIA_ASSETS.heroBaobab },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],

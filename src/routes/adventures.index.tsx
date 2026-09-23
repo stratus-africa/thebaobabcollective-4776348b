@@ -28,11 +28,9 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { AdventureCard, getHumanDifficulty } from "@/components/site/AdventureCard";
+import { SiteImage } from "@/components/site/SiteImage";
 import { Label } from "@/components/ui/label";
-import heroBaobab from "@/assets/hero-baobab.jpg";
-import g1Img from "@/assets/gallery-1.jpg";
-import g4Img from "@/assets/gallery-4.jpg";
-import elephantImg from "@/assets/elephant.jpg";
+import { ABSOLUTE_MEDIA_ASSETS, MEDIA_ASSETS } from "@/lib/media-assets";
 import {
   adventuresDefaults,
   getAdventuresPage,
@@ -43,6 +41,11 @@ import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS, ADVENTURES_SECTIONS, adventuresSectionOrder } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { DESTINATION_COMBINATIONS } from "@/lib/destinations.data";
+
+const heroBaobab = MEDIA_ASSETS.heroBaobab;
+const g1Img = MEDIA_ASSETS.gallery1;
+const g4Img = MEDIA_ASSETS.gallery4;
+const elephantImg = MEDIA_ASSETS.elephant;
 
 const searchSchema = z.object({
   q: z.string().default(""),
@@ -62,7 +65,7 @@ export const Route = createFileRoute("/adventures/")({
     const description =
       seo.seo_description ||
       "Explore thoughtfully curated Kenya safari adventures, from wildlife and wilderness to beach escapes and cultural journeys. Designed personally by The Baobab Collective.";
-    const image = seo.seo_og_image || heroBaobab;
+    const image = seo.seo_og_image || ABSOLUTE_MEDIA_ASSETS.heroBaobab;
     return {
       meta: [
         { title },
@@ -243,13 +246,14 @@ function HeroSection({
   const heroSrc = resolveImageSource(content.hero_image, hero.image, heroBaobab) ?? heroBaobab;
   return (
     <section className="relative h-[85vh] min-h-[620px] flex items-end">
-      <img
+      <SiteImage
         src={heroSrc}
         alt={hero.imageAlt || "Sunrise over the African bush — a guide leads a walking safari toward distant baobabs"}
         className="absolute inset-0 w-full h-full object-cover"
         decoding="async"
         fetchPriority="high"
         sizes="100vw"
+        responsiveWidths={[640, 960, 1280, 1920]}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-forest/90 via-forest-dark/35 to-transparent" />
 
@@ -345,7 +349,14 @@ function DayInTheFieldSection({ content }: { content: typeof PAGE_DEFAULTS.adven
                 <p className="text-foreground/70 text-sm leading-relaxed mb-6">{step.body}</p>
               </div>
               <div className="aspect-[16/9] rounded-lg overflow-hidden mt-auto">
-                <img src={step.image} alt={step.title} loading="lazy" className="w-full h-full object-cover" />
+                <SiteImage
+                  src={step.image}
+                  alt={step.title}
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  responsiveWidths={[320, 640]}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           ))}
@@ -692,10 +703,12 @@ function ExploreByExperienceSection({ content }: { content: typeof PAGE_DEFAULTS
                 className="group relative text-left rounded-xl overflow-hidden border border-border bg-background p-6 hover:border-gold/60 transition-all duration-500 hover:shadow-lg"
               >
                 <div className="aspect-[16/9] rounded-lg overflow-hidden mb-5 bg-cream">
-                  <img
+                  <SiteImage
                     src={exp.image}
                     alt={exp.name}
                     loading="lazy"
+                    sizes="(max-width: 640px) 100vw, 25vw"
+                    responsiveWidths={[320, 640]}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                 </div>
@@ -733,7 +746,14 @@ function FeaturedJourneySpotlight({ signatures }: { signatures: AdventuresSignat
           {/* Image */}
           <div className="lg:col-span-7">
             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-gold/30 shadow-2xl">
-              <img src={spotlight.image} alt={spotlight.name} className="w-full h-full object-cover" />
+              <SiteImage
+                src={spotlight.image}
+                alt={spotlight.name}
+                loading="lazy"
+                sizes="(max-width: 1024px) 100vw, 58vw"
+                responsiveWidths={[640, 960, 1280]}
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/65 via-transparent to-transparent" />
               <div className="absolute top-6 left-6">
                 <span className="px-4 py-1.5 rounded-full text-[11px] tracking-[0.25em] uppercase font-semibold bg-gold text-gold-foreground shadow">
@@ -977,7 +997,14 @@ function JourneyCombinationsSection({ content }: { content: typeof PAGE_DEFAULTS
             >
               <div>
                 <div className="aspect-[16/10] rounded-lg overflow-hidden mb-5">
-                  <img src={combo.image} alt={combo.title} loading="lazy" className="w-full h-full object-cover" />
+                  <SiteImage
+                    src={combo.image}
+                    alt={combo.title}
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                    responsiveWidths={[320, 640]}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <p className="text-[10px] tracking-[0.2em] uppercase text-gold font-semibold mb-1.5">{combo.days}</p>
                 <h3 className="font-serif text-xl text-foreground mb-2">{combo.title}</h3>
@@ -1053,7 +1080,14 @@ function FinalCtaSection({ cta }: { cta: AdventuresPage["cta"] }) {
   return (
     <section className="relative py-28 bg-forest text-forest-foreground text-center overflow-hidden">
       <div className="absolute inset-0 opacity-15">
-        <img src={heroBaobab} alt="Kenya Bush" className="w-full h-full object-cover" />
+        <SiteImage
+          src={heroBaobab}
+          alt="Kenya bush"
+          loading="lazy"
+          sizes="100vw"
+          responsiveWidths={[640, 960, 1280, 1920]}
+          className="w-full h-full object-cover"
+        />
       </div>
       <div className="relative max-w-3xl mx-auto px-6 space-y-6">
         <p className="text-[11px] tracking-[0.35em] uppercase text-gold font-semibold">

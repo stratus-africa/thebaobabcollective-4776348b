@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Compass, Calendar, Users, Search, Plus, Minus } from "lucide-react";
-import heroImg from "@/assets/hero-baobab.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { usePreviewMerge } from "@/lib/preview-overrides";
@@ -55,7 +55,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
         {asBackground && (
           <SiteImage
             src={heroSrc}
-            fallback={heroImg}
+            fallback={MEDIA_ASSETS.heroBaobab}
             alt="Baobab safari hero"
             className="absolute inset-0 h-full w-full animate-ken-burns"
             decoding="async"
@@ -172,7 +172,7 @@ export function Hero({ content }: { content?: HeroContent | null } = {}) {
               <div className="absolute inset-0 flex items-end justify-center lg:justify-end">
                 <SiteImage
                   src={heroSrc}
-                  fallback={heroImg}
+                  fallback={MEDIA_ASSETS.heroBaobab}
                   alt="Baobab safari hero"
                   className="w-full h-full max-h-[600px] rounded-[18px] md:rounded-[24px] shadow-2xl"
                   decoding="async"
