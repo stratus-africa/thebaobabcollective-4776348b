@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
-import g1 from "@/assets/gallery-1.jpg";
-import g4 from "@/assets/gallery-4.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { SiteImage } from "@/components/site/SiteImage";
@@ -18,7 +17,7 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
       name: c.founder_1_name,
       role: c.founder_1_role,
       image: c.founder_1_image || null,
-      fallback: g1,
+      fallback: MEDIA_ASSETS.gallery1,
       quote: c.founder_1_quote,
       tag: c.founder_1_tag,
     },
@@ -26,7 +25,7 @@ export function FoundersStrip({ content }: { content?: FoundersContent | null } 
       name: c.founder_2_name,
       role: c.founder_2_role,
       image: c.founder_2_image || null,
-      fallback: g4,
+      fallback: MEDIA_ASSETS.gallery4,
       quote: c.founder_2_quote,
       tag: c.founder_2_tag,
     },

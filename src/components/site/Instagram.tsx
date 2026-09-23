@@ -1,17 +1,19 @@
 import { SiteImage } from "@/components/site/SiteImage";
 import { Instagram as IgIcon } from "lucide-react";
-import g1 from "@/assets/gallery-1.jpg";
-import g2 from "@/assets/gallery-2.jpg";
-import g3 from "@/assets/gallery-3.jpg";
-import g4 from "@/assets/gallery-4.jpg";
-import g5 from "@/assets/gallery-5.jpg";
-import g6 from "@/assets/gallery-6.jpg";
-import g7 from "@/assets/gallery-7.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 
 import { usePreviewMerge } from "@/lib/preview-overrides";
 
-const defaultImgs = [g1, g2, g3, g4, g5, g6, g7];
+const defaultImgs = [
+  MEDIA_ASSETS.gallery1,
+  MEDIA_ASSETS.gallery2,
+  MEDIA_ASSETS.gallery3,
+  MEDIA_ASSETS.gallery4,
+  MEDIA_ASSETS.gallery5,
+  MEDIA_ASSETS.gallery6,
+  MEDIA_ASSETS.gallery7,
+];
 
 type Content = Partial<typeof PAGE_DEFAULTS.home_instagram>;
 

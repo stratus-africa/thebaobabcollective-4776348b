@@ -3,7 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Compass, Sparkles, Check } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { BEST_FOR_CATEGORIES } from "@/lib/destinations.data";
-import journalLodgeImg from "@/assets/journal-lodge.jpg";
+import { MEDIA_ASSETS } from "@/lib/media-assets";
+import { SiteImage } from "@/components/site/SiteImage";
 
 interface DestinationMatcherSectionProps {
   eyebrow?: string;
@@ -82,7 +83,7 @@ export function DestinationMatcherSection({ eyebrow, title, body }: DestinationM
                   title: "Custom Kenya Journey",
                   dates: selectedInterests.join(", "),
                   slug: "matcher",
-                  image: journalLodgeImg,
+                  image: MEDIA_ASSETS.journalLodge,
                 }}
                 trigger={
                   <button
@@ -106,10 +107,12 @@ export function DestinationMatcherSection({ eyebrow, title, body }: DestinationM
 
           {/* Right Editorial Image Panel */}
           <div className="lg:col-span-5 relative min-h-[320px] lg:min-h-full bg-forest">
-            <img
-              src={journalLodgeImg}
+            <SiteImage
+              src={MEDIA_ASSETS.journalLodge}
               alt="Bespoke luxury safari camp verandah at dawn in Kenya"
               loading="lazy"
+              sizes="(max-width: 1024px) 100vw, 42vw"
+              responsiveWidths={[640, 960, 1280]}
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/82 via-forest-dark/28 to-transparent" />
