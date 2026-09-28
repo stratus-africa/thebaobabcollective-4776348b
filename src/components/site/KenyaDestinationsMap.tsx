@@ -16,7 +16,6 @@ import type { DestinationMetadata } from "@/lib/destinations.data";
 import {
   KENYA_REGIONS,
   DEFAULT_DESTINATION_MAP_POSITIONS,
-  DESTINATION_LABEL_OFFSETS,
   getDestinationMapPosition,
 } from "@/lib/destinations.data";
 import { MEDIA_ASSETS } from "@/lib/media-assets";
