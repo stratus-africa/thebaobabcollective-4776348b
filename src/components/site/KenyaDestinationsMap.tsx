@@ -16,7 +16,6 @@ import type { DestinationMetadata } from "@/lib/destinations.data";
 import {
   KENYA_REGIONS,
   DEFAULT_DESTINATION_MAP_POSITIONS,
-  DESTINATION_LABEL_OFFSETS,
   getDestinationMapPosition,
 } from "@/lib/destinations.data";
 import { MEDIA_ASSETS } from "@/lib/media-assets";
@@ -469,7 +468,6 @@ export function KenyaDestinationsMap({
                   const isActive = activeDestination?.slug === d.slug;
                   const isDragging = draggingSlug === d.slug;
                   const isRegionMatch = selectedRegion === "All" || d.region === selectedRegion;
-                  const labelOffsetClass = DESTINATION_LABEL_OFFSETS[d.slug] || "-translate-x-1/2 translate-y-3";
 
                   return (
                     <div
@@ -493,54 +491,46 @@ export function KenyaDestinationsMap({
                         aria-label={`${isEditMode ? "Drag" : "Select"} ${d.name} (X: ${pos.left}%, Y: ${pos.top}%)`}
                         title={isEditMode ? `Drag to move ${d.name} (${pos.left}%, ${pos.top}%)` : d.name}
                       >
-                        {/* Pulsing ring on active pin */}
+                        {/* Soft halo on active pin */}
                         {isActive && !isDragging && (
-                          <span className="absolute -inset-3.5 rounded-full bg-orange-500/40 animate-ping pointer-events-none" />
+                          <span className="absolute -inset-2 rounded-full bg-gold/35 animate-ping pointer-events-none" />
                         )}
 
-                        {/* Drag mode active aura */}
                         {isDragging && (
-                          <span className="absolute -inset-5 rounded-full bg-orange-600/50 animate-pulse pointer-events-none ring-4 ring-orange-300" />
+                          <span className="absolute -inset-4 rounded-full bg-gold/40 animate-pulse pointer-events-none" />
                         )}
 
-                        {/* Pin Circle Icon - Bigger & Orange */}
-                        <div
-                          className={`relative flex items-center justify-center rounded-full transition-all shadow-2xl ${
-                            isDragging
-                              ? "w-12 h-12 bg-orange-600 text-white ring-4 ring-orange-300 cursor-grabbing scale-125"
-                              : isEditMode
-                                ? isActive
-                                  ? "w-11 h-11 bg-orange-500 text-white ring-4 ring-white/90 ring-offset-2 ring-offset-forest cursor-grab hover:scale-110 shadow-orange-500/50 shadow-lg"
-                                  : "w-9 h-9 bg-orange-500 text-white border-2 border-white hover:bg-orange-600 cursor-grab hover:scale-110 shadow-md"
-                                : isActive
-                                  ? "w-11 h-11 bg-orange-500 text-white ring-4 ring-white/90 ring-offset-2 ring-offset-forest shadow-orange-500/50 shadow-lg scale-110"
-                                  : "w-9 h-9 bg-orange-500 text-white border-2 border-white/90 hover:scale-125 hover:bg-orange-600 shadow-md"
+                        {/* Minimal pin dot */}
+                        <span
+                          className={`relative flex items-center justify-center rounded-full border-2 border-cream shadow-lg transition-all duration-200 ${
+                            isEditMode ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""
+                          } ${
+                            isActive || isDragging
+                              ? "w-5 h-5 bg-gold ring-4 ring-gold/30"
+                              : "w-3.5 h-3.5 bg-forest group-hover:w-5 group-hover:h-5 group-hover:bg-gold group-focus-visible:w-5 group-focus-visible:h-5 group-focus-visible:bg-gold"
                           }`}
                         >
-                          {isEditMode ? (
-                            <Move className={`${isActive || isDragging ? "w-5 h-5" : "w-4 h-4"}`} />
-                          ) : (
-                            <MapPin className={`${isActive ? "w-5.5 h-5.5" : "w-4.5 h-4.5"} drop-shadow-sm`} />
-                          )}
-                        </div>
+                          {isEditMode && (isActive || isDragging) && <Move className="w-3 h-3 text-forest" />}
+                        </span>
 
                         {/* Live Coordinate Tooltip during edit/drag */}
                         {isEditMode && (isActive || isDragging) && (
-                          <div className="absolute -top-8 whitespace-nowrap bg-black/90 text-orange-400 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-lg pointer-events-none border border-orange-500/50">
+                          <div className="absolute top-full mt-2 whitespace-nowrap bg-forest-dark/90 text-gold text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-lg pointer-events-none">
                             {pos.left}% · {pos.top}%
                           </div>
                         )}
 
-                        {/* Destination Label Badge - Orange */}
-                        <div
-                          className={`absolute top-full left-1/2 ${labelOffsetClass} whitespace-nowrap px-3 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all pointer-events-none shadow-lg ${
-                            isActive || isDragging
-                              ? "bg-orange-600 text-white scale-110 z-30 ring-2 ring-orange-300 shadow-orange-600/40"
-                              : "bg-orange-500 text-white group-hover:bg-orange-600 group-hover:scale-105"
+                        {/* Name tooltip — hover / keyboard focus only */}
+                        <span
+                          className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 whitespace-nowrap rounded-md bg-forest text-cream px-3 py-1.5 font-serif text-sm shadow-xl pointer-events-none transition-all duration-200 ${
+                            isDragging
+                              ? "opacity-100 translate-y-0"
+                              : "opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0"
                           }`}
                         >
                           {d.name}
-                        </div>
+                          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-forest" />
+                        </span>
                       </button>
                     </div>
                   );
