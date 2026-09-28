@@ -500,17 +500,40 @@ export function KenyaDestinationsMap({
                           <span className="absolute -inset-4 rounded-full bg-gold/40 animate-pulse pointer-events-none" />
                         )}
 
-                        {/* Minimal pin dot */}
+                        {/* Classic teardrop map pin — tip anchored on the exact coordinate */}
                         <span
-                          className={`relative flex items-center justify-center rounded-full border-2 border-cream shadow-lg transition-all duration-200 ${
+                          className={`relative flex items-center justify-center ${
                             isEditMode ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""
-                          } ${
-                            isActive || isDragging
-                              ? "w-5 h-5 bg-gold ring-4 ring-gold/30"
-                              : "w-3.5 h-3.5 bg-forest group-hover:w-5 group-hover:h-5 group-hover:bg-gold group-focus-visible:w-5 group-focus-visible:h-5 group-focus-visible:bg-gold"
                           }`}
                         >
-                          {isEditMode && (isActive || isDragging) && <Move className="w-3 h-3 text-forest" />}
+                          <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            className={`w-7 h-7 origin-bottom -translate-y-1/2 drop-shadow-[0_4px_5px_rgba(0,0,0,0.4)] transition-all duration-200 ${
+                              isActive || isDragging
+                                ? "scale-110 text-gold"
+                                : "text-forest group-hover:scale-110 group-hover:text-gold group-focus-visible:scale-110 group-focus-visible:text-gold"
+                            }`}
+                          >
+                            <path d="M12 22c4.9-4.6 8-8.65 8-12.4C20 5.68 16.42 2 12 2S4 5.68 4 9.6C4 13.35 7.1 17.4 12 22Z" />
+                            <circle
+                              cx="12"
+                              cy="9.5"
+                              r="2.7"
+                              className={isActive || isDragging ? "fill-forest" : "fill-cream"}
+                            />
+                            <path
+                              d="M12 22c4.9-4.6 8-8.65 8-12.4C20 5.68 16.42 2 12 2S4 5.68 4 9.6C4 13.35 7.1 17.4 12 22Z"
+                              fill="none"
+                              stroke="var(--color-cream)"
+                              strokeWidth="1.3"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          {isEditMode && (isActive || isDragging) && (
+                            <Move className="absolute w-3 h-3 text-forest pointer-events-none" />
+                          )}
                         </span>
 
                         {/* Live Coordinate Tooltip during edit/drag */}
