@@ -545,7 +545,7 @@ export function KenyaDestinationsMap({
 
                         {/* Name tooltip — hover / keyboard focus only */}
                         <span
-                          className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 whitespace-nowrap rounded-md bg-forest text-cream px-3 py-1.5 font-serif text-sm shadow-xl pointer-events-none transition-all duration-200 ${
+                          className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-9 whitespace-nowrap rounded-md bg-forest text-cream px-3 py-1.5 font-serif text-sm shadow-xl pointer-events-none transition-all duration-200 ${
                             isDragging
                               ? "opacity-100 translate-y-0"
                               : "opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0"
