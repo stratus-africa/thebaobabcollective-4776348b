@@ -149,7 +149,7 @@ export function TripRecommender({ initialInterests = [] }: { initialInterests?: 
                   image={a.image}
                   reason={a.reason}
                   link={<Link to="/adventures/$slug" params={{ slug: a.slug }} className="underline-offset-4 hover:underline hover:text-gold">View adventure</Link>}
-                  enquire={{ subject: a.name, profile, slug: a.slug, kind: "Adventure" }}
+                  enquire={{ subject: a.name, profile, slug: a.slug, kind: "Journey" }}
                 />
               ))}
             </ResultGroup>
@@ -182,7 +182,7 @@ function ResultCard({
   image: string | null;
   reason: string;
   link: React.ReactNode;
-  enquire: { subject: string; profile: string; slug: string; kind: "Destination" | "Adventure" };
+  enquire: { subject: string; profile: string; slug: string; kind: "Destination" | "Journey" };
 }) {
   return (
     <article className="bg-background rounded-2xl border border-border overflow-hidden flex flex-col">
