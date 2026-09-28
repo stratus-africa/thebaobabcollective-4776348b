@@ -469,7 +469,6 @@ export function KenyaDestinationsMap({
                   const isActive = activeDestination?.slug === d.slug;
                   const isDragging = draggingSlug === d.slug;
                   const isRegionMatch = selectedRegion === "All" || d.region === selectedRegion;
-                  const labelOffsetClass = DESTINATION_LABEL_OFFSETS[d.slug] || "-translate-x-1/2 translate-y-3";
 
                   return (
                     <div
