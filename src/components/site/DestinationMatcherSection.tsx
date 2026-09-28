@@ -97,10 +97,12 @@ export function DestinationMatcherSection({ eyebrow, title, body }: DestinationM
               />
 
               <Link
-                to="/private-travel"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-cream text-foreground border border-border uppercase tracking-[0.2em] text-[11px] font-semibold px-6 py-4 hover:border-gold hover:text-gold transition-colors text-center"
+                to="/plan-with-ai"
+                search={{ interests: selectedInterests.join(",") }}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-forest text-cream uppercase tracking-[0.2em] text-[11px] font-semibold px-6 py-4 hover:bg-forest/90 transition-colors text-center"
               >
-                <span>Private Travel Designer</span>
+                <Sparkles className="w-3.5 h-3.5 text-gold" />
+                <span>Get Instant Recommendations</span>
               </Link>
             </div>
           </div>
