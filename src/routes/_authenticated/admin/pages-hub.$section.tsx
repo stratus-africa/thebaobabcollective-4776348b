@@ -520,6 +520,7 @@ const SECTIONS: Record<string, HubSection> = {
               "beyond_eyebrow",
               "beyond_title",
               "beyond_body",
+              "show_ocean",
               "ocean_eyebrow",
               "ocean_title",
               "ocean_body",

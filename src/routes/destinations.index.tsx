@@ -24,6 +24,7 @@ import { getAdventuresPage } from "@/lib/adventures.functions";
 import { mergeDestinationsWithDefaults, type DestinationMetadata } from "@/lib/destinations.data";
 import { resolveImageSource } from "@/lib/image-resolution";
 import { ABSOLUTE_MEDIA_ASSETS, MEDIA_ASSETS } from "@/lib/media-assets";
+import { errorMessage } from "@/lib/route-error";
 
 const heroBaobab = MEDIA_ASSETS.heroBaobab;
 const g4Img = MEDIA_ASSETS.gallery4;
@@ -129,7 +130,7 @@ export const Route = createFileRoute("/destinations/")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-        <p className="text-foreground/70">{error.message}</p>
+        <p className="text-foreground/70">{errorMessage(error)}</p>
       </main>
       <Footer />
     </div>
@@ -367,7 +368,7 @@ function DestinationsDiscoveryPage() {
             )}
 
             {/* GROUP 3: THE INDIAN OCEAN */}
-            {indianOcean.length > 0 && (
+            {content.show_ocean !== false && indianOcean.length > 0 && (
               <section
                 aria-labelledby="ocean-heading"
                 className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16"

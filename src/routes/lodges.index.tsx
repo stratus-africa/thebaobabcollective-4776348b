@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { SiteImage } from "@/components/site/SiteImage";
+import { errorMessage } from "@/lib/route-error";
 
 const lodgesQuery = queryOptions({
   queryKey: ["lodges"],
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/lodges/")({
   }),
   errorComponent: ({ error }) => (
     <div className="p-10 text-center" role="alert">
-      {error.message}
+      {errorMessage(error)}
     </div>
   ),
   notFoundComponent: () => <div className="p-10 text-center">Not found</div>,

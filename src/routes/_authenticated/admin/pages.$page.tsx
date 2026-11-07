@@ -572,6 +572,7 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
       { name: "beyond_eyebrow", label: "Beyond the Classics — Eyebrow", type: "text" },
       { name: "beyond_title", label: "Beyond the Classics — Title", type: "text" },
       { name: "beyond_body", label: "Beyond the Classics — Description", type: "textarea" },
+      { name: "show_ocean", label: "Show The Indian Ocean section", type: "boolean" },
       { name: "ocean_eyebrow", label: "The Indian Ocean — Eyebrow", type: "text" },
       { name: "ocean_title", label: "The Indian Ocean — Title", type: "text" },
       { name: "ocean_body", label: "The Indian Ocean — Description", type: "textarea" },

@@ -30,6 +30,7 @@ import {
   DESTINATION_COMBINATIONS,
   type DestinationMetadata,
 } from "@/lib/destinations.data";
+import { errorMessage } from "@/lib/route-error";
 
 const destQuery = (slug: string) =>
   queryOptions({
@@ -155,7 +156,7 @@ export const Route = createFileRoute("/destinations/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-        <p className="text-foreground/70">{error.message}</p>
+        <p className="text-foreground/70">{errorMessage(error)}</p>
       </main>
       <Footer />
     </div>

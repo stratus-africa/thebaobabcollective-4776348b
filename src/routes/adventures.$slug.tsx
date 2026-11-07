@@ -24,6 +24,7 @@ import { AdventureCard, getHumanDifficulty } from "@/components/site/AdventureCa
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { getDestinations, getLodges } from "@/lib/cms.functions";
 import { resolveImageSource } from "@/lib/image-resolution";
+import { errorMessage } from "@/lib/route-error";
 
 const adventuresQuery = queryOptions({
   queryKey: ["adventures-page"],
@@ -129,7 +130,7 @@ export const Route = createFileRoute("/adventures/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-        <p className="text-foreground/70">{error.message}</p>
+        <p className="text-foreground/70">{errorMessage(error)}</p>
       </main>
       <Footer />
     </div>
