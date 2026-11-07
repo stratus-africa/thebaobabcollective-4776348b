@@ -25,6 +25,7 @@ import { getDestinationBySlug, getDestinations, getLodges } from "@/lib/cms.func
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { resolveImageSource } from "@/lib/image-resolution";
 import {
+import { errorMessage } from "@/lib/route-error";
   enrichDestination,
   mergeDestinationsWithDefaults,
   DESTINATION_COMBINATIONS,
@@ -155,7 +156,7 @@ export const Route = createFileRoute("/destinations/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-        <p className="text-foreground/70">{error.message}</p>
+        <p className="text-foreground/70">{errorMessage(error)}</p>
       </main>
       <Footer />
     </div>

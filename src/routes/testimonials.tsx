@@ -9,6 +9,7 @@ import { getPageContent } from "@/lib/page-content.functions";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { Star, Quote } from "lucide-react";
 import { MEDIA_ASSETS } from "@/lib/media-assets";
+import { errorMessage } from "@/lib/route-error";
 
 const defaultIgImgs = [
   MEDIA_ASSETS.gallery1,
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/testimonials")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  errorComponent: ({ error }) => <div className="p-10 text-center">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-10 text-center">{errorMessage(error)}</div>,
   notFoundComponent: () => <div className="p-10 text-center">Not found</div>,
   component: TestimonialsPage,
 });

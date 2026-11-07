@@ -10,6 +10,7 @@ import { ShareButtons } from "@/components/site/ShareButtons";
 import { getItineraryBySlug } from "@/lib/cms.functions";
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { errorMessage } from "@/lib/route-error";
 
 const itinerarySearchSchema = z.object({
   itinerary: fallback(z.string(), "").default(""),
@@ -62,7 +63,7 @@ export const Route = createFileRoute("/itineraries/$slug")({
         <Navbar />
         <main className="max-w-3xl mx-auto px-6 py-32 text-center">
           <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-          <p className="text-foreground/70 mb-6">{error.message}</p>
+          <p className="text-foreground/70 mb-6">{errorMessage(error)}</p>
           <button
             onClick={() => {
               reset();

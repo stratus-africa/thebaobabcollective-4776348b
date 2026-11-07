@@ -6,6 +6,7 @@ import { EnquireDialog } from "@/components/site/EnquireDialog";
 import { SiteImage } from "@/components/site/SiteImage";
 import { articles as staticArticles, getArticle as getStaticArticle } from "@/lib/content";
 import { getArticleBySlug, getArticles } from "@/lib/cms.functions";
+import { errorMessage } from "@/lib/route-error";
 
 type ArticleView = {
   slug: string;
@@ -94,7 +95,7 @@ export const Route = createFileRoute("/journal/$slug")({
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 py-32 text-center">
         <h1 className="font-serif text-3xl mb-4">Something went wrong</h1>
-        <p className="text-foreground/70">{error.message}</p>
+        <p className="text-foreground/70">{errorMessage(error)}</p>
       </main>
       <Footer />
     </div>

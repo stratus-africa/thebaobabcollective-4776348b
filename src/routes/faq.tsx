@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input";
 import { Search, HelpCircle, ArrowRight } from "lucide-react";
 import { EnquireDialog } from "@/components/site/EnquireDialog";
+import { errorMessage } from "@/lib/route-error";
 
 const q = queryOptions({ queryKey: ["faqs"], queryFn: () => getFaqs() });
 
@@ -70,7 +71,7 @@ export const Route = createFileRoute("/faq")({
       { name: "description", content: "Answers on planning, seasons, conservation and logistics for your bespoke Kenya safari." },
     ],
   }),
-  errorComponent: ({ error }) => <div className="p-10 text-center">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-10 text-center">{errorMessage(error)}</div>,
   notFoundComponent: () => <div className="p-10 text-center">Not found</div>,
   component: FaqPage,
 });

@@ -11,6 +11,7 @@ import { getItineraryBySlug } from "@/lib/cms.functions";
 import { createBooking } from "@/lib/bookings.functions";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { errorMessage } from "@/lib/route-error";
 
 export const Route = createFileRoute("/book/$slug")({
   ssr: false,
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/book/$slug")({
     if (!it) throw notFound();
     return { itinerary: it };
   },
-  errorComponent: ({ error }) => <div className="p-10 text-center">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-10 text-center">{errorMessage(error)}</div>,
   notFoundComponent: () => (
     <div className="p-10 text-center">
       <p>Journey not found.</p>
