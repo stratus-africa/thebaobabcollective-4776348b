@@ -25,12 +25,12 @@ import { getDestinationBySlug, getDestinations, getLodges } from "@/lib/cms.func
 import { getAdventuresPage } from "@/lib/adventures.functions";
 import { resolveImageSource } from "@/lib/image-resolution";
 import {
-import { errorMessage } from "@/lib/route-error";
   enrichDestination,
   mergeDestinationsWithDefaults,
   DESTINATION_COMBINATIONS,
   type DestinationMetadata,
 } from "@/lib/destinations.data";
+import { errorMessage } from "@/lib/route-error";
 
 const destQuery = (slug: string) =>
   queryOptions({
