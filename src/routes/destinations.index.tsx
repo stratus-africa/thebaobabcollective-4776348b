@@ -367,7 +367,7 @@ function DestinationsDiscoveryPage() {
             )}
 
             {/* GROUP 3: THE INDIAN OCEAN */}
-            {indianOcean.length > 0 && (
+            {content.show_ocean !== false && indianOcean.length > 0 && (
               <section
                 aria-labelledby="ocean-heading"
                 className="max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16"

@@ -314,6 +314,7 @@ export const PAGE_DEFAULTS = {
     beyond_title: "Beyond the Classics",
     beyond_body:
       "Private conservancies, ancient volcanoes, and Great Rift Valley lakes where wildlife viewing is intimate, active, and conservation-focused.",
+    show_ocean: true as boolean,
     ocean_eyebrow: "Swahili Coast & Coral Reefs",
     ocean_title: "The Indian Ocean",
     ocean_body:
