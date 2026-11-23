@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Authenticated users can read visitor counter" ON public.visitor_counter;
+CREATE POLICY "Admins and editors can read visitor counter" ON public.visitor_counter FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'editor'));
