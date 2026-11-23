@@ -494,6 +494,10 @@ export const PAGE_DEFAULTS = {
     linkedin_url: "",
     twitter_url: "",
     youtube_url: "",
+    trustpilot_url: "",
+    trustpilot_score: "4.9",
+    trustpilot_label: "Excellent",
+    trustpilot_reviews: "",
   },
   // 404 / Auth / global SEO
   not_found: {

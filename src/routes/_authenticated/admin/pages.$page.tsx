@@ -790,6 +790,10 @@ export const SCHEMAS: Record<PageKey, { title: string; description: string; prev
       { name: "linkedin_url", label: "LinkedIn URL (blank to hide icon)", type: "text" },
       { name: "twitter_url", label: "X / Twitter URL (blank to hide icon)", type: "text" },
       { name: "youtube_url", label: "YouTube URL (blank to hide icon)", type: "text" },
+      { name: "trustpilot_url", label: "Trustpilot profile URL (blank to hide badge)", type: "text" },
+      { name: "trustpilot_score", label: "Trustpilot score (e.g. 4.9)", type: "text" },
+      { name: "trustpilot_label", label: "Trustpilot rating word (e.g. Excellent)", type: "text" },
+      { name: "trustpilot_reviews", label: "Trustpilot review count (optional)", type: "text" },
     ],
   },
   not_found: {

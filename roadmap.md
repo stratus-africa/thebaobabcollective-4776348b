@@ -1,0 +1,1 @@
+- [x] Trustpilot rating badge (footer + homepage testimonials, admin settings)

@@ -9,6 +9,7 @@ import { useMenuConfig } from "@/hooks/useMenuConfig";
 import { PAGE_DEFAULTS } from "@/lib/page-content.defaults";
 import { usePreviewMerge } from "@/lib/preview-overrides";
 import { toast } from "sonner";
+import { TrustpilotBadge } from "./TrustpilotBadge";
 
 type FooterContent = Partial<typeof PAGE_DEFAULTS.footer>;
 
@@ -118,6 +119,10 @@ export function Footer({ content }: { content?: FooterContent | null } = {}) {
               ))}
             </div>
           )}
+          <TrustpilotBadge
+            className="mt-4"
+            info={{ url: f.trustpilot_url, score: f.trustpilot_score, label: f.trustpilot_label, reviews: f.trustpilot_reviews }}
+          />
         </address>
 
         <div>

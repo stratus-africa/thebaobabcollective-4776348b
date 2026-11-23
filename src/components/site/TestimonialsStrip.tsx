@@ -2,6 +2,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Star, Quote, Sparkles } from "lucide-react";
 import { getTestimonials } from "@/lib/cms.functions";
+import { TrustpilotBadge } from "./TrustpilotBadge";
+import { getPageContent } from "@/lib/page-content.functions";
 import { useReveal, useRevealChildren } from "@/hooks/useReveal";
 
 export function TestimonialsStrip() {
@@ -42,6 +44,12 @@ export function TestimonialsStrip() {
     },
   ];
 
+  const { data: footer } = useQuery({
+    queryKey: ["page-content", "footer", "trustpilot"],
+    queryFn: () => getPageContent({ data: { key: "footer" } }).catch(() => null),
+    staleTime: 60_000,
+  });
+  const tp: any = footer ?? {};
   const list = dbTestimonials.length > 0 ? dbTestimonials : fallbackTestimonials;
   const headingRef = useReveal<HTMLDivElement>();
   const cardsRef = useRevealChildren<HTMLDivElement>();
@@ -62,6 +70,9 @@ export function TestimonialsStrip() {
           <p className="mt-4 text-foreground/75 text-base sm:text-lg leading-relaxed">
             The clearest measure of a journey is how it stays with you long after you've returned home.
           </p>
+          <div className="mt-6 flex justify-center">
+            <TrustpilotBadge info={{ url: tp.trustpilot_url, score: tp.trustpilot_score || "4.9", label: tp.trustpilot_label || "Excellent", reviews: tp.trustpilot_reviews }} />
+          </div>
         </div>
 
         <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-8">
