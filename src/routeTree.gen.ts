@@ -28,7 +28,6 @@ import { Route as BookSlugRouteImport } from './routes/book.$slug'
 import { Route as BookingSuccessRouteImport } from './routes/booking.success'
 import { Route as DestinationsIndexRouteImport } from './routes/destinations.index'
 import { Route as DestinationsSlugRouteImport } from './routes/destinations.$slug'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ItinerariesSlugRouteImport } from './routes/itineraries.$slug'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
 import { Route as LodgesIndexRouteImport } from './routes/lodges.index'
@@ -41,7 +40,7 @@ import { Route as AuthenticatedAdminMenuRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminPrivateTravelRouteImport } from './routes/_authenticated/admin/private-travel'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminSubscribersRouteImport } from './routes/_authenticated/admin/subscribers'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as AuthenticatedAdminAdventuresIndexRouteImport } from './routes/_authenticated/admin/adventures.index'
 import { Route as AuthenticatedAdminAdventuresSlugRouteImport } from './routes/_authenticated/admin/adventures.$slug'
 import { Route as AuthenticatedAdminContentTableRouteImport } from './routes/_authenticated/admin/content.$table'
@@ -53,9 +52,7 @@ import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/med
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -151,11 +148,6 @@ const DestinationsSlugRoute = DestinationsSlugRouteImport.update({
   path: '/destinations/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ItinerariesSlugRoute = ItinerariesSlugRouteImport.update({
   id: '/itineraries/$slug',
   path: '/itineraries/$slug',
@@ -221,9 +213,9 @@ const AuthenticatedAdminSubscribersRoute =
     path: '/subscribers',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminAdventuresIndexRoute =
@@ -289,22 +281,10 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
     path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -325,7 +305,6 @@ export interface FileRoutesByFullPath {
   '/book/$slug': typeof BookSlugRoute
   '/booking/success': typeof BookingSuccessRoute
   '/destinations/$slug': typeof DestinationsSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/itineraries/$slug': typeof ItinerariesSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/lodges/$slug': typeof LodgesSlugRoute
@@ -339,7 +318,7 @@ export interface FileRoutesByFullPath {
   '/admin/private-travel': typeof AuthenticatedAdminPrivateTravelRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
@@ -351,9 +330,7 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/adventures/': typeof AuthenticatedAdminAdventuresIndexRoute
 }
 export interface FileRoutesByTo {
@@ -371,7 +348,6 @@ export interface FileRoutesByTo {
   '/book/$slug': typeof BookSlugRoute
   '/booking/success': typeof BookingSuccessRoute
   '/destinations/$slug': typeof DestinationsSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/itineraries/$slug': typeof ItinerariesSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/lodges/$slug': typeof LodgesSlugRoute
@@ -385,7 +361,7 @@ export interface FileRoutesByTo {
   '/admin/private-travel': typeof AuthenticatedAdminPrivateTravelRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
@@ -397,9 +373,7 @@ export interface FileRoutesByTo {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/adventures': typeof AuthenticatedAdminAdventuresIndexRoute
 }
 export interface FileRoutesById {
@@ -421,7 +395,6 @@ export interface FileRoutesById {
   '/book/$slug': typeof BookSlugRoute
   '/booking/success': typeof BookingSuccessRoute
   '/destinations/$slug': typeof DestinationsSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/itineraries/$slug': typeof ItinerariesSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/lodges/$slug': typeof LodgesSlugRoute
@@ -435,7 +408,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/private-travel': typeof AuthenticatedAdminPrivateTravelRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/subscribers': typeof AuthenticatedAdminSubscribersRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/adventures/$slug': typeof AuthenticatedAdminAdventuresSlugRoute
   '/_authenticated/admin/content/$table': typeof AuthenticatedAdminContentTableRoute
@@ -447,9 +420,7 @@ export interface FileRoutesById {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/admin/adventures/': typeof AuthenticatedAdminAdventuresIndexRoute
 }
 export interface FileRouteTypes {
@@ -471,7 +442,6 @@ export interface FileRouteTypes {
     | '/book/$slug'
     | '/booking/success'
     | '/destinations/$slug'
-    | '/email/unsubscribe'
     | '/itineraries/$slug'
     | '/journal/$slug'
     | '/lodges/$slug'
@@ -485,7 +455,7 @@ export interface FileRouteTypes {
     | '/admin/private-travel'
     | '/admin/settings'
     | '/admin/subscribers'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/admin/'
     | '/admin/adventures/$slug'
     | '/admin/content/$table'
@@ -497,9 +467,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/admin/adventures/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -517,7 +485,6 @@ export interface FileRouteTypes {
     | '/book/$slug'
     | '/booking/success'
     | '/destinations/$slug'
-    | '/email/unsubscribe'
     | '/itineraries/$slug'
     | '/journal/$slug'
     | '/lodges/$slug'
@@ -531,7 +498,7 @@ export interface FileRouteTypes {
     | '/admin/private-travel'
     | '/admin/settings'
     | '/admin/subscribers'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/admin'
     | '/admin/adventures/$slug'
     | '/admin/content/$table'
@@ -543,9 +510,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/admin/adventures'
   id:
     | '__root__'
@@ -566,7 +531,6 @@ export interface FileRouteTypes {
     | '/book/$slug'
     | '/booking/success'
     | '/destinations/$slug'
-    | '/email/unsubscribe'
     | '/itineraries/$slug'
     | '/journal/$slug'
     | '/lodges/$slug'
@@ -580,7 +544,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/private-travel'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/subscribers'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/adventures/$slug'
     | '/_authenticated/admin/content/$table'
@@ -592,9 +556,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/_authenticated/admin/adventures/'
   fileRoutesById: FileRoutesById
 }
@@ -614,19 +576,16 @@ export interface RootRouteChildren {
   BookSlugRoute: typeof BookSlugRoute
   BookingSuccessRoute: typeof BookingSuccessRoute
   DestinationsSlugRoute: typeof DestinationsSlugRoute
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ItinerariesSlugRoute: typeof ItinerariesSlugRoute
   LodgesSlugRoute: typeof LodgesSlugRoute
   DestinationsIndexRoute: typeof DestinationsIndexRoute
   LodgesIndexRoute: typeof LodgesIndexRoute
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -764,13 +723,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DestinationsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/itineraries/$slug': {
       id: '/itineraries/$slug'
       path: '/itineraries/$slug'
@@ -855,11 +807,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSubscribersRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/adventures/': {
@@ -939,25 +891,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
       fullPath: '/lovable/email/transactional/preview'
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1062,19 +1000,16 @@ const rootRouteChildren: RootRouteChildren = {
   BookSlugRoute: BookSlugRoute,
   BookingSuccessRoute: BookingSuccessRoute,
   DestinationsSlugRoute: DestinationsSlugRoute,
-  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ItinerariesSlugRoute: ItinerariesSlugRoute,
   LodgesSlugRoute: LodgesSlugRoute,
   DestinationsIndexRoute: DestinationsIndexRoute,
   LodgesIndexRoute: LodgesIndexRoute,
-  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

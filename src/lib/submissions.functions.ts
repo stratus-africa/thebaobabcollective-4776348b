@@ -190,10 +190,19 @@ export const submitEnquiry = createServerFn({ method: "POST" })
     const messageId = `enquiry-${inserted.id}`;
     await supabaseAdmin.from("enquiries").update({ message_id: messageId }).eq("id", inserted.id);
 
+    const logEmail = async (status: string, error_message: string | null = null) => {
+      const { error: logErr } = await supabaseAdmin.from("email_send_log").insert({
+        message_id: messageId,
+        template_name: "enquiry-notification",
+        recipient_email: "info@thebaobabcollective.co.uk",
+        status,
+        error_message,
+      });
+      if (logErr) console.error("submitEnquiry: email log failed", { code: logErr.code, message: logErr.message });
+    };
     try {
-      const { enqueueInternalEmail } = await import("@/lib/email/send-internal.server");
-      await enqueueInternalEmail({
-        templateName: "enquiry-notification",
+      const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+      const result = await sendTemplateEmail("enquiry-notification", "", {
         idempotencyKey: messageId,
         templateData: {
           kind: data.subject ? "Contact" : "Enquiry",
@@ -214,8 +223,10 @@ export const submitEnquiry = createServerFn({ method: "POST" })
           message: data.message,
         },
       });
+      await logEmail(result.sent ? "sent" : "suppressed");
     } catch (err) {
       console.error("submitEnquiry: email notification failed", err);
+      await logEmail("failed", err instanceof Error ? err.message : String(err));
     }
     return { ok: true as const };
   });
